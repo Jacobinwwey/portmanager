@@ -29,6 +29,8 @@ export interface EventStreamEntry {
   summary: string
 }
 
+export type OperationEventContract = components['schemas']['OperationEvent']
+
 export interface HostDetailState {
   host: HostDetail
   healthChecks: HealthCheck[]
@@ -51,6 +53,15 @@ export type WebView = 'overview' | 'host-detail'
 
 const mountedRoots = new WeakMap<Element, Root>()
 const navigationItems = ['Overview', 'Hosts', 'Bridge Rules', 'Operations', 'Backups', 'Console']
+
+export function eventEntryFromOperationEvent(event: OperationEventContract): EventStreamEntry {
+  return {
+    id: event.id,
+    level: event.level === 'error' ? 'warn' : event.level,
+    timestamp: shortTime(event.emittedAt),
+    summary: event.summary
+  }
+}
 
 export const webSkeletonStyles = `
 :root {
@@ -624,6 +635,44 @@ export function createMockHostDetailState(): HostDetailState {
     ]
   }
 
+  const operationEvents: OperationEventContract[] = [
+    {
+      id: 'evt_001',
+      kind: 'operation_state_changed',
+      operationId: 'op_backup_001',
+      operationType: 'backup',
+      state: 'succeeded',
+      level: 'success',
+      summary: 'backup snapshot sealed before apply on host_alpha',
+      hostId: 'host_alpha',
+      emittedAt: '2026-04-16T17:38:00.000Z'
+    },
+    {
+      id: 'evt_002',
+      kind: 'operation_state_changed',
+      operationId: 'op_apply_001',
+      operationType: 'apply_policy',
+      state: 'succeeded',
+      level: 'success',
+      summary: 'policy apply completed for rule_alpha_https with active rollback point rp_alpha_001',
+      hostId: 'host_alpha',
+      ruleId: 'rule_alpha_https',
+      emittedAt: '2026-04-16T17:43:00.000Z'
+    },
+    {
+      id: 'evt_003',
+      kind: 'operation_state_changed',
+      operationId: 'op_diag_001',
+      operationType: 'diagnostics',
+      state: 'succeeded',
+      level: 'success',
+      summary: 'diagnostics confirmed https relay and refreshed host readiness evidence',
+      hostId: 'host_alpha',
+      ruleId: 'rule_alpha_https',
+      emittedAt: '2026-04-16T17:52:00.000Z'
+    }
+  ]
+
   return {
     host,
     healthChecks: [
@@ -674,26 +723,7 @@ export function createMockHostDetailState(): HostDetailState {
       '/var/lib/portmanager/snapshots/op_snapshot_001-manifest.json',
       '/var/lib/portmanager/rollback/rp_alpha_001-result.json'
     ],
-    eventStream: [
-      {
-        id: 'evt_001',
-        level: 'success',
-        timestamp: '17:38',
-        summary: 'backup snapshot sealed before apply on host_alpha'
-      },
-      {
-        id: 'evt_002',
-        level: 'info',
-        timestamp: '17:43',
-        summary: 'policy apply completed for rule_alpha_https with active rollback point rp_alpha_001'
-      },
-      {
-        id: 'evt_003',
-        level: 'success',
-        timestamp: '17:52',
-        summary: 'diagnostics confirmed https relay and refreshed host readiness evidence'
-      }
-    ]
+    eventStream: operationEvents.map(eventEntryFromOperationEvent)
   }
 }
 
@@ -729,12 +759,17 @@ export function createMockOverviewState(): OverviewState {
     degradedCount: 1,
     eventStream: [
       ...selectedHost.eventStream,
-      {
+      eventEntryFromOperationEvent({
         id: 'evt_004',
+        kind: 'operation_state_changed',
+        operationId: 'op_bootstrap_002',
+        operationType: 'bootstrap_host',
+        state: 'degraded',
         level: 'warn',
-        timestamp: '17:58',
-        summary: 'bootstrap still waiting for steady HTTP reachability on host_bravo'
-      }
+        summary: 'bootstrap still waiting for steady HTTP reachability on host_bravo',
+        hostId: 'host_bravo',
+        emittedAt: '2026-04-16T17:58:00.000Z'
+      })
     ]
   }
 }

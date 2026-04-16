@@ -24,11 +24,41 @@ export function createOperationRunner(options: {
 }): OperationRunner {
   const { store, eventBus } = options
 
+  function eventLevelFromState(state: OperationDetail['state']) {
+    if (state === 'succeeded') {
+      return 'success' as const
+    }
+
+    if (state === 'degraded' || state === 'cancelled') {
+      return 'warn' as const
+    }
+
+    if (state === 'failed') {
+      return 'error' as const
+    }
+
+    return 'info' as const
+  }
+
+  function eventSummary(operation: OperationDetail) {
+    if (operation.resultSummary) {
+      return operation.resultSummary
+    }
+
+    return `${operation.type} entered ${operation.state}`
+  }
+
   function publish(operation: OperationDetail) {
     eventBus.publish({
+      id: `evt_${operation.id}_${operation.state}_${Date.now()}`,
       kind: 'operation_state_changed',
       operationId: operation.id,
+      operationType: operation.type,
       state: operation.state,
+      level: eventLevelFromState(operation.state),
+      summary: eventSummary(operation),
+      hostId: operation.hostId,
+      ruleId: operation.ruleId,
       emittedAt: new Date().toISOString()
     })
   }

@@ -118,7 +118,7 @@ function rowToDetail(row: OperationRow): OperationDetail {
     ruleId: row.rule_id ?? undefined,
     startedAt: row.started_at,
     finishedAt: row.finished_at ?? undefined,
-    eventStreamUrl: row.event_stream_url ?? undefined,
+    eventStreamUrl: row.event_stream_url ?? '/operations/events',
     backupId: row.backup_id ?? undefined,
     rollbackPointId: row.rollback_point_id ?? undefined,
     diagnosticResult: row.diagnostic_result_json

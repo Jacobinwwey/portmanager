@@ -313,3 +313,53 @@ fn degraded_operation_stays_distinct_from_transport_failure() {
         serde_json::from_str(&transport_stdout).expect("parse transport json");
     assert_eq!(transport_parsed["error"], "transport");
 }
+
+#[test]
+fn events_list_json_reads_shared_event_stream_history() {
+    let server = MockHttpServer::start(vec![(
+        "/events?limit=2",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "evt_002",
+                        "kind": "operation_state_changed",
+                        "operationId": "op_apply_001",
+                        "operationType": "apply_policy",
+                        "state": "succeeded",
+                        "level": "success",
+                        "summary": "rule_alpha_https applied and awaiting diagnostics",
+                        "hostId": "host_alpha",
+                        "ruleId": "rule_alpha_https",
+                        "emittedAt": "2026-04-16T18:30:02.000Z"
+                    },
+                    {
+                        "id": "evt_001",
+                        "kind": "operation_state_changed",
+                        "operationId": "op_apply_001",
+                        "operationType": "apply_policy",
+                        "state": "running",
+                        "level": "info",
+                        "summary": "apply_policy entered running",
+                        "hostId": "host_alpha",
+                        "ruleId": "rule_alpha_https",
+                        "emittedAt": "2026-04-16T18:30:00.000Z"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(&["events", "list", "--json", "--limit", "2"], &server.base_url());
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["items"][0]["operationType"], "apply_policy");
+    assert_eq!(parsed["items"][0]["level"], "success");
+    assert_eq!(parsed["items"][0]["summary"], "rule_alpha_https applied and awaiting diagnostics");
+}

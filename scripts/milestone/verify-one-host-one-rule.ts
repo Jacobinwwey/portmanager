@@ -61,6 +61,21 @@ interface RollbackInventory {
   }>
 }
 
+interface EventHistory {
+  items: Array<{
+    id: string
+    kind: string
+    operationId: string
+    operationType: string
+    state: string
+    level: string
+    summary: string
+    hostId?: string
+    ruleId?: string
+    emittedAt: string
+  }>
+}
+
 export interface OneHostOneRuleVerificationResult {
   controllerBaseUrl: string
   bootstrapResult: OperationResult
@@ -70,6 +85,8 @@ export interface OneHostOneRuleVerificationResult {
   cliOperation: Record<string, unknown>
   diagnosticsOperation: Record<string, unknown>
   diagnosticsSnapshotArtifactExists: boolean
+  apiEventHistory: EventHistory
+  cliEventHistory: EventHistory
   backups: BackupInventory
   rollbackPoints: RollbackInventory
   rollbackOperation: Record<string, unknown>
@@ -382,6 +399,25 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
       rollbackAccepted.operationId
     )
     const rollbackInventory = await fetchJson<RollbackInventory>(`${listening.baseUrl}/rollback-points`)
+    const apiEventHistory = await fetchJson<EventHistory>(`${listening.baseUrl}/events?limit=8`)
+    const cliEventHistory = (await runJsonCommandAsync(
+      'cargo',
+      [
+        'run',
+        '-q',
+        '-p',
+        'portmanager-cli',
+        '--',
+        'events',
+        'list',
+        '--json',
+        '--limit',
+        '8'
+      ],
+      {
+        PORTMANAGER_CONTROLLER_BASE_URL: listening.baseUrl
+      }
+    )) as unknown as EventHistory
 
     return {
       controllerBaseUrl: listening.baseUrl,
@@ -392,6 +428,8 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
       cliOperation,
       diagnosticsOperation,
       diagnosticsSnapshotArtifactExists,
+      apiEventHistory,
+      cliEventHistory,
       backups: backupInventory,
       rollbackPoints: rollbackInventory,
       rollbackOperation

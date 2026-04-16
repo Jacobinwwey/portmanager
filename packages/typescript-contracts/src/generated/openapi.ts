@@ -230,6 +230,44 @@ export interface paths {
         };
         trace?: never;
     };
+    "/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List recent operation events */
+        get: {
+            parameters: {
+                query?: {
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Event history */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventListResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/exposure-policies/{hostId}": {
         parameters: {
             query?: never;
@@ -796,7 +834,10 @@ export interface components {
             name: string;
             ssh: components["schemas"]["SshConnection"];
         };
-        /** @description SSE stream carrying controller events and operation state transitions. */
+        EventListResponse: {
+            items: components["schemas"]["OperationEvent"][];
+        };
+        /** @description SSE stream carrying `OperationEvent` JSON envelopes. */
         EventStreamEnvelope: string;
         ExposurePolicy: {
             allowedSources: string[];
@@ -855,6 +896,23 @@ export interface components {
             initiator?: "web" | "cli" | "automation";
             rollbackPointId?: string;
             snapshotResult?: components["schemas"]["WebSnapshotResult"];
+        };
+        OperationEvent: {
+            /** Format: date-time */
+            emittedAt: string;
+            hostId?: string;
+            id: string;
+            /** @enum {string} */
+            kind: "operation_state_changed";
+            /** @enum {string} */
+            level: "info" | "success" | "warn" | "error";
+            operationId: string;
+            /** @enum {string} */
+            operationType: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "backup" | "diagnostics" | "rollback";
+            ruleId?: string;
+            /** @enum {string} */
+            state: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
+            summary: string;
         };
         OperationSummary: {
             /** Format: date-time */
@@ -953,6 +1011,7 @@ export type BootstrapHostRequest = components['schemas']['BootstrapHostRequest']
 export type BridgeRule = components['schemas']['BridgeRule'];
 export type CreateBridgeRuleRequest = components['schemas']['CreateBridgeRuleRequest'];
 export type CreateHostRequest = components['schemas']['CreateHostRequest'];
+export type EventListResponse = components['schemas']['EventListResponse'];
 export type EventStreamEnvelope = components['schemas']['EventStreamEnvelope'];
 export type ExposurePolicy = components['schemas']['ExposurePolicy'];
 export type ExposurePolicyUpdateRequest = components['schemas']['ExposurePolicyUpdateRequest'];
@@ -961,6 +1020,7 @@ export type HostDetail = components['schemas']['HostDetail'];
 export type HostSummary = components['schemas']['HostSummary'];
 export type OperationAccepted = components['schemas']['OperationAccepted'];
 export type OperationDetail = components['schemas']['OperationDetail'];
+export type OperationEvent = components['schemas']['OperationEvent'];
 export type OperationSummary = components['schemas']['OperationSummary'];
 export type PortDiagnosticResult = components['schemas']['PortDiagnosticResult'];
 export type ProbeHostRequest = components['schemas']['ProbeHostRequest'];

@@ -69,6 +69,14 @@ export function createControllerServer(options: {
       return
     }
 
+    if (request.method === 'GET' && requestUrl.pathname === '/events') {
+      const rawLimit = Number(requestUrl.searchParams.get('limit') ?? '20')
+      const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 20
+
+      sendJson(response, 200, { items: eventBus.listRecent(limit) })
+      return
+    }
+
     if (request.method === 'GET' && requestUrl.pathname === '/backups') {
       sendJson(response, 200, { items: store.listBackups() })
       return
@@ -219,8 +227,14 @@ export function createControllerServer(options: {
           'content-type': 'text/event-stream'
         })
         response.write(': connected\n\n')
+        for (const event of [...eventBus.listRecent(50)].reverse()) {
+          response.write(`id: ${event.id}\n`)
+          response.write(`event: ${event.kind}\n`)
+          response.write(`data: ${JSON.stringify(event)}\n\n`)
+        }
 
         const unsubscribe = eventBus.subscribe((event) => {
+          response.write(`id: ${event.id}\n`)
           response.write(`event: ${event.kind}\n`)
           response.write(`data: ${JSON.stringify(event)}\n\n`)
         })

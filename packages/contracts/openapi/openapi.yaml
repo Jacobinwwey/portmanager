@@ -11,6 +11,7 @@ tags:
   - name: exposure-policies
   - name: health-checks
   - name: operations
+  - name: events
   - name: rollback-points
   - name: backups
   - name: snapshots-diagnostics
@@ -264,6 +265,25 @@ paths:
             text/event-stream:
               schema:
                 $ref: '#/components/schemas/EventStreamEnvelope'
+  /events:
+    get:
+      tags: [events]
+      summary: List recent operation events
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 20
+      responses:
+        '200':
+          description: Event history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventListResponse'
   /rollback-points:
     get:
       tags: [rollback-points]
@@ -621,6 +641,44 @@ components:
               $ref: '#/components/schemas/PortDiagnosticResult'
             snapshotResult:
               $ref: '#/components/schemas/WebSnapshotResult'
+    OperationEvent:
+      type: object
+      required:
+        [id, kind, operationId, operationType, state, level, summary, emittedAt]
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [operation_state_changed]
+        operationId:
+          type: string
+        operationType:
+          type: string
+          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, backup, diagnostics, rollback]
+        state:
+          type: string
+          enum: [queued, running, succeeded, failed, degraded, cancelled]
+        level:
+          type: string
+          enum: [info, success, warn, error]
+        summary:
+          type: string
+        hostId:
+          type: string
+        ruleId:
+          type: string
+        emittedAt:
+          type: string
+          format: date-time
+    EventListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationEvent'
     RollbackPoint:
       type: object
       required: [id, hostId, operationId, createdAt, state]
@@ -742,4 +800,4 @@ components:
           type: string
     EventStreamEnvelope:
       type: string
-      description: SSE stream carrying controller events and operation state transitions.
+      description: SSE stream carrying `OperationEvent` JSON envelopes.

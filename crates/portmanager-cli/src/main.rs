@@ -19,7 +19,19 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    Events(EventsCommand),
     Operation(OperationCommand),
+}
+
+#[derive(Args)]
+struct EventsCommand {
+    #[command(subcommand)]
+    command: EventsSubcommand,
+}
+
+#[derive(Subcommand)]
+enum EventsSubcommand {
+    List(EventsListArgs),
 }
 
 #[derive(Args)]
@@ -44,6 +56,16 @@ struct OperationGetArgs {
     timeout_ms: u64,
     #[arg(long, default_value_t = 250)]
     poll_interval_ms: u64,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
+struct EventsListArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long, default_value_t = 20)]
+    limit: u16,
     #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
     controller_base_url: String,
 }
@@ -107,6 +129,9 @@ async fn main() -> ExitCode {
 
 async fn execute(cli: Cli) -> ExecutionResult {
     match cli.command {
+        Commands::Events(command) => match command.command {
+            EventsSubcommand::List(args) => run_events_list(args).await,
+        },
         Commands::Operation(command) => match command.command {
             OperationSubcommand::Get(args) => run_operation_get(args).await,
         },
@@ -181,6 +206,34 @@ async fn run_operation_get(args: OperationGetArgs) -> ExecutionResult {
     }
 }
 
+async fn run_events_list(args: EventsListArgs) -> ExecutionResult {
+    match fetch_events(&Client::new(), &args.controller_base_url, args.limit).await {
+        Ok(events) => {
+            if args.json {
+                ExecutionResult::success_json(&events)
+            } else {
+                let lines = events["items"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(|event| {
+                        format!(
+                            "{} {} {}",
+                            event["emittedAt"].as_str().unwrap_or("unknown"),
+                            event["level"].as_str().unwrap_or("info"),
+                            event["summary"].as_str().unwrap_or("missing summary")
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                ExecutionResult::success_text(lines)
+            }
+        }
+        Err(error) => json_or_text_error_flag(args.json, error, "event fetch failed".to_string()),
+    }
+}
+
 async fn fetch_operation(
     client: &Client,
     controller_base_url: &str,
@@ -234,6 +287,49 @@ async fn fetch_operation(
     })
 }
 
+async fn fetch_events(
+    client: &Client,
+    controller_base_url: &str,
+    limit: u16,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!("{}/events", controller_base_url.trim_end_matches('/'));
+
+    let response = client
+        .get(url)
+        .query(&[("limit", limit)])
+        .send()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: None,
+        })?;
+
+    let status = response.status();
+    if !status.is_success() {
+        return Err(JsonErrorOutput {
+            error: "controller_error",
+            message: format!("controller returned unexpected status {}", status.as_u16()),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        });
+    }
+
+    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
+    })
+}
+
 fn operation_state(operation: &Value) -> Result<&str, CliError> {
     operation
         .get("state")
@@ -250,7 +346,15 @@ fn json_or_text_error(
     json_error: JsonErrorOutput,
     text_error: String,
 ) -> ExecutionResult {
-    if args.json {
+    json_or_text_error_flag(args.json, json_error, text_error)
+}
+
+fn json_or_text_error_flag(
+    json: bool,
+    json_error: JsonErrorOutput,
+    text_error: String,
+) -> ExecutionResult {
+    if json {
         ExecutionResult::error_json(json_error)
     } else {
         ExecutionResult {

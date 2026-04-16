@@ -25,7 +25,7 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] Milestone 1: one-host bootstrap and one-rule apply verification.
 - [x] Milestone 1: local backup and rollback primitive.
 - [x] Milestone 1: controller-side webpage snapshot and connectivity diagnostics.
-- [ ] Milestone 1: unified event stream across Web, CLI, and API.
+- [x] Milestone 1: unified event stream across Web, CLI, and API.
 
 ## 中文
 
@@ -49,4 +49,4 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] 里程碑 1：单主机 bootstrap 与单规则 apply 验证。
 - [x] 里程碑 1：本地备份与回滚原语。
 - [x] 里程碑 1：controller 侧网页快照与连通性诊断。
-- [ ] 里程碑 1：Web、CLI 与 API 共享事件流。
+- [x] 里程碑 1：Web、CLI 与 API 共享事件流。

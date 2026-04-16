@@ -1,27 +1,43 @@
-export type ControllerOperationState = 'queued' | 'running' | 'succeeded' | 'failed' | 'degraded' | 'cancelled'
+import type { components } from '@portmanager/typescript-contracts'
 
-export interface ControllerEvent {
+export type ControllerOperationState =
+  | 'queued'
+  | 'running'
+  | 'succeeded'
+  | 'failed'
+  | 'degraded'
+  | 'cancelled'
+
+export type ControllerEvent = components['schemas']['OperationEvent'] & {
   kind: 'operation_state_changed'
-  operationId: string
-  state: ControllerOperationState
-  emittedAt: string
 }
 
 export type ControllerEventHandler = (event: ControllerEvent) => void
 
 export interface ControllerEventBus {
   publish(event: ControllerEvent): void
+  listRecent(limit?: number): ControllerEvent[]
   subscribe(handler: ControllerEventHandler): () => void
 }
 
 export function createControllerEventBus(): ControllerEventBus {
   const handlers = new Set<ControllerEventHandler>()
+  const history: ControllerEvent[] = []
+  const historyLimit = 128
 
   return {
     publish(event) {
+      history.push(event)
+      if (history.length > historyLimit) {
+        history.shift()
+      }
+
       for (const handler of handlers) {
         handler(event)
       }
+    },
+    listRecent(limit = history.length) {
+      return [...history].slice(-limit).reverse()
     },
     subscribe(handler) {
       handlers.add(handler)
