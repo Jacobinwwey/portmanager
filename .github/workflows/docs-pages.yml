@@ -23,9 +23,16 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: docs-site/package.json
+          run_install: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -39,17 +46,16 @@ jobs:
 
       - name: Install dependencies
         working-directory: docs-site
-        run: |
-          corepack enable
-          corepack pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Build docs site
         working-directory: docs-site
         env:
           PORTMANAGER_DOCS_BASE: /portmanager/
-        run: |
-          corepack enable
-          corepack pnpm run docs:build
+        run: pnpm run docs:build
+
+      - name: Verify generated locale pages are committed
+        run: git diff --exit-code -- docs-site/en docs-site/zh
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
