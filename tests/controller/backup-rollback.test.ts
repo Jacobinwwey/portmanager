@@ -1,0 +1,201 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import path from 'node:path'
+import { tmpdir } from 'node:os'
+import { setTimeout as delay } from 'node:timers/promises'
+
+import {
+  createControllerEventBus,
+  createControllerServer,
+  createOperationStore
+} from '../../apps/controller/src/index.ts'
+
+function tempPaths() {
+  const directory = mkdtempSync(path.join(tmpdir(), 'portmanager-backup-'))
+  return {
+    directory,
+    databasePath: path.join(directory, 'controller.sqlite'),
+    artifactRoot: path.join(directory, 'artifacts')
+  }
+}
+
+async function waitForTerminalOperation(baseUrl: string, operationId: string) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const response = await fetch(`${baseUrl}/operations/${operationId}`)
+    assert.equal(response.status, 200)
+
+    const payload = (await response.json()) as {
+      state: string
+      resultSummary?: string
+    }
+
+    if (payload.state === 'succeeded' || payload.state === 'failed' || payload.state === 'degraded') {
+      return payload
+    }
+
+    await delay(20)
+  }
+
+  throw new Error(`operation did not settle: ${operationId}`)
+}
+
+test('controller server runs local backup and exposes backup plus rollback inventory', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, artifactRoot })
+
+    const listening = await server.listen(0)
+
+    try {
+      const response = await fetch(`${listening.baseUrl}/backups/run`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId: 'host_alpha',
+          mode: 'required'
+        })
+      })
+
+      assert.equal(response.status, 202)
+      const accepted = (await response.json()) as { operationId: string; state: string }
+      assert.equal(accepted.state, 'queued')
+
+      const operation = await waitForTerminalOperation(listening.baseUrl, accepted.operationId)
+      assert.equal(operation.state, 'succeeded')
+
+      const backupsResponse = await fetch(`${listening.baseUrl}/backups`)
+      assert.equal(backupsResponse.status, 200)
+      const backupsPayload = (await backupsResponse.json()) as {
+        items: Array<{
+          id: string
+          hostId: string
+          localStatus: string
+          githubStatus?: string
+          manifestPath?: string
+          operationId?: string
+        }>
+      }
+
+      assert.equal(backupsPayload.items.length, 1)
+      assert.equal(backupsPayload.items[0]?.hostId, 'host_alpha')
+      assert.equal(backupsPayload.items[0]?.localStatus, 'succeeded')
+      assert.equal(backupsPayload.items[0]?.githubStatus, 'skipped')
+      assert.equal(backupsPayload.items[0]?.operationId, accepted.operationId)
+
+      const manifestPath = backupsPayload.items[0]?.manifestPath
+      assert.ok(manifestPath)
+
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+        backupMode: string
+        operationId: string
+        checksums: Array<unknown>
+      }
+      assert.equal(manifest.operationId, accepted.operationId)
+      assert.equal(manifest.backupMode, 'required')
+      assert.equal(manifest.checksums.length >= 4, true)
+
+      const rollbackResponse = await fetch(`${listening.baseUrl}/rollback-points`)
+      assert.equal(rollbackResponse.status, 200)
+      const rollbackPayload = (await rollbackResponse.json()) as {
+        items: Array<{
+          id: string
+          hostId: string
+          operationId: string
+          state: string
+          createdAt: string
+        }>
+      }
+
+      assert.equal(rollbackPayload.items.length, 1)
+      assert.equal(rollbackPayload.items[0]?.id, `rp_${accepted.operationId}`)
+      assert.equal(rollbackPayload.items[0]?.hostId, 'host_alpha')
+      assert.equal(rollbackPayload.items[0]?.operationId, accepted.operationId)
+      assert.equal(rollbackPayload.items[0]?.state, 'ready')
+      assert.match(rollbackPayload.items[0]?.createdAt ?? '', /T/)
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('controller server applies rollback point and marks result artifact applied', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, artifactRoot })
+
+    const listening = await server.listen(0)
+
+    try {
+      const backupResponse = await fetch(`${listening.baseUrl}/backups/run`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId: 'host_alpha',
+          mode: 'best_effort'
+        })
+      })
+
+      const acceptedBackup = (await backupResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, acceptedBackup.operationId)
+
+      const rollbackResponse = await fetch(`${listening.baseUrl}/rollback-points/rp_${acceptedBackup.operationId}/apply`, {
+        method: 'POST'
+      })
+
+      assert.equal(rollbackResponse.status, 202)
+      const acceptedRollback = (await rollbackResponse.json()) as {
+        operationId: string
+        state: string
+      }
+      assert.equal(acceptedRollback.state, 'queued')
+
+      const rollbackOperation = await waitForTerminalOperation(listening.baseUrl, acceptedRollback.operationId)
+      assert.equal(rollbackOperation.state, 'succeeded')
+
+      const rollbackListResponse = await fetch(`${listening.baseUrl}/rollback-points`)
+      const rollbackListPayload = (await rollbackListResponse.json()) as {
+        items: Array<{
+          id: string
+          state: string
+        }>
+      }
+
+      assert.equal(rollbackListPayload.items[0]?.id, `rp_${acceptedBackup.operationId}`)
+      assert.equal(rollbackListPayload.items[0]?.state, 'applied')
+
+      const rollbackResultPath = path.join(
+        artifactRoot,
+        'rollback',
+        `rp_${acceptedBackup.operationId}-result.json`
+      )
+      const rollbackResult = JSON.parse(readFileSync(rollbackResultPath, 'utf8')) as {
+        operationId: string
+        status: string
+        restoredArtifacts: string[]
+      }
+
+      assert.equal(rollbackResult.operationId, acceptedRollback.operationId)
+      assert.equal(rollbackResult.status, 'rolled_back')
+      assert.equal(rollbackResult.restoredArtifacts.length >= 4, true)
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})

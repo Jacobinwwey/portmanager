@@ -4,16 +4,16 @@ title: Agent Quickstart
 
 # Agent Quickstart
 
-产品实现尚未发布，所以这个页面冻结的是目标中的非交互入口形态，而不是假装这条命令已经可以运行。
+完整产品实现尚未发布，但第一条 CLI read path 现在已经进入仓库。
 
 ## 状态
 
-`Planned`
+`Partial`
 
 ## 目标命令形态
 
 ```bash
-pmctl host probe --host demo-host --json --wait
+portmanager operation get op_123 --json --wait
 ```
 
 ## 必须满足的行为

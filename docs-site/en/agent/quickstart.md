@@ -4,16 +4,16 @@ title: Agent Quickstart
 
 # Agent Quickstart
 
-The product implementation is not shipped yet, so this page freezes the intended non-interactive entry shape instead of pretending the command already works.
+The full product implementation is not shipped yet, but the first CLI read path now exists in-repo.
 
 ## Status
 
-`Planned`
+`Partial`
 
 ## Target command shape
 
 ```bash
-pmctl host probe --host demo-host --json --wait
+portmanager operation get op_123 --json --wait
 ```
 
 ## Required behavior

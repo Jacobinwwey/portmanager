@@ -14,6 +14,7 @@ status: active
 ### Purpose
 This checklist is the formal verification matrix for the first `docs-first` upload.
 Every locked decision from the agreed V1 plan must map to a concrete repository artifact before the first push to `main`.
+Later milestone branches may add implementation foundations; this checklist still describes the baseline upload gate.
 
 ### Ordered completion matrix
 1. Repository baseline
@@ -95,4 +96,4 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
 - OpenAPI parses as YAML.
 - JSON Schema files parse as JSON.
 - Locale generation succeeds for the docs publishing layer.
-- The repository is still docs-first and intentionally lacks milestone implementation code.
+- The repository preserves the docs-first baseline and may add milestone implementation foundations in later branches.

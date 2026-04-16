@@ -1,0 +1,27 @@
+{
+  "name": "portmanager",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "contracts:generate": "node scripts/contracts/generate-contracts.mjs",
+    "contracts:check": "node scripts/contracts/generate-contracts.mjs --check",
+    "test": "node --experimental-strip-types --test tests/contracts/*.test.mjs tests/controller/*.test.ts tests/web/*.test.ts tests/milestone/*.test.ts",
+    "typecheck": "pnpm exec tsc -p packages/typescript-contracts/tsconfig.json --noEmit && pnpm exec tsc -p apps/controller/tsconfig.json --noEmit && pnpm exec tsc -p apps/web/tsconfig.json --noEmit",
+    "rust:check": "cargo test --workspace",
+    "milestone:verify": "node --experimental-strip-types scripts/milestone/verify-one-host-one-rule.ts"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@types/node": "^25.6.0",
+    "json-schema-to-typescript": "^15.0.4",
+    "openapi-typescript": "^7.13.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,8 @@
+export * from './generated/openapi.js'
+export type { ApplyDesiredState as ApplyDesiredStateSchema } from './generated/jsonschema/apply-desired-state.js'
+export type { OperationResult as OperationResultSchema } from './generated/jsonschema/operation-result.js'
+export type { PortDiagnosticResult as PortDiagnosticResultSchema } from './generated/jsonschema/port-diagnostic-result.js'
+export type { RollbackResult as RollbackResultSchema } from './generated/jsonschema/rollback-result.js'
+export type { RuntimeState as RuntimeStateSchema } from './generated/jsonschema/runtime-state.js'
+export type { SnapshotManifest as SnapshotManifestSchema } from './generated/jsonschema/snapshot-manifest.js'
+export type { WebSnapshotResult as WebSnapshotResultSchema } from './generated/jsonschema/web-snapshot-result.js'

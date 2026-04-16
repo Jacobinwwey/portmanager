@@ -17,14 +17,14 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] Separate the product console design baseline from the VitePress docs-site design baseline.
 
 ### Next implementation work
-- [ ] Milestone 1: contracts foundation and codegen toolchain.
-- [ ] Milestone 1: controller skeleton with SQLite state store and operation runner.
-- [ ] Milestone 1: Rust agent skeleton with bootstrap, apply, collect, snapshot, rollback.
-- [ ] Milestone 1: Rust CLI skeleton with `--json` and `--wait`.
-- [ ] Milestone 1: React SPA skeleton for overview and host detail.
-- [ ] Milestone 1: one-host bootstrap and one-rule apply verification.
-- [ ] Milestone 1: local backup and rollback primitive.
-- [ ] Milestone 1: controller-side webpage snapshot and connectivity diagnostics.
+- [x] Milestone 1: contracts foundation and codegen toolchain.
+- [x] Milestone 1: controller skeleton with SQLite state store and operation runner.
+- [x] Milestone 1: Rust agent skeleton with bootstrap, apply, collect, snapshot, rollback.
+- [x] Milestone 1: Rust CLI skeleton with `--json` and `--wait`.
+- [x] Milestone 1: React SPA skeleton for overview and host detail.
+- [x] Milestone 1: one-host bootstrap and one-rule apply verification.
+- [x] Milestone 1: local backup and rollback primitive.
+- [x] Milestone 1: controller-side webpage snapshot and connectivity diagnostics.
 - [ ] Milestone 1: unified event stream across Web, CLI, and API.
 
 ## 中文
@@ -41,12 +41,12 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] 将产品控制台设计基线与 VitePress 文档站设计基线明确拆分。
 
 ### 后续实现工作
-- [ ] 里程碑 1：契约基础设施与 codegen 工具链。
-- [ ] 里程碑 1：带 SQLite 状态库与 operation runner 的 controller 骨架。
-- [ ] 里程碑 1：具备 bootstrap、apply、collect、snapshot、rollback 的 Rust agent 骨架。
-- [ ] 里程碑 1：强制支持 `--json` 与 `--wait` 的 Rust CLI 骨架。
-- [ ] 里程碑 1：overview 与 host detail 的 React SPA 骨架。
-- [ ] 里程碑 1：单主机 bootstrap 与单规则 apply 验证。
-- [ ] 里程碑 1：本地备份与回滚原语。
-- [ ] 里程碑 1：controller 侧网页快照与连通性诊断。
+- [x] 里程碑 1：契约基础设施与 codegen 工具链。
+- [x] 里程碑 1：带 SQLite 状态库与 operation runner 的 controller 骨架。
+- [x] 里程碑 1：具备 bootstrap、apply、collect、snapshot、rollback 的 Rust agent 骨架。
+- [x] 里程碑 1：强制支持 `--json` 与 `--wait` 的 Rust CLI 骨架。
+- [x] 里程碑 1：overview 与 host detail 的 React SPA 骨架。
+- [x] 里程碑 1：单主机 bootstrap 与单规则 apply 验证。
+- [x] 里程碑 1：本地备份与回滚原语。
+- [x] 里程碑 1：controller 侧网页快照与连通性诊断。
 - [ ] 里程碑 1：Web、CLI 与 API 共享事件流。

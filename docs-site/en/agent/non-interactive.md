@@ -5,16 +5,18 @@ title: Non-Interactive Flows
 # Non-Interactive Flows
 
 This page defines the contract posture expected by automation, agent consumers, and future SDK wrappers.
+The first implemented CLI read path is now available in-repo.
 
 ## CLI expectations
 
 ```bash
-pmctl bridge apply --host alpha --file desired-state.toml --json --wait
+portmanager operation get op_123 --json --wait
 ```
 
 - `--json` returns structured output only
 - `--wait` blocks until the operation reaches a terminal state or timeout
-- command output must point to operation ids and rollback points instead of hiding them
+- transport failures emit explicit machine-readable error payloads
+- degraded operation state stays visible instead of collapsing into a generic transport error
 
 ## API expectations
 

@@ -8,6 +8,7 @@ Version: v0.3.0-docs-site-design-alignment
 ### Purpose
 This checklist is the formal verification matrix for the first `docs-first` upload.
 Every locked decision from the agreed V1 plan must map to a concrete repository artifact before the first push to `main`.
+Later milestone branches may add implementation foundations; this checklist still describes the baseline upload gate.
 
 ### Ordered completion matrix
 1. Repository baseline
@@ -89,13 +90,14 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
 - OpenAPI parses as YAML.
 - JSON Schema files parse as JSON.
 - Locale generation succeeds for the docs publishing layer.
-- The repository is still docs-first and intentionally lacks milestone implementation code.
+- The repository preserves the docs-first baseline and may add milestone implementation foundations in later branches.
 
 ## 中文
 
 ### 用途
 这份清单是首次 `docs-first` 上传的正式验收矩阵。
 已确认的 V1 方案中的每一条锁定决策，都必须在首次推送到 `main` 前映射到仓库中的具体产物。
+后续里程碑分支可以加入实现基础设施；这份清单仍然描述首次基线上传的门槛。
 
 ### 按顺序完成矩阵
 1. 仓库基线
@@ -177,4 +179,4 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
 - OpenAPI 可作为 YAML 解析。
 - JSON Schema 文件可作为 JSON 解析。
 - 文档发布层的语言拆分能够成功生成。
-- 仓库仍然保持 docs-first 形态，并有意缺少里程碑实现代码。
+- 仓库保留 docs-first 基线，同时允许后续分支加入里程碑实现基础设施。

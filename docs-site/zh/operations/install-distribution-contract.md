@@ -39,9 +39,11 @@ curl -fsSL https://jacobinwwey.github.io/portmanager/install/bootstrap-control-p
 Agent 文档不能冒充“安装 control plane”。
 它必须改为暴露非交互消费入口，例如：
 ```bash
-# Planned
 portmanager operation get op_123 --json --wait
 ```
+
+这个 operation read 形态现在已经作为 Milestone 1 CLI 基础命令进入仓库。
+其他自动化入口在真正实现前仍然保持 `Planned`。
 
 ```bash
 # Planned

@@ -39,9 +39,11 @@ curl -fsSL https://jacobinwwey.github.io/portmanager/install/bootstrap-control-p
 Agent-facing docs must not pretend to install the control plane.
 They must instead expose non-interactive consumption shapes such as:
 ```bash
-# Planned
 portmanager operation get op_123 --json --wait
 ```
+
+This operation-read shape now exists in the repository as a Milestone 1 CLI foundation command.
+Other automation entrypoints remain planned until implemented.
 
 ```bash
 # Planned

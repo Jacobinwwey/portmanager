@@ -5,16 +5,18 @@ title: Non-Interactive Flows
 # Non-Interactive Flows
 
 这个页面定义自动化、agent consumer 与未来 SDK 包装层所期待的契约姿态。
+仓库里现在已经有第一条真正实现的 CLI read path。
 
 ## CLI 预期
 
 ```bash
-pmctl bridge apply --host alpha --file desired-state.toml --json --wait
+portmanager operation get op_123 --json --wait
 ```
 
 - `--json` 只返回结构化输出
 - `--wait` 持续阻塞直到 operation 进入终态或超时
-- 命令结果必须暴露 operation id 与 rollback point，而不是把它们藏起来
+- transport failure 会返回显式、可机读的错误载荷
+- degraded operation state 会被保留下来，而不是被折叠成泛化 transport error
 
 ## API 预期
 
