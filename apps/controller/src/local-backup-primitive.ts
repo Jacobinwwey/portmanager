@@ -29,7 +29,9 @@ export interface LocalBackupPrimitive {
   }
   runBackup(input: RunBackupInput): {
     backup: BackupSummary
+    operationState: 'succeeded' | 'degraded'
     rollbackPoint: RollbackPoint
+    resultSummary: string
   }
 }
 
@@ -161,8 +163,9 @@ export function createLocalBackupPrimitive(options: {
         hostId: input.hostId,
         operationId: input.operationId,
         createdAt,
+        backupMode: input.mode,
         localStatus: 'succeeded',
-        githubStatus: 'skipped',
+        githubStatus: 'not_configured',
         manifestPath
       })
 
@@ -174,7 +177,17 @@ export function createLocalBackupPrimitive(options: {
         state: 'ready'
       })
 
-      return { backup, rollbackPoint }
+      const resultSummary =
+        input.mode === 'required'
+          ? `backup ${backup.id} created with rollback point ${rollbackPoint.id}, but required GitHub backup is not configured`
+          : `backup ${backup.id} created with rollback point ${rollbackPoint.id}; best_effort permits local-only continuation while GitHub backup is not configured`
+
+      return {
+        backup,
+        operationState: input.mode === 'required' ? 'degraded' : 'succeeded',
+        rollbackPoint,
+        resultSummary
+      }
     },
     applyRollback(input) {
       const rollbackPoint = store.getRollbackPoint(input.rollbackPointId)

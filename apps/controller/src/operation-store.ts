@@ -39,6 +39,7 @@ export interface CreateBackupInput {
   id: string
   hostId: string
   operationId?: string
+  backupMode: NonNullable<BackupSummary['backupMode']>
   localStatus: BackupSummary['localStatus']
   githubStatus?: NonNullable<BackupSummary['githubStatus']>
   manifestPath?: string
@@ -108,6 +109,7 @@ interface BackupRow {
   host_id: string
   operation_id: string | null
   created_at: string
+  backup_mode: NonNullable<BackupSummary['backupMode']> | null
   local_status: BackupSummary['localStatus']
   github_status: NonNullable<BackupSummary['githubStatus']> | null
   manifest_path: string | null
@@ -177,6 +179,7 @@ function rowToBackup(row: BackupRow): BackupSummary {
     hostId: row.host_id,
     operationId: row.operation_id ?? undefined,
     createdAt: row.created_at,
+    backupMode: row.backup_mode ?? 'best_effort',
     localStatus: row.local_status,
     githubStatus: row.github_status ?? undefined,
     manifestPath: row.manifest_path ?? undefined
@@ -232,6 +235,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       host_id TEXT NOT NULL,
       operation_id TEXT,
       created_at TEXT NOT NULL,
+      backup_mode TEXT,
       local_status TEXT NOT NULL,
       github_status TEXT,
       manifest_path TEXT
@@ -256,6 +260,10 @@ export function createOperationStore(options: { databasePath: string }): Operati
       created_at TEXT NOT NULL
     );
   `)
+
+  try {
+    database.exec(`ALTER TABLE backups ADD COLUMN backup_mode TEXT`)
+  } catch {}
 
   const insertOperation = database.prepare(`
     INSERT INTO operations (
@@ -362,10 +370,11 @@ export function createOperationStore(options: { databasePath: string }): Operati
       host_id,
       operation_id,
       created_at,
+      backup_mode,
       local_status,
       github_status,
       manifest_path
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `)
 
   const insertHealthCheck = database.prepare(`
@@ -387,6 +396,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       host_id,
       operation_id,
       created_at,
+      backup_mode,
       local_status,
       github_status,
       manifest_path
@@ -414,6 +424,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       host_id,
       operation_id,
       created_at,
+      backup_mode,
       local_status,
       github_status,
       manifest_path
@@ -539,6 +550,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
         input.hostId,
         input.operationId ?? null,
         createdAt,
+        input.backupMode,
         input.localStatus,
         input.githubStatus ?? null,
         input.manifestPath ?? null
@@ -552,6 +564,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
             hostId: input.hostId,
             operationId: input.operationId,
             createdAt,
+            backupMode: input.backupMode,
             localStatus: input.localStatus,
             githubStatus: input.githubStatus,
             manifestPath: input.manifestPath

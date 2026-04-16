@@ -378,10 +378,12 @@ async fn run_backups_list(args: BackupsListArgs) -> ExecutionResult {
                     .flatten()
                     .map(|backup| {
                         format!(
-                            "{} {} {}",
+                            "{} {} {} {} {}",
                             backup["createdAt"].as_str().unwrap_or("unknown"),
                             backup["hostId"].as_str().unwrap_or("unknown"),
+                            backup["backupMode"].as_str().unwrap_or("unknown"),
                             backup["localStatus"].as_str().unwrap_or("unknown"),
+                            backup["githubStatus"].as_str().unwrap_or("unknown"),
                         )
                     })
                     .collect::<Vec<_>>()

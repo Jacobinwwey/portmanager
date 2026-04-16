@@ -183,14 +183,15 @@ export function createControllerServer(options: {
 
       queueMicrotask(() => {
         void runner.run(operationId, async () => {
-          const { backup, rollbackPoint } = backupPrimitive.runBackup({
+          const { backup, operationState, rollbackPoint, resultSummary } = backupPrimitive.runBackup({
             operationId,
             hostId,
             mode
           })
 
           return {
-            resultSummary: `backup ${backup.id} created with rollback point ${rollbackPoint.id}`,
+            state: operationState,
+            resultSummary,
             backupId: backup.id,
             rollbackPointId: rollbackPoint.id
           }

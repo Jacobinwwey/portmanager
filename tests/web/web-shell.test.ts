@@ -59,6 +59,14 @@ test('host detail shell surfaces rollback candidates and diagnostics evidence re
   assert.match(html, /snapshot-op_diag_001\.html/i)
 })
 
+test('host detail shell surfaces backup policy modes and remote backup status', () => {
+  const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
+
+  assert.match(html, /best_effort/i)
+  assert.match(html, /required/i)
+  assert.match(html, /not_configured/i)
+})
+
 test('preview document embeds styles and web skeleton copy', () => {
   const html = renderWebPreviewDocument('overview')
 

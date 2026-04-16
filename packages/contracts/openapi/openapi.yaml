@@ -773,7 +773,7 @@ components:
           format: date-time
     BackupSummary:
       type: object
-      required: [id, hostId, createdAt, localStatus]
+      required: [id, hostId, createdAt, backupMode, localStatus]
       properties:
         id:
           type: string
@@ -784,6 +784,9 @@ components:
         createdAt:
           type: string
           format: date-time
+        backupMode:
+          type: string
+          enum: [best_effort, required]
         localStatus:
           type: string
           enum: [succeeded, failed]

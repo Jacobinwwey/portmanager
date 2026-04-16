@@ -40,7 +40,98 @@ async function waitForTerminalOperation(baseUrl: string, operationId: string) {
   throw new Error(`operation did not settle: ${operationId}`)
 }
 
-test('controller server runs local backup and exposes backup plus rollback inventory', async () => {
+test('controller server runs best_effort backup and exposes local-only safety evidence', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, artifactRoot })
+
+    const listening = await server.listen(0)
+
+    try {
+      const response = await fetch(`${listening.baseUrl}/backups/run`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId: 'host_alpha',
+          mode: 'best_effort'
+        })
+      })
+
+      assert.equal(response.status, 202)
+      const accepted = (await response.json()) as { operationId: string; state: string }
+      assert.equal(accepted.state, 'queued')
+
+      const operation = await waitForTerminalOperation(listening.baseUrl, accepted.operationId)
+      assert.equal(operation.state, 'succeeded')
+      assert.match(operation.resultSummary ?? '', /best_effort/i)
+      assert.match(operation.resultSummary ?? '', /not configured/i)
+
+      const backupsResponse = await fetch(`${listening.baseUrl}/backups`)
+      assert.equal(backupsResponse.status, 200)
+      const backupsPayload = (await backupsResponse.json()) as {
+        items: Array<{
+          id: string
+          hostId: string
+          localStatus: string
+          backupMode?: string
+          githubStatus?: string
+          manifestPath?: string
+          operationId?: string
+        }>
+      }
+
+      assert.equal(backupsPayload.items.length, 1)
+      assert.equal(backupsPayload.items[0]?.hostId, 'host_alpha')
+      assert.equal(backupsPayload.items[0]?.localStatus, 'succeeded')
+      assert.equal(backupsPayload.items[0]?.backupMode, 'best_effort')
+      assert.equal(backupsPayload.items[0]?.githubStatus, 'not_configured')
+      assert.equal(backupsPayload.items[0]?.operationId, accepted.operationId)
+
+      const manifestPath = backupsPayload.items[0]?.manifestPath
+      assert.ok(manifestPath)
+
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+        backupMode: string
+        operationId: string
+        checksums: Array<unknown>
+      }
+      assert.equal(manifest.operationId, accepted.operationId)
+      assert.equal(manifest.backupMode, 'best_effort')
+      assert.equal(manifest.checksums.length >= 4, true)
+
+      const rollbackResponse = await fetch(`${listening.baseUrl}/rollback-points`)
+      assert.equal(rollbackResponse.status, 200)
+      const rollbackPayload = (await rollbackResponse.json()) as {
+        items: Array<{
+          id: string
+          hostId: string
+          operationId: string
+          state: string
+          createdAt: string
+        }>
+      }
+
+      assert.equal(rollbackPayload.items.length, 1)
+      assert.equal(rollbackPayload.items[0]?.id, `rp_${accepted.operationId}`)
+      assert.equal(rollbackPayload.items[0]?.hostId, 'host_alpha')
+      assert.equal(rollbackPayload.items[0]?.operationId, accepted.operationId)
+      assert.equal(rollbackPayload.items[0]?.state, 'ready')
+      assert.match(rollbackPayload.items[0]?.createdAt ?? '', /T/)
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('controller server marks required backup degraded when remote backup is unavailable', async () => {
   const { directory, databasePath, artifactRoot } = tempPaths()
 
   try {
@@ -63,61 +154,38 @@ test('controller server runs local backup and exposes backup plus rollback inven
       })
 
       assert.equal(response.status, 202)
-      const accepted = (await response.json()) as { operationId: string; state: string }
-      assert.equal(accepted.state, 'queued')
-
+      const accepted = (await response.json()) as { operationId: string }
       const operation = await waitForTerminalOperation(listening.baseUrl, accepted.operationId)
-      assert.equal(operation.state, 'succeeded')
 
-      const backupsResponse = await fetch(`${listening.baseUrl}/backups`)
+      assert.equal(operation.state, 'degraded')
+      assert.match(operation.resultSummary ?? '', /required/i)
+      assert.match(operation.resultSummary ?? '', /not configured/i)
+
+      const backupsResponse = await fetch(
+        `${listening.baseUrl}/backups?operationId=${accepted.operationId}`
+      )
       assert.equal(backupsResponse.status, 200)
       const backupsPayload = (await backupsResponse.json()) as {
         items: Array<{
-          id: string
-          hostId: string
-          localStatus: string
+          backupMode?: string
           githubStatus?: string
-          manifestPath?: string
-          operationId?: string
+          localStatus: string
         }>
       }
 
       assert.equal(backupsPayload.items.length, 1)
-      assert.equal(backupsPayload.items[0]?.hostId, 'host_alpha')
+      assert.equal(backupsPayload.items[0]?.backupMode, 'required')
       assert.equal(backupsPayload.items[0]?.localStatus, 'succeeded')
-      assert.equal(backupsPayload.items[0]?.githubStatus, 'skipped')
-      assert.equal(backupsPayload.items[0]?.operationId, accepted.operationId)
+      assert.equal(backupsPayload.items[0]?.githubStatus, 'not_configured')
 
-      const manifestPath = backupsPayload.items[0]?.manifestPath
-      assert.ok(manifestPath)
-
-      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
-        backupMode: string
-        operationId: string
-        checksums: Array<unknown>
-      }
-      assert.equal(manifest.operationId, accepted.operationId)
-      assert.equal(manifest.backupMode, 'required')
-      assert.equal(manifest.checksums.length >= 4, true)
-
-      const rollbackResponse = await fetch(`${listening.baseUrl}/rollback-points`)
+      const rollbackResponse = await fetch(
+        `${listening.baseUrl}/rollback-points?hostId=host_alpha&state=ready`
+      )
       assert.equal(rollbackResponse.status, 200)
       const rollbackPayload = (await rollbackResponse.json()) as {
-        items: Array<{
-          id: string
-          hostId: string
-          operationId: string
-          state: string
-          createdAt: string
-        }>
+        items: Array<{ state: string }>
       }
-
-      assert.equal(rollbackPayload.items.length, 1)
-      assert.equal(rollbackPayload.items[0]?.id, `rp_${accepted.operationId}`)
-      assert.equal(rollbackPayload.items[0]?.hostId, 'host_alpha')
-      assert.equal(rollbackPayload.items[0]?.operationId, accepted.operationId)
       assert.equal(rollbackPayload.items[0]?.state, 'ready')
-      assert.match(rollbackPayload.items[0]?.createdAt ?? '', /T/)
     } finally {
       await server.close()
       store.close()

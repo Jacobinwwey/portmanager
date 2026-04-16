@@ -722,11 +722,22 @@ export function createMockHostDetailState(): HostDetailState {
     ],
     backups: [
       {
+        id: 'backup_alpha_002',
+        hostId: 'host_alpha',
+        createdAt: '2026-04-16T18:12:00.000Z',
+        backupMode: 'required',
+        localStatus: 'succeeded',
+        githubStatus: 'not_configured',
+        manifestPath: '/var/lib/portmanager/snapshots/op_snapshot_002-manifest.json',
+        operationId: 'op_snapshot_002'
+      },
+      {
         id: 'backup_alpha_001',
         hostId: 'host_alpha',
         createdAt: '2026-04-16T17:38:00.000Z',
+        backupMode: 'best_effort',
         localStatus: 'succeeded',
-        githubStatus: 'skipped',
+        githubStatus: 'not_configured',
         manifestPath: '/var/lib/portmanager/snapshots/op_snapshot_001-manifest.json',
         operationId: 'op_snapshot_001'
       }
@@ -774,6 +785,7 @@ export function createMockHostDetailState(): HostDetailState {
       '/etc/portmanager/agent.toml',
       '/var/lib/portmanager/desired-state.toml',
       '/var/lib/portmanager/runtime-state.json',
+      '/var/lib/portmanager/snapshots/op_snapshot_002-manifest.json',
       '/var/lib/portmanager/snapshots/op_snapshot_001-manifest.json',
       '/var/lib/portmanager/snapshots/snapshot-op_diag_001.html',
       '/var/lib/portmanager/rollback/rp_alpha_001-result.json'
@@ -1228,7 +1240,12 @@ function HostDetailMain(props: { state: HostDetailState }) {
         props.state.backups.map((backup) =>
           h('li', { className: 'pm-list-item', key: backup.id }, [
             h('div', { key: 'line1' }, `${backup.id} · ${shortTime(backup.createdAt)}`),
-            h('div', { className: 'pm-microcopy', key: 'line2' }, backup.manifestPath ?? 'no manifest path'),
+            h(
+              'div',
+              { className: 'pm-microcopy', key: 'line2' },
+              `${backup.backupMode} · ${backup.githubStatus ?? 'unknown'}`
+            ),
+            h('div', { className: 'pm-artifact', key: 'line3' }, backup.manifestPath ?? 'no manifest path'),
             h(StatusBadge, { key: 'badge', state: backup.localStatus })
           ])
         )

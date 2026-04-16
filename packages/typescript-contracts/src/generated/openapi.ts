@@ -879,6 +879,8 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         BackupSummary: {
+            /** @enum {string} */
+            backupMode: "best_effort" | "required";
             /** Format: date-time */
             createdAt: string;
             /** @enum {string} */
