@@ -4,18 +4,27 @@ title: Agent Quickstart
 
 # Agent Quickstart
 
-这个页面刻意采用 agent-first 组织方式。
+产品实现尚未发布，所以这个页面冻结的是目标中的非交互入口形态，而不是假装这条命令已经可以运行。
+
+## 状态
+
+`Planned`
+
+## 目标命令形态
 
 ```bash
-# Planned
-portmanager operation get op_123 --json --wait
+pmctl host probe --host demo-host --json --wait
 ```
 
-```bash
-# Planned
-curl -fsSL https://controller.example/api/operations/events
-```
+## 必须满足的行为
 
-- 先给 deterministic entrypoint。
-- 不在这里混入 Human onboarding 文案。
-- 下一步阅读 [契约基线](/zh/reference/contracts-baseline)。
+- 当存在 `--json` 时输出必须机器可读
+- `--wait` 语义必须显式，而不是隐藏轮询
+- 成功、degraded 与 failure 需要有稳定退出码
+- 非交互模式不能出现隐藏提示
+
+## 下一步阅读
+
+- [非交互工作流](/zh/agent/non-interactive)
+- [OpenAPI 参考](/zh/reference/openapi)
+- [契约基线](/zh/reference/contracts-baseline)

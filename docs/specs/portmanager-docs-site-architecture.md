@@ -1,7 +1,7 @@
 # PortManager Docs Site Architecture and Governance
 
 Updated: 2026-04-16
-Version: v0.3.0-docs-site-design-alignment
+Version: v0.3.1-docs-site-rebuild
 
 ## English
 
@@ -22,6 +22,7 @@ The repository keeps raw bilingual specifications as the source of truth, while 
 - Docs-site publishing baseline: `docs/design/portmanager-docs-site-design-baseline.md`
 - The docs site may reference the VitePress structure used by `OpenAvatarChat`, but only as a design reference rather than a cloning target.
 - The docs site should prefer standard VitePress `home` and `doc` layouts before custom wrappers.
+- The docs site should keep custom Vue components to the minimum set needed for `Quick Start` and `Roadmap`.
 
 ### Route contract
 The public site treats the following route families as stable interfaces:
@@ -37,10 +38,13 @@ The public site treats the following route families as stable interfaces:
 - `/zh/architecture/...`
 - `/en/operations/...`
 - `/zh/operations/...`
-- `/en/roadmap`
-- `/zh/roadmap`
+- `/en/roadmap/`
+- `/zh/roadmap/`
 - `/en/archive`
 - `/zh/archive`
+
+Section landing pages that also own child pages should publish through nested `index` routes.
+This avoids static-host conflicts between a page and a folder with the same public path.
 
 ### Audience split
 The docs site must separate `Human` and `Agent` audiences at the top level.
@@ -84,6 +88,7 @@ Archived pages remain static references rather than active version branches.
 - 文档站发布基线：`docs/design/portmanager-docs-site-design-baseline.md`
 - 文档站可以参考 `OpenAvatarChat` 使用的 VitePress 结构，但只能作为设计参考，而不是克隆目标。
 - 在引入自定义包装层之前，文档站应优先使用标准 VitePress `home` 与 `doc` 布局。
+- 文档站应把自定义 Vue 组件控制在 `Quick Start` 与 `Roadmap` 所需的最小集合内。
 
 ### 路由契约
 公共站点将以下路由族视为稳定接口：
@@ -99,10 +104,13 @@ Archived pages remain static references rather than active version branches.
 - `/zh/architecture/...`
 - `/en/operations/...`
 - `/zh/operations/...`
-- `/en/roadmap`
-- `/zh/roadmap`
+- `/en/roadmap/`
+- `/zh/roadmap/`
 - `/en/archive`
 - `/zh/archive`
+
+当某个分区首页同时拥有子页面时，应通过嵌套 `index` 路由发布。
+这样可以避免静态托管环境中“页面路径”和“目录路径”同名而发生冲突。
 
 ### 受众分流
 文档站必须在顶层明确区分 `Human` 与 `Agent`。

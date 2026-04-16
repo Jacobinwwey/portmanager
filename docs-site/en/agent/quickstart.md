@@ -4,18 +4,27 @@ title: Agent Quickstart
 
 # Agent Quickstart
 
-This surface is intentionally agent-first.
+The product implementation is not shipped yet, so this page freezes the intended non-interactive entry shape instead of pretending the command already works.
+
+## Status
+
+`Planned`
+
+## Target command shape
 
 ```bash
-# Planned
-portmanager operation get op_123 --json --wait
+pmctl host probe --host demo-host --json --wait
 ```
 
-```bash
-# Planned
-curl -fsSL https://controller.example/api/operations/events
-```
+## Required behavior
 
-- Deterministic entrypoints come first.
-- Human onboarding text stays out of this page.
-- Read [Contracts Baseline](/en/reference/contracts-baseline) next.
+- machine-readable output by default when `--json` is present
+- explicit `--wait` semantics rather than hidden polling
+- stable exit codes for success, degraded, and failure
+- no hidden prompts in non-interactive mode
+
+## Next reads
+
+- [Non-Interactive Flows](/en/agent/non-interactive)
+- [OpenAPI Reference](/en/reference/openapi)
+- [Contracts Baseline](/en/reference/contracts-baseline)

@@ -10,7 +10,7 @@ status: active
 ---
 > Source of truth: `docs/design/portmanager-docs-site-design-baseline.md`
 > Audience: `shared` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
+> Updated: 2026-04-16 | Version: v0.3.1-docs-site-rebuild
 ### Purpose
 This document freezes the visual and structural baseline for the public PortManager documentation site.
 It is separate from the product control-plane design baseline.
@@ -43,6 +43,8 @@ This is a reference posture, not a requirement to clone that site pixel-for-pixe
 - Homepage sections should emphasize quick orientation, audience entry, and key document families.
 - Secondary pages should favor headings, lists, code blocks, callouts, and lightweight doc cards.
 - Roadmap may remain a custom page because it expresses structured milestone data rather than ordinary prose.
+- The docs site should keep the custom component set minimal; the current allowed set is a quick-start card block and a roadmap renderer.
+- If a section landing page also has child pages, it should use a nested `index` route such as `/en/roadmap/` rather than a sibling top-level page route that collides with a directory.
 
 ### Visual language rules
 - Keep chrome light, calm, and readable.

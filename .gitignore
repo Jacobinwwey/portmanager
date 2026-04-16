@@ -74,6 +74,7 @@ target/
 
 # Local reference clones and scratch material
 ref/
+tmp/
 
 # Keep core lockfiles and source assets tracked
 !docs-site/pnpm-lock.yaml

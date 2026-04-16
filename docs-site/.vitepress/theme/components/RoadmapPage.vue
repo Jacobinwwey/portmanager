@@ -1,59 +1,91 @@
 <template>
-  <section class="pm-shell">
-    <div class="pm-roadmap" style="padding: 1.5rem;">
-      <span class="pm-eyebrow">{{ copy.eyebrow }}</span>
-      <h1 class="pm-title">{{ copy.title }}</h1>
-      <p class="pm-lede">{{ copy.lede }}</p>
-      <div class="pm-statline">
-        <span class="pm-pill primary">{{ copy.stageNow }}</span>
-        <span class="pm-pill warn">{{ copy.stageNext }}</span>
-        <span class="pm-pill success">{{ copy.stageLater }}</span>
+  <section class="pm-roadmap-shell">
+    <article class="pm-callout-card pm-roadmap-hero">
+      <span class="pm-kicker">{{ copy.kicker }}</span>
+      <h1>{{ copy.title }}</h1>
+      <p>{{ copy.lede }}</p>
+      <div class="pm-doc-links">
+        <span class="pm-pill now">{{ copy.now }}</span>
+        <span class="pm-pill next">{{ copy.next }}</span>
+        <span class="pm-pill later">{{ copy.later }}</span>
       </div>
-    </div>
+    </article>
 
-    <div class="pm-grid two">
-      <section class="pm-panel" style="padding: 1.25rem;">
-        <h2 class="pm-section-title">{{ copy.productTrack }}</h2>
-        <div class="pm-lane">
-          <div class="pm-chip-row">
-            <span v-for="item in tracks.product[locale]" :key="item" class="pm-chip">{{ item }}</span>
+    <div class="pm-docs-grid two">
+      <article class="pm-lane-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.productTrack }}</span>
+            <h3>{{ copy.productTitle }}</h3>
           </div>
         </div>
-      </section>
-      <section class="pm-panel" style="padding: 1.25rem;">
-        <h2 class="pm-section-title">{{ copy.engineeringTrack }}</h2>
-        <div class="pm-lane">
-          <div class="pm-chip-row">
-            <span v-for="item in tracks.engineering[locale]" :key="item" class="pm-chip">{{ item }}</span>
+        <ul>
+          <li v-for="item in tracks.product[locale]" :key="item">{{ item }}</li>
+        </ul>
+      </article>
+
+      <article class="pm-lane-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.engineeringTrack }}</span>
+            <h3>{{ copy.engineeringTitle }}</h3>
           </div>
         </div>
-      </section>
+        <ul>
+          <li v-for="item in tracks.engineering[locale]" :key="item">{{ item }}</li>
+        </ul>
+      </article>
     </div>
 
-    <section class="pm-panel" style="padding: 1.35rem;">
-      <h2 class="pm-section-title">{{ copy.timelineTitle }}</h2>
-      <div class="pm-grid three">
-        <article v-for="milestone in milestones" :key="milestone.id" class="pm-card">
-          <span class="pm-eyebrow">{{ stageLabel(milestone.stage) }}</span>
-          <div class="pm-card-title">
+    <section class="pm-roadmap-lanes">
+      <article v-for="lane in lanes" :key="lane.stage" class="pm-lane-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ lane.label }}</span>
+            <h3>{{ lane.title }}</h3>
+          </div>
+        </div>
+        <ul>
+          <li v-for="item in lane.items" :key="item">{{ item }}</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="pm-docs-grid">
+      <article v-for="milestone in milestones" :key="milestone.id" class="pm-roadmap-card">
+        <div class="pm-roadmap-header">
+          <div>
+            <span class="pm-kicker">{{ stageLabel(milestone.stage) }}</span>
             <h3>{{ milestone.title[locale] }}</h3>
-            <span class="pm-pill primary">{{ milestone.status[locale] }}</span>
           </div>
-          <p>{{ milestone.summary[locale] }}</p>
-          <h4 style="margin-top: 1rem;">{{ copy.productOutcomeLabel }}</h4>
-          <ul class="pm-list">
+          <span class="pm-badge planned">{{ milestone.status[locale] }}</span>
+        </div>
+
+        <p>{{ milestone.summary[locale] }}</p>
+
+        <section>
+          <h4>{{ copy.productOutcomeLabel }}</h4>
+          <ul>
             <li v-for="item in milestone.productOutcomes[locale]" :key="item">{{ item }}</li>
           </ul>
-          <h4 style="margin-top: 1rem;">{{ copy.engineeringWorkLabel }}</h4>
-          <ul class="pm-list">
+        </section>
+
+        <section>
+          <h4>{{ copy.engineeringWorkLabel }}</h4>
+          <ul>
             <li v-for="item in milestone.engineeringWork[locale]" :key="item">{{ item }}</li>
           </ul>
-          <h4 style="margin-top: 1rem;">{{ copy.linkedDocsLabel }}</h4>
-          <div class="pm-statline">
-            <a v-for="docId in milestone.docs" :key="docId" :href="docLink(locale, docId)" class="pm-pill primary">{{ docMeta(locale, docId).title }}</a>
+        </section>
+
+        <section>
+          <h4>{{ copy.linkedDocsLabel }}</h4>
+          <div class="pm-doc-links">
+            <a v-for="docId in milestone.docs" :key="docId" class="pm-doc-link" :href="docLink(locale, docId)">
+              {{ docMeta(locale, docId).title }}
+            </a>
           </div>
-        </article>
-      </div>
+        </section>
+      </article>
     </section>
   </section>
 </template>
@@ -69,41 +101,61 @@ const milestones = roadmapMilestones
 
 const copy = computed(() => props.locale === 'zh'
   ? {
-      eyebrow: 'Roadmap',
-      title: '把产品演进和工程依赖放在同一条可读的时间线上。',
-      lede: 'Roadmap 不只是对外叙事页，也不是仅供内部看的 TODO 清单。它同时回答：PortManager 正在成为什么，以及接下来必须先完成什么。',
-      stageNow: 'Now',
-      stageNext: 'Next',
-      stageLater: 'Later',
+      kicker: 'Roadmap',
+      title: '把产品演进、工程依赖与交付顺序放到同一条页面里。',
+      lede: '这不是营销页，也不是内部 TODO 清单。Roadmap 需要同时回答两件事：PortManager 正在成为什么，以及在那之前哪些依赖必须先落地。',
+      now: 'Now',
+      next: 'Next',
+      later: 'Later',
       productTrack: 'Product Track',
+      productTitle: '对采用者可见的能力演进',
       engineeringTrack: 'Engineering Track',
-      timelineTitle: 'Milestone Cards',
+      engineeringTitle: '对实施者可执行的依赖链',
       productOutcomeLabel: '产品结果',
       engineeringWorkLabel: '工程工作',
       linkedDocsLabel: '关联文档'
     }
   : {
-      eyebrow: 'Roadmap',
-      title: 'Read product evolution and engineering dependency in the same timeline.',
-      lede: 'The roadmap is not only a public narrative page, and not only an internal TODO stack. It answers both: what PortManager is becoming, and what must be completed first.',
-      stageNow: 'Now',
-      stageNext: 'Next',
-      stageLater: 'Later',
+      kicker: 'Roadmap',
+      title: 'Put product evolution, engineering dependency, and delivery order on the same page.',
+      lede: 'This is neither a marketing page nor an internal TODO dump. The roadmap has to answer two things at once: what PortManager is becoming, and which dependencies must land first.',
+      now: 'Now',
+      next: 'Next',
+      later: 'Later',
       productTrack: 'Product Track',
+      productTitle: 'Capabilities visible to adopters',
       engineeringTrack: 'Engineering Track',
-      timelineTitle: 'Milestone Cards',
+      engineeringTitle: 'Dependencies executable by builders',
       productOutcomeLabel: 'Product Outcomes',
       engineeringWorkLabel: 'Engineering Work',
       linkedDocsLabel: 'Linked Docs'
     }
 )
 
+const lanes = computed(() => {
+  const labels = props.locale === 'zh'
+    ? {
+        now: { label: 'Now', title: '当前主线' },
+        next: { label: 'Next', title: '下一阶段' },
+        later: { label: 'Later', title: '后续方向' }
+      }
+    : {
+        now: { label: 'Now', title: 'Current line' },
+        next: { label: 'Next', title: 'Next phase' },
+        later: { label: 'Later', title: 'Later expansion' }
+      }
+
+  return (['now', 'next', 'later'] as const).map((stage) => ({
+    stage,
+    label: labels[stage].label,
+    title: labels[stage].title,
+    items: roadmapMilestones
+      .filter((milestone) => milestone.stage === stage)
+      .map((milestone) => milestone.title[props.locale])
+  }))
+})
+
 function stageLabel(stage: string) {
-  if (props.locale === 'zh') {
-    if (stage === 'now') return 'Now'
-    if (stage === 'next') return 'Next'
-    return 'Later'
-  }
   if (stage === 'now') return 'Now'
   if (stage === 'next') return 'Next'
   return 'Later'

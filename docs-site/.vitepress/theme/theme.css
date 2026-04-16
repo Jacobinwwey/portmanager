@@ -1,43 +1,57 @@
 :root {
-  --pm-primary: #0d4f96;
-  --pm-primary-soft: #e9f2fb;
-  --pm-primary-deep: #08376a;
-  --pm-ink: #15253d;
-  --pm-muted: #52627a;
-  --pm-border: #d9e3f1;
+  --pm-brand-1: #2b6cb0;
+  --pm-brand-2: #1f5a96;
+  --pm-brand-3: #4f87c7;
+  --pm-bg: #f7fafc;
   --pm-surface: #ffffff;
-  --pm-surface-soft: #f6f9fc;
-  --pm-code-bg: #0f1729;
-  --pm-code-fg: #d9e4ff;
-  --vp-c-brand-1: var(--pm-primary);
-  --vp-c-brand-2: #1160b6;
-  --vp-c-brand-3: #2a75c9;
+  --pm-surface-soft: #f1f6fb;
+  --pm-border: #d7e3f2;
+  --pm-ink: #16324f;
+  --pm-muted: #55718f;
+  --pm-success: #1f7a5c;
+  --pm-warn: #a56b10;
+  --pm-planned: #7a5ea8;
+  --vp-c-brand-1: var(--pm-brand-1);
+  --vp-c-brand-2: var(--pm-brand-2);
+  --vp-c-brand-3: var(--pm-brand-3);
+  --vp-c-bg: var(--pm-bg);
+  --vp-c-bg-soft: var(--pm-surface-soft);
+  --vp-c-bg-alt: #edf4fb;
+  --vp-c-divider: rgba(22, 50, 79, 0.1);
+  --vp-c-text-1: var(--pm-ink);
+  --vp-c-text-2: var(--pm-muted);
   --vp-home-hero-name-color: var(--pm-ink);
   --vp-home-hero-image-background-image: none;
   --vp-home-hero-image-filter: none;
-  --vp-font-family-base: 'Inter', 'Segoe UI', sans-serif;
-  --vp-font-family-mono: 'JetBrains Mono', monospace;
+  --vp-font-family-base: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
 }
 
 body {
   color: var(--pm-ink);
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  background:
+    radial-gradient(circle at top, rgba(79, 135, 199, 0.1), transparent 32%),
+    linear-gradient(180deg, #ffffff 0%, var(--pm-bg) 100%);
 }
 
 .VPNavBar {
-  background: rgba(255, 255, 255, 0.92) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  border-bottom: 1px solid rgba(22, 50, 79, 0.08);
+}
+
+.VPNavBarTitle .title {
+  font-weight: 700;
 }
 
 .VPHome {
-  padding-bottom: 3rem;
+  padding-bottom: 4rem;
 }
 
 .VPHomeHero .container,
 .VPHomeFeatures .container,
 .VPDoc .container {
-  max-width: 1180px;
+  max-width: 1160px;
 }
 
 .VPHomeHero .name,
@@ -47,12 +61,12 @@ body {
 
 .VPHomeHero .tagline {
   color: var(--pm-muted);
-  max-width: 64ch;
+  max-width: 66ch;
 }
 
 .VPButton.brand {
-  border-color: var(--pm-primary);
-  background: var(--pm-primary);
+  border-color: var(--pm-brand-1);
+  background: var(--pm-brand-1);
 }
 
 .VPButton.alt {
@@ -63,196 +77,251 @@ body {
 
 .VPFeature {
   border: 1px solid var(--pm-border);
-  border-radius: 20px;
-  background: var(--pm-surface);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 14px 32px rgba(22, 50, 79, 0.05);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
 }
 
 .VPFeature:hover {
-  border-color: rgba(13, 79, 150, 0.24);
+  transform: translateY(-1px);
+  border-color: rgba(43, 108, 176, 0.24);
+  box-shadow: 0 18px 36px rgba(22, 50, 79, 0.08);
 }
 
-.pm-shell {
+.vp-doc a,
+.VPHome a {
+  text-underline-offset: 0.18em;
+}
+
+.pm-docs-section {
+  margin: 2rem 0;
+}
+
+.pm-docs-grid {
   display: grid;
   gap: 1rem;
 }
 
-.pm-hero,
-.pm-panel,
-.pm-roadmap {
-  position: relative;
-  background: var(--pm-surface);
-  border: 1px solid var(--pm-border);
-  border-radius: 22px;
-  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.04);
-}
-
-.pm-hero {
-  padding: 1.4rem;
-}
-
-.pm-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.pm-grid.two {
+.pm-docs-grid.two {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.pm-grid.three {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.pm-doc-card,
+.pm-roadmap-card,
+.pm-lane-card,
+.pm-callout-card {
+  border: 1px solid var(--pm-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 32px rgba(22, 50, 79, 0.05);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
 }
 
-.pm-eyebrow {
+.pm-doc-card,
+.pm-roadmap-card,
+.pm-lane-card,
+.pm-callout-card,
+.pm-doc-details {
+  padding: 1.1rem 1.2rem;
+}
+
+.pm-doc-card h3,
+.pm-roadmap-card h3,
+.pm-roadmap-card h4,
+.pm-lane-card h3 {
+  margin: 0;
+}
+
+.pm-card-header,
+.pm-roadmap-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.pm-kicker,
+.pm-badge,
+.pm-pill {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  background: var(--pm-primary-soft);
-  color: var(--pm-primary);
-  font-size: 0.74rem;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  line-height: 1;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.36rem 0.72rem;
+  border: 1px solid var(--pm-border);
+  background: var(--pm-surface-soft);
 }
 
-.pm-title {
-  margin: 0.85rem 0 0.75rem;
-  font-size: clamp(1.85rem, 3.4vw, 3rem);
+.pm-kicker {
+  color: var(--pm-brand-1);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pm-badge.available {
+  color: var(--pm-success);
+}
+
+.pm-badge.planned,
+.pm-pill.planned {
+  color: var(--pm-planned);
+}
+
+.pm-badge.safe,
+.pm-pill.now {
+  color: var(--pm-brand-1);
+}
+
+.pm-pill.next {
+  color: var(--pm-warn);
+}
+
+.pm-pill.later {
+  color: var(--pm-success);
+}
+
+.pm-doc-card p,
+.pm-roadmap-card p,
+.pm-callout-card p,
+.pm-lane-card p,
+.pm-doc-note,
+.pm-roadmap-card li,
+.pm-lane-card li {
+  color: var(--pm-muted);
+}
+
+.pm-doc-card ul,
+.pm-roadmap-card ul,
+.pm-lane-card ul {
+  margin: 0.8rem 0 0;
+  padding-left: 1.15rem;
+}
+
+.pm-doc-card pre,
+.pm-doc-details pre {
+  margin: 0.9rem 0 0;
+  border-radius: 14px;
+  background: #0f1b2d;
+}
+
+.pm-doc-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.pm-doc-link {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--pm-border);
+  padding: 0.45rem 0.8rem;
+  text-decoration: none;
+  background: var(--pm-surface);
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+.pm-doc-link:hover,
+.pm-doc-link:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(43, 108, 176, 0.28);
+  box-shadow: 0 12px 26px rgba(43, 108, 176, 0.08);
+  outline: none;
+}
+
+.pm-doc-details {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.pm-doc-details summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--pm-ink);
+}
+
+.pm-doc-details summary:focus-visible {
+  outline: 2px solid rgba(43, 108, 176, 0.34);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.pm-doc-details[open] summary {
+  margin-bottom: 0.85rem;
+}
+
+.pm-roadmap-shell {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+}
+
+.pm-roadmap-hero {
+  padding: 1.4rem;
+}
+
+.pm-roadmap-hero h1 {
+  margin: 0.75rem 0;
+  font-size: clamp(2rem, 4vw, 3.3rem);
   line-height: 1.04;
   letter-spacing: -0.03em;
 }
 
-.pm-lede {
-  max-width: 68ch;
-  color: var(--pm-muted);
-  line-height: 1.7;
-}
-
-.pm-card {
-  background: var(--pm-surface-soft);
-  border: 1px solid var(--pm-border);
-  border-radius: 18px;
-  padding: 1rem;
-  min-height: 100%;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-}
-
-.pm-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(13, 79, 150, 0.22);
-  box-shadow: 0 12px 28px rgba(13, 79, 150, 0.06);
-}
-
-.pm-card h3,
-.pm-card h4,
-.pm-section-title {
-  margin: 0;
-}
-
-.pm-card p,
-.pm-card li,
-.pm-muted {
-  color: var(--pm-muted);
-}
-
-.pm-card-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin: 0.55rem 0;
-}
-
-.pm-statline,
-.pm-chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  margin-top: 0.95rem;
-}
-
-.pm-pill,
-.pm-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.34rem 0.7rem;
-  border-radius: 999px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.76rem;
-  border: 1px solid var(--pm-border);
-  background: #fff;
-}
-
-.pm-pill.primary { color: var(--pm-primary); }
-.pm-pill.success { color: #0c7f5d; }
-.pm-pill.warn { color: #9b5b09; }
-.pm-pill.danger { color: #a33b2f; }
-
-.pm-link-card {
+.pm-roadmap-lanes {
   display: grid;
-  gap: 0.45rem;
-  text-decoration: none;
-  color: inherit;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.pm-code {
-  margin-top: 0.9rem;
-  padding: 0.9rem 1rem;
-  border-radius: 16px;
-  background: var(--pm-code-bg);
-  color: var(--pm-code-fg);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8rem;
-  overflow-x: auto;
+.pm-roadmap-card section + section {
+  margin-top: 1rem;
 }
 
-.pm-section-title {
-  margin-bottom: 0.85rem;
-  font-size: 1.18rem;
+.pm-roadmap-card ul,
+.pm-lane-card ul {
+  list-style: disc;
 }
 
-.pm-list {
-  margin: 0;
-  padding-left: 1.15rem;
+.pm-doc-card:hover,
+.pm-roadmap-card:hover,
+.pm-lane-card:hover,
+.pm-callout-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(43, 108, 176, 0.22);
+  box-shadow: 0 18px 36px rgba(22, 50, 79, 0.08);
 }
 
-.pm-lane {
-  padding: 1rem;
-  border-radius: 18px;
-  background: var(--pm-surface-soft);
-  border: 1px solid var(--pm-border);
-}
-
-.pm-lane-title {
-  margin: 0 0 0.75rem;
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--pm-primary);
-}
-
-.pm-callout {
-  padding: 1rem;
-  border-radius: 16px;
-  border: 1px solid var(--pm-border);
-  background: var(--pm-primary-soft);
-}
-
-.pm-empty {
-  padding: 1.1rem;
-  border-radius: 16px;
-  text-align: center;
-  color: var(--pm-muted);
-  border: 1px solid var(--pm-border);
-  background: var(--pm-surface-soft);
+.pm-doc-footnote {
+  font-size: 0.92rem;
 }
 
 @media (max-width: 960px) {
-  .pm-grid.two,
-  .pm-grid.three {
+  .pm-docs-grid.two,
+  .pm-roadmap-lanes {
     grid-template-columns: 1fr;
+  }
+
+  .pm-card-header,
+  .pm-roadmap-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

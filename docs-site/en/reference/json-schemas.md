@@ -4,12 +4,24 @@ title: JSON Schema Reference
 
 # JSON Schema Reference
 
-Raw schema sources:
+The raw JSON Schema source of truth lives under `packages/contracts/jsonschema/`.
 
-- [runtime-state.schema.json](https://github.com/Jacobinwwey/portmanager/blob/main/packages/contracts/jsonschema/runtime-state.schema.json)
-- [apply-desired-state.schema.json](https://github.com/Jacobinwwey/portmanager/blob/main/packages/contracts/jsonschema/apply-desired-state.schema.json)
-- [snapshot-manifest.schema.json](https://github.com/Jacobinwwey/portmanager/blob/main/packages/contracts/jsonschema/snapshot-manifest.schema.json)
-- [rollback-result.schema.json](https://github.com/Jacobinwwey/portmanager/blob/main/packages/contracts/jsonschema/rollback-result.schema.json)
-- [operation-result.schema.json](https://github.com/Jacobinwwey/portmanager/blob/main/packages/contracts/jsonschema/operation-result.schema.json)
-- [port-diagnostic-result.schema.json](https://github.com/Jacobinwwey/portmanager/blob/main/packages/contracts/jsonschema/port-diagnostic-result.schema.json)
-- [web-snapshot-result.schema.json](https://github.com/Jacobinwwey/portmanager/blob/main/packages/contracts/jsonschema/web-snapshot-result.schema.json)
+## Published schemas
+
+- `apply-desired-state.schema.json`
+- `operation-result.schema.json`
+- `port-diagnostic-result.schema.json`
+- `rollback-result.schema.json`
+- `runtime-state.schema.json`
+- `snapshot-manifest.schema.json`
+- `web-snapshot-result.schema.json`
+
+## Why this page exists
+
+This page is an entry surface, not a duplicated schema catalog. The schema files remain authoritative and should drive generated types and validation flows.
+
+## Read this with
+
+- [OpenAPI Reference](/en/reference/openapi)
+- [Contracts Baseline](/en/reference/contracts-baseline)
+- [Snapshot and Diagnostics](/en/operations/snapshot-diagnostics)

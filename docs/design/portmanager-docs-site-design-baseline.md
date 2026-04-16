@@ -1,7 +1,7 @@
 # PortManager Docs Site Design Baseline
 
 Updated: 2026-04-16
-Version: v0.3.0-docs-site-design-alignment
+Version: v0.3.1-docs-site-rebuild
 
 ## English
 
@@ -37,6 +37,8 @@ This is a reference posture, not a requirement to clone that site pixel-for-pixe
 - Homepage sections should emphasize quick orientation, audience entry, and key document families.
 - Secondary pages should favor headings, lists, code blocks, callouts, and lightweight doc cards.
 - Roadmap may remain a custom page because it expresses structured milestone data rather than ordinary prose.
+- The docs site should keep the custom component set minimal; the current allowed set is a quick-start card block and a roadmap renderer.
+- If a section landing page also has child pages, it should use a nested `index` route such as `/en/roadmap/` rather than a sibling top-level page route that collides with a directory.
 
 ### Visual language rules
 - Keep chrome light, calm, and readable.
@@ -85,6 +87,8 @@ No future work may treat these as interchangeable.
 - 首页区块应优先强调快速定位、受众入口与关键文档族。
 - 次级页面应优先使用标题、列表、代码块、callout 与轻量文档卡片。
 - Roadmap 可以继续保留为自定义页面，因为它表达的是结构化里程碑数据，而不是普通长文。
+- 文档站应把自定义组件集控制在最小范围内；当前允许保留的是 quick-start 卡片区块与 roadmap 渲染组件。
+- 如果某个分区首页同时还拥有子页面，则应使用嵌套 `index` 路由，例如 `/en/roadmap/`，而不是与目录发生冲突的同名顶层页面路由。
 
 ### 视觉语言规则
 - 保持界面轻、稳、可读。

@@ -2,4 +2,14 @@
 title: Archive
 ---
 
-<SectionLanding locale="zh" section="archive" />
+# Archive
+
+Archive 会先于版本体系存在。
+
+## 当前状态
+
+目前还没有公开归档版本文档。
+
+## 为什么这个路由现在就要存在
+
+未来的公共文档仍然需要稳定路由。即使多版本支持还没有出现，归档边界也应该先拥有固定位置。

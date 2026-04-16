@@ -10,7 +10,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-docs-site-architecture.md`
 > Audience: `shared` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
+> Updated: 2026-04-16 | Version: v0.3.1-docs-site-rebuild
 ### Purpose
 This document locks the documentation publishing architecture for PortManager.
 The repository keeps raw bilingual specifications as the source of truth, while VitePress acts as the public publishing layer for GitHub Pages.
@@ -28,6 +28,7 @@ The repository keeps raw bilingual specifications as the source of truth, while 
 - Docs-site publishing baseline: `docs/design/portmanager-docs-site-design-baseline.md`
 - The docs site may reference the VitePress structure used by `OpenAvatarChat`, but only as a design reference rather than a cloning target.
 - The docs site should prefer standard VitePress `home` and `doc` layouts before custom wrappers.
+- The docs site should keep custom Vue components to the minimum set needed for `Quick Start` and `Roadmap`.
 
 ### Route contract
 The public site treats the following route families as stable interfaces:
@@ -43,10 +44,13 @@ The public site treats the following route families as stable interfaces:
 - `/zh/architecture/...`
 - `/en/operations/...`
 - `/zh/operations/...`
-- `/en/roadmap`
-- `/zh/roadmap`
+- `/en/roadmap/`
+- `/zh/roadmap/`
 - `/en/archive`
 - `/zh/archive`
+
+Section landing pages that also own child pages should publish through nested `index` routes.
+This avoids static-host conflicts between a page and a folder with the same public path.
 
 ### Audience split
 The docs site must separate `Human` and `Agent` audiences at the top level.
