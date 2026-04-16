@@ -82,11 +82,81 @@ export function createControllerServer(options: {
       return
     }
 
+    if (request.method === 'GET' && requestUrl.pathname === '/health-checks') {
+      sendJson(response, 200, {
+        items: store.listHealthChecks({
+          hostId: requestUrl.searchParams.get('hostId') ?? undefined,
+          ruleId: requestUrl.searchParams.get('ruleId') ?? undefined
+        })
+      })
+      return
+    }
+
     if (request.method === 'GET' && requestUrl.pathname === '/diagnostics') {
       sendJson(response, 200, {
         items: store.listDiagnostics({
           hostId: requestUrl.searchParams.get('hostId') ?? undefined,
           ruleId: requestUrl.searchParams.get('ruleId') ?? undefined
+        })
+      })
+      return
+    }
+
+    const driftMatch =
+      request.method === 'POST'
+        ? requestUrl.pathname.match(/^\/bridge-rules\/([^/]+)\/drift-check$/)
+        : null
+
+    if (driftMatch) {
+      const payload = await readJsonBody(request)
+      const ruleId = decodeURIComponent(driftMatch[1] ?? '')
+      const hostId = typeof payload.hostId === 'string' ? payload.hostId : undefined
+      const expectedStateHash =
+        typeof payload.expectedStateHash === 'string' ? payload.expectedStateHash : undefined
+      const observedStateHash =
+        typeof payload.observedStateHash === 'string' ? payload.observedStateHash : undefined
+      const backupPolicy =
+        payload.backupPolicy === 'required' ? 'required' : payload.backupPolicy === 'best_effort' ? 'best_effort' : undefined
+
+      if (!hostId || !expectedStateHash || !observedStateHash || !backupPolicy) {
+        sendJson(response, 400, { error: 'invalid_drift_check_request' })
+        return
+      }
+
+      const operationId = createOperationId('op_verify')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'verify_rule',
+        initiator: 'web',
+        hostId,
+        ruleId
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          const driftDetected = expectedStateHash !== observedStateHash
+          const summary = driftDetected
+            ? backupPolicy === 'required'
+              ? `drift detected: expected ${expectedStateHash}, observed ${observedStateHash}, rollback inspection required`
+              : `drift detected: expected ${expectedStateHash}, observed ${observedStateHash}, best_effort remediation allowed`
+            : `bridge verification matched expected state hash ${expectedStateHash}`
+
+          store.createHealthCheck({
+            id: `hc_${ruleId}_${operationId}`,
+            hostId,
+            ruleId,
+            category: 'bridge_verify',
+            status: driftDetected ? 'degraded' : 'healthy',
+            summary,
+            backupPolicy
+          })
+
+          return {
+            state: driftDetected ? 'degraded' : 'succeeded',
+            resultSummary: summary
+          }
         })
       })
       return

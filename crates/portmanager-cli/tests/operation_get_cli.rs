@@ -363,3 +363,49 @@ fn events_list_json_reads_shared_event_stream_history() {
     assert_eq!(parsed["items"][0]["level"], "success");
     assert_eq!(parsed["items"][0]["summary"], "rule_alpha_https applied and awaiting diagnostics");
 }
+
+#[test]
+fn health_checks_list_json_reads_degraded_bridge_verify_checks() {
+    let server = MockHttpServer::start(vec![(
+        "/health-checks?hostId=host_alpha&ruleId=rule_alpha_https",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "hc_rule_alpha_https_drift",
+                        "hostId": "host_alpha",
+                        "ruleId": "rule_alpha_https",
+                        "category": "bridge_verify",
+                        "status": "degraded",
+                        "summary": "drift detected: expected expected_hash_alpha, observed observed_hash_bravo, rollback inspection required",
+                        "backupPolicy": "required",
+                        "checkedAt": "2026-04-16T18:45:00.000Z"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &[
+            "health-checks",
+            "list",
+            "--json",
+            "--host-id",
+            "host_alpha",
+            "--rule-id",
+            "rule_alpha_https",
+        ],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["items"][0]["status"], "degraded");
+    assert_eq!(parsed["items"][0]["backupPolicy"], "required");
+}

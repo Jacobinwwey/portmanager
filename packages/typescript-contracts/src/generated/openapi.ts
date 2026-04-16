@@ -230,6 +230,48 @@ export interface paths {
         };
         trace?: never;
     };
+    "/bridge-rules/{ruleId}/drift-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify rule drift against expected runtime state */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    ruleId: components["parameters"]["RuleId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RunDriftCheckRequest"];
+                };
+            };
+            responses: {
+                /** @description Drift verification accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OperationAccepted"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events": {
         parameters: {
             query?: never;
@@ -342,7 +384,10 @@ export interface paths {
         /** List health checks */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    hostId?: string;
+                    ruleId?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -852,6 +897,8 @@ export interface components {
         ExposurePolicyUpdateRequest: components["schemas"]["ExposurePolicy"];
         HealthCheck: {
             /** @enum {string} */
+            backupPolicy?: "best_effort" | "required";
+            /** @enum {string} */
             category: "host_probe" | "bridge_verify" | "diagnostics";
             /** Format: date-time */
             checkedAt: string;
@@ -908,7 +955,7 @@ export interface components {
             level: "info" | "success" | "warn" | "error";
             operationId: string;
             /** @enum {string} */
-            operationType: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "backup" | "diagnostics" | "rollback";
+            operationType: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
             ruleId?: string;
             /** @enum {string} */
             state: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
@@ -925,7 +972,7 @@ export interface components {
             /** @enum {string} */
             state: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
             /** @enum {string} */
-            type: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "backup" | "diagnostics" | "rollback";
+            type: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
         };
         PortDiagnosticResult: {
             /** Format: date-time */
@@ -965,6 +1012,13 @@ export interface components {
             ruleId?: string;
             /** @enum {string} */
             scheme?: "http" | "https";
+        };
+        RunDriftCheckRequest: {
+            /** @enum {string} */
+            backupPolicy: "best_effort" | "required";
+            expectedStateHash: string;
+            hostId: string;
+            observedStateHash: string;
         };
         SshConnection: {
             host: string;
@@ -1027,6 +1081,7 @@ export type ProbeHostRequest = components['schemas']['ProbeHostRequest'];
 export type RollbackPoint = components['schemas']['RollbackPoint'];
 export type RunBackupRequest = components['schemas']['RunBackupRequest'];
 export type RunDiagnosticsRequest = components['schemas']['RunDiagnosticsRequest'];
+export type RunDriftCheckRequest = components['schemas']['RunDriftCheckRequest'];
 export type SshConnection = components['schemas']['SshConnection'];
 export type TlsSummary = components['schemas']['TlsSummary'];
 export type UpdateBridgeRuleRequest = components['schemas']['UpdateBridgeRuleRequest'];

@@ -20,6 +20,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Events(EventsCommand),
+    HealthChecks(HealthChecksCommand),
     Operation(OperationCommand),
 }
 
@@ -32,6 +33,17 @@ struct EventsCommand {
 #[derive(Subcommand)]
 enum EventsSubcommand {
     List(EventsListArgs),
+}
+
+#[derive(Args)]
+struct HealthChecksCommand {
+    #[command(subcommand)]
+    command: HealthChecksSubcommand,
+}
+
+#[derive(Subcommand)]
+enum HealthChecksSubcommand {
+    List(HealthChecksListArgs),
 }
 
 #[derive(Args)]
@@ -66,6 +78,18 @@ struct EventsListArgs {
     json: bool,
     #[arg(long, default_value_t = 20)]
     limit: u16,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
+struct HealthChecksListArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long)]
+    host_id: Option<String>,
+    #[arg(long)]
+    rule_id: Option<String>,
     #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
     controller_base_url: String,
 }
@@ -131,6 +155,9 @@ async fn execute(cli: Cli) -> ExecutionResult {
     match cli.command {
         Commands::Events(command) => match command.command {
             EventsSubcommand::List(args) => run_events_list(args).await,
+        },
+        Commands::HealthChecks(command) => match command.command {
+            HealthChecksSubcommand::List(args) => run_health_checks_list(args).await,
         },
         Commands::Operation(command) => match command.command {
             OperationSubcommand::Get(args) => run_operation_get(args).await,
@@ -234,6 +261,45 @@ async fn run_events_list(args: EventsListArgs) -> ExecutionResult {
     }
 }
 
+async fn run_health_checks_list(args: HealthChecksListArgs) -> ExecutionResult {
+    match fetch_health_checks(
+        &Client::new(),
+        &args.controller_base_url,
+        args.host_id.as_deref(),
+        args.rule_id.as_deref(),
+    )
+    .await
+    {
+        Ok(health_checks) => {
+            if args.json {
+                ExecutionResult::success_json(&health_checks)
+            } else {
+                let lines = health_checks["items"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(|check| {
+                        format!(
+                            "{} {} {}",
+                            check["checkedAt"].as_str().unwrap_or("unknown"),
+                            check["status"].as_str().unwrap_or("unknown"),
+                            check["summary"].as_str().unwrap_or("missing summary")
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                ExecutionResult::success_text(lines)
+            }
+        }
+        Err(error) => json_or_text_error_flag(
+            args.json,
+            error,
+            "health check fetch failed".to_string(),
+        ),
+    }
+}
+
 async fn fetch_operation(
     client: &Client,
     controller_base_url: &str,
@@ -297,6 +363,57 @@ async fn fetch_events(
     let response = client
         .get(url)
         .query(&[("limit", limit)])
+        .send()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: None,
+        })?;
+
+    let status = response.status();
+    if !status.is_success() {
+        return Err(JsonErrorOutput {
+            error: "controller_error",
+            message: format!("controller returned unexpected status {}", status.as_u16()),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        });
+    }
+
+    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
+    })
+}
+
+async fn fetch_health_checks(
+    client: &Client,
+    controller_base_url: &str,
+    host_id: Option<&str>,
+    rule_id: Option<&str>,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!("{}/health-checks", controller_base_url.trim_end_matches('/'));
+    let mut query: Vec<(&str, &str)> = Vec::new();
+    if let Some(host_id) = host_id {
+        query.push(("hostId", host_id));
+    }
+    if let Some(rule_id) = rule_id {
+        query.push(("ruleId", rule_id));
+    }
+
+    let response = client
+        .get(url)
+        .query(&query)
         .send()
         .await
         .map_err(|error| JsonErrorOutput {

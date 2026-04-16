@@ -176,6 +176,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OperationAccepted'
+  /bridge-rules/{ruleId}/drift-check:
+    post:
+      tags: [bridge-rules]
+      summary: Verify rule drift against expected runtime state
+      parameters:
+        - $ref: '#/components/parameters/RuleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunDriftCheckRequest'
+      responses:
+        '202':
+          description: Drift verification accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
   /exposure-policies/{hostId}:
     get:
       tags: [exposure-policies]
@@ -211,6 +230,15 @@ paths:
     get:
       tags: [health-checks]
       summary: List health checks
+      parameters:
+        - name: hostId
+          in: query
+          schema:
+            type: string
+        - name: ruleId
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Health check list
@@ -598,6 +626,9 @@ components:
           enum: [healthy, degraded, failed]
         summary:
           type: string
+        backupPolicy:
+          type: string
+          enum: [best_effort, required]
         checkedAt:
           type: string
           format: date-time
@@ -609,7 +640,7 @@ components:
           type: string
         type:
           type: string
-          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, backup, diagnostics, rollback]
+          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, verify_rule, backup, diagnostics, rollback]
         state:
           type: string
           enum: [queued, running, succeeded, failed, degraded, cancelled]
@@ -655,7 +686,7 @@ components:
           type: string
         operationType:
           type: string
-          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, backup, diagnostics, rollback]
+          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, verify_rule, backup, diagnostics, rollback]
         state:
           type: string
           enum: [queued, running, succeeded, failed, degraded, cancelled]
@@ -742,6 +773,19 @@ components:
         captureSnapshot:
           type: boolean
           default: true
+    RunDriftCheckRequest:
+      type: object
+      required: [hostId, expectedStateHash, observedStateHash, backupPolicy]
+      properties:
+        hostId:
+          type: string
+        expectedStateHash:
+          type: string
+        observedStateHash:
+          type: string
+        backupPolicy:
+          type: string
+          enum: [best_effort, required]
     PortDiagnosticResult:
       type: object
       required: [hostId, port, tcpReachable, capturedAt]

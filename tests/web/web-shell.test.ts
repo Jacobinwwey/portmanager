@@ -41,6 +41,14 @@ test('host detail shell renders required milestone sections', () => {
   assert.match(html, /rule_alpha_https/)
 })
 
+test('host detail shell surfaces degraded bridge verification and required backup policy', () => {
+  const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
+
+  assert.match(html, /degraded/i)
+  assert.match(html, /rollback inspection required/i)
+  assert.match(html, /required/i)
+})
+
 test('preview document embeds styles and web skeleton copy', () => {
   const html = renderWebPreviewDocument('overview')
 

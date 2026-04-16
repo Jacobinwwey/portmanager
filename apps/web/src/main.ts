@@ -607,6 +607,15 @@ export function createMockHostDetailState(): HostDetailState {
         ruleId: 'rule_alpha_https',
         startedAt: '2026-04-16T17:49:00.000Z',
         finishedAt: '2026-04-16T17:52:00.000Z'
+      },
+      {
+        id: 'op_verify_001',
+        type: 'verify_rule',
+        state: 'degraded',
+        hostId: 'host_alpha',
+        ruleId: 'rule_alpha_https',
+        startedAt: '2026-04-16T18:08:00.000Z',
+        finishedAt: '2026-04-16T18:09:00.000Z'
       }
     ],
     recentRules: [
@@ -618,8 +627,8 @@ export function createMockHostDetailState(): HostDetailState {
         listenPort: 443,
         targetHost: '127.0.0.1',
         targetPort: 3000,
-        lifecycleState: 'active',
-        lastVerifiedAt: '2026-04-16T17:52:00.000Z',
+        lifecycleState: 'degraded',
+        lastVerifiedAt: '2026-04-16T18:09:00.000Z',
         lastRollbackPointId: 'rp_alpha_001'
       },
       {
@@ -670,6 +679,19 @@ export function createMockHostDetailState(): HostDetailState {
       hostId: 'host_alpha',
       ruleId: 'rule_alpha_https',
       emittedAt: '2026-04-16T17:52:00.000Z'
+    },
+    {
+      id: 'evt_004',
+      kind: 'operation_state_changed',
+      operationId: 'op_verify_001',
+      operationType: 'verify_rule',
+      state: 'degraded',
+      level: 'warn',
+      summary:
+        'drift detected for rule_alpha_https; required backup policy keeps rollback inspection explicit',
+      hostId: 'host_alpha',
+      ruleId: 'rule_alpha_https',
+      emittedAt: '2026-04-16T18:09:00.000Z'
     }
   ]
 
@@ -689,9 +711,11 @@ export function createMockHostDetailState(): HostDetailState {
         hostId: 'host_alpha',
         ruleId: 'rule_alpha_https',
         category: 'bridge_verify',
-        status: 'healthy',
-        checkedAt: '2026-04-16T17:52:00.000Z',
-        summary: '443 mirrored to 3000 with clean TCP reachability'
+        status: 'degraded',
+        checkedAt: '2026-04-16T18:09:00.000Z',
+        summary:
+          'drift detected: expected expected_hash_alpha, observed observed_hash_bravo, rollback inspection required',
+        backupPolicy: 'required'
       }
     ],
     backups: [
@@ -760,7 +784,7 @@ export function createMockOverviewState(): OverviewState {
     eventStream: [
       ...selectedHost.eventStream,
       eventEntryFromOperationEvent({
-        id: 'evt_004',
+        id: 'evt_005',
         kind: 'operation_state_changed',
         operationId: 'op_bootstrap_002',
         operationType: 'bootstrap_host',

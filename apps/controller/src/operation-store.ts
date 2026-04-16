@@ -7,6 +7,7 @@ import type {
 } from '@portmanager/typescript-contracts'
 
 export type BackupSummary = components['schemas']['BackupSummary']
+export type HealthCheck = components['schemas']['HealthCheck']
 export type OperationAccepted = components['schemas']['OperationAccepted']
 export type OperationDetail = components['schemas']['OperationDetail'] & {
   diagnosticResult?: components['schemas']['PortDiagnosticResult'] & PortDiagnosticResultSchema
@@ -44,6 +45,17 @@ export interface CreateBackupInput {
   createdAt?: string
 }
 
+export interface CreateHealthCheckInput {
+  id: string
+  hostId: string
+  ruleId?: string
+  category: HealthCheck['category']
+  status: HealthCheck['status']
+  summary?: string
+  backupPolicy?: NonNullable<HealthCheck['backupPolicy']>
+  checkedAt?: string
+}
+
 export interface CreateRollbackPointInput {
   id: string
   hostId: string
@@ -60,8 +72,10 @@ export interface OperationStore {
   markRunning(id: string): OperationDetail
   markFinished(id: string, input: FinishOperationInput): OperationDetail
   createBackup(input: CreateBackupInput): BackupSummary
+  createHealthCheck(input: CreateHealthCheckInput): HealthCheck
   findBackupByOperationId(operationId: string): BackupSummary | null
   listBackups(): BackupSummary[]
+  listHealthChecks(filters?: { hostId?: string; ruleId?: string }): HealthCheck[]
   createRollbackPoint(input: CreateRollbackPointInput): RollbackPoint
   getRollbackPoint(id: string): RollbackPoint | null
   listRollbackPoints(): RollbackPoint[]
@@ -94,6 +108,17 @@ interface BackupRow {
   local_status: BackupSummary['localStatus']
   github_status: NonNullable<BackupSummary['githubStatus']> | null
   manifest_path: string | null
+}
+
+interface HealthCheckRow {
+  id: string
+  host_id: string
+  rule_id: string | null
+  category: HealthCheck['category']
+  status: HealthCheck['status']
+  summary: string | null
+  backup_policy: NonNullable<HealthCheck['backupPolicy']> | null
+  checked_at: string
 }
 
 interface RollbackPointRow {
@@ -155,6 +180,19 @@ function rowToBackup(row: BackupRow): BackupSummary {
   }
 }
 
+function rowToHealthCheck(row: HealthCheckRow): HealthCheck {
+  return {
+    id: row.id,
+    hostId: row.host_id,
+    ruleId: row.rule_id ?? undefined,
+    category: row.category,
+    status: row.status,
+    summary: row.summary ?? undefined,
+    backupPolicy: row.backup_policy ?? undefined,
+    checkedAt: row.checked_at
+  }
+}
+
 function rowToRollbackPoint(row: RollbackPointRow): RollbackPoint {
   return {
     id: row.id,
@@ -194,6 +232,17 @@ export function createOperationStore(options: { databasePath: string }): Operati
       local_status TEXT NOT NULL,
       github_status TEXT,
       manifest_path TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS health_checks (
+      id TEXT PRIMARY KEY,
+      host_id TEXT NOT NULL,
+      rule_id TEXT,
+      category TEXT NOT NULL,
+      status TEXT NOT NULL,
+      summary TEXT,
+      backup_policy TEXT,
+      checked_at TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS rollback_points (
@@ -316,6 +365,19 @@ export function createOperationStore(options: { databasePath: string }): Operati
     ) VALUES (?, ?, ?, ?, ?, ?, ?)
   `)
 
+  const insertHealthCheck = database.prepare(`
+    INSERT INTO health_checks (
+      id,
+      host_id,
+      rule_id,
+      category,
+      status,
+      summary,
+      backup_policy,
+      checked_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `)
+
   const listBackups = database.prepare(`
     SELECT
       id,
@@ -327,6 +389,20 @@ export function createOperationStore(options: { databasePath: string }): Operati
       manifest_path
     FROM backups
     ORDER BY created_at DESC, id DESC
+  `)
+
+  const listHealthChecks = database.prepare(`
+    SELECT
+      id,
+      host_id,
+      rule_id,
+      category,
+      status,
+      summary,
+      backup_policy,
+      checked_at
+    FROM health_checks
+    ORDER BY checked_at DESC, id DESC
   `)
 
   const findBackupByOperationId = database.prepare(`
@@ -478,12 +554,51 @@ export function createOperationStore(options: { databasePath: string }): Operati
             manifestPath: input.manifestPath
           }
     },
+    createHealthCheck(input) {
+      const checkedAt = input.checkedAt ?? nowIso()
+      insertHealthCheck.run(
+        input.id,
+        input.hostId,
+        input.ruleId ?? null,
+        input.category,
+        input.status,
+        input.summary ?? null,
+        input.backupPolicy ?? null,
+        checkedAt
+      )
+
+      return {
+        id: input.id,
+        hostId: input.hostId,
+        ruleId: input.ruleId,
+        category: input.category,
+        status: input.status,
+        summary: input.summary,
+        backupPolicy: input.backupPolicy,
+        checkedAt
+      }
+    },
     findBackupByOperationId(operationId) {
       const row = findBackupByOperationId.get(operationId) as BackupRow | undefined
       return row ? rowToBackup(row) : null
     },
     listBackups() {
       return (listBackups.all() as unknown as BackupRow[]).map((row) => rowToBackup(row))
+    },
+    listHealthChecks(filters) {
+      return (listHealthChecks.all() as unknown as HealthCheckRow[])
+        .map((row) => rowToHealthCheck(row))
+        .filter((row) => {
+          if (filters?.hostId && row.hostId !== filters.hostId) {
+            return false
+          }
+
+          if (filters?.ruleId && row.ruleId !== filters.ruleId) {
+            return false
+          }
+
+          return true
+        })
     },
     createRollbackPoint(input) {
       const createdAt = input.createdAt ?? nowIso()
