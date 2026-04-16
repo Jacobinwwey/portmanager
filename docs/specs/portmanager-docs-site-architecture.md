@@ -45,6 +45,10 @@ The public site treats the following route families as stable interfaces:
 
 Section landing pages that also own child pages should publish through nested `index` routes.
 This avoids static-host conflicts between a page and a folder with the same public path.
+Custom Vue components must follow one of two valid patterns and may not mix them:
+- pass raw site-relative paths such as `/en/roadmap/milestones` into VitePress navigation components such as `VPLink`
+- or, if a plain anchor must be used, expand the path through a VitePress base-aware helper first
+Applying both `VPLink` and a pre-expanded `withBase(...)` path at the same time is invalid because it double-prefixes Project Pages bases such as `/portmanager/`.
 
 ### Audience split
 The docs site must separate `Human` and `Agent` audiences at the top level.
@@ -111,6 +115,8 @@ Archived pages remain static references rather than active version branches.
 
 当某个分区首页同时拥有子页面时，应通过嵌套 `index` 路由发布。
 这样可以避免静态托管环境中“页面路径”和“目录路径”同名而发生冲突。
+自定义 Vue 组件中的内部链接必须通过 VitePress 的 base-aware 路径辅助生成，而不能手写根路径 href。
+这样可以避免在 GitHub Project Pages 的 `/portmanager/` 这类 base path 下出现跳转失效。
 
 ### 受众分流
 文档站必须在顶层明确区分 `Human` 与 `Agent`。

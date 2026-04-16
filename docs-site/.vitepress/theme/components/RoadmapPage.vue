@@ -37,6 +37,84 @@
       </article>
     </div>
 
+    <div class="pm-docs-grid two">
+      <article class="pm-lane-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.principlesLabel }}</span>
+            <h3>{{ copy.principlesTitle }}</h3>
+          </div>
+        </div>
+        <ul>
+          <li v-for="item in principles[locale]" :key="item">{{ item }}</li>
+        </ul>
+      </article>
+
+      <article class="pm-lane-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.progressionLabel }}</span>
+            <h3>{{ copy.progressionTitle }}</h3>
+          </div>
+        </div>
+        <section v-for="step in progression" :key="step.id" style="margin-top: 0.85rem;">
+          <h4>{{ step.label[locale] }} · {{ step.title[locale] }}</h4>
+          <p>{{ step.description[locale] }}</p>
+        </section>
+      </article>
+    </div>
+
+    <section class="pm-docs-grid">
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.schemeCLabel }}</span>
+            <h3>{{ schemeC.title[locale] }}</h3>
+          </div>
+          <span class="pm-badge planned">{{ copy.later }}</span>
+        </div>
+
+        <p>{{ schemeC.summary[locale] }}</p>
+
+        <section>
+          <h4>{{ copy.advantagesLabel }}</h4>
+          <ul>
+            <li v-for="item in schemeC.advantages[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>{{ copy.costsLabel }}</h4>
+          <ul>
+            <li v-for="item in schemeC.costs[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>{{ copy.suitableWhenLabel }}</h4>
+          <ul>
+            <li v-for="item in schemeC.suitableWhen[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>{{ copy.notForLabel }}</h4>
+          <ul>
+            <li v-for="item in schemeC.notFor[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>{{ copy.linkedDocsLabel }}</h4>
+          <div class="pm-doc-links">
+            <VPLink v-for="docId in schemeC.docs" :key="docId" class="pm-doc-link" :href="docMeta(locale, docId).link">
+              {{ docMeta(locale, docId).title }}
+            </VPLink>
+          </div>
+        </section>
+      </article>
+    </section>
+
     <section class="pm-roadmap-lanes">
       <article v-for="lane in lanes" :key="lane.stage" class="pm-lane-card">
         <div class="pm-card-header">
@@ -64,6 +142,16 @@
         <p>{{ milestone.summary[locale] }}</p>
 
         <section>
+          <h4>{{ copy.decisionLabel }}</h4>
+          <p>{{ milestone.decision[locale] }}</p>
+        </section>
+
+        <section v-if="milestone.focus">
+          <h4>{{ milestone.focus.label[locale] }}</h4>
+          <p>{{ milestone.focus.body[locale] }}</p>
+        </section>
+
+        <section>
           <h4>{{ copy.productOutcomeLabel }}</h4>
           <ul>
             <li v-for="item in milestone.productOutcomes[locale]" :key="item">{{ item }}</li>
@@ -78,11 +166,25 @@
         </section>
 
         <section>
+          <h4>{{ copy.entryCriteriaLabel }}</h4>
+          <ul>
+            <li v-for="item in milestone.entryCriteria[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>{{ copy.tradeoffsLabel }}</h4>
+          <ul>
+            <li v-for="item in milestone.tradeoffs[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
           <h4>{{ copy.linkedDocsLabel }}</h4>
           <div class="pm-doc-links">
-            <a v-for="docId in milestone.docs" :key="docId" class="pm-doc-link" :href="docLink(locale, docId)">
+            <VPLink v-for="docId in milestone.docs" :key="docId" class="pm-doc-link" :href="docMeta(locale, docId).link">
               {{ docMeta(locale, docId).title }}
-            </a>
+            </VPLink>
           </div>
         </section>
       </article>
@@ -92,8 +194,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { roadmapMilestones, roadmapTracks as tracks } from '../../../data/roadmap'
-import { docLink, docMeta, type LocaleCode } from '../../../data/docs'
+import { VPLink } from 'vitepress/theme'
+import { roadmapMilestones, roadmapPrinciples as principles, roadmapProgression as progression, roadmapTracks as tracks, schemeCProfile as schemeC } from '../../../data/roadmap'
+import { docMeta, type LocaleCode } from '../../../data/docs'
 
 const props = defineProps<{ locale: LocaleCode }>()
 const locale = computed(() => props.locale)
@@ -102,8 +205,8 @@ const milestones = roadmapMilestones
 const copy = computed(() => props.locale === 'zh'
   ? {
       kicker: 'Roadmap',
-      title: '把产品演进、工程依赖与交付顺序放到同一条页面里。',
-      lede: '这不是营销页，也不是内部 TODO 清单。Roadmap 需要同时回答两件事：PortManager 正在成为什么，以及在那之前哪些依赖必须先落地。',
+      title: '把路线排序、判定权衡与 Toward C 的边界放到同一页。',
+      lede: '这不是营销页，也不是 TODO 清单。Roadmap 必须同时说明为什么先做什么、什么被刻意延后，以及 Toward C 到底意味着哪一种架构方向。',
       now: 'Now',
       next: 'Next',
       later: 'Later',
@@ -111,14 +214,26 @@ const copy = computed(() => props.locale === 'zh'
       productTitle: '对采用者可见的能力演进',
       engineeringTrack: 'Engineering Track',
       engineeringTitle: '对实施者可执行的依赖链',
+      principlesLabel: 'Ordering Rules',
+      principlesTitle: '路线排序原则',
+      progressionLabel: 'A / B / C',
+      progressionTitle: '递进状态定义',
+      schemeCLabel: 'Scheme C',
+      decisionLabel: '判定与取舍',
+      advantagesLabel: '优势',
+      costsLabel: '成本 / 风险',
+      suitableWhenLabel: '适用阶段',
+      notForLabel: '不适合用于',
       productOutcomeLabel: '产品结果',
       engineeringWorkLabel: '工程工作',
+      entryCriteriaLabel: '进入门槛',
+      tradeoffsLabel: '明确延后 / 权衡',
       linkedDocsLabel: '关联文档'
     }
   : {
       kicker: 'Roadmap',
-      title: 'Put product evolution, engineering dependency, and delivery order on the same page.',
-      lede: 'This is neither a marketing page nor an internal TODO dump. The roadmap has to answer two things at once: what PortManager is becoming, and which dependencies must land first.',
+      title: 'Put sequencing, trade-offs, and the boundary of Toward C on one page.',
+      lede: 'This is neither a marketing page nor a TODO dump. The roadmap has to explain why certain work comes first, what is deliberately deferred, and what architectural direction Toward C actually names.',
       now: 'Now',
       next: 'Next',
       later: 'Later',
@@ -126,8 +241,20 @@ const copy = computed(() => props.locale === 'zh'
       productTitle: 'Capabilities visible to adopters',
       engineeringTrack: 'Engineering Track',
       engineeringTitle: 'Dependencies executable by builders',
+      principlesLabel: 'Ordering Rules',
+      principlesTitle: 'Roadmap sequencing principles',
+      progressionLabel: 'A / B / C',
+      progressionTitle: 'Progression-state definitions',
+      schemeCLabel: 'Scheme C',
+      decisionLabel: 'Decision and trade-off',
+      advantagesLabel: 'Advantages',
+      costsLabel: 'Costs / Risks',
+      suitableWhenLabel: 'Suitable When',
+      notForLabel: 'Not For',
       productOutcomeLabel: 'Product Outcomes',
       engineeringWorkLabel: 'Engineering Work',
+      entryCriteriaLabel: 'Entry Criteria',
+      tradeoffsLabel: 'Deliberately Deferred / Trade-Offs',
       linkedDocsLabel: 'Linked Docs'
     }
 )

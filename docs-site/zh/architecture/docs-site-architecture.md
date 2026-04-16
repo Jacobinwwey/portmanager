@@ -60,6 +60,8 @@ Archived pages remain static references rather than active version branches.
 
 当某个分区首页同时拥有子页面时，应通过嵌套 `index` 路由发布。
 这样可以避免静态托管环境中“页面路径”和“目录路径”同名而发生冲突。
+自定义 Vue 组件中的内部链接必须通过 VitePress 的 base-aware 路径辅助生成，而不能手写根路径 href。
+这样可以避免在 GitHub Project Pages 的 `/portmanager/` 这类 base path 下出现跳转失效。
 
 ### 受众分流
 文档站必须在顶层明确区分 `Human` 与 `Agent`。

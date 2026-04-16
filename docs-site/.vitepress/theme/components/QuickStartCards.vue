@@ -26,9 +26,9 @@
         </div>
         <p>{{ copy.reality.description }}</p>
         <div class="pm-doc-links">
-          <a class="pm-doc-link" :href="copy.reality.humanHref">{{ copy.reality.humanLink }}</a>
-          <a class="pm-doc-link" :href="copy.reality.agentHref">{{ copy.reality.agentLink }}</a>
-          <a class="pm-doc-link" :href="copy.reality.installHref">{{ copy.reality.installLink }}</a>
+          <VPLink class="pm-doc-link" :href="siteLink(copy.reality.humanHref)">{{ copy.reality.humanLink }}</VPLink>
+          <VPLink class="pm-doc-link" :href="siteLink(copy.reality.agentHref)">{{ copy.reality.agentLink }}</VPLink>
+          <VPLink class="pm-doc-link" :href="siteLink(copy.reality.installHref)">{{ copy.reality.installLink }}</VPLink>
         </div>
       </article>
     </div>
@@ -43,6 +43,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { VPLink } from 'vitepress/theme'
+import { siteLink } from '../../../data/docs'
 
 const props = defineProps<{ locale: 'en' | 'zh' }>()
 

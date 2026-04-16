@@ -52,6 +52,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'toward-c-strategy',
+    sourcePath: 'docs/specs/portmanager-toward-c-strategy.md',
+    route: 'roadmap/toward-c-strategy',
+    audience: 'shared',
+    persona: ['contributor', 'admin', 'operator', 'automation'],
+    section: 'roadmap',
+    status: 'active',
+    titles: {
+      en: 'Toward C Strategy',
+      zh: 'Toward C 策略'
+    }
+  },
+  {
     id: 'docs-site-architecture',
     sourcePath: 'docs/specs/portmanager-docs-site-architecture.md',
     route: 'architecture/docs-site-architecture',

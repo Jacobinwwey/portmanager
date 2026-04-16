@@ -15,6 +15,10 @@ export function docLink(locale: LocaleCode, id: string) {
   return `/${locale}/${docById(id).route}`
 }
 
+export function siteLink(path: string) {
+  return path
+}
+
 export function githubSourceLink(sourcePath: string) {
   return `https://github.com/Jacobinwwey/portmanager/blob/main/${sourcePath}`
 }

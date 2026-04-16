@@ -51,6 +51,10 @@ The public site treats the following route families as stable interfaces:
 
 Section landing pages that also own child pages should publish through nested `index` routes.
 This avoids static-host conflicts between a page and a folder with the same public path.
+Custom Vue components must follow one of two valid patterns and may not mix them:
+- pass raw site-relative paths such as `/en/roadmap/milestones` into VitePress navigation components such as `VPLink`
+- or, if a plain anchor must be used, expand the path through a VitePress base-aware helper first
+Applying both `VPLink` and a pre-expanded `withBase(...)` path at the same time is invalid because it double-prefixes Project Pages bases such as `/portmanager/`.
 
 ### Audience split
 The docs site must separate `Human` and `Agent` audiences at the top level.
