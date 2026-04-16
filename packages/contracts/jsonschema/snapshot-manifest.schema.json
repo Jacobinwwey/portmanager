@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portmanager.dev/schemas/snapshot-manifest.schema.json",
+  "title": "SnapshotManifest",
+  "type": "object",
+  "required": ["schemaVersion", "operationId", "hostId", "createdAt", "artifactVersion", "backupMode", "bundleFiles", "checksums"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "operationId": { "type": "string" },
+    "hostId": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "artifactVersion": { "type": "string" },
+    "backupMode": { "type": "string", "enum": ["best_effort", "required"] },
+    "bundleFiles": { "type": "array", "items": { "type": "string" } },
+    "checksums": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "diagnosticArtifacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

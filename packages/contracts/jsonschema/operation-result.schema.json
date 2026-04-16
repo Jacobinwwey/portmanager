@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portmanager.dev/schemas/operation-result.schema.json",
+  "title": "OperationResult",
+  "type": "object",
+  "required": ["schemaVersion", "operationId", "type", "state", "startedAt"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "operationId": { "type": "string" },
+    "type": { "type": "string" },
+    "state": {
+      "type": "string",
+      "enum": ["queued", "running", "succeeded", "failed", "degraded", "cancelled"]
+    },
+    "hostId": { "type": "string" },
+    "ruleId": { "type": "string" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "resultSummary": { "type": "string" },
+    "linkedArtifacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

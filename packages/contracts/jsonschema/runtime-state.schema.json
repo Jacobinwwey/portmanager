@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portmanager.dev/schemas/runtime-state.schema.json",
+  "title": "RuntimeState",
+  "type": "object",
+  "required": ["schemaVersion", "hostId", "agentState", "effectiveStateHash", "updatedAt", "appliedRules"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "hostId": { "type": "string" },
+    "agentState": {
+      "type": "string",
+      "enum": ["ready", "degraded", "failed", "unreachable"]
+    },
+    "effectiveStateHash": { "type": "string" },
+    "health": {
+      "type": "object",
+      "required": ["summary"],
+      "properties": {
+        "summary": { "type": "string" },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["code", "status"],
+            "properties": {
+              "code": { "type": "string" },
+              "status": { "type": "string", "enum": ["healthy", "degraded", "failed"] },
+              "message": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "appliedRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "listenPort", "targetHost", "targetPort", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "listenPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+          "targetHost": { "type": "string" },
+          "targetPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+          "status": {
+            "type": "string",
+            "enum": ["applying", "applied_unverified", "active", "degraded", "rolled_back"]
+          },
+          "lastVerifiedAt": { "type": "string", "format": "date-time" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

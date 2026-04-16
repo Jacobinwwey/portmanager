@@ -1,0 +1,14 @@
+# Ignore future implementation artifacts
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.*
+target/
+Cargo.lock
+.sqlite
+*.db
+artifacts/
+playwright-report/

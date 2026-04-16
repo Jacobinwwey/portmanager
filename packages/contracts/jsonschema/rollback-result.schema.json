@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portmanager.dev/schemas/rollback-result.schema.json",
+  "title": "RollbackResult",
+  "type": "object",
+  "required": ["schemaVersion", "rollbackPointId", "operationId", "status", "verifiedAt"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "rollbackPointId": { "type": "string" },
+    "operationId": { "type": "string" },
+    "status": { "type": "string", "enum": ["rolled_back", "failed", "degraded"] },
+    "verifiedAt": { "type": "string", "format": "date-time" },
+    "restoredArtifacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}

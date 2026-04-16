@@ -1,0 +1,745 @@
+openapi: 3.1.0
+info:
+  title: PortManager Controller API
+  version: v0.1.0-docs-baseline
+  description: Docs-first controller API baseline for PortManager V1.
+servers:
+  - url: http://localhost:8710
+tags:
+  - name: hosts
+  - name: bridge-rules
+  - name: exposure-policies
+  - name: health-checks
+  - name: operations
+  - name: rollback-points
+  - name: backups
+  - name: snapshots-diagnostics
+paths:
+  /hosts:
+    get:
+      tags: [hosts]
+      summary: List managed hosts
+      responses:
+        '200':
+          description: Host list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HostSummary'
+    post:
+      tags: [hosts]
+      summary: Create host draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHostRequest'
+      responses:
+        '202':
+          description: Host creation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+  /hosts/{hostId}:
+    get:
+      tags: [hosts]
+      summary: Get host detail
+      parameters:
+        - $ref: '#/components/parameters/HostId'
+      responses:
+        '200':
+          description: Host detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostDetail'
+  /hosts/{hostId}/probe:
+    post:
+      tags: [hosts]
+      summary: Probe host readiness prerequisites
+      parameters:
+        - $ref: '#/components/parameters/HostId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProbeHostRequest'
+      responses:
+        '202':
+          description: Probe operation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+  /hosts/{hostId}/bootstrap:
+    post:
+      tags: [hosts]
+      summary: Bootstrap a host
+      parameters:
+        - $ref: '#/components/parameters/HostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapHostRequest'
+      responses:
+        '202':
+          description: Bootstrap operation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+  /bridge-rules:
+    get:
+      tags: [bridge-rules]
+      summary: List bridge rules
+      responses:
+        '200':
+          description: Rule list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BridgeRule'
+    post:
+      tags: [bridge-rules]
+      summary: Create bridge rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBridgeRuleRequest'
+      responses:
+        '202':
+          description: Rule creation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+  /bridge-rules/{ruleId}:
+    get:
+      tags: [bridge-rules]
+      summary: Get bridge rule detail
+      parameters:
+        - $ref: '#/components/parameters/RuleId'
+      responses:
+        '200':
+          description: Rule detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BridgeRule'
+    patch:
+      tags: [bridge-rules]
+      summary: Update bridge rule
+      parameters:
+        - $ref: '#/components/parameters/RuleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBridgeRuleRequest'
+      responses:
+        '202':
+          description: Rule update accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+    delete:
+      tags: [bridge-rules]
+      summary: Remove bridge rule
+      parameters:
+        - $ref: '#/components/parameters/RuleId'
+      responses:
+        '202':
+          description: Rule removal accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+  /exposure-policies/{hostId}:
+    get:
+      tags: [exposure-policies]
+      summary: Get host exposure policy
+      parameters:
+        - $ref: '#/components/parameters/HostId'
+      responses:
+        '200':
+          description: Exposure policy detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposurePolicy'
+    put:
+      tags: [exposure-policies]
+      summary: Replace host exposure policy
+      parameters:
+        - $ref: '#/components/parameters/HostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExposurePolicyUpdateRequest'
+      responses:
+        '202':
+          description: Policy update accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+  /health-checks:
+    get:
+      tags: [health-checks]
+      summary: List health checks
+      responses:
+        '200':
+          description: Health check list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HealthCheck'
+  /operations:
+    get:
+      tags: [operations]
+      summary: List operations
+      responses:
+        '200':
+          description: Operation list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OperationSummary'
+  /operations/{operationId}:
+    get:
+      tags: [operations]
+      summary: Get operation detail
+      parameters:
+        - $ref: '#/components/parameters/OperationId'
+      responses:
+        '200':
+          description: Operation detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationDetail'
+  /operations/events:
+    get:
+      tags: [operations]
+      summary: Subscribe to operation and event stream
+      responses:
+        '200':
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/EventStreamEnvelope'
+  /rollback-points:
+    get:
+      tags: [rollback-points]
+      summary: List rollback points
+      responses:
+        '200':
+          description: Rollback point list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RollbackPoint'
+  /rollback-points/{rollbackPointId}/apply:
+    post:
+      tags: [rollback-points]
+      summary: Apply rollback point
+      parameters:
+        - $ref: '#/components/parameters/RollbackPointId'
+      responses:
+        '202':
+          description: Rollback operation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+  /backups:
+    get:
+      tags: [backups]
+      summary: List backups
+      responses:
+        '200':
+          description: Backup list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BackupSummary'
+  /backups/run:
+    post:
+      tags: [backups]
+      summary: Trigger backup
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunBackupRequest'
+      responses:
+        '202':
+          description: Backup accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+  /snapshots/diagnostics:
+    post:
+      tags: [snapshots-diagnostics]
+      summary: Run diagnostics and webpage snapshot capture
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunDiagnosticsRequest'
+      responses:
+        '202':
+          description: Diagnostics operation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
+components:
+  parameters:
+    HostId:
+      name: hostId
+      in: path
+      required: true
+      schema:
+        type: string
+    RuleId:
+      name: ruleId
+      in: path
+      required: true
+      schema:
+        type: string
+    OperationId:
+      name: operationId
+      in: path
+      required: true
+      schema:
+        type: string
+    RollbackPointId:
+      name: rollbackPointId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    OperationAccepted:
+      type: object
+      required: [operationId, state]
+      properties:
+        operationId:
+          type: string
+        state:
+          type: string
+          enum: [queued, running]
+    HostSummary:
+      type: object
+      required: [id, name, lifecycleState, tailscaleAddress, agentState, updatedAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lifecycleState:
+          type: string
+          enum: [draft, probing, bootstrapping, ready, degraded, retired]
+        tailscaleAddress:
+          type: string
+        agentState:
+          type: string
+          enum: [unknown, ready, degraded, failed, unreachable]
+        lastBackupAt:
+          type: string
+          format: date-time
+        lastDiagnosticsAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    HostDetail:
+      allOf:
+        - $ref: '#/components/schemas/HostSummary'
+        - type: object
+          required: [effectivePolicy, recentRules, recentOperations]
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+            effectivePolicy:
+              $ref: '#/components/schemas/ExposurePolicy'
+            recentRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/BridgeRule'
+            recentOperations:
+              type: array
+              items:
+                $ref: '#/components/schemas/OperationSummary'
+    CreateHostRequest:
+      type: object
+      required: [name, ssh]
+      properties:
+        name:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        ssh:
+          $ref: '#/components/schemas/SshConnection'
+    ProbeHostRequest:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [read_only]
+    BootstrapHostRequest:
+      type: object
+      required: [sshUser, desiredAgentPort]
+      properties:
+        sshUser:
+          type: string
+        desiredAgentPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        installPrefix:
+          type: string
+        backupPolicy:
+          type: string
+          enum: [best_effort, required]
+    SshConnection:
+      type: object
+      required: [host, port]
+      properties:
+        host:
+          type: string
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+    BridgeRule:
+      type: object
+      required: [id, hostId, protocol, listenPort, targetHost, targetPort, lifecycleState]
+      properties:
+        id:
+          type: string
+        hostId:
+          type: string
+        name:
+          type: string
+        protocol:
+          type: string
+          enum: [tcp]
+        listenPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        targetHost:
+          type: string
+        targetPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        lifecycleState:
+          type: string
+          enum: [desired, applying, applied_unverified, active, degraded, rollback_pending, rolled_back, removed]
+        lastVerifiedAt:
+          type: string
+          format: date-time
+        lastRollbackPointId:
+          type: string
+    CreateBridgeRuleRequest:
+      type: object
+      required: [hostId, protocol, listenPort, targetHost, targetPort]
+      properties:
+        hostId:
+          type: string
+        name:
+          type: string
+        protocol:
+          type: string
+          enum: [tcp]
+        listenPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        targetHost:
+          type: string
+        targetPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+    UpdateBridgeRuleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        listenPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        targetHost:
+          type: string
+        targetPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+    ExposurePolicy:
+      type: object
+      required: [hostId, allowedSources, excludedPorts, samePortMirror, conflictPolicy, backupPolicy]
+      properties:
+        hostId:
+          type: string
+        allowedSources:
+          type: array
+          items:
+            type: string
+        excludedPorts:
+          type: array
+          items:
+            type: integer
+        samePortMirror:
+          type: boolean
+        conflictPolicy:
+          type: string
+          enum: [reject, replace_existing]
+        backupPolicy:
+          type: string
+          enum: [best_effort, required]
+    ExposurePolicyUpdateRequest:
+      $ref: '#/components/schemas/ExposurePolicy'
+    HealthCheck:
+      type: object
+      required: [id, hostId, category, status, checkedAt]
+      properties:
+        id:
+          type: string
+        hostId:
+          type: string
+        ruleId:
+          type: string
+        category:
+          type: string
+          enum: [host_probe, bridge_verify, diagnostics]
+        status:
+          type: string
+          enum: [healthy, degraded, failed]
+        summary:
+          type: string
+        checkedAt:
+          type: string
+          format: date-time
+    OperationSummary:
+      type: object
+      required: [id, type, state, startedAt]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, backup, diagnostics, rollback]
+        state:
+          type: string
+          enum: [queued, running, succeeded, failed, degraded, cancelled]
+        hostId:
+          type: string
+        ruleId:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+    OperationDetail:
+      allOf:
+        - $ref: '#/components/schemas/OperationSummary'
+        - type: object
+          properties:
+            initiator:
+              type: string
+              enum: [web, cli, automation]
+            eventStreamUrl:
+              type: string
+            backupId:
+              type: string
+            rollbackPointId:
+              type: string
+            diagnosticResult:
+              $ref: '#/components/schemas/PortDiagnosticResult'
+            snapshotResult:
+              $ref: '#/components/schemas/WebSnapshotResult'
+    RollbackPoint:
+      type: object
+      required: [id, hostId, operationId, createdAt, state]
+      properties:
+        id:
+          type: string
+        hostId:
+          type: string
+        operationId:
+          type: string
+        state:
+          type: string
+          enum: [ready, applied, invalid]
+        createdAt:
+          type: string
+          format: date-time
+    BackupSummary:
+      type: object
+      required: [id, hostId, createdAt, localStatus]
+      properties:
+        id:
+          type: string
+        hostId:
+          type: string
+        operationId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        localStatus:
+          type: string
+          enum: [succeeded, failed]
+        githubStatus:
+          type: string
+          enum: [not_configured, skipped, succeeded, failed]
+        manifestPath:
+          type: string
+    RunBackupRequest:
+      type: object
+      properties:
+        hostId:
+          type: string
+        mode:
+          type: string
+          enum: [best_effort, required]
+    RunDiagnosticsRequest:
+      type: object
+      required: [hostId, port]
+      properties:
+        hostId:
+          type: string
+        ruleId:
+          type: string
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        scheme:
+          type: string
+          enum: [http, https]
+        captureSnapshot:
+          type: boolean
+          default: true
+    PortDiagnosticResult:
+      type: object
+      required: [hostId, port, tcpReachable, capturedAt]
+      properties:
+        hostId:
+          type: string
+        ruleId:
+          type: string
+        port:
+          type: integer
+        tcpReachable:
+          type: boolean
+        httpStatus:
+          type: integer
+        pageTitle:
+          type: string
+        finalUrl:
+          type: string
+        tls:
+          $ref: '#/components/schemas/TlsSummary'
+        capturedAt:
+          type: string
+          format: date-time
+    WebSnapshotResult:
+      type: object
+      required: [hostId, port, artifactPath, capturedAt]
+      properties:
+        hostId:
+          type: string
+        ruleId:
+          type: string
+        port:
+          type: integer
+        artifactPath:
+          type: string
+        pageTitle:
+          type: string
+        httpStatus:
+          type: integer
+        capturedAt:
+          type: string
+          format: date-time
+    TlsSummary:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        subject:
+          type: string
+        issuer:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        validitySummary:
+          type: string
+    EventStreamEnvelope:
+      type: string
+      description: SSE stream carrying controller events and operation state transitions.

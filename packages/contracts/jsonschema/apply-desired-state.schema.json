@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portmanager.dev/schemas/apply-desired-state.schema.json",
+  "title": "ApplyDesiredState",
+  "type": "object",
+  "required": ["schemaVersion", "hostId", "policy", "bridgeRules"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "hostId": { "type": "string" },
+    "policy": {
+      "type": "object",
+      "required": ["allowedSources", "excludedPorts", "samePortMirror", "conflictPolicy", "backupPolicy"],
+      "properties": {
+        "allowedSources": { "type": "array", "items": { "type": "string" } },
+        "excludedPorts": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 65535 } },
+        "samePortMirror": { "type": "boolean" },
+        "conflictPolicy": { "type": "string", "enum": ["reject", "replace_existing"] },
+        "backupPolicy": { "type": "string", "enum": ["best_effort", "required"] }
+      },
+      "additionalProperties": false
+    },
+    "bridgeRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "protocol", "listenPort", "targetHost", "targetPort"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "protocol": { "type": "string", "enum": ["tcp"] },
+          "listenPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+          "targetHost": { "type": "string" },
+          "targetPort": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
