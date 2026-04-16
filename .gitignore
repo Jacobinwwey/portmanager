@@ -1,14 +1,77 @@
-# Ignore future implementation artifacts
+# OS and editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+*.swp
+*.swo
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*.code-workspace
+.idea/
+.vscode/
+
+# Logs and local debug output
+*.log
+*.out
+*.err
+*.pid
+*.pid.lock
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# JavaScript / TypeScript dependency and cache directories
 node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+.parcel-cache/
+.turbo/
+.cache/
+.vite/
+*.tsbuildinfo
+
+# Build output and test artifacts
 dist/
 build/
 coverage/
-*.log
-.env
-.env.*
-target/
-Cargo.lock
-.sqlite
-*.db
 artifacts/
 playwright-report/
+test-results/
+
+# Docs site generated output
+docs-site/node_modules/
+docs-site/.vitepress/cache/
+docs-site/.vitepress/dist/
+
+# Python helper-script noise
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.python-version
+.venv/
+venv/
+
+# Rust build output
+target/
+
+# Local databases and machine state
+*.db
+*.sqlite
+*.sqlite3
+
+# Keep core lockfiles and source assets tracked
+!docs-site/pnpm-lock.yaml
+!Cargo.lock

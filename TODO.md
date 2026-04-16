@@ -1,7 +1,7 @@
 # TODO
 
 Updated: 2026-04-16
-Version: v0.1.0-docs-baseline
+Version: v0.2.0-docs-site-baseline
 
 ## English
 
@@ -13,6 +13,10 @@ Version: v0.1.0-docs-baseline
 - [x] Draft the shared JSON Schemas.
 - [x] Define backup, rollback, SDK, Docker, diagnostics, and information-architecture boundaries.
 - [x] Add a formal baseline checklist for pre-push verification.
+- [x] Add the GitHub Pages + VitePress publishing layer.
+- [x] Freeze Human / Agent top-level docs entrypoints.
+- [x] Freeze one-line install and bootstrap contract shapes as `Planned` public interfaces.
+- [x] Publish the first roadmap page as a first-class docs surface.
 
 ### Next implementation work
 - [ ] Milestone 1: contracts foundation and codegen toolchain.
@@ -36,6 +40,10 @@ Version: v0.1.0-docs-baseline
 - [x] 起草共享 JSON Schema。
 - [x] 定义备份、回滚、SDK、Docker、诊断与信息架构边界。
 - [x] 增加推送前核验用的正式基线清单。
+- [x] 增加 GitHub Pages + VitePress 文档发布层。
+- [x] 固化 Human / Agent 顶层文档入口。
+- [x] 将一行安装与 bootstrap 形态固化为 `Planned` 公共契约。
+- [x] 将首版 roadmap 页面作为一级文档面发布。
 
 ### 后续实现工作
 - [ ] 里程碑 1：契约基础设施与 codegen 工具链。

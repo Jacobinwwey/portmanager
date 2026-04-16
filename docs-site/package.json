@@ -1,0 +1,23 @@
+{
+  "name": "portmanager-docs-site",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.11.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "scripts": {
+    "docs:generate": "node ../scripts/docs/extract-locales.mjs",
+    "docs:dev": "pnpm run docs:generate && vitepress dev . --host 0.0.0.0",
+    "docs:build": "pnpm run docs:generate && vitepress build .",
+    "docs:preview": "pnpm run docs:build && vitepress preview . --host 0.0.0.0",
+    "dev": "pnpm run docs:dev",
+    "build": "pnpm run docs:build",
+    "preview": "pnpm run docs:preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3"
+  }
+}

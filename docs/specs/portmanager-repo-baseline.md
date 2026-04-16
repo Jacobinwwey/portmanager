@@ -1,7 +1,7 @@
 # PortManager Repository Baseline
 
 Updated: 2026-04-16
-Version: v0.1.0-docs-baseline
+Version: v0.2.0-docs-site-baseline
 
 ## English
 
@@ -14,6 +14,9 @@ Business implementation code begins after this baseline is committed and reviewe
 - docs/architecture
 - docs/operations
 - docs/design
+- docs-site
+- scripts/docs
+- .github/workflows
 - packages/contracts/openapi
 - packages/contracts/jsonschema
 
@@ -28,5 +31,8 @@ Business implementation code begins after this baseline is committed and reviewe
 - docs/architecture
 - docs/operations
 - docs/design
+- docs-site
+- scripts/docs
+- .github/workflows
 - packages/contracts/openapi
 - packages/contracts/jsonschema
