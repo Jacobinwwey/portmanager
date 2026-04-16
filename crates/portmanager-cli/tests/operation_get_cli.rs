@@ -409,3 +409,218 @@ fn health_checks_list_json_reads_degraded_bridge_verify_checks() {
     assert_eq!(parsed["items"][0]["status"], "degraded");
     assert_eq!(parsed["items"][0]["backupPolicy"], "required");
 }
+
+#[test]
+fn backups_list_json_filters_by_host() {
+    let server = MockHttpServer::start(vec![(
+        "/backups?hostId=host_alpha",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "backup_alpha_001",
+                        "hostId": "host_alpha",
+                        "operationId": "op_backup_alpha_001",
+                        "createdAt": "2026-04-16T19:05:00.000Z",
+                        "localStatus": "succeeded",
+                        "githubStatus": "skipped",
+                        "manifestPath": "/var/lib/portmanager/snapshots/op_backup_alpha_001-manifest.json"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["backups", "list", "--json", "--host-id", "host_alpha"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["items"][0]["hostId"], "host_alpha");
+    assert_eq!(parsed["items"][0]["localStatus"], "succeeded");
+}
+
+#[test]
+fn diagnostics_list_json_filters_by_host_and_rule() {
+    let server = MockHttpServer::start(vec![(
+        "/diagnostics?hostId=host_alpha&ruleId=rule_alpha_https",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "op_diag_001",
+                        "type": "diagnostics",
+                        "state": "succeeded",
+                        "initiator": "web",
+                        "hostId": "host_alpha",
+                        "ruleId": "rule_alpha_https",
+                        "startedAt": "2026-04-16T19:10:00.000Z",
+                        "finishedAt": "2026-04-16T19:11:00.000Z",
+                        "resultSummary": "diagnostics confirmed https relay and refreshed host readiness evidence",
+                        "diagnosticResult": {
+                            "hostId": "host_alpha",
+                            "ruleId": "rule_alpha_https",
+                            "port": 443,
+                            "tcpReachable": true,
+                            "httpStatus": 200,
+                            "pageTitle": "Alpha Relay Healthy",
+                            "finalUrl": "http://127.0.0.1/status"
+                        },
+                        "snapshotResult": {
+                            "hostId": "host_alpha",
+                            "ruleId": "rule_alpha_https",
+                            "httpStatus": 200,
+                            "pageTitle": "Alpha Relay Healthy",
+                            "artifactPath": "/tmp/artifacts/snapshot-op_diag_001.html"
+                        }
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &[
+            "diagnostics",
+            "list",
+            "--json",
+            "--host-id",
+            "host_alpha",
+            "--rule-id",
+            "rule_alpha_https",
+        ],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["items"][0]["type"], "diagnostics");
+    assert_eq!(parsed["items"][0]["snapshotResult"]["pageTitle"], "Alpha Relay Healthy");
+}
+
+#[test]
+fn rollback_points_list_json_filters_by_host_and_state() {
+    let server = MockHttpServer::start(vec![(
+        "/rollback-points?hostId=host_alpha&state=applied",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "rp_op_backup_alpha_001",
+                        "hostId": "host_alpha",
+                        "operationId": "op_backup_alpha_001",
+                        "state": "applied",
+                        "createdAt": "2026-04-16T19:14:00.000Z"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &[
+            "rollback-points",
+            "list",
+            "--json",
+            "--host-id",
+            "host_alpha",
+            "--state",
+            "applied",
+        ],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["items"][0]["id"], "rp_op_backup_alpha_001");
+    assert_eq!(parsed["items"][0]["state"], "applied");
+}
+
+#[test]
+fn rollback_points_apply_json_waits_for_terminal_operation() {
+    let server = MockHttpServer::start(vec![
+        (
+            "/rollback-points/rp_op_backup_alpha_001/apply",
+            vec![MockOutcome::Json {
+                status: 202,
+                body: json!({
+                    "operationId": "op_rollback_001",
+                    "state": "queued"
+                }),
+            }],
+        ),
+        (
+            "/operations/op_rollback_001",
+            vec![
+                MockOutcome::Json {
+                    status: 200,
+                    body: json!({
+                        "id": "op_rollback_001",
+                        "type": "rollback",
+                        "state": "queued",
+                        "initiator": "cli",
+                        "hostId": "host_alpha",
+                        "startedAt": "2026-04-16T19:15:00.000Z"
+                    }),
+                },
+                MockOutcome::Json {
+                    status: 200,
+                    body: json!({
+                        "id": "op_rollback_001",
+                        "type": "rollback",
+                        "state": "succeeded",
+                        "initiator": "cli",
+                        "hostId": "host_alpha",
+                        "startedAt": "2026-04-16T19:15:00.000Z",
+                        "finishedAt": "2026-04-16T19:15:03.000Z",
+                        "rollbackPointId": "rp_op_backup_alpha_001",
+                        "resultSummary": "rollback rp_op_backup_alpha_001 applied"
+                    }),
+                },
+            ],
+        ),
+    ]);
+
+    let output = run_portmanager(
+        &[
+            "rollback-points",
+            "apply",
+            "rp_op_backup_alpha_001",
+            "--json",
+            "--wait",
+            "--poll-interval-ms",
+            "5",
+            "--timeout-ms",
+            "200",
+        ],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["id"], "op_rollback_001");
+    assert_eq!(parsed["state"], "succeeded");
+    assert_eq!(parsed["rollbackPointId"], "rp_op_backup_alpha_001");
+    assert_eq!(server.hits_for("/operations/op_rollback_001"), 2);
+}

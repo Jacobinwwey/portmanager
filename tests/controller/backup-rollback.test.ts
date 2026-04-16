@@ -199,3 +199,100 @@ test('controller server applies rollback point and marks result artifact applied
     rmSync(directory, { recursive: true, force: true })
   }
 })
+
+test('controller server filters backup and rollback inspection views by host and state', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, artifactRoot })
+
+    const listening = await server.listen(0)
+
+    try {
+      const alphaBackupResponse = await fetch(`${listening.baseUrl}/backups/run`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId: 'host_alpha',
+          mode: 'required'
+        })
+      })
+      const alphaAccepted = (await alphaBackupResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, alphaAccepted.operationId)
+
+      const bravoBackupResponse = await fetch(`${listening.baseUrl}/backups/run`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId: 'host_bravo',
+          mode: 'best_effort'
+        })
+      })
+      const bravoAccepted = (await bravoBackupResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, bravoAccepted.operationId)
+
+      const rollbackResponse = await fetch(
+        `${listening.baseUrl}/rollback-points/rp_${alphaAccepted.operationId}/apply`,
+        {
+          method: 'POST'
+        }
+      )
+      const rollbackAccepted = (await rollbackResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, rollbackAccepted.operationId)
+
+      const backupsResponse = await fetch(`${listening.baseUrl}/backups?hostId=host_alpha`)
+      assert.equal(backupsResponse.status, 200)
+      const backupsPayload = (await backupsResponse.json()) as {
+        items: Array<{
+          hostId: string
+          operationId?: string
+        }>
+      }
+
+      assert.equal(backupsPayload.items.length, 1)
+      assert.equal(backupsPayload.items[0]?.hostId, 'host_alpha')
+      assert.equal(backupsPayload.items[0]?.operationId, alphaAccepted.operationId)
+
+      const appliedRollbackResponse = await fetch(
+        `${listening.baseUrl}/rollback-points?hostId=host_alpha&state=applied`
+      )
+      assert.equal(appliedRollbackResponse.status, 200)
+      const appliedRollbackPayload = (await appliedRollbackResponse.json()) as {
+        items: Array<{
+          hostId: string
+          state: string
+        }>
+      }
+
+      assert.equal(appliedRollbackPayload.items.length, 1)
+      assert.equal(appliedRollbackPayload.items[0]?.hostId, 'host_alpha')
+      assert.equal(appliedRollbackPayload.items[0]?.state, 'applied')
+
+      const readyRollbackResponse = await fetch(
+        `${listening.baseUrl}/rollback-points?hostId=host_bravo&state=ready`
+      )
+      assert.equal(readyRollbackResponse.status, 200)
+      const readyRollbackPayload = (await readyRollbackResponse.json()) as {
+        items: Array<{
+          hostId: string
+          state: string
+        }>
+      }
+
+      assert.equal(readyRollbackPayload.items.length, 1)
+      assert.equal(readyRollbackPayload.items[0]?.hostId, 'host_bravo')
+      assert.equal(readyRollbackPayload.items[0]?.state, 'ready')
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})

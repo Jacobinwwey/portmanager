@@ -27,6 +27,7 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] Milestone 1: controller-side webpage snapshot and connectivity diagnostics.
 - [x] Milestone 1: unified event stream across Web, CLI, and API.
 - [x] Milestone 2: explicit drift-driven degraded state visibility across Web, CLI, and API.
+- [x] Milestone 2: filtered backup, diagnostics, and rollback inspection with CLI rollback execution.
 
 ## 中文
 
@@ -52,3 +53,4 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] 里程碑 1：controller 侧网页快照与连通性诊断。
 - [x] 里程碑 1：Web、CLI 与 API 共享事件流。
 - [x] 里程碑 2：在 Web、CLI 与 API 中显式暴露 drift 驱动的 degraded 状态。
+- [x] 里程碑 2：补全 backup、diagnostics、rollback 的筛选检查面，并支持 CLI 执行 rollback。

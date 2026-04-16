@@ -14,7 +14,10 @@ export interface paths {
         /** List backups */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    hostId?: string;
+                    operationId?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -266,6 +269,47 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List diagnostics operations with snapshot evidence */
+        get: {
+            parameters: {
+                query?: {
+                    hostId?: string;
+                    ruleId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Diagnostics operation list */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: components["schemas"]["OperationDetail"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -721,7 +765,10 @@ export interface paths {
         /** List rollback points */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    hostId?: string;
+                    state?: "ready" | "applied" | "invalid";
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;

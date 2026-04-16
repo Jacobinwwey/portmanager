@@ -74,11 +74,14 @@ export interface OperationStore {
   createBackup(input: CreateBackupInput): BackupSummary
   createHealthCheck(input: CreateHealthCheckInput): HealthCheck
   findBackupByOperationId(operationId: string): BackupSummary | null
-  listBackups(): BackupSummary[]
+  listBackups(filters?: { hostId?: string; operationId?: string }): BackupSummary[]
   listHealthChecks(filters?: { hostId?: string; ruleId?: string }): HealthCheck[]
   createRollbackPoint(input: CreateRollbackPointInput): RollbackPoint
   getRollbackPoint(id: string): RollbackPoint | null
-  listRollbackPoints(): RollbackPoint[]
+  listRollbackPoints(filters?: {
+    hostId?: string
+    state?: RollbackPoint['state']
+  }): RollbackPoint[]
   markRollbackPointState(id: string, state: RollbackPoint['state']): RollbackPoint
   listDiagnostics(filters?: { hostId?: string; ruleId?: string }): OperationDetail[]
 }
@@ -582,8 +585,20 @@ export function createOperationStore(options: { databasePath: string }): Operati
       const row = findBackupByOperationId.get(operationId) as BackupRow | undefined
       return row ? rowToBackup(row) : null
     },
-    listBackups() {
-      return (listBackups.all() as unknown as BackupRow[]).map((row) => rowToBackup(row))
+    listBackups(filters) {
+      return (listBackups.all() as unknown as BackupRow[])
+        .map((row) => rowToBackup(row))
+        .filter((row) => {
+          if (filters?.hostId && row.hostId !== filters.hostId) {
+            return false
+          }
+
+          if (filters?.operationId && row.operationId !== filters.operationId) {
+            return false
+          }
+
+          return true
+        })
     },
     listHealthChecks(filters) {
       return (listHealthChecks.all() as unknown as HealthCheckRow[])
@@ -616,10 +631,20 @@ export function createOperationStore(options: { databasePath: string }): Operati
       const row = getRollbackPoint.get(id) as RollbackPointRow | undefined
       return row ? rowToRollbackPoint(row) : null
     },
-    listRollbackPoints() {
-      return (listRollbackPoints.all() as unknown as RollbackPointRow[]).map((row) =>
-        rowToRollbackPoint(row)
-      )
+    listRollbackPoints(filters) {
+      return (listRollbackPoints.all() as unknown as RollbackPointRow[])
+        .map((row) => rowToRollbackPoint(row))
+        .filter((row) => {
+          if (filters?.hostId && row.hostId !== filters.hostId) {
+            return false
+          }
+
+          if (filters?.state && row.state !== filters.state) {
+            return false
+          }
+
+          return true
+        })
     },
     markRollbackPointState(id, state) {
       requireRollbackPoint(id)

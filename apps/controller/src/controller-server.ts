@@ -78,7 +78,12 @@ export function createControllerServer(options: {
     }
 
     if (request.method === 'GET' && requestUrl.pathname === '/backups') {
-      sendJson(response, 200, { items: store.listBackups() })
+      sendJson(response, 200, {
+        items: store.listBackups({
+          hostId: requestUrl.searchParams.get('hostId') ?? undefined,
+          operationId: requestUrl.searchParams.get('operationId') ?? undefined
+        })
+      })
       return
     }
 
@@ -242,7 +247,14 @@ export function createControllerServer(options: {
     }
 
     if (request.method === 'GET' && requestUrl.pathname === '/rollback-points') {
-      sendJson(response, 200, { items: store.listRollbackPoints() })
+      const state = requestUrl.searchParams.get('state')
+      sendJson(response, 200, {
+        items: store.listRollbackPoints({
+          hostId: requestUrl.searchParams.get('hostId') ?? undefined,
+          state:
+            state === 'ready' || state === 'applied' || state === 'invalid' ? state : undefined
+        })
+      })
       return
     }
 

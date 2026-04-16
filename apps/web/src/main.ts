@@ -6,7 +6,8 @@ import type {
   HealthCheck,
   HostDetail,
   HostSummary,
-  OperationSummary
+  OperationSummary,
+  RollbackPoint
 } from '@portmanager/typescript-contracts'
 import { createElement as h, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
@@ -35,7 +36,8 @@ export interface HostDetailState {
   host: HostDetail
   healthChecks: HealthCheck[]
   backups: BackupSummary[]
-  diagnostics: OperationSummary[]
+  rollbackPoints: RollbackPoint[]
+  diagnostics: components['schemas']['OperationDetail'][]
   localArtifacts: string[]
   eventStream: EventStreamEntry[]
 }
@@ -729,6 +731,15 @@ export function createMockHostDetailState(): HostDetailState {
         operationId: 'op_snapshot_001'
       }
     ],
+    rollbackPoints: [
+      {
+        id: 'rp_alpha_001',
+        hostId: 'host_alpha',
+        operationId: 'op_snapshot_001',
+        state: 'applied',
+        createdAt: '2026-04-16T17:38:30.000Z'
+      }
+    ],
     diagnostics: [
       {
         id: 'op_diag_001',
@@ -737,7 +748,26 @@ export function createMockHostDetailState(): HostDetailState {
         hostId: 'host_alpha',
         ruleId: 'rule_alpha_https',
         startedAt: '2026-04-16T17:49:00.000Z',
-        finishedAt: '2026-04-16T17:52:00.000Z'
+        finishedAt: '2026-04-16T17:52:00.000Z',
+        diagnosticResult: {
+          hostId: 'host_alpha',
+          ruleId: 'rule_alpha_https',
+          capturedAt: '2026-04-16T17:52:00.000Z',
+          port: 443,
+          tcpReachable: true,
+          httpStatus: 200,
+          pageTitle: 'Alpha Relay Healthy',
+          finalUrl: 'http://127.0.0.1/status'
+        },
+        snapshotResult: {
+          hostId: 'host_alpha',
+          ruleId: 'rule_alpha_https',
+          capturedAt: '2026-04-16T17:52:00.000Z',
+          port: 443,
+          httpStatus: 200,
+          pageTitle: 'Alpha Relay Healthy',
+          artifactPath: '/var/lib/portmanager/snapshots/snapshot-op_diag_001.html'
+        }
       }
     ],
     localArtifacts: [
@@ -745,6 +775,7 @@ export function createMockHostDetailState(): HostDetailState {
       '/var/lib/portmanager/desired-state.toml',
       '/var/lib/portmanager/runtime-state.json',
       '/var/lib/portmanager/snapshots/op_snapshot_001-manifest.json',
+      '/var/lib/portmanager/snapshots/snapshot-op_diag_001.html',
       '/var/lib/portmanager/rollback/rp_alpha_001-result.json'
     ],
     eventStream: operationEvents.map(eventEntryFromOperationEvent)
@@ -1202,6 +1233,24 @@ function HostDetailMain(props: { state: HostDetailState }) {
           ])
         )
       )
+    ]),
+    h('section', { className: 'pm-card', key: 'rollback-points' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Rollback candidates and execution',
+        detail: `${props.state.rollbackPoints.length} points`
+      }),
+      h(
+        'ul',
+        { className: 'pm-list', key: 'list' },
+        props.state.rollbackPoints.map((rollbackPoint) =>
+          h('li', { className: 'pm-list-item', key: rollbackPoint.id }, [
+            h('div', { key: 'line1' }, `${rollbackPoint.id} · ${rollbackPoint.operationId}`),
+            h('div', { className: 'pm-microcopy', key: 'line2' }, `created ${shortTime(rollbackPoint.createdAt)}`),
+            h(StatusBadge, { key: 'badge', state: rollbackPoint.state })
+          ])
+        )
+      )
     ])
   ])
 }
@@ -1220,7 +1269,16 @@ function HostDetailRail(props: { state: HostDetailState }) {
         props.state.diagnostics.map((diagnostic) =>
           h('li', { className: 'pm-list-item', key: diagnostic.id }, [
             h('div', { key: 'line1' }, `${diagnostic.id} · ${diagnostic.type}`),
-            h('div', { className: 'pm-microcopy', key: 'line2' }, `finished ${shortTime(diagnostic.finishedAt)}`),
+            h(
+              'div',
+              { className: 'pm-microcopy', key: 'line2' },
+              diagnostic.snapshotResult?.pageTitle ?? `finished ${shortTime(diagnostic.finishedAt)}`
+            ),
+            h(
+              'div',
+              { className: 'pm-artifact', key: 'line3' },
+              diagnostic.snapshotResult?.artifactPath ?? 'no snapshot artifact'
+            ),
             h(StatusBadge, { key: 'badge', state: diagnostic.state })
           ])
         )

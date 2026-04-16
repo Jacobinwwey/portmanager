@@ -316,6 +316,16 @@ paths:
     get:
       tags: [rollback-points]
       summary: List rollback points
+      parameters:
+        - name: hostId
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+            enum: [ready, applied, invalid]
       responses:
         '200':
           description: Rollback point list
@@ -346,6 +356,15 @@ paths:
     get:
       tags: [backups]
       summary: List backups
+      parameters:
+        - name: hostId
+          in: query
+          schema:
+            type: string
+        - name: operationId
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Backup list
@@ -393,6 +412,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OperationAccepted'
+  /diagnostics:
+    get:
+      tags: [snapshots-diagnostics]
+      summary: List diagnostics operations with snapshot evidence
+      parameters:
+        - name: hostId
+          in: query
+          schema:
+            type: string
+        - name: ruleId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Diagnostics operation list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OperationDetail'
 components:
   parameters:
     HostId:

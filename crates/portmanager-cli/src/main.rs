@@ -19,9 +19,34 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    Backups(BackupsCommand),
+    Diagnostics(DiagnosticsCommand),
     Events(EventsCommand),
     HealthChecks(HealthChecksCommand),
     Operation(OperationCommand),
+    RollbackPoints(RollbackPointsCommand),
+}
+
+#[derive(Args)]
+struct BackupsCommand {
+    #[command(subcommand)]
+    command: BackupsSubcommand,
+}
+
+#[derive(Subcommand)]
+enum BackupsSubcommand {
+    List(BackupsListArgs),
+}
+
+#[derive(Args)]
+struct DiagnosticsCommand {
+    #[command(subcommand)]
+    command: DiagnosticsSubcommand,
+}
+
+#[derive(Subcommand)]
+enum DiagnosticsSubcommand {
+    List(DiagnosticsListArgs),
 }
 
 #[derive(Args)]
@@ -57,6 +82,18 @@ enum OperationSubcommand {
     Get(OperationGetArgs),
 }
 
+#[derive(Args)]
+struct RollbackPointsCommand {
+    #[command(subcommand)]
+    command: RollbackPointsSubcommand,
+}
+
+#[derive(Subcommand)]
+enum RollbackPointsSubcommand {
+    Apply(RollbackPointsApplyArgs),
+    List(RollbackPointsListArgs),
+}
+
 #[derive(Args, Clone)]
 struct OperationGetArgs {
     operation_id: String,
@@ -83,6 +120,30 @@ struct EventsListArgs {
 }
 
 #[derive(Args, Clone)]
+struct BackupsListArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long)]
+    host_id: Option<String>,
+    #[arg(long)]
+    operation_id: Option<String>,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
+struct DiagnosticsListArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long)]
+    host_id: Option<String>,
+    #[arg(long)]
+    rule_id: Option<String>,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
 struct HealthChecksListArgs {
     #[arg(long)]
     json: bool,
@@ -90,6 +151,33 @@ struct HealthChecksListArgs {
     host_id: Option<String>,
     #[arg(long)]
     rule_id: Option<String>,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
+struct RollbackPointsApplyArgs {
+    rollback_point_id: String,
+    #[arg(long)]
+    json: bool,
+    #[arg(long)]
+    wait: bool,
+    #[arg(long, default_value_t = 30_000)]
+    timeout_ms: u64,
+    #[arg(long, default_value_t = 250)]
+    poll_interval_ms: u64,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
+struct RollbackPointsListArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long)]
+    host_id: Option<String>,
+    #[arg(long)]
+    state: Option<String>,
     #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
     controller_base_url: String,
 }
@@ -153,6 +241,12 @@ async fn main() -> ExitCode {
 
 async fn execute(cli: Cli) -> ExecutionResult {
     match cli.command {
+        Commands::Backups(command) => match command.command {
+            BackupsSubcommand::List(args) => run_backups_list(args).await,
+        },
+        Commands::Diagnostics(command) => match command.command {
+            DiagnosticsSubcommand::List(args) => run_diagnostics_list(args).await,
+        },
         Commands::Events(command) => match command.command {
             EventsSubcommand::List(args) => run_events_list(args).await,
         },
@@ -161,6 +255,10 @@ async fn execute(cli: Cli) -> ExecutionResult {
         },
         Commands::Operation(command) => match command.command {
             OperationSubcommand::Get(args) => run_operation_get(args).await,
+        },
+        Commands::RollbackPoints(command) => match command.command {
+            RollbackPointsSubcommand::Apply(args) => run_rollback_points_apply(args).await,
+            RollbackPointsSubcommand::List(args) => run_rollback_points_list(args).await,
         },
     }
 }
@@ -261,6 +359,78 @@ async fn run_events_list(args: EventsListArgs) -> ExecutionResult {
     }
 }
 
+async fn run_backups_list(args: BackupsListArgs) -> ExecutionResult {
+    match fetch_backups(
+        &Client::new(),
+        &args.controller_base_url,
+        args.host_id.as_deref(),
+        args.operation_id.as_deref(),
+    )
+    .await
+    {
+        Ok(backups) => {
+            if args.json {
+                ExecutionResult::success_json(&backups)
+            } else {
+                let lines = backups["items"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(|backup| {
+                        format!(
+                            "{} {} {}",
+                            backup["createdAt"].as_str().unwrap_or("unknown"),
+                            backup["hostId"].as_str().unwrap_or("unknown"),
+                            backup["localStatus"].as_str().unwrap_or("unknown"),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                ExecutionResult::success_text(lines)
+            }
+        }
+        Err(error) => json_or_text_error_flag(args.json, error, "backup fetch failed".to_string()),
+    }
+}
+
+async fn run_diagnostics_list(args: DiagnosticsListArgs) -> ExecutionResult {
+    match fetch_diagnostics(
+        &Client::new(),
+        &args.controller_base_url,
+        args.host_id.as_deref(),
+        args.rule_id.as_deref(),
+    )
+    .await
+    {
+        Ok(diagnostics) => {
+            if args.json {
+                ExecutionResult::success_json(&diagnostics)
+            } else {
+                let lines = diagnostics["items"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(|diagnostic| {
+                        format!(
+                            "{} {} {}",
+                            diagnostic["finishedAt"].as_str().unwrap_or("unknown"),
+                            diagnostic["ruleId"].as_str().unwrap_or("n/a"),
+                            diagnostic["state"].as_str().unwrap_or("unknown"),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                ExecutionResult::success_text(lines)
+            }
+        }
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "diagnostics fetch failed".to_string())
+        }
+    }
+}
+
 async fn run_health_checks_list(args: HealthChecksListArgs) -> ExecutionResult {
     match fetch_health_checks(
         &Client::new(),
@@ -296,6 +466,139 @@ async fn run_health_checks_list(args: HealthChecksListArgs) -> ExecutionResult {
             args.json,
             error,
             "health check fetch failed".to_string(),
+        ),
+    }
+}
+
+async fn run_rollback_points_apply(args: RollbackPointsApplyArgs) -> ExecutionResult {
+    let client = Client::new();
+
+    match apply_rollback_point(&client, &args.controller_base_url, &args.rollback_point_id).await {
+        Ok(accepted) => {
+            if !args.wait {
+                return if args.json {
+                    ExecutionResult::success_json(&accepted)
+                } else {
+                    ExecutionResult::success_text(format!(
+                        "{} {}",
+                        accepted["operationId"].as_str().unwrap_or("unknown"),
+                        accepted["state"].as_str().unwrap_or("queued")
+                    ))
+                };
+            }
+
+            let operation_id = accepted["operationId"]
+                .as_str()
+                .unwrap_or_default()
+                .to_string();
+            let deadline = Instant::now() + Duration::from_millis(args.timeout_ms);
+
+            loop {
+                match fetch_operation(&client, &args.controller_base_url, &operation_id).await {
+                    Ok(operation) => {
+                        let state = match operation_state(&operation) {
+                            Ok(state) => state.to_string(),
+                            Err(error) => {
+                                return json_or_text_error_flag(
+                                    args.json,
+                                    JsonErrorOutput {
+                                        error: "protocol",
+                                        message: error.to_string(),
+                                        operation_id: Some(operation_id.clone()),
+                                        last_state: None,
+                                        timeout_ms: None,
+                                        status: None,
+                                    },
+                                    error.to_string(),
+                                );
+                            }
+                        };
+
+                        if is_terminal_state(&state) {
+                            return if args.json {
+                                ExecutionResult::success_json(&operation)
+                            } else {
+                                ExecutionResult::success_text(format!(
+                                    "{} {} {}",
+                                    operation["id"].as_str().unwrap_or("unknown"),
+                                    operation["type"].as_str().unwrap_or("rollback"),
+                                    state
+                                ))
+                            };
+                        }
+
+                        if Instant::now() >= deadline {
+                            return json_or_text_error_flag(
+                                args.json,
+                                JsonErrorOutput {
+                                    error: "timeout",
+                                    message: format!(
+                                        "rollback operation {} did not reach a terminal state before timeout",
+                                        operation_id
+                                    ),
+                                    operation_id: Some(operation_id.clone()),
+                                    last_state: Some(state.clone()),
+                                    timeout_ms: Some(args.timeout_ms),
+                                    status: None,
+                                },
+                                format!(
+                                    "rollback operation {} timed out while waiting in state {}",
+                                    operation_id, state
+                                ),
+                            );
+                        }
+
+                        tokio::time::sleep(Duration::from_millis(args.poll_interval_ms)).await;
+                    }
+                    Err(error) => {
+                        return json_or_text_error_flag(
+                            args.json,
+                            error,
+                            "rollback apply failed".to_string(),
+                        );
+                    }
+                }
+            }
+        }
+        Err(error) => json_or_text_error_flag(args.json, error, "rollback apply failed".to_string()),
+    }
+}
+
+async fn run_rollback_points_list(args: RollbackPointsListArgs) -> ExecutionResult {
+    match fetch_rollback_points(
+        &Client::new(),
+        &args.controller_base_url,
+        args.host_id.as_deref(),
+        args.state.as_deref(),
+    )
+    .await
+    {
+        Ok(rollback_points) => {
+            if args.json {
+                ExecutionResult::success_json(&rollback_points)
+            } else {
+                let lines = rollback_points["items"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(|rollback_point| {
+                        format!(
+                            "{} {} {}",
+                            rollback_point["createdAt"].as_str().unwrap_or("unknown"),
+                            rollback_point["id"].as_str().unwrap_or("unknown"),
+                            rollback_point["state"].as_str().unwrap_or("unknown"),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                ExecutionResult::success_text(lines)
+            }
+        }
+        Err(error) => json_or_text_error_flag(
+            args.json,
+            error,
+            "rollback point fetch failed".to_string(),
         ),
     }
 }
@@ -426,6 +729,212 @@ async fn fetch_health_checks(
         })?;
 
     let status = response.status();
+    if !status.is_success() {
+        return Err(JsonErrorOutput {
+            error: "controller_error",
+            message: format!("controller returned unexpected status {}", status.as_u16()),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        });
+    }
+
+    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
+    })
+}
+
+async fn fetch_backups(
+    client: &Client,
+    controller_base_url: &str,
+    host_id: Option<&str>,
+    operation_id: Option<&str>,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!("{}/backups", controller_base_url.trim_end_matches('/'));
+    let mut query: Vec<(&str, &str)> = Vec::new();
+    if let Some(host_id) = host_id {
+        query.push(("hostId", host_id));
+    }
+    if let Some(operation_id) = operation_id {
+        query.push(("operationId", operation_id));
+    }
+
+    let response = client
+        .get(url)
+        .query(&query)
+        .send()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: None,
+        })?;
+
+    let status = response.status();
+    if !status.is_success() {
+        return Err(JsonErrorOutput {
+            error: "controller_error",
+            message: format!("controller returned unexpected status {}", status.as_u16()),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        });
+    }
+
+    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
+    })
+}
+
+async fn fetch_diagnostics(
+    client: &Client,
+    controller_base_url: &str,
+    host_id: Option<&str>,
+    rule_id: Option<&str>,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!("{}/diagnostics", controller_base_url.trim_end_matches('/'));
+    let mut query: Vec<(&str, &str)> = Vec::new();
+    if let Some(host_id) = host_id {
+        query.push(("hostId", host_id));
+    }
+    if let Some(rule_id) = rule_id {
+        query.push(("ruleId", rule_id));
+    }
+
+    let response = client
+        .get(url)
+        .query(&query)
+        .send()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: None,
+        })?;
+
+    let status = response.status();
+    if !status.is_success() {
+        return Err(JsonErrorOutput {
+            error: "controller_error",
+            message: format!("controller returned unexpected status {}", status.as_u16()),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        });
+    }
+
+    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
+    })
+}
+
+async fn fetch_rollback_points(
+    client: &Client,
+    controller_base_url: &str,
+    host_id: Option<&str>,
+    state: Option<&str>,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!("{}/rollback-points", controller_base_url.trim_end_matches('/'));
+    let mut query: Vec<(&str, &str)> = Vec::new();
+    if let Some(host_id) = host_id {
+        query.push(("hostId", host_id));
+    }
+    if let Some(state) = state {
+        query.push(("state", state));
+    }
+
+    let response = client
+        .get(url)
+        .query(&query)
+        .send()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: None,
+        })?;
+
+    let status = response.status();
+    if !status.is_success() {
+        return Err(JsonErrorOutput {
+            error: "controller_error",
+            message: format!("controller returned unexpected status {}", status.as_u16()),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        });
+    }
+
+    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
+    })
+}
+
+async fn apply_rollback_point(
+    client: &Client,
+    controller_base_url: &str,
+    rollback_point_id: &str,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!(
+        "{}/rollback-points/{}/apply",
+        controller_base_url.trim_end_matches('/'),
+        rollback_point_id
+    );
+
+    let response = client.post(url).send().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: None,
+    })?;
+
+    let status = response.status();
+    if status == StatusCode::NOT_FOUND {
+        return Err(JsonErrorOutput {
+            error: "not_found",
+            message: format!("rollback point {} not found", rollback_point_id),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        });
+    }
+
     if !status.is_success() {
         return Err(JsonErrorOutput {
             error: "controller_error",

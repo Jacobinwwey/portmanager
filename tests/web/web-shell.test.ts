@@ -49,6 +49,16 @@ test('host detail shell surfaces degraded bridge verification and required backu
   assert.match(html, /required/i)
 })
 
+test('host detail shell surfaces rollback candidates and diagnostics evidence references', () => {
+  const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
+
+  assert.match(html, /rollback candidates and execution/i)
+  assert.match(html, /rp_alpha_001/i)
+  assert.match(html, /applied/i)
+  assert.match(html, /alpha relay healthy/i)
+  assert.match(html, /snapshot-op_diag_001\.html/i)
+})
+
 test('preview document embeds styles and web skeleton copy', () => {
   const html = renderWebPreviewDocument('overview')
 
