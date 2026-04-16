@@ -11,13 +11,13 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.1.0-docs-baseline
+> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
 ### Milestone 1: One Host, One Rule, One Rollback
 1. contracts foundation
 2. controller skeleton with SQLite state store
 3. Rust agent skeleton with apply, collect, snapshot, rollback primitives
 4. Rust CLI skeleton with `--json` and `--wait`
-5. React SPA overview and host detail skeleton based on the locked design baseline
+5. React SPA overview and host detail skeleton based on the locked product-console design baseline
 6. bootstrap gold path for one Ubuntu 24.04 host
 7. single bridge-rule apply plus verification
 8. required local backup before mutation

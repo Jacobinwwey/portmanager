@@ -1,5 +1,5 @@
 ---
-title: "Overview 设计基线"
+title: "产品控制台设计基线"
 audience: human
 persona:
   - contributor
@@ -10,7 +10,12 @@ status: active
 ---
 > 真源文档：`docs/design/portmanager-overview-design-baseline.md`
 > Audience：`human` | Section：`architecture` | Status：`active`
-> Updated：2026-04-16 | Version：v0.1.0-docs-baseline
+> Updated：2026-04-16 | Version：v0.3.0-docs-site-design-alignment
+### 作用范围边界
+本文档只定义未来产品 Web 控制平面的设计基线。
+它不负责定义公共 VitePress 文档站。
+文档站发布层的设计基线单独记录在 `docs/design/portmanager-docs-site-design-baseline.md`。
+
 ### 设计真源
 你提供的 HTML 设计现在已经成为 V1 Overview 控制台的官方视觉母版。
 仓库中保留了：

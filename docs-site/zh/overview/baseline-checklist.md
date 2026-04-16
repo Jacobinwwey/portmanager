@@ -10,7 +10,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-v1-baseline-checklist.md`
 > Audience：`shared` | Section：`overview` | Status：`active`
-> Updated：2026-04-16 | Version：v0.2.0-docs-site-baseline
+> Updated：2026-04-16 | Version：v0.3.0-docs-site-design-alignment
 ### 用途
 这份清单是首次 `docs-first` 上传的正式验收矩阵。
 已确认的 V1 方案中的每一条锁定决策，都必须在首次推送到 `main` 前映射到仓库中的具体产物。
@@ -28,7 +28,7 @@ status: active
    - `docs/architecture/portmanager-contract-strategy.md`
    - `docs/architecture/portmanager-agent-bootstrap.md`
    - 状态：完成
-3. 前端设计基线
+3. 产品 Web 设计基线
    - `docs/design/assets/original-onesync-reference.html`
    - `docs/design/assets/portmanager-overview-reference.html`
    - `docs/design/portmanager-overview-design-baseline.md`
@@ -61,6 +61,7 @@ status: active
    - `docs-site/`
    - `docs/specs/portmanager-docs-site-architecture.md`
    - `docs/specs/portmanager-install-distribution-contract.md`
+   - `docs/design/portmanager-docs-site-design-baseline.md`
    - `scripts/docs/extract-locales.mjs`
    - `.github/workflows/docs-pages.yml`
    - 状态：完成
@@ -85,6 +86,7 @@ status: active
 - GitHub 私有备份受支持，V1 默认认证形态为 fine-grained PAT。
 - GitHub Pages + VitePress 是官方文档发布层。
 - 文档站在顶层明确区分 `Human` 与 `Agent`。
+- 文档站发布基线与产品控制台基线是两套不同约束。
 - 一行安装入口属于公共契约，在真正实现前必须标记为 `Planned`。
 
 ### 推送前验证要求

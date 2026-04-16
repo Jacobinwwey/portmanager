@@ -11,13 +11,13 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-16 | Version：v0.1.0-docs-baseline
+> Updated：2026-04-16 | Version：v0.3.0-docs-site-design-alignment
 ### 里程碑 1：One Host, One Rule, One Rollback
 1. 契约基础设施
 2. 带 SQLite 状态库的 controller 骨架
 3. 具备 apply、collect、snapshot、rollback 原语的 Rust agent 骨架
 4. 强制支持 `--json` 与 `--wait` 的 Rust CLI 骨架
-5. 基于已锁定设计基线实现 React SPA 的 overview 与 host detail 骨架
+5. 基于已锁定产品控制台设计基线实现 React SPA 的 overview 与 host detail 骨架
 6. 一台 Ubuntu 24.04 主机的 bootstrap 金路径
 7. 单条 bridge rule 的 apply 与验证
 8. mutation 前必须完成的本地备份

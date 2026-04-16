@@ -72,6 +72,9 @@ target/
 *.sqlite
 *.sqlite3
 
+# Local reference clones and scratch material
+ref/
+
 # Keep core lockfiles and source assets tracked
 !docs-site/pnpm-lock.yaml
 !Cargo.lock

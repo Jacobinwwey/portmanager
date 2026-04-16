@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-v1-product-spec.md`
 > Audience: `shared` | Section: `overview` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.1.0-docs-baseline
+> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
 ### Summary
 PortManager V1 is a control plane for exposing selected remote localhost services over Tailscale without treating ad-hoc shell commands as the operating model.
 The product goal is not only exposure, but safe exposure: desired state, operations history, diagnostics visibility, backup-before-mutation, and explicit rollback points.
@@ -65,11 +65,12 @@ The product goal is not only exposure, but safe exposure: desired state, operati
 - `Backup`: a concrete stored bundle with manifest and checksums.
 - `Snapshot` and `Diagnostic`: controller-captured evidence for a specific host, rule, and port.
 
-### Frontend expectations locked for V1
-- Overview page must use the provided control-console layout language, reinterpreted for PortManager semantics.
+### Product web expectations locked for V1
+- Product web overview must use the provided control-console layout language, reinterpreted for PortManager semantics.
 - The product must expose a host-centric main table, a contextual right rail, and a bottom event stream.
 - Host detail must show current policy, rules, health, backups, rollback points, and recent diagnostics.
 - Port detail must show webpage snapshot preview, transport reachability, HTTP result, and TLS basics when applicable.
+- The VitePress docs site is a separate documentation surface and follows its own docs-site design baseline.
 
 ### Acceptance target for Milestone 1
 A V1 implementation will be considered valid only if all of the following become true:

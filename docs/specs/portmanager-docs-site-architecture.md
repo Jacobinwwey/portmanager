@@ -1,7 +1,7 @@
 # PortManager Docs Site Architecture and Governance
 
 Updated: 2026-04-16
-Version: v0.2.0-docs-site-baseline
+Version: v0.3.0-docs-site-design-alignment
 
 ## English
 
@@ -15,6 +15,13 @@ The repository keeps raw bilingual specifications as the source of truth, while 
 - locale generation: `scripts/docs/extract-locales.mjs`
 - public hosting: GitHub Pages
 - deployment flow: `main -> GitHub Actions -> GitHub Pages`
+
+### Design baseline boundary
+- Product control-plane baseline: `docs/design/portmanager-overview-design-baseline.md`
+- Product control-plane semantic mapping: `docs/design/portmanager-overview-semantic-mapping.md`
+- Docs-site publishing baseline: `docs/design/portmanager-docs-site-design-baseline.md`
+- The docs site may reference the VitePress structure used by `OpenAvatarChat`, but only as a design reference rather than a cloning target.
+- The docs site should prefer standard VitePress `home` and `doc` layouts before custom wrappers.
 
 ### Route contract
 The public site treats the following route families as stable interfaces:
@@ -70,6 +77,13 @@ Archived pages remain static references rather than active version branches.
 - 语言拆分生成：`scripts/docs/extract-locales.mjs`
 - 公共托管：GitHub Pages
 - 部署流：`main -> GitHub Actions -> GitHub Pages`
+
+### 设计基线边界
+- 产品控制平面基线：`docs/design/portmanager-overview-design-baseline.md`
+- 产品控制平面语义映射：`docs/design/portmanager-overview-semantic-mapping.md`
+- 文档站发布基线：`docs/design/portmanager-docs-site-design-baseline.md`
+- 文档站可以参考 `OpenAvatarChat` 使用的 VitePress 结构，但只能作为设计参考，而不是克隆目标。
+- 在引入自定义包装层之前，文档站应优先使用标准 VitePress `home` 与 `doc` 布局。
 
 ### 路由契约
 公共站点将以下路由族视为稳定接口：

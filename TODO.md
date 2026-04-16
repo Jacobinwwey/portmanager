@@ -1,58 +1,52 @@
-# TODO
+# PortManager
 
 Updated: 2026-04-16
-Version: v0.2.0-docs-site-baseline
+Version: v0.3.0-docs-site-design-alignment
 
 ## English
 
-### Baseline upload
-- [x] Create the docs-first repository baseline.
-- [x] Freeze bilingual product, architecture, operations, and design documents.
-- [x] Preserve the original design reference and the PortManager semantic reference.
-- [x] Draft the controller OpenAPI contract.
-- [x] Draft the shared JSON Schemas.
-- [x] Define backup, rollback, SDK, Docker, diagnostics, and information-architecture boundaries.
-- [x] Add a formal baseline checklist for pre-push verification.
+### Baseline work completed
+- [x] Freeze the V1 product boundary and architecture.
+- [x] Freeze OpenAPI and JSON Schema as the public contract foundation.
+- [x] Freeze the controller-side diagnostics and snapshot model.
+- [x] Freeze the Docker and SDK boundary for V1.
 - [x] Add the GitHub Pages + VitePress publishing layer.
 - [x] Freeze Human / Agent top-level docs entrypoints.
 - [x] Freeze one-line install and bootstrap contract shapes as `Planned` public interfaces.
 - [x] Publish the first roadmap page as a first-class docs surface.
+- [x] Separate the product console design baseline from the VitePress docs-site design baseline.
 
 ### Next implementation work
 - [ ] Milestone 1: contracts foundation and codegen toolchain.
-- [ ] Milestone 1: controller skeleton.
-- [ ] Milestone 1: agent skeleton.
-- [ ] Milestone 1: CLI skeleton.
-- [ ] Milestone 1: web skeleton.
-- [ ] Milestone 1: bootstrap gold path.
-- [ ] Milestone 1: single bridge rule apply and verify.
+- [ ] Milestone 1: controller skeleton with SQLite state store and operation runner.
+- [ ] Milestone 1: Rust agent skeleton with bootstrap, apply, collect, snapshot, rollback.
+- [ ] Milestone 1: Rust CLI skeleton with `--json` and `--wait`.
+- [ ] Milestone 1: React SPA skeleton for overview and host detail.
+- [ ] Milestone 1: one-host bootstrap and one-rule apply verification.
 - [ ] Milestone 1: local backup and rollback primitive.
-- [ ] Milestone 1: snapshot and diagnostics flow.
-- [ ] Milestone 1: unified operations and event stream.
+- [ ] Milestone 1: controller-side webpage snapshot and connectivity diagnostics.
+- [ ] Milestone 1: unified event stream across Web, CLI, and API.
 
 ## 中文
 
-### 基线上传
-- [x] 建立 docs-first 仓库基线。
-- [x] 固化双语产品、架构、运维与设计文档。
-- [x] 保存原始设计参考与 PortManager 语义参考页。
-- [x] 起草 controller OpenAPI 契约。
-- [x] 起草共享 JSON Schema。
-- [x] 定义备份、回滚、SDK、Docker、诊断与信息架构边界。
-- [x] 增加推送前核验用的正式基线清单。
+### 已完成的基线工作
+- [x] 冻结 V1 产品边界与架构决策。
+- [x] 冻结 OpenAPI 与 JSON Schema 作为公共契约基础。
+- [x] 冻结 controller-side 诊断与快照模型。
+- [x] 冻结 V1 的 Docker 与 SDK 边界。
 - [x] 增加 GitHub Pages + VitePress 文档发布层。
 - [x] 固化 Human / Agent 顶层文档入口。
 - [x] 将一行安装与 bootstrap 形态固化为 `Planned` 公共契约。
 - [x] 将首版 roadmap 页面作为一级文档面发布。
+- [x] 将产品控制台设计基线与 VitePress 文档站设计基线明确拆分。
 
 ### 后续实现工作
 - [ ] 里程碑 1：契约基础设施与 codegen 工具链。
-- [ ] 里程碑 1：controller 骨架。
-- [ ] 里程碑 1：agent 骨架。
-- [ ] 里程碑 1：CLI 骨架。
-- [ ] 里程碑 1：web 骨架。
-- [ ] 里程碑 1：bootstrap 金路径。
-- [ ] 里程碑 1：单条 bridge rule 的 apply 与 verify。
+- [ ] 里程碑 1：带 SQLite 状态库与 operation runner 的 controller 骨架。
+- [ ] 里程碑 1：具备 bootstrap、apply、collect、snapshot、rollback 的 Rust agent 骨架。
+- [ ] 里程碑 1：强制支持 `--json` 与 `--wait` 的 Rust CLI 骨架。
+- [ ] 里程碑 1：overview 与 host detail 的 React SPA 骨架。
+- [ ] 里程碑 1：单主机 bootstrap 与单规则 apply 验证。
 - [ ] 里程碑 1：本地备份与回滚原语。
-- [ ] 里程碑 1：snapshot 与 diagnostics 链路。
-- [ ] 里程碑 1：统一的 operations 与 event stream。
+- [ ] 里程碑 1：controller 侧网页快照与连通性诊断。
+- [ ] 里程碑 1：Web、CLI 与 API 共享事件流。

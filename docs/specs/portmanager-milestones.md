@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-16
-Version: v0.1.0-docs-baseline
+Version: v0.3.0-docs-site-design-alignment
 
 ## English
 
@@ -10,7 +10,7 @@ Version: v0.1.0-docs-baseline
 2. controller skeleton with SQLite state store
 3. Rust agent skeleton with apply, collect, snapshot, rollback primitives
 4. Rust CLI skeleton with `--json` and `--wait`
-5. React SPA overview and host detail skeleton based on the locked design baseline
+5. React SPA overview and host detail skeleton based on the locked product-console design baseline
 6. bootstrap gold path for one Ubuntu 24.04 host
 7. single bridge-rule apply plus verification
 8. required local backup before mutation
@@ -39,7 +39,7 @@ Version: v0.1.0-docs-baseline
 2. 带 SQLite 状态库的 controller 骨架
 3. 具备 apply、collect、snapshot、rollback 原语的 Rust agent 骨架
 4. 强制支持 `--json` 与 `--wait` 的 Rust CLI 骨架
-5. 基于已锁定设计基线实现 React SPA 的 overview 与 host detail 骨架
+5. 基于已锁定产品控制台设计基线实现 React SPA 的 overview 与 host detail 骨架
 6. 一台 Ubuntu 24.04 主机的 bootstrap 金路径
 7. 单条 bridge rule 的 apply 与验证
 8. mutation 前必须完成的本地备份

@@ -49,7 +49,7 @@ const roleContent = {
       links: [
         { eyebrow: 'Operations', title: 'Snapshot and Diagnostics', description: 'Read the evidence model for page snapshots and transport checks.', href: '/en/operations/snapshot-diagnostics' },
         { eyebrow: 'Operations', title: 'Backup and Rollback Policy', description: 'Understand the safety boundary around destructive change.', href: '/en/operations/backup-rollback-policy' },
-        { eyebrow: 'Architecture', title: 'UI Information Architecture', description: 'See where diagnostics, health, and event-stream surfaces live in the UI.', href: '/en/architecture/ui-information-architecture' }
+        { eyebrow: 'Architecture', title: 'Product Web UI Information Architecture', description: 'See where diagnostics, health, and event-stream surfaces live in the product UI.', href: '/en/architecture/ui-information-architecture' }
       ]
     },
     'self-host-admin': {
@@ -83,14 +83,15 @@ const roleContent = {
     contributor: {
       eyebrow: 'Human / Contributor',
       title: 'Change docs, design, and contracts without creating a second truth layer.',
-      lede: 'Contributor docs focus on docs-first rules, raw-source ownership, design baseline, roadmap, and the implementation handoff surface.',
-      pills: ['Docs-First', 'Design Baseline', 'Roadmap'],
+      lede: 'Contributor docs focus on docs-first rules, raw-source ownership, design boundaries, roadmap, and the implementation handoff surface.',
+      pills: ['Docs-First', 'Design Boundaries', 'Roadmap'],
       startTitle: 'Start Here',
       expectationTitle: 'What this role needs',
-      expectations: ['Keep raw bilingual docs as the truth layer.', 'Update docs-site mappings when public docs change.', 'Treat design baseline and contract changes as first-class decisions.'],
+      expectations: ['Keep raw bilingual docs as the truth layer.', 'Update docs-site mappings when public docs change.', 'Treat product-console and docs-site baseline changes as separate first-class decisions.'],
       links: [
         { eyebrow: 'Architecture', title: 'Docs Site Architecture', description: 'Read the publishing model and governance rules.', href: '/en/architecture/docs-site-architecture' },
-        { eyebrow: 'Architecture', title: 'Overview Design Baseline', description: 'Stay aligned with the frozen visual mother-template.', href: '/en/architecture/overview-design-baseline' },
+        { eyebrow: 'Architecture', title: 'Docs Site Design Baseline', description: 'Stay aligned with the docs-first VitePress publishing baseline.', href: '/en/architecture/docs-site-design-baseline' },
+        { eyebrow: 'Architecture', title: 'Product Console Design Baseline', description: 'Use the control-console mother-template only for the product web UI.', href: '/en/architecture/overview-design-baseline' },
         { eyebrow: 'Roadmap', title: 'Milestones Detail', description: 'Track implementation sequencing and future expansion.', href: '/en/roadmap/milestones' }
       ]
     }
@@ -107,7 +108,7 @@ const roleContent = {
       links: [
         { eyebrow: 'Operations', title: '快照与诊断', description: '阅读页面快照与传输检查的证据模型。', href: '/zh/operations/snapshot-diagnostics' },
         { eyebrow: 'Operations', title: '备份与回滚策略', description: '理解 destructive change 周围的安全边界。', href: '/zh/operations/backup-rollback-policy' },
-        { eyebrow: 'Architecture', title: 'UI 信息架构', description: '查看 diagnostics、health 与 event stream 在界面中的位置。', href: '/zh/architecture/ui-information-architecture' }
+        { eyebrow: 'Architecture', title: '产品 Web UI 信息架构', description: '查看 diagnostics、health 与 event stream 在产品界面中的位置。', href: '/zh/architecture/ui-information-architecture' }
       ]
     },
     'self-host-admin': {
@@ -141,14 +142,15 @@ const roleContent = {
     contributor: {
       eyebrow: 'Human / Contributor',
       title: '改动文档、设计与契约时，不要制造第二层真源。',
-      lede: 'Contributor 文档聚焦 docs-first 规则、原始真源归属、设计基线、roadmap 与实现交接边界。',
-      pills: ['Docs-First', 'Design Baseline', 'Roadmap'],
+      lede: 'Contributor 文档聚焦 docs-first 规则、原始真源归属、设计边界、roadmap 与实现交接边界。',
+      pills: ['Docs-First', 'Design Boundaries', 'Roadmap'],
       startTitle: '先看这些',
       expectationTitle: '这个角色真正关心什么',
-      expectations: ['保持双语原始文档为真源。', '公共文档变更时同步更新 docs-site 映射。', '把设计基线与契约变更视为一等决策。'],
+      expectations: ['保持双语原始文档为真源。', '公共文档变更时同步更新 docs-site 映射。', '把产品控制台基线与文档站基线的修改当成两种不同的一等决策。'],
       links: [
         { eyebrow: 'Architecture', title: '文档站架构', description: '阅读发布模型与治理规则。', href: '/zh/architecture/docs-site-architecture' },
-        { eyebrow: 'Architecture', title: 'Overview 设计基线', description: '与已冻结的视觉母版保持对齐。', href: '/zh/architecture/overview-design-baseline' },
+        { eyebrow: 'Architecture', title: '文档站设计基线', description: '与 docs-first 的 VitePress 发布基线保持对齐。', href: '/zh/architecture/docs-site-design-baseline' },
+        { eyebrow: 'Architecture', title: '产品控制台设计基线', description: '只有产品 Web UI 才使用控制台母版。', href: '/zh/architecture/overview-design-baseline' },
         { eyebrow: 'Roadmap', title: '里程碑明细', description: '跟踪实现顺序与后续扩展。', href: '/zh/roadmap/milestones' }
       ]
     }

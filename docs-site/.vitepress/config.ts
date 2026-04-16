@@ -83,9 +83,10 @@ function sidebar(locale: 'en' | 'zh') {
         { text: isZh ? 'V1 架构' : 'V1 Architecture', link: doc(locale, 'v1-architecture') },
         { text: isZh ? '契约策略' : 'Contract Strategy', link: doc(locale, 'contract-strategy') },
         { text: isZh ? 'Agent Bootstrap' : 'Agent Bootstrap', link: doc(locale, 'agent-bootstrap') },
-        { text: isZh ? 'UI 信息架构' : 'UI Information Architecture', link: doc(locale, 'ui-information-architecture') },
-        { text: isZh ? '设计基线' : 'Design Baseline', link: doc(locale, 'overview-design-baseline') },
-        { text: isZh ? '语义映射' : 'Semantic Mapping', link: doc(locale, 'overview-semantic-mapping') },
+        { text: isZh ? '产品 Web UI 信息架构' : 'Product Web UI Information Architecture', link: doc(locale, 'ui-information-architecture') },
+        { text: isZh ? '产品控制台设计基线' : 'Product Console Design Baseline', link: doc(locale, 'overview-design-baseline') },
+        { text: isZh ? '产品控制台语义映射' : 'Product Console Semantic Mapping', link: doc(locale, 'overview-semantic-mapping') },
+        { text: isZh ? '文档站设计基线' : 'Docs Site Design Baseline', link: doc(locale, 'docs-site-design-baseline') },
         { text: isZh ? '文档站架构' : 'Docs Site Architecture', link: doc(locale, 'docs-site-architecture') }
       ]
     },

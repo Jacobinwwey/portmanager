@@ -1,9 +1,14 @@
-# PortManager Overview Design Baseline
+# PortManager Product Console Design Baseline
 
 Updated: 2026-04-16
-Version: v0.1.0-docs-baseline
+Version: v0.3.0-docs-site-design-alignment
 
 ## English
+
+### Scope boundary
+This document defines the future product web control-plane baseline only.
+It does not define the public VitePress docs site.
+The docs-site publishing baseline is recorded separately in `docs/design/portmanager-docs-site-design-baseline.md`.
 
 ### Design source of truth
 The provided HTML design is the official visual mother template for the V1 Overview console.
@@ -44,6 +49,11 @@ The first real UI implementation must map to this baseline before secondary page
 If a later implementation needs to depart from this language, the document update must happen first and the change must be treated as a design decision, not a coding convenience.
 
 ## 中文
+
+### 作用范围边界
+本文档只定义未来产品 Web 控制平面的设计基线。
+它不负责定义公共 VitePress 文档站。
+文档站发布层的设计基线单独记录在 `docs/design/portmanager-docs-site-design-baseline.md`。
 
 ### 设计真源
 你提供的 HTML 设计现在已经成为 V1 Overview 控制台的官方视觉母版。

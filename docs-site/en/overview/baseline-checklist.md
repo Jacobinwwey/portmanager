@@ -10,7 +10,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-v1-baseline-checklist.md`
 > Audience: `shared` | Section: `overview` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.2.0-docs-site-baseline
+> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
 ### Purpose
 This checklist is the formal verification matrix for the first `docs-first` upload.
 Every locked decision from the agreed V1 plan must map to a concrete repository artifact before the first push to `main`.
@@ -28,7 +28,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
    - `docs/architecture/portmanager-contract-strategy.md`
    - `docs/architecture/portmanager-agent-bootstrap.md`
    - Status: complete
-3. Frontend design baseline
+3. Product web design baseline
    - `docs/design/assets/original-onesync-reference.html`
    - `docs/design/assets/portmanager-overview-reference.html`
    - `docs/design/portmanager-overview-design-baseline.md`
@@ -61,6 +61,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
    - `docs-site/`
    - `docs/specs/portmanager-docs-site-architecture.md`
    - `docs/specs/portmanager-install-distribution-contract.md`
+   - `docs/design/portmanager-docs-site-design-baseline.md`
    - `scripts/docs/extract-locales.mjs`
    - `.github/workflows/docs-pages.yml`
    - Status: complete
@@ -85,6 +86,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
 - GitHub private backup is supported with fine-grained PAT as the V1 default credential shape.
 - GitHub Pages + VitePress is the official docs publishing layer.
 - The docs site splits `Human` and `Agent` at the top level.
+- The docs-site publishing baseline is separate from the product-console baseline.
 - One-line install entrypoints are public contracts and must be marked `Planned` until implemented.
 
 ### Verification expectation before push

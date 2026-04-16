@@ -1,5 +1,5 @@
 ---
-title: "UI Information Architecture"
+title: "Product Web UI Information Architecture"
 audience: human
 persona:
   - operator
@@ -10,7 +10,12 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-ui-information-architecture.md`
 > Audience: `human` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.1.0-docs-baseline
+> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
+### Scope boundary
+This document defines the product web control-plane information architecture.
+It does not define the public VitePress docs site.
+The docs-site publishing baseline lives in `docs/design/portmanager-docs-site-design-baseline.md`.
+
 ### Baseline direction
 The UI baseline reuses the supplied operations-console visual language, but the semantics are fully rewritten for PortManager.
 The baseline is not allowed to drift into asset-management vocabulary, synthetic telemetry, or dashboard theater.
@@ -111,5 +116,6 @@ It must aggregate:
 - backup / rollback outcomes
 
 ### Design rule
-The provided HTML remains the visual mother template.
+The provided HTML remains the product web visual mother template.
+This rule applies to the future React SPA control plane, not to `docs-site/`.
 Any deviation from its core layout language must be preceded by a design baseline update in `docs/design/`.

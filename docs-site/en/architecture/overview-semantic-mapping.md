@@ -1,5 +1,5 @@
 ---
-title: "Overview Semantic Mapping"
+title: "Product Console Semantic Mapping"
 audience: human
 persona:
   - contributor
@@ -10,9 +10,10 @@ status: active
 ---
 > Source of truth: `docs/design/portmanager-overview-semantic-mapping.md`
 > Audience: `human` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.1.0-docs-baseline
+> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
 ### Purpose
 This document maps the provided HTML console skeleton into PortManager domain semantics so future UI work does not preserve the wrong nouns.
+It applies to the product control-plane UI, not to the VitePress docs site.
 
 ### Header mapping
 - `OneSync` -> `PortManager`

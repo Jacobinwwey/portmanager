@@ -1,5 +1,5 @@
 ---
-title: "Overview Design Baseline"
+title: "Product Console Design Baseline"
 audience: human
 persona:
   - contributor
@@ -10,7 +10,12 @@ status: active
 ---
 > Source of truth: `docs/design/portmanager-overview-design-baseline.md`
 > Audience: `human` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.1.0-docs-baseline
+> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
+### Scope boundary
+This document defines the future product web control-plane baseline only.
+It does not define the public VitePress docs site.
+The docs-site publishing baseline is recorded separately in `docs/design/portmanager-docs-site-design-baseline.md`.
+
 ### Design source of truth
 The provided HTML design is the official visual mother template for the V1 Overview console.
 The repository preserves:

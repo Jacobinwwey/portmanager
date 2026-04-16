@@ -1,7 +1,7 @@
 # PortManager V1 Baseline Checklist
 
 Updated: 2026-04-16
-Version: v0.2.0-docs-site-baseline
+Version: v0.3.0-docs-site-design-alignment
 
 ## English
 
@@ -22,7 +22,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
    - `docs/architecture/portmanager-contract-strategy.md`
    - `docs/architecture/portmanager-agent-bootstrap.md`
    - Status: complete
-3. Frontend design baseline
+3. Product web design baseline
    - `docs/design/assets/original-onesync-reference.html`
    - `docs/design/assets/portmanager-overview-reference.html`
    - `docs/design/portmanager-overview-design-baseline.md`
@@ -55,6 +55,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
    - `docs-site/`
    - `docs/specs/portmanager-docs-site-architecture.md`
    - `docs/specs/portmanager-install-distribution-contract.md`
+   - `docs/design/portmanager-docs-site-design-baseline.md`
    - `scripts/docs/extract-locales.mjs`
    - `.github/workflows/docs-pages.yml`
    - Status: complete
@@ -79,6 +80,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
 - GitHub private backup is supported with fine-grained PAT as the V1 default credential shape.
 - GitHub Pages + VitePress is the official docs publishing layer.
 - The docs site splits `Human` and `Agent` at the top level.
+- The docs-site publishing baseline is separate from the product-console baseline.
 - One-line install entrypoints are public contracts and must be marked `Planned` until implemented.
 
 ### Verification expectation before push
@@ -108,7 +110,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
    - `docs/architecture/portmanager-contract-strategy.md`
    - `docs/architecture/portmanager-agent-bootstrap.md`
    - 状态：完成
-3. 前端设计基线
+3. 产品 Web 设计基线
    - `docs/design/assets/original-onesync-reference.html`
    - `docs/design/assets/portmanager-overview-reference.html`
    - `docs/design/portmanager-overview-design-baseline.md`
@@ -141,6 +143,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
    - `docs-site/`
    - `docs/specs/portmanager-docs-site-architecture.md`
    - `docs/specs/portmanager-install-distribution-contract.md`
+   - `docs/design/portmanager-docs-site-design-baseline.md`
    - `scripts/docs/extract-locales.mjs`
    - `.github/workflows/docs-pages.yml`
    - 状态：完成
@@ -165,6 +168,7 @@ Every locked decision from the agreed V1 plan must map to a concrete repository 
 - GitHub 私有备份受支持，V1 默认认证形态为 fine-grained PAT。
 - GitHub Pages + VitePress 是官方文档发布层。
 - 文档站在顶层明确区分 `Human` 与 `Agent`。
+- 文档站发布基线与产品控制台基线是两套不同约束。
 - 一行安装入口属于公共契约，在真正实现前必须标记为 `Planned`。
 
 ### 推送前验证要求

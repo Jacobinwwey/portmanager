@@ -86,8 +86,8 @@ export const contentMap = [
     section: 'architecture',
     status: 'active',
     titles: {
-      en: 'UI Information Architecture',
-      zh: 'UI 信息架构'
+      en: 'Product Web UI Information Architecture',
+      zh: '产品 Web UI 信息架构'
     }
   },
   {
@@ -177,8 +177,8 @@ export const contentMap = [
     section: 'architecture',
     status: 'active',
     titles: {
-      en: 'Overview Design Baseline',
-      zh: 'Overview 设计基线'
+      en: 'Product Console Design Baseline',
+      zh: '产品控制台设计基线'
     }
   },
   {
@@ -190,8 +190,21 @@ export const contentMap = [
     section: 'architecture',
     status: 'active',
     titles: {
-      en: 'Overview Semantic Mapping',
-      zh: 'Overview 语义映射'
+      en: 'Product Console Semantic Mapping',
+      zh: '产品控制台语义映射'
+    }
+  },
+  {
+    id: 'docs-site-design-baseline',
+    sourcePath: 'docs/design/portmanager-docs-site-design-baseline.md',
+    route: 'architecture/docs-site-design-baseline',
+    audience: 'shared',
+    persona: ['contributor', 'admin'],
+    section: 'architecture',
+    status: 'active',
+    titles: {
+      en: 'Docs Site Design Baseline',
+      zh: '文档站设计基线'
     }
   },
   {

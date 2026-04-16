@@ -10,7 +10,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-docs-site-architecture.md`
 > Audience: `shared` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.2.0-docs-site-baseline
+> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
 ### Purpose
 This document locks the documentation publishing architecture for PortManager.
 The repository keeps raw bilingual specifications as the source of truth, while VitePress acts as the public publishing layer for GitHub Pages.
@@ -21,6 +21,13 @@ The repository keeps raw bilingual specifications as the source of truth, while 
 - locale generation: `scripts/docs/extract-locales.mjs`
 - public hosting: GitHub Pages
 - deployment flow: `main -> GitHub Actions -> GitHub Pages`
+
+### Design baseline boundary
+- Product control-plane baseline: `docs/design/portmanager-overview-design-baseline.md`
+- Product control-plane semantic mapping: `docs/design/portmanager-overview-semantic-mapping.md`
+- Docs-site publishing baseline: `docs/design/portmanager-docs-site-design-baseline.md`
+- The docs site may reference the VitePress structure used by `OpenAvatarChat`, but only as a design reference rather than a cloning target.
+- The docs site should prefer standard VitePress `home` and `doc` layouts before custom wrappers.
 
 ### Route contract
 The public site treats the following route families as stable interfaces:

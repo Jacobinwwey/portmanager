@@ -1,5 +1,5 @@
 ---
-title: "Overview 语义映射"
+title: "产品控制台语义映射"
 audience: human
 persona:
   - contributor
@@ -10,9 +10,10 @@ status: active
 ---
 > 真源文档：`docs/design/portmanager-overview-semantic-mapping.md`
 > Audience：`human` | Section：`architecture` | Status：`active`
-> Updated：2026-04-16 | Version：v0.1.0-docs-baseline
+> Updated：2026-04-16 | Version：v0.3.0-docs-site-design-alignment
 ### 用途
 这份文档负责把你提供的 HTML 控制台骨架映射成 PortManager 领域语义，避免后续 UI 工作保留错误的名词体系。
+它服务于产品控制平面 UI，而不是 VitePress 文档站。
 
 ### Header 映射
 - `OneSync` -> `PortManager`

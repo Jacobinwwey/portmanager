@@ -1,12 +1,13 @@
-# PortManager Overview Semantic Mapping
+# PortManager Product Console Semantic Mapping
 
 Updated: 2026-04-16
-Version: v0.1.0-docs-baseline
+Version: v0.3.0-docs-site-design-alignment
 
 ## English
 
 ### Purpose
 This document maps the provided HTML console skeleton into PortManager domain semantics so future UI work does not preserve the wrong nouns.
+It applies to the product control-plane UI, not to the VitePress docs site.
 
 ### Header mapping
 - `OneSync` -> `PortManager`
@@ -44,6 +45,7 @@ The original reference does not include enough semantics for PortManager V1, so 
 
 ### 用途
 这份文档负责把你提供的 HTML 控制台骨架映射成 PortManager 领域语义，避免后续 UI 工作保留错误的名词体系。
+它服务于产品控制平面 UI，而不是 VitePress 文档站。
 
 ### Header 映射
 - `OneSync` -> `PortManager`

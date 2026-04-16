@@ -42,14 +42,16 @@ const sectionContent = {
     },
     architecture: {
       eyebrow: 'Architecture',
-      title: 'The system decisions that the implementation must honor.',
-      lede: 'Architecture is where PortManager records invariants: service split, state ownership, contract strategy, bootstrap order, and the frozen UI language.',
+      title: 'System decisions for both the product UI and the docs publishing layer.',
+      lede: 'Architecture records PortManager invariants: service split, state ownership, contract strategy, bootstrap order, and the boundary between the product console baseline and the docs-site baseline.',
       sectionTitle: 'Architecture Documents',
       links: [
         { eyebrow: 'Core', title: 'V1 Architecture', description: 'Top-level service split, topology, and lifecycle model.', href: '/en/architecture/v1-architecture' },
         { eyebrow: 'Contracts', title: 'Contract Strategy', description: 'Why OpenAPI + JSON Schema + codegen is non-negotiable.', href: '/en/architecture/contract-strategy' },
         { eyebrow: 'Bootstrap', title: 'Agent Bootstrap', description: 'Ordered bootstrap flow and rescue boundary.', href: '/en/architecture/agent-bootstrap' },
-        { eyebrow: 'Design', title: 'Overview Design Baseline', description: 'The official mother-template and layout language.', href: '/en/architecture/overview-design-baseline' },
+        { eyebrow: 'Product UI', title: 'Product Console Design Baseline', description: 'The official mother-template for the future React SPA control plane.', href: '/en/architecture/overview-design-baseline' },
+        { eyebrow: 'Product UI', title: 'Product Console Semantic Mapping', description: 'How the supplied console skeleton maps into PortManager nouns.', href: '/en/architecture/overview-semantic-mapping' },
+        { eyebrow: 'Docs Site', title: 'Docs Site Design Baseline', description: 'The docs-first VitePress publishing baseline and visual rules.', href: '/en/architecture/docs-site-design-baseline' },
         { eyebrow: 'Publishing', title: 'Docs Site Architecture', description: 'How raw bilingual truth becomes the published docs site.', href: '/en/architecture/docs-site-architecture' }
       ]
     },
@@ -88,14 +90,16 @@ const sectionContent = {
     },
     architecture: {
       eyebrow: 'Architecture',
-      title: '实现必须尊重的系统决策。',
-      lede: 'Architecture 用来记录 PortManager 的不变量：服务拆分、状态归属、契约策略、bootstrap 顺序，以及冻结的 UI 语言。',
+      title: '同时约束产品 UI 与文档发布层的系统决策。',
+      lede: 'Architecture 用来记录 PortManager 的不变量：服务拆分、状态归属、契约策略、bootstrap 顺序，以及产品控制台基线与文档站基线之间的边界。',
       sectionTitle: 'Architecture 文档',
       links: [
         { eyebrow: 'Core', title: 'V1 架构', description: '顶层服务拆分、拓扑与生命周期模型。', href: '/zh/architecture/v1-architecture' },
         { eyebrow: 'Contracts', title: '契约策略', description: '为什么 OpenAPI + JSON Schema + codegen 不可谈判。', href: '/zh/architecture/contract-strategy' },
         { eyebrow: 'Bootstrap', title: 'Agent Bootstrap', description: '按顺序的 bootstrap 流程与 rescue 边界。', href: '/zh/architecture/agent-bootstrap' },
-        { eyebrow: 'Design', title: 'Overview 设计基线', description: '官方视觉母版与布局语言。', href: '/zh/architecture/overview-design-baseline' },
+        { eyebrow: 'Product UI', title: '产品控制台设计基线', description: '未来 React SPA 控制平面的官方母版。', href: '/zh/architecture/overview-design-baseline' },
+        { eyebrow: 'Product UI', title: '产品控制台语义映射', description: '提供的控制台骨架如何映射为 PortManager 领域名词。', href: '/zh/architecture/overview-semantic-mapping' },
+        { eyebrow: 'Docs Site', title: '文档站设计基线', description: 'docs-first 的 VitePress 发布基线与视觉规则。', href: '/zh/architecture/docs-site-design-baseline' },
         { eyebrow: 'Publishing', title: '文档站架构', description: '双语原始真源如何变成公开文档站。', href: '/zh/architecture/docs-site-architecture' }
       ]
     },
