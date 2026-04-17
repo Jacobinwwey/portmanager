@@ -27,7 +27,7 @@ As of `2026-04-17`, that mismatch is no longer mixed with gate uncertainty: GitH
 
 Because of that mismatch, the repeatable mainline acceptance gate should now be treated as completed engineering precondition rather than active recovery work.
 `pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml` therefore mark Unit 0 as achieved branch discipline: they harden delivery and branch protection, but they do not by themselves close Milestone 1.
-Unit 1 controller surface parity has now landed, so active implementation focus shifts to Unit 2 CLI parity plus Unit 3 Web live-data parity while Unit 0 remains a mandatory guardrail.
+Units 1 and 2 controller-plus-CLI parity have now landed, so active implementation focus shifts to Unit 3 Web live-data parity plus Unit 4 agent steady-state integration while Unit 0 remains a mandatory guardrail.
 
 ## Problem Frame
 
@@ -180,7 +180,7 @@ flowchart TD
 **Verification:**
 - `tests/controller/host-rule-policy.test.ts` proves real host/rule/policy surface parity, host probe/bootstrap lifecycle, backup-aware destructive rule mutation, and 404 guards alongside existing reliability primitives.
 
-- [ ] **Unit 2: CLI Public Surface Expansion**
+- [x] **Unit 2: CLI Public Surface Expansion**
 
 **Goal:** Make the CLI a truthful peer to the controller for host, bridge-rule, and exposure-policy inspection and core write operations.
 
@@ -209,6 +209,7 @@ flowchart TD
 
 **Verification:**
 - CLI tests prove contract-aligned read and write behavior for the missing public resources.
+- Status update: `crates/portmanager-cli/tests/host_rule_policy_cli.rs` now proves list/get/create/probe/bootstrap for hosts, list/get/create/update/delete for bridge rules, and get/set for exposure policies.
 
 - [ ] **Unit 3: Web Live Data and Route Parity**
 
@@ -528,7 +529,7 @@ flowchart TD
 **验证：**
 - controller 测试套件在现有 reliability primitives 之外，补充证明真实 host/rule/policy 表面一致性。
 
-- [ ] **Unit 2：CLI 公共表面扩展**
+- [x] **Unit 2：CLI 公共表面扩展**
 
 **目标：** 让 CLI 在 host、bridge-rule 与 exposure-policy 的检查及核心写操作上，成为 controller 的真实同行。
 
@@ -557,6 +558,7 @@ flowchart TD
 
 **验证：**
 - CLI 测试证明缺失公共资源的 contract-aligned 读写行为已经补齐。
+- 状态更新：`crates/portmanager-cli/tests/host_rule_policy_cli.rs` 已证明 hosts 的 list/get/create/probe/bootstrap、bridge rules 的 list/get/create/update/delete，以及 exposure policies 的 get/set。
 
 - [ ] **Unit 3：Web 实时数据与路由一致性**
 
