@@ -599,7 +599,9 @@ export function createMockHostDetailState(): HostDetailState {
         hostId: 'host_alpha',
         ruleId: 'rule_alpha_https',
         startedAt: '2026-04-16T17:41:00.000Z',
-        finishedAt: '2026-04-16T17:43:00.000Z'
+        finishedAt: '2026-04-16T17:43:00.000Z',
+        resultSummary: 'policy apply completed for rule_alpha_https with active rollback point rp_alpha_001',
+        rollbackPointId: 'rp_alpha_001'
       },
       {
         id: 'op_diag_001',
@@ -608,7 +610,19 @@ export function createMockHostDetailState(): HostDetailState {
         hostId: 'host_alpha',
         ruleId: 'rule_alpha_https',
         startedAt: '2026-04-16T17:49:00.000Z',
-        finishedAt: '2026-04-16T17:52:00.000Z'
+        finishedAt: '2026-04-16T17:52:00.000Z',
+        resultSummary: 'diagnostics confirmed https relay and refreshed host readiness evidence'
+      },
+      {
+        id: 'op_backup_required_001',
+        type: 'backup',
+        state: 'degraded',
+        hostId: 'host_alpha',
+        startedAt: '2026-04-16T18:11:00.000Z',
+        finishedAt: '2026-04-16T18:12:00.000Z',
+        resultSummary: 'required GitHub backup is not configured',
+        backupId: 'backup_alpha_002',
+        rollbackPointId: 'rp_alpha_002'
       },
       {
         id: 'op_verify_001',
@@ -1223,6 +1237,17 @@ function HostDetailMain(props: { state: HostDetailState }) {
           h('li', { className: 'pm-list-item', key: operation.id }, [
             h('div', { key: 'line1' }, `${operation.id} · ${operation.type}`),
             h('div', { className: 'pm-microcopy', key: 'line2' }, `rule ${operation.ruleId ?? 'n/a'}`),
+            h('div', { key: 'line3' }, operation.resultSummary ?? 'No summary'),
+            h(
+              'div',
+              { className: 'pm-artifact', key: 'line4' },
+              [
+                operation.backupId ? `backup ${operation.backupId}` : null,
+                operation.rollbackPointId ? `rollback ${operation.rollbackPointId}` : null
+              ]
+                .filter(Boolean)
+                .join(' · ') || 'no linked recovery evidence'
+            ),
             h(StatusBadge, { key: 'badge', state: operation.state })
           ])
         )

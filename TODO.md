@@ -29,6 +29,7 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] Milestone 2: explicit drift-driven degraded state visibility across Web, CLI, and API.
 - [x] Milestone 2: filtered backup, diagnostics, and rollback inspection with CLI rollback execution.
 - [x] Milestone 2: best_effort versus required backup policy enforcement with visible remote-backup status.
+- [x] Milestone 2: filtered operation inventory with recovery-linked summaries across Web, CLI, and API.
 
 ## 中文
 
@@ -56,3 +57,4 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] 里程碑 2：在 Web、CLI 与 API 中显式暴露 drift 驱动的 degraded 状态。
 - [x] 里程碑 2：补全 backup、diagnostics、rollback 的筛选检查面，并支持 CLI 执行 rollback。
 - [x] 里程碑 2：落地 best_effort 与 required 的 backup policy 行为差异，并显式暴露远端备份状态。
+- [x] 里程碑 2：补全 operation 列表筛选与 recovery 证据摘要，并在 Web、CLI、API 中统一暴露。

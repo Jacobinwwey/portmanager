@@ -24,6 +24,7 @@ enum Commands {
     Events(EventsCommand),
     HealthChecks(HealthChecksCommand),
     Operation(OperationCommand),
+    Operations(OperationsCommand),
     RollbackPoints(RollbackPointsCommand),
 }
 
@@ -77,9 +78,20 @@ struct OperationCommand {
     command: OperationSubcommand,
 }
 
+#[derive(Args)]
+struct OperationsCommand {
+    #[command(subcommand)]
+    command: OperationsSubcommand,
+}
+
 #[derive(Subcommand)]
 enum OperationSubcommand {
     Get(OperationGetArgs),
+}
+
+#[derive(Subcommand)]
+enum OperationsSubcommand {
+    List(OperationsListArgs),
 }
 
 #[derive(Args)]
@@ -151,6 +163,22 @@ struct HealthChecksListArgs {
     host_id: Option<String>,
     #[arg(long)]
     rule_id: Option<String>,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
+struct OperationsListArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long)]
+    host_id: Option<String>,
+    #[arg(long)]
+    rule_id: Option<String>,
+    #[arg(long)]
+    state: Option<String>,
+    #[arg(long)]
+    r#type: Option<String>,
     #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
     controller_base_url: String,
 }
@@ -255,6 +283,9 @@ async fn execute(cli: Cli) -> ExecutionResult {
         },
         Commands::Operation(command) => match command.command {
             OperationSubcommand::Get(args) => run_operation_get(args).await,
+        },
+        Commands::Operations(command) => match command.command {
+            OperationsSubcommand::List(args) => run_operations_list(args).await,
         },
         Commands::RollbackPoints(command) => match command.command {
             RollbackPointsSubcommand::Apply(args) => run_rollback_points_apply(args).await,
@@ -469,6 +500,56 @@ async fn run_health_checks_list(args: HealthChecksListArgs) -> ExecutionResult {
             error,
             "health check fetch failed".to_string(),
         ),
+    }
+}
+
+async fn run_operations_list(args: OperationsListArgs) -> ExecutionResult {
+    match fetch_operations(
+        &Client::new(),
+        &args.controller_base_url,
+        args.host_id.as_deref(),
+        args.rule_id.as_deref(),
+        args.state.as_deref(),
+        args.r#type.as_deref(),
+    )
+    .await
+    {
+        Ok(operations) => {
+            if args.json {
+                ExecutionResult::success_json(&operations)
+            } else {
+                let lines = operations["items"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(|operation| {
+                        format!(
+                            "{} {} {} {} {} {} {}",
+                            operation["finishedAt"]
+                                .as_str()
+                                .or_else(|| operation["startedAt"].as_str())
+                                .unwrap_or("unknown"),
+                            operation["id"].as_str().unwrap_or("unknown"),
+                            operation["type"].as_str().unwrap_or("unknown"),
+                            operation["state"].as_str().unwrap_or("unknown"),
+                            operation["resultSummary"]
+                                .as_str()
+                                .unwrap_or("missing summary"),
+                            operation["backupId"].as_str().unwrap_or("backup n/a"),
+                            operation["rollbackPointId"]
+                                .as_str()
+                                .unwrap_or("rollback n/a"),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                ExecutionResult::success_text(lines)
+            }
+        }
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "operation fetch failed".to_string())
+        }
     }
 }
 
@@ -816,6 +897,65 @@ async fn fetch_diagnostics(
     }
     if let Some(rule_id) = rule_id {
         query.push(("ruleId", rule_id));
+    }
+
+    let response = client
+        .get(url)
+        .query(&query)
+        .send()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: None,
+        })?;
+
+    let status = response.status();
+    if !status.is_success() {
+        return Err(JsonErrorOutput {
+            error: "controller_error",
+            message: format!("controller returned unexpected status {}", status.as_u16()),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        });
+    }
+
+    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
+    })
+}
+
+async fn fetch_operations(
+    client: &Client,
+    controller_base_url: &str,
+    host_id: Option<&str>,
+    rule_id: Option<&str>,
+    state: Option<&str>,
+    operation_type: Option<&str>,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!("{}/operations", controller_base_url.trim_end_matches('/'));
+    let mut query: Vec<(&str, &str)> = Vec::new();
+    if let Some(host_id) = host_id {
+        query.push(("hostId", host_id));
+    }
+    if let Some(rule_id) = rule_id {
+        query.push(("ruleId", rule_id));
+    }
+    if let Some(state) = state {
+        query.push(("state", state));
+    }
+    if let Some(operation_type) = operation_type {
+        query.push(("type", operation_type));
     }
 
     let response = client

@@ -67,6 +67,14 @@ test('host detail shell surfaces backup policy modes and remote backup status', 
   assert.match(html, /not_configured/i)
 })
 
+test('host detail shell surfaces operation summaries and linked recovery evidence', () => {
+  const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
+
+  assert.match(html, /required github backup is not configured/i)
+  assert.match(html, /backup_alpha_002/i)
+  assert.match(html, /rp_alpha_002/i)
+})
+
 test('preview document embeds styles and web skeleton copy', () => {
   const html = renderWebPreviewDocument('overview')
 

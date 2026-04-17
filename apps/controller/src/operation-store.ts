@@ -17,6 +17,13 @@ export type OperationDetail = components['schemas']['OperationDetail'] & {
 export type OperationSummary = components['schemas']['OperationSummary']
 export type RollbackPoint = components['schemas']['RollbackPoint']
 
+export interface OperationListFilters {
+  hostId?: string
+  ruleId?: string
+  type?: string
+  state?: string
+}
+
 export interface FinishOperationInput {
   state: Extract<OperationDetail['state'], 'succeeded' | 'failed' | 'degraded' | 'cancelled'>
   resultSummary?: string
@@ -69,7 +76,7 @@ export interface OperationStore {
   close(): void
   enqueueOperation(input: EnqueueOperationInput): OperationAccepted
   getOperation(id: string): OperationDetail | null
-  listOperations(): OperationSummary[]
+  listOperations(filters?: OperationListFilters): OperationSummary[]
   markRunning(id: string): OperationDetail
   markFinished(id: string, input: FinishOperationInput): OperationDetail
   createBackup(input: CreateBackupInput): BackupSummary
@@ -169,7 +176,10 @@ function rowToSummary(row: OperationRow): OperationSummary {
     hostId: row.host_id ?? undefined,
     ruleId: row.rule_id ?? undefined,
     startedAt: row.started_at,
-    finishedAt: row.finished_at ?? undefined
+    finishedAt: row.finished_at ?? undefined,
+    ...(row.result_summary ? { resultSummary: row.result_summary } : {}),
+    ...(row.backup_id ? { backupId: row.backup_id } : {}),
+    ...(row.rollback_point_id ? { rollbackPointId: row.rollback_point_id } : {})
   }
 }
 
@@ -512,8 +522,28 @@ export function createOperationStore(options: { databasePath: string }): Operati
       const row = getOperation.get(id) as OperationRow | undefined
       return row ? rowToDetail(row) : null
     },
-    listOperations() {
-      return (listOperations.all() as unknown as OperationRow[]).map((row) => rowToSummary(row))
+    listOperations(filters) {
+      return (listOperations.all() as unknown as OperationRow[])
+        .map((row) => rowToSummary(row))
+        .filter((row) => {
+          if (filters?.hostId && row.hostId !== filters.hostId) {
+            return false
+          }
+
+          if (filters?.ruleId && row.ruleId !== filters.ruleId) {
+            return false
+          }
+
+          if (filters?.type && row.type !== filters.type) {
+            return false
+          }
+
+          if (filters?.state && row.state !== filters.state) {
+            return false
+          }
+
+          return true
+        })
     },
     markRunning(id) {
       const current = requireOperation(id)

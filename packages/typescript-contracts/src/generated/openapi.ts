@@ -653,7 +653,12 @@ export interface paths {
         /** List operations */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    hostId?: string;
+                    ruleId?: string;
+                    state?: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
+                    type?: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -1011,10 +1016,13 @@ export interface components {
             summary: string;
         };
         OperationSummary: {
+            backupId?: string;
             /** Format: date-time */
             finishedAt?: string;
             hostId?: string;
             id: string;
+            resultSummary?: string;
+            rollbackPointId?: string;
             ruleId?: string;
             /** Format: date-time */
             startedAt: string;

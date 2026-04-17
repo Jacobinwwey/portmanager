@@ -166,6 +166,68 @@ test('controller server exposes queued operations over REST', async () => {
   }
 })
 
+test('controller server filters operations and keeps linked recovery evidence in summaries', async () => {
+  const { directory, databasePath } = tempDbPath()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const runner = createOperationRunner({ store, eventBus })
+    const server = createControllerServer({ store, eventBus })
+
+    store.enqueueOperation({
+      id: 'op_backup_required_001',
+      type: 'backup',
+      initiator: 'web',
+      hostId: 'host_alpha'
+    })
+    store.enqueueOperation({
+      id: 'op_diag_001',
+      type: 'diagnostics',
+      initiator: 'web',
+      hostId: 'host_alpha',
+      ruleId: 'rule_alpha_https'
+    })
+
+    await runner.run('op_backup_required_001', async () => ({
+      state: 'degraded',
+      resultSummary: 'required GitHub backup is not configured',
+      backupId: 'backup_alpha_002',
+      rollbackPointId: 'rp_alpha_002'
+    }))
+    await runner.run('op_diag_001', async () => ({
+      resultSummary: 'diagnostics confirmed https relay and refreshed host readiness evidence'
+    }))
+
+    const listening = await server.listen(0)
+
+    try {
+      const response = await fetch(
+        `${listening.baseUrl}/operations?hostId=host_alpha&state=degraded&type=backup`
+      )
+      assert.equal(response.status, 200)
+
+      const payload = (await response.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+
+      assert.equal(payload.items.length, 1)
+      assert.equal(payload.items[0]?.id, 'op_backup_required_001')
+      assert.equal(payload.items[0]?.state, 'degraded')
+      assert.equal(payload.items[0]?.backupId, 'backup_alpha_002')
+      assert.equal(payload.items[0]?.rollbackPointId, 'rp_alpha_002')
+      assert.equal(
+        payload.items[0]?.resultSummary,
+        'required GitHub backup is not configured'
+      )
+    } finally {
+      await server.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
 test('controller server streams operation state transitions over SSE', async () => {
   const { directory, databasePath } = tempDbPath()
 

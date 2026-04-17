@@ -660,3 +660,100 @@ fn rollback_points_apply_json_waits_for_terminal_operation() {
     assert_eq!(parsed["rollbackPointId"], "rp_op_backup_alpha_001");
     assert_eq!(server.hits_for("/operations/op_rollback_001"), 2);
 }
+
+#[test]
+fn operations_list_json_filters_by_host_state_and_type() {
+    let server = MockHttpServer::start(vec![(
+        "/operations?hostId=host_alpha&state=degraded&type=backup",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "op_backup_required_001",
+                        "type": "backup",
+                        "state": "degraded",
+                        "hostId": "host_alpha",
+                        "startedAt": "2026-04-16T20:00:00.000Z",
+                        "finishedAt": "2026-04-16T20:00:02.000Z",
+                        "resultSummary": "required GitHub backup is not configured",
+                        "backupId": "backup_alpha_002",
+                        "rollbackPointId": "rp_alpha_002"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &[
+            "operations",
+            "list",
+            "--json",
+            "--host-id",
+            "host_alpha",
+            "--state",
+            "degraded",
+            "--type",
+            "backup",
+        ],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["items"][0]["id"], "op_backup_required_001");
+    assert_eq!(parsed["items"][0]["backupId"], "backup_alpha_002");
+    assert_eq!(parsed["items"][0]["rollbackPointId"], "rp_alpha_002");
+}
+
+#[test]
+fn operations_list_text_surfaces_result_summary_and_recovery_links() {
+    let server = MockHttpServer::start(vec![(
+        "/operations?hostId=host_alpha&state=degraded&type=backup",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "op_backup_required_001",
+                        "type": "backup",
+                        "state": "degraded",
+                        "hostId": "host_alpha",
+                        "startedAt": "2026-04-16T20:00:00.000Z",
+                        "finishedAt": "2026-04-16T20:00:02.000Z",
+                        "resultSummary": "required GitHub backup is not configured",
+                        "backupId": "backup_alpha_002",
+                        "rollbackPointId": "rp_alpha_002"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &[
+            "operations",
+            "list",
+            "--host-id",
+            "host_alpha",
+            "--state",
+            "degraded",
+            "--type",
+            "backup",
+        ],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("required GitHub backup is not configured"));
+    assert!(stdout.contains("backup_alpha_002"));
+    assert!(stdout.contains("rp_alpha_002"));
+}

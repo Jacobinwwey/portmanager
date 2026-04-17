@@ -65,7 +65,14 @@ export function createControllerServer(options: {
     const requestUrl = new URL(request.url ?? '/', 'http://127.0.0.1')
 
     if (request.method === 'GET' && requestUrl.pathname === '/operations') {
-      sendJson(response, 200, { items: store.listOperations() })
+      sendJson(response, 200, {
+        items: store.listOperations({
+          hostId: requestUrl.searchParams.get('hostId') ?? undefined,
+          ruleId: requestUrl.searchParams.get('ruleId') ?? undefined,
+          state: requestUrl.searchParams.get('state') ?? undefined,
+          type: requestUrl.searchParams.get('type') ?? undefined
+        })
+      })
       return
     }
 
