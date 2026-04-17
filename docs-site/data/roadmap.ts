@@ -21,12 +21,22 @@ export interface RoadmapMilestone {
   engineeringWork: { en: string[]; zh: string[] }
   entryCriteria: { en: string[]; zh: string[] }
   tradeoffs: { en: string[]; zh: string[] }
+  verifiedNow: { en: string[]; zh: string[] }
+  blockingGaps: { en: string[]; zh: string[] }
+  developerFocus: { en: string[]; zh: string[] }
   focus?: {
     label: { en: string; zh: string }
     body: { en: string; zh: string }
   }
   dependencies: string[]
   docs: string[]
+}
+
+export interface RoadmapProgressBucket {
+  id: string
+  tone: 'safe' | 'next' | 'planned'
+  label: { en: string; zh: string }
+  items: { en: string[]; zh: string[] }
 }
 
 export const roadmapPrinciples = {
@@ -132,6 +142,79 @@ export const schemeCProfile: RoadmapProfile = {
   docs: ['toward-c-strategy', 'milestones', 'v1-architecture', 'contract-strategy']
 }
 
+export const roadmapDeveloperProgress = {
+  title: {
+    en: 'Development Progress',
+    zh: '开发进度'
+  },
+  lede: {
+    en: 'This page now exposes what is already real, what is still blocking acceptance, and what developers should advance next before milestone status moves again.',
+    zh: '这个页面现在直接暴露哪些能力已经真实存在、哪些缺口仍在阻塞验收、以及开发者在里程碑状态继续推进前应该先做什么。'
+  },
+  buckets: [
+    {
+      id: 'verified',
+      tone: 'safe',
+      label: {
+        en: 'Verified Now',
+        zh: '当前已验证'
+      },
+      items: {
+        en: [
+          'Docs-first baseline, contracts, and roadmap sequencing are locked.',
+          'Backup, rollback, diagnostics, drift, event history, and recovery evidence are already proved in controller, CLI, and milestone tests.',
+          'Mainline documentation now distinguishes contractual surface from delivered surface.'
+        ],
+        zh: [
+          'Docs-first 基线、契约和路线排序已经锁定。',
+          'backup、rollback、diagnostics、drift、event history、recovery 证据已经在 controller、CLI、milestone 测试中被证明。',
+          '主线文档现在已经明确区分契约表面与已交付表面。'
+        ]
+      }
+    },
+    {
+      id: 'in-progress',
+      tone: 'next',
+      label: {
+        en: 'In Progress',
+        zh: '进行中'
+      },
+      items: {
+        en: [
+          'Milestone 1 acceptance closure on real hosts, bridge rules, exposure policies, live web parity, and agent steady-state service.',
+          'Milestone 2 reliability acceptance on the same live cross-surface model instead of branch-only evidence.',
+          'Roadmap status sync between root specs, docs-site detail pages, and roadmap index.'
+        ],
+        zh: [
+          '里程碑 1 正在补齐真实 hosts、bridge rules、exposure policies、live web 一致性与 agent 稳态服务。',
+          '里程碑 2 正在把可靠性验收建立在同一套 live 跨界面模型上，而不是只靠分支局部证据。',
+          '路线状态正在 root specs、docs-site 详情页和 roadmap 首页之间保持同步。'
+        ]
+      }
+    },
+    {
+      id: 'developer-focus',
+      tone: 'planned',
+      label: {
+        en: 'Developer Focus',
+        zh: '开发者下一步'
+      },
+      items: {
+        en: [
+          'Make controller host, bridge-rule, and exposure-policy resources real.',
+          'Mirror those resources into CLI commands and live web views before advancing milestone status.',
+          'Move the agent from file-backed CLI skeleton to the locked HTTP-over-Tailscale steady-state boundary without breaking evidence artifacts.'
+        ],
+        zh: [
+          '先把 controller 的 host、bridge-rule、exposure-policy 资源做成真实表面。',
+          '在提升里程碑状态前，把这些表面同步镜像到 CLI 命令和 live Web 视图。',
+          '在不破坏证据产物的前提下，把 agent 从文件式 CLI 骨架推进到锁定的 HTTP-over-Tailscale 稳态边界。'
+        ]
+      }
+    }
+  ] satisfies RoadmapProgressBucket[]
+}
+
 export const roadmapMilestones: RoadmapMilestone[] = [
   {
     id: 'm1',
@@ -161,6 +244,42 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     tradeoffs: {
       en: ['No PostgreSQL default yet.', 'No broad platform support yet.', 'No Agent-First Distributed Platform starting posture.'],
       zh: ['暂不把 PostgreSQL 设为默认。', '暂不做广平台支持。', '暂不以 Agent-First Distributed Platform 作为起手姿态。']
+    },
+    verifiedNow: {
+      en: [
+        'Controller operations, backups, diagnostics, rollback points, and event replay surfaces are already real.',
+        'CLI inspection flows for operations, backups, diagnostics, health checks, and rollback points are already real.',
+        'Milestone verification already proves backup-before-mutation, diagnostics evidence, rollback evidence, and degraded-state history.'
+      ],
+      zh: [
+        'controller 的 operations、backups、diagnostics、rollback points、event replay 表面已经真实存在。',
+        'CLI 的 operations、backups、diagnostics、health checks、rollback points 检查流已经真实存在。',
+        '里程碑验证已经证明变更前备份、诊断证据、回滚证据与 degraded 状态历史。'
+      ]
+    },
+    blockingGaps: {
+      en: [
+        'Real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources are still missing.',
+        'Web roadmap IA still relies on mock-only overview, host detail, and operations shells.',
+        'Agent steady-state service over HTTP over Tailscale is still missing.'
+      ],
+      zh: [
+        '真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源仍然缺失。',
+        'Web 的 roadmap 信息架构仍然依赖 mock-only 的 overview、host detail、operations shell。',
+        '基于 HTTP over Tailscale 的 agent 稳态服务仍然缺失。'
+      ]
+    },
+    developerFocus: {
+      en: [
+        'Build controller source-of-truth resources for hosts, rules, and policies.',
+        'Mirror those resources into CLI and live web routes without losing current verification coverage.',
+        'Keep Milestone 1 proof green while removing mock-only page behavior.'
+      ],
+      zh: [
+        '先补齐 controller 中作为真源的 hosts、rules、policies 资源。',
+        '在不丢失当前验证覆盖的前提下，把这些资源同步到 CLI 和 live Web 路由。',
+        '在移除 mock-only 页面行为时，保持里程碑 1 验证持续为绿。'
+      ]
     },
     dependencies: [],
     docs: ['product-spec', 'v1-architecture', 'contract-strategy', 'ui-information-architecture', 'milestones']
@@ -194,6 +313,42 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       en: ['Still not broad multi-platform expansion.', 'Still not generic fleet orchestration.', 'PostgreSQL remains optional until there is real pressure.'],
       zh: ['仍然不先做广义多平台扩展。', '仍然不先做通用 fleet 编排。', '在真实压力出现前，PostgreSQL 继续保持可选迁移面。']
     },
+    verifiedNow: {
+      en: [
+        'Backup policy modes already behave differently and expose remote-backup status evidence.',
+        'Drift detection already records explicit degraded state and recovery-linked summaries.',
+        'Event history, operation detail replay paths, and rollback inspection are already richer than the original skeleton.'
+      ],
+      zh: [
+        'backup policy 模式已经具备真实行为差异，并暴露远端备份状态证据。',
+        'drift detection 已经记录显式 degraded 状态与 recovery 关联摘要。',
+        'event history、operation detail replay path、rollback inspection 已经比最初骨架更完整。'
+      ]
+    },
+    blockingGaps: {
+      en: [
+        'Web still lacks live-data parity for the broader reliability surfaces.',
+        'Host/rule/policy public surfaces remain incomplete, so cross-interface reliability cannot yet be declared finished.',
+        'Milestone 2 still depends on Milestone 1 parity closure before acceptance language can advance.'
+      ],
+      zh: [
+        'Web 仍然缺少覆盖更广可靠性表面的 live-data 一致性。',
+        'host/rule/policy 公共表面仍不完整，所以还不能宣布跨界面可靠性已经完成。',
+        '在里程碑 1 一致性闭环前，里程碑 2 仍不能推进到验收完成表述。'
+      ]
+    },
+    developerFocus: {
+      en: [
+        'Finish Milestone 1 public-surface parity first, then harden reliability UX on real surfaces.',
+        'Keep one evidence model across controller, CLI, and web instead of growing separate reliability stories.',
+        'Use the same contracts and replay links for degraded state, backup policy, diagnostics, and rollback evidence.'
+      ],
+      zh: [
+        '先完成里程碑 1 公共表面一致性，再把可靠性 UX 加固到真实表面上。',
+        '保持 controller、CLI、web 共享同一套证据模型，而不是长出三套不同的可靠性叙事。',
+        '让 degraded 状态、backup policy、diagnostics、rollback 证据继续共用同一套契约与 replay 链路。'
+      ]
+    },
     dependencies: ['m1'],
     docs: ['backup-rollback-policy', 'snapshot-diagnostics', 'sdk-docker', 'milestones']
   },
@@ -225,6 +380,42 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     tradeoffs: {
       en: ['Do not start with controller/agent/event/policy/audit full separation in V1.', 'Do not let infrastructure elegance outrun delivered value.', 'Do not dilute contract governance while broadening the platform.'],
       zh: ['不要在 V1 起点就做 controller/agent/event/policy/audit 全量拆分。', '不要让基础设施优雅性跑在价值交付前面。', '不要在扩展平台时稀释契约治理。']
+    },
+    verifiedNow: {
+      en: [
+        'The architectural direction is documented and reviewable.',
+        'The entry gate is explicit instead of being treated as an automatic next step.',
+        'Current roadmap copy already constrains C behind B-state trust and reliability proof.'
+      ],
+      zh: [
+        '这个架构方向已经被文档化并可评审。',
+        '进入门槛已经被明确写出，而不是被当成自动的下一步。',
+        '当前 roadmap 文案已经把 C 明确约束在 B 状态可信和可靠性证明之后。'
+      ]
+    },
+    blockingGaps: {
+      en: [
+        'B-state trust is not yet fully earned.',
+        'Controller, CLI, web, and agent public-surface parity is still incomplete.',
+        'Starting distributed separation now would amplify documentation and implementation drift.'
+      ],
+      zh: [
+        'B 状态可信度还没有完全挣出来。',
+        'controller、CLI、web、agent 的公共表面一致性仍未补齐。',
+        '现在就启动分布式拆分，只会放大文档和实现漂移。'
+      ]
+    },
+    developerFocus: {
+      en: [
+        'Treat C as a reference direction, not an active execution lane.',
+        'Do not start controller/agent/event/policy/audit separation before Milestone 1 and Milestone 2 closure.',
+        'Keep future-platform thinking documented, but spend implementation time on parity and reliability first.'
+      ],
+      zh: [
+        '把 C 当作参考方向，而不是当前执行主线。',
+        '在里程碑 1 和里程碑 2 闭环前，不要提前启动 controller/agent/event/policy/audit 拆分。',
+        '把未来平台思考继续写清楚，但把实现时间先花在一致性和可靠性上。'
+      ]
     },
     focus: {
       label: { en: 'Scheme C', zh: '方案 C' },

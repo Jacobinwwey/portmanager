@@ -111,6 +111,10 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.pm-docs-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .pm-doc-card,
 .pm-roadmap-card,
 .pm-lane-card,
@@ -185,6 +189,10 @@ body {
   color: var(--pm-brand-1);
 }
 
+.pm-badge.next {
+  color: var(--pm-warn);
+}
+
 .pm-pill.next {
   color: var(--pm-warn);
 }
@@ -208,6 +216,33 @@ body {
 .pm-lane-card ul {
   margin: 0.8rem 0 0;
   padding-left: 1.15rem;
+}
+
+.pm-progress-grid {
+  margin-top: 1rem;
+}
+
+.pm-progress-card {
+  border: 1px solid rgba(43, 108, 176, 0.12);
+  border-radius: 16px;
+  background: rgba(241, 246, 251, 0.72);
+  padding: 1rem 1rem 1rem 1.05rem;
+}
+
+.pm-progress-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.pm-progress-card h4 {
+  margin: 0;
+}
+
+.pm-progress-list {
+  margin: 0.8rem 0 0;
+  padding-left: 1.1rem;
 }
 
 .pm-doc-card pre,

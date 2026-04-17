@@ -130,13 +130,37 @@
     </section>
 
     <section class="pm-docs-grid">
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.developerProgressLabel }}</span>
+            <h3>{{ developerProgress.title[locale] }}</h3>
+          </div>
+        </div>
+        <p>{{ developerProgress.lede[locale] }}</p>
+
+        <div class="pm-docs-grid three pm-progress-grid">
+          <section v-for="bucket in developerProgress.buckets" :key="bucket.id" class="pm-progress-card">
+            <div class="pm-progress-header">
+              <h4>{{ bucket.label[locale] }}</h4>
+              <span class="pm-badge" :class="bucket.tone">{{ progressToneLabel(bucket.tone) }}</span>
+            </div>
+            <ul class="pm-progress-list">
+              <li v-for="item in bucket.items[locale]" :key="item">{{ item }}</li>
+            </ul>
+          </section>
+        </div>
+      </article>
+    </section>
+
+    <section class="pm-docs-grid">
       <article v-for="milestone in milestones" :key="milestone.id" class="pm-roadmap-card">
         <div class="pm-roadmap-header">
           <div>
             <span class="pm-kicker">{{ stageLabel(milestone.stage) }}</span>
             <h3>{{ milestone.title[locale] }}</h3>
           </div>
-          <span class="pm-badge planned">{{ milestone.status[locale] }}</span>
+          <span class="pm-badge" :class="badgeTone(milestone.stage)">{{ milestone.status[locale] }}</span>
         </div>
 
         <p>{{ milestone.summary[locale] }}</p>
@@ -180,6 +204,27 @@
         </section>
 
         <section>
+          <h4>{{ copy.verifiedNowLabel }}</h4>
+          <ul>
+            <li v-for="item in milestone.verifiedNow[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>{{ copy.blockingGapsLabel }}</h4>
+          <ul>
+            <li v-for="item in milestone.blockingGaps[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>{{ copy.developerFocusLabel }}</h4>
+          <ul>
+            <li v-for="item in milestone.developerFocus[locale]" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section>
           <h4>{{ copy.linkedDocsLabel }}</h4>
           <div class="pm-doc-links">
             <VPLink v-for="docId in milestone.docs" :key="docId" class="pm-doc-link" :href="docMeta(locale, docId).link">
@@ -195,7 +240,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { VPLink } from 'vitepress/theme'
-import { roadmapMilestones, roadmapPrinciples as principles, roadmapProgression as progression, roadmapTracks as tracks, schemeCProfile as schemeC } from '../../../data/roadmap'
+import { roadmapDeveloperProgress as developerProgress, roadmapMilestones, roadmapPrinciples as principles, roadmapProgression as progression, roadmapTracks as tracks, schemeCProfile as schemeC } from '../../../data/roadmap'
 import { docMeta, type LocaleCode } from '../../../data/docs'
 
 const props = defineProps<{ locale: LocaleCode }>()
@@ -219,6 +264,7 @@ const copy = computed(() => props.locale === 'zh'
       progressionLabel: 'A / B / C',
       progressionTitle: '递进状态定义',
       schemeCLabel: 'Scheme C',
+      developerProgressLabel: 'Developer Progress',
       decisionLabel: '判定与取舍',
       advantagesLabel: '优势',
       costsLabel: '成本 / 风险',
@@ -228,6 +274,9 @@ const copy = computed(() => props.locale === 'zh'
       engineeringWorkLabel: '工程工作',
       entryCriteriaLabel: '进入门槛',
       tradeoffsLabel: '明确延后 / 权衡',
+      verifiedNowLabel: '当前已验证',
+      blockingGapsLabel: '阻塞缺口',
+      developerFocusLabel: '开发者下一步',
       linkedDocsLabel: '关联文档'
     }
   : {
@@ -246,6 +295,7 @@ const copy = computed(() => props.locale === 'zh'
       progressionLabel: 'A / B / C',
       progressionTitle: 'Progression-state definitions',
       schemeCLabel: 'Scheme C',
+      developerProgressLabel: 'Developer Progress',
       decisionLabel: 'Decision and trade-off',
       advantagesLabel: 'Advantages',
       costsLabel: 'Costs / Risks',
@@ -255,6 +305,9 @@ const copy = computed(() => props.locale === 'zh'
       engineeringWorkLabel: 'Engineering Work',
       entryCriteriaLabel: 'Entry Criteria',
       tradeoffsLabel: 'Deliberately Deferred / Trade-Offs',
+      verifiedNowLabel: 'Verified Now',
+      blockingGapsLabel: 'Blocking Gaps',
+      developerFocusLabel: 'Developer Focus',
       linkedDocsLabel: 'Linked Docs'
     }
 )
@@ -286,5 +339,23 @@ function stageLabel(stage: string) {
   if (stage === 'now') return 'Now'
   if (stage === 'next') return 'Next'
   return 'Later'
+}
+
+function badgeTone(stage: string) {
+  if (stage === 'now') return 'safe'
+  if (stage === 'next') return 'next'
+  return 'planned'
+}
+
+function progressToneLabel(tone: string) {
+  if (props.locale === 'zh') {
+    if (tone === 'safe') return '已验证'
+    if (tone === 'next') return '进行中'
+    return '下一步'
+  }
+
+  if (tone === 'safe') return 'Verified'
+  if (tone === 'next') return 'In Progress'
+  return 'Next'
 }
 </script>
