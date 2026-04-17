@@ -7,6 +7,7 @@ export type ControllerContracts = {
 }
 
 export { createControllerEventBus } from './controller-events.ts'
+export { AgentClientError, createAgentClient } from './agent-client.ts'
 export { createOperationRunner } from './operation-runner.ts'
 export { createControllerServer } from './controller-server.ts'
 export { closeHttpServer } from './http-server-lifecycle.ts'

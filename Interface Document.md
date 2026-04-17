@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-17
-Version: v0.2.4-unit2-focus
+Version: v0.2.5-unit5-closure
 
 ## English
 
@@ -44,22 +44,24 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 | `operations` | Shared audit record plus detail and replay | Implemented for controller and CLI reads, including detail and replay URLs. Web operations and console surfaces now consume live controller data, replay URLs, and selected diagnostic detail. |
 | `rollback-points` | Recovery inventory plus apply flow | Implemented for controller and CLI list/apply flows. Web now renders live rollback readiness and linked recovery evidence in host-detail and backups views. |
 | `backups` | Backup inventory plus backup execution | Implemented for controller list/run and CLI list. Web now renders live backup inventory, manifest paths, and related recovery operations in dedicated `Backups` and controller-backed host views. |
-| `snapshots/diagnostics` | Diagnostics run/list plus snapshot evidence | Implemented for controller run/list and CLI list. Web shows only mock diagnostics evidence; dedicated diagnostics detail is still missing. |
-| Controller-agent steady state | `HTTP over Tailscale` | Not yet implemented. `crates/portmanager-agent/src/main.rs` is still a file-backed CLI skeleton, not a long-lived service. |
+| `snapshots/diagnostics` | Diagnostics run/list plus snapshot evidence | Implemented for controller run/list and CLI list. Web now renders live diagnostics detail and snapshot evidence inside controller-backed operations, console, and host-level evidence surfaces. |
+| Controller-agent steady state | `HTTP over Tailscale` | Implemented. `crates/portmanager-agent/src/main.rs` now exposes long-lived `serve` with `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback`; controller uses `apps/controller/src/agent-client.ts` to push desired state, collect runtime state, and explicitly degrade unreachable hosts and rules. |
 
 ### Verification boundary
 - The repository now has a repeatable mainline verification gate: `pnpm acceptance:verify`.
 - The main branch CI mirror for that gate is `.github/workflows/mainline-acceptance.yml`.
-- Latest remote proof on `2026-04-17`: `mainline-acceptance` run `24565361391` and `docs-pages` run `24565361388` both succeeded on `main` for commit `63a1257`, so Unit 0 is now achieved and should be treated as mandatory baseline discipline.
+- Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
-- This gate does **not** mean cross-surface parity is complete. Live web parity and the steady-state agent service remain delivery obligations.
+- Fresh local proof on `2026-04-17`: `pnpm acceptance:verify` passes after the Unit 4 agent-service delivery and Unit 5 docs sync.
+- This gate now proves the locked Milestone 1 public-surface slice is real. It does **not** mean Milestone 2 reliability hardening is complete.
 
-### Recommended parity-closure order
+### Current delivery status
 - `Unit 1`: complete. Controller `hosts`, `bridge-rules`, and `exposure-policies` now exist as real source-of-truth resources.
 - `Unit 2`: complete. CLI now inspects and mutates those same controller-backed resources with the existing `--json` and wait-aware conventions.
 - `Unit 3`: complete. Web now renders controller-backed routes and diagnostics detail.
-- `Unit 4`: connect controller and agent through the locked `HTTP over Tailscale` steady-state boundary without breaking current evidence artifacts.
-- `Unit 5`: rerun acceptance and update milestone language only after the parity gaps above are closed.
+- `Unit 4`: complete. Controller and agent now communicate through the locked `HTTP over Tailscale` steady-state boundary without breaking current evidence artifacts.
+- `Unit 5`: complete. Acceptance was replayed and milestone language updated only after the proof stayed green.
+- `Next lane`: Milestone 2 reliability hardening on the same live host / rule / policy slice.
 
 ## 中文
 
@@ -102,19 +104,21 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 | `operations` | 共享审计记录、详情与回放入口 | controller 与 CLI 的读取能力已实现，包括 detail 与 replay URL；Web 的 operations 与 console 页面现在也会消费 live controller 数据、replay URL 与 diagnostics detail。 |
 | `rollback-points` | 恢复点清单与 apply 流程 | controller 与 CLI 的 list/apply 已实现；Web 现在也会在 host-detail 与 backups 页面中渲染 live rollback readiness 与恢复证据。 |
 | `backups` | 备份清单与执行入口 | controller 的 list/run 与 CLI 的 list 已实现；Web 现在也已经在独立 `Backups` 与 controller-backed host 视图里渲染 live backup inventory、manifest 路径与恢复操作。 |
-| `snapshots/diagnostics` | 诊断执行、列表与快照证据 | controller 的 run/list 与 CLI 的 list 已实现；Web 只显示 mock diagnostics 证据，独立 diagnostics detail 仍缺失。 |
-| controller-agent 稳态通信 | `HTTP over Tailscale` | 尚未实现。`crates/portmanager-agent/src/main.rs` 仍是文件落盘式 CLI 骨架，而不是长驻服务。 |
+| `snapshots/diagnostics` | 诊断执行、列表与快照证据 | controller 的 run/list 与 CLI 的 list 已实现；Web 现在也已经在 controller-backed 的 operations、console 与 host 证据面里渲染 live diagnostics detail 与 snapshot 证据。 |
+| controller-agent 稳态通信 | `HTTP over Tailscale` | 已实现。`crates/portmanager-agent/src/main.rs` 现在已经提供长驻 `serve` 以及 `/health`、`/runtime-state`、`/apply`、`/snapshot`、`/rollback`；controller 会通过 `apps/controller/src/agent-client.ts` 推送 desired state、收集 runtime state，并在 agent 不可达时显式把 host / rule 置为 degraded。 |
 
 ### 验证边界
 - 当前仓库已经具备可重复执行的主线验证 gate：`pnpm acceptance:verify`。
 - 该 gate 在主分支上的 CI 镜像为 `.github/workflows/mainline-acceptance.yml`。
-- 最新远端证明发生在 `2026-04-17`：`mainline-acceptance` run `24565361391` 与 `docs-pages` run `24565361388` 已经在 `main` 的 commit `63a1257` 上同时通过，因此 Unit 0 现在已经成立，应被视为必须持续保持的基线纪律。
+- Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
-- 但它**并不**意味着跨界面一致性已经闭环。live web parity 与稳态 agent service 仍然是必须补齐的交付项。
+- 本地最新证明也发生在 `2026-04-17`：Unit 4 agent-service 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新通过。
+- 这个 gate 现在已经证明锁定的 Milestone 1 公共表面切片真实存在，但它**并不**意味着 Milestone 2 可靠性加固已经完成。
 
-### 推荐闭环顺序
+### 当前交付状态
 - `Unit 1`：已完成。controller 的 `hosts`、`bridge-rules`、`exposure-policies` 真源资源已经落地。
 - `Unit 2`：已完成。CLI 已补齐这些 controller-backed 资源，并继续沿用现有 `--json` 与等待轮询约定。
 - `Unit 3`：已完成。Web 现在已经渲染 controller-backed 路由与 diagnostics detail。
-- `Unit 4`：在不破坏现有证据产物的前提下，通过锁定的 `HTTP over Tailscale` 稳态边界接通 controller 与 agent。
-- `Unit 5`：只有在以上一致性缺口补齐后，才重新跑验收并更新里程碑状态表述。
+- `Unit 4`：已完成。在不破坏现有证据产物的前提下，controller 与 agent 已通过锁定的 `HTTP over Tailscale` 稳态边界接通。
+- `Unit 5`：已完成。只有在证明链保持为绿之后，验收才被重跑，里程碑状态表述也才被更新。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 可靠性加固。

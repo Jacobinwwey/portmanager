@@ -162,7 +162,7 @@ test('controller server exposes host, rule, and policy resources through real de
   }
 })
 
-test('controller server probes and bootstraps hosts into ready state with host health evidence', async () => {
+test('controller server probes hosts and marks bootstrap degraded when no live agent service is reachable', async () => {
   const { directory, databasePath, artifactRoot } = tempPaths()
 
   try {
@@ -238,13 +238,14 @@ test('controller server probes and bootstraps hosts into ready state with host h
         bootstrapAccepted.operationId
       )
       assert.equal(bootstrapOperation.type, 'bootstrap_host')
-      assert.equal(bootstrapOperation.state, 'succeeded')
+      assert.equal(bootstrapOperation.state, 'degraded')
+      assert.match(String(bootstrapOperation.resultSummary), /agent/i)
 
       const hostDetailResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}`)
       assert.equal(hostDetailResponse.status, 200)
       const hostDetail = (await hostDetailResponse.json()) as Record<string, unknown>
-      assert.equal(hostDetail.lifecycleState, 'ready')
-      assert.equal(hostDetail.agentState, 'ready')
+      assert.equal(hostDetail.lifecycleState, 'degraded')
+      assert.equal(hostDetail.agentState, 'unreachable')
       assert.equal(
         Array.isArray(hostDetail.recentOperations) &&
           (hostDetail.recentOperations as Array<Record<string, unknown>>).some(

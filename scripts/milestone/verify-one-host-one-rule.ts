@@ -10,7 +10,6 @@ import {
   closeHttpServer,
   createControllerEventBus,
   createControllerServer,
-  createOperationRunner,
   createOperationStore
 } from '../../apps/controller/src/index.ts'
 
@@ -82,6 +81,7 @@ export interface OneHostOneRuleVerificationResult {
   bootstrapResult: OperationResult
   controllerBootstrapOperation: Record<string, unknown>
   applyResult: OperationResult
+  apiRuleDetail: Record<string, unknown>
   runtimeState: RuntimeState
   cliOperation: Record<string, unknown>
   diagnosticsOperation: Record<string, unknown>
@@ -143,6 +143,94 @@ function runJsonCommandAsync(command: string, args: string[], env: NodeJS.Proces
   })
 }
 
+function agentBinaryPath() {
+  const build = spawnSync('cargo', ['build', '-q', '-p', 'portmanager-agent'], {
+    cwd: repoRoot,
+    encoding: 'utf8'
+  })
+
+  if (build.status !== 0) {
+    throw new Error(build.stderr || build.stdout || `cargo build failed: ${build.status}`)
+  }
+
+  return path.join(
+    repoRoot,
+    'target',
+    'debug',
+    process.platform === 'win32' ? 'portmanager-agent.exe' : 'portmanager-agent'
+  )
+}
+
+async function reservePort() {
+  const server = createServer()
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', reject)
+      resolve()
+    })
+  })
+
+  const address = server.address()
+  if (!address || typeof address === 'string') {
+    throw new Error('failed to reserve port')
+  }
+
+  const port = address.port
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error)
+        return
+      }
+      resolve()
+    })
+  })
+
+  return port
+}
+
+async function waitForAgent(baseUrl: string) {
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    try {
+      const response = await fetch(`${baseUrl}/health`)
+      if (response.status === 200) {
+        return
+      }
+    } catch {
+      // keep polling
+    }
+
+    await delay(25)
+  }
+
+  throw new Error(`agent did not become healthy: ${baseUrl}`)
+}
+
+async function spawnAgentService(binaryPath: string, configDir: string, stateDir: string, port: number) {
+  const child = spawn(
+    binaryPath,
+    [
+      'serve',
+      '--bind-address',
+      '127.0.0.1',
+      '--port',
+      String(port),
+      '--config-dir',
+      configDir,
+      '--state-dir',
+      stateDir
+    ],
+    {
+      cwd: repoRoot,
+      stdio: ['ignore', 'pipe', 'pipe']
+    }
+  )
+
+  await waitForAgent(`http://127.0.0.1:${port}`)
+  return child
+}
+
 async function fetchJson<T>(url: string, init?: RequestInit) {
   const response = await fetch(url, init)
   if (!response.ok) {
@@ -173,37 +261,13 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
   const sandbox = mkdtempSync(path.join(tmpdir(), 'portmanager-milestone-'))
   const configDir = path.join(sandbox, 'config')
   const stateDir = path.join(sandbox, 'state')
-  const desiredStatePath = path.join(sandbox, 'apply-desired-state.json')
   const controllerDbPath = path.join(sandbox, 'controller.sqlite')
   const controllerArtifactsPath = path.join(sandbox, 'controller-artifacts')
-
-  const desiredState = {
-    schemaVersion: '0.1.0',
-    hostId: 'host_alpha',
-    policy: {
-      allowedSources: ['tailscale'],
-      excludedPorts: [22],
-      samePortMirror: false,
-      conflictPolicy: 'reject',
-      backupPolicy: 'required'
-    },
-    bridgeRules: [
-      {
-        id: 'rule_alpha_https',
-        name: 'HTTPS relay',
-        protocol: 'tcp',
-        listenPort: 443,
-        targetHost: '127.0.0.1',
-        targetPort: 3000
-      }
-    ]
-  }
-
-  writeFileSync(desiredStatePath, JSON.stringify(desiredState, null, 2))
+  const binaryPath = agentBinaryPath()
+  let agentProcess: ReturnType<typeof spawn> | undefined
 
   const store = createOperationStore({ databasePath: controllerDbPath })
   const eventBus = createControllerEventBus()
-  const runner = createOperationRunner({ store, eventBus })
   const server = createControllerServer({
     store,
     eventBus,
@@ -236,77 +300,95 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
       throw new Error('diagnostic target failed to bind')
     }
 
-    const bootstrapResult = runJsonCommand('cargo', [
-      'run',
-      '-q',
-      '-p',
-      'portmanager-agent',
-      '--',
+    const listening = await server.listen(0)
+
+    const createHostAccepted = await fetchJson<{ operationId: string }>(`${listening.baseUrl}/hosts`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: 'Alpha Relay',
+        ssh: {
+          host: '127.0.0.1',
+          port: 22
+        }
+      })
+    })
+    await waitForControllerOperation(listening.baseUrl, createHostAccepted.operationId)
+
+    const hostsPayload = await fetchJson<{ items: Array<Record<string, unknown>> }>(
+      `${listening.baseUrl}/hosts`
+    )
+    const hostId = String(hostsPayload.items[0]?.id)
+
+    runJsonCommand(binaryPath, [
       'bootstrap',
       '--operation-id',
       'op_bootstrap_001',
       '--host-id',
-      'host_alpha',
+      hostId,
       '--hostname',
       'alpha',
       '--tailscale-address',
-      '100.64.0.10',
+      '127.0.0.1',
       '--config-dir',
       configDir,
       '--state-dir',
       stateDir,
       '--json'
-    ]) as unknown as OperationResult
+    ])
 
-    store.enqueueOperation({
-      id: 'op_bootstrap_001',
-      type: 'bootstrap_host',
-      initiator: 'automation',
-      hostId: 'host_alpha'
-    })
+    const agentPort = await reservePort()
+    agentProcess = await spawnAgentService(binaryPath, configDir, stateDir, agentPort)
 
-    const controllerBootstrapOperation = await runner.run('op_bootstrap_001', async () => ({
-      resultSummary: 'host_alpha bootstrapped and ready for rule application'
-    }))
+    const bootstrapAccepted = await fetchJson<{ operationId: string }>(
+      `${listening.baseUrl}/hosts/${hostId}/bootstrap`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          sshUser: 'ubuntu',
+          desiredAgentPort: agentPort,
+          backupPolicy: 'required'
+        })
+      }
+    )
+    const bootstrapResult = (await waitForControllerOperation(
+      listening.baseUrl,
+      bootstrapAccepted.operationId
+    )) as unknown as OperationResult
+    const controllerBootstrapOperation = bootstrapResult
 
-    const applyResult = runJsonCommand('cargo', [
-      'run',
-      '-q',
-      '-p',
-      'portmanager-agent',
-      '--',
-      'apply',
-      '--operation-id',
-      'op_agent_apply_001',
-      '--desired-state-file',
-      desiredStatePath,
-      '--state-dir',
-      stateDir,
-      '--json'
-    ]) as unknown as OperationResult
+    const createRuleAccepted = await fetchJson<{ operationId: string }>(
+      `${listening.baseUrl}/bridge-rules`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId,
+          name: 'HTTPS relay',
+          protocol: 'tcp',
+          listenPort: 443,
+          targetHost: '127.0.0.1',
+          targetPort: 3000
+        })
+      }
+    )
+    const applyResult = (await waitForControllerOperation(
+      listening.baseUrl,
+      createRuleAccepted.operationId
+    )) as unknown as OperationResult
 
-    const runtimeState = runJsonCommand('cargo', [
-      'run',
-      '-q',
-      '-p',
-      'portmanager-agent',
-      '--',
-      'collect',
-      '--state-dir',
-      stateDir,
-      '--json'
-    ]) as unknown as RuntimeState
+    const runtimeState = (await fetchJson<RuntimeState>(
+      `http://127.0.0.1:${agentPort}/runtime-state`
+    )) as RuntimeState
 
-    store.enqueueOperation({
-      id: 'op_apply_001',
-      type: 'apply_policy',
-      initiator: 'automation',
-      hostId: 'host_alpha',
-      ruleId: 'rule_alpha_https'
-    })
-
-    const listening = await server.listen(0)
-    const cliPromise = runJsonCommandAsync(
+    const cliOperation = await runJsonCommandAsync(
       'cargo',
       [
         'run',
@@ -316,7 +398,7 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
         '--',
         'operation',
         'get',
-        'op_apply_001',
+        createRuleAccepted.operationId,
         '--json',
         '--wait',
         '--poll-interval-ms',
@@ -329,15 +411,6 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
       }
     )
 
-    await delay(40)
-    await runner.run('op_apply_001', async () => {
-      await delay(40)
-      return {
-        resultSummary: 'rule_alpha_https applied and waiting for controller-side diagnostics'
-      }
-    })
-
-    const cliOperation = await cliPromise
     const diagnosticsAccepted = await fetchJson<{ operationId: string; state: string }>(
       `${listening.baseUrl}/snapshots/diagnostics`,
       {
@@ -346,8 +419,8 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          hostId: 'host_alpha',
-          ruleId: 'rule_alpha_https',
+          hostId,
+          ruleId: applyResult.ruleId,
           port: targetAddress.port,
           scheme: 'http',
           captureSnapshot: true
@@ -364,6 +437,9 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
           ''
       )
     )
+    const apiRuleDetail = await fetchJson<Record<string, unknown>>(
+      `${listening.baseUrl}/bridge-rules/${applyResult.ruleId}`
+    )
 
     const backupAccepted = await fetchJson<{ operationId: string; state: string }>(
       `${listening.baseUrl}/backups/run`,
@@ -373,7 +449,7 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          hostId: 'host_alpha',
+          hostId,
           mode: 'required'
         })
       }
@@ -425,6 +501,7 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
       bootstrapResult,
       controllerBootstrapOperation,
       applyResult,
+      apiRuleDetail,
       runtimeState,
       cliOperation,
       diagnosticsOperation,
@@ -436,6 +513,12 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
       rollbackOperation
     }
   } finally {
+    if (agentProcess) {
+      agentProcess.kill()
+      await new Promise<void>((resolve) => {
+        agentProcess?.once('close', () => resolve())
+      })
+    }
     await closeHttpServer(diagnosticTarget)
     await server.close()
     store.close()

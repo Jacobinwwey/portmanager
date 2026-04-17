@@ -1,7 +1,7 @@
 ---
 title: PortManager Mainline Reconciliation Plan
 type: refactor
-status: active
+status: completed
 date: 2026-04-16
 origin: docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md
 ---
@@ -9,25 +9,24 @@ origin: docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps
 # PortManager Mainline Reconciliation Plan
 
 Updated: 2026-04-17
-Version: v0.1.3-unit3-web-parity
+Version: v0.1.4-unit5-closure
 
 ## English
 
 ## Overview
 
-Close the gap between PortManager's frozen V1 contracts and the currently implemented branch slice without abandoning the reliability work already in place.
-This plan assumes the 2026-04-16 docs truth-sync has landed and focuses on the executable work required to make Milestone 1 acceptance credible and to frame Milestone 2 accurately.
+This plan is now the execution record for the Unit 0 through Unit 5 closure pass that landed on `2026-04-17`.
+Its scope was to close the remaining gap between PortManager's frozen V1 contracts and the implemented branch slice without abandoning the reliability work already in place.
 
 ## Execution Update: 2026-04-17
 
-The repository's strongest implemented asset is now an evidence-first control-plane nucleus around operations, diagnostics, backup, rollback, recovery, and event history.
-That is real progress, not presentation-only work.
-The biggest structural mismatch is also now clearer: the public contract surface gap is now concentrated at the steady-state controller-agent boundary plus the final Milestone 1 acceptance/doc resync pass.
-As of `2026-04-17`, that mismatch is no longer mixed with gate uncertainty: GitHub Actions runs `24565361391` (`mainline-acceptance`) and `24565361388` (`docs-pages`) both succeeded on `main` for commit `63a1257`.
+The repository's strongest implemented asset remains an evidence-first control-plane nucleus around operations, diagnostics, backup, rollback, recovery, and event history.
+That base is now matched by the previously missing public-surface closure work.
+As of `2026-04-17`, Units 4 and 5 have landed: the agent serves the locked `HTTP over Tailscale` boundary, controller syncs desired state against that live service, docs truth has been resynced, and `pnpm acceptance:verify` now replays green on the same slice.
 
-Because of that mismatch, the repeatable mainline acceptance gate should now be treated as completed engineering precondition rather than active recovery work.
-`pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml` therefore mark Unit 0 as achieved branch discipline: they harden delivery and branch protection, but they do not by themselves close Milestone 1.
-Units 1 through 3 controller-plus-CLI-plus-Web parity have now landed, so active implementation focus shifts to Unit 4 agent steady-state integration plus Unit 5 acceptance/doc resync while Unit 0 remains a mandatory guardrail.
+Because of that, the repeatable mainline acceptance gate should now be treated as both standing branch discipline and fresh closure evidence for Milestone 1's public surface.
+It still does not imply that Milestone 2 reliability is accepted.
+Active implementation focus therefore moves off parity recovery and onto Milestone 2 reliability hardening while Unit 0 remains a mandatory guardrail.
 
 ## Problem Frame
 
@@ -244,7 +243,7 @@ flowchart TD
 - Web tests now prove live-data rendering and route parity across the locked V1 navigation model.
 - Status update: `tests/web/live-controller-shell.test.ts` proves controller-backed overview, host detail, operations, hosts, bridge-rules, backups, and console views; `tests/web/web-shell.test.ts` keeps preview-mode shells aligned with the same information architecture.
 
-- [ ] **Unit 4: Agent Steady-State Service Boundary**
+- [x] **Unit 4: Agent Steady-State Service Boundary**
 
 **Goal:** Move the agent from file-backed CLI skeleton toward the locked `HTTP over Tailscale` steady-state boundary without breaking existing artifact contracts.
 
@@ -276,9 +275,10 @@ flowchart TD
 - Integration: agent responses still emit artifacts compatible with existing diagnostics and backup/rollback consumers.
 
 **Verification:**
-- Controller and agent tests prove a minimal real controller-agent service path while retaining current artifact compatibility.
+- `crates/portmanager-agent/tests/agent_cli.rs` now proves `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback` over the long-lived `serve` command while preserving existing artifact formats.
+- `tests/controller/agent-service.test.ts` proves live controller-to-agent desired-state sync and explicit degraded handling when the agent is unreachable.
 
-- [ ] **Unit 5: Acceptance Closure, Roadmap Sync, and Verification**
+- [x] **Unit 5: Acceptance Closure, Roadmap Sync, and Verification**
 
 **Goal:** Re-run the full verification matrix, update progress documents, and move the repo to a truthful Milestone 1 / Milestone 2 status after code parity lands.
 
@@ -319,7 +319,7 @@ flowchart TD
 - Error path: docs and roadmap statuses are not advanced when verification still shows acceptance gaps.
 
 **Verification:**
-- `pnpm acceptance:verify` succeeds before any status upgrade is declared.
+- `pnpm acceptance:verify` succeeds after the Unit 4 agent-service delivery and the Unit 5 docs sync pass, and the resulting docs now move Milestone 1 wording only after that proof stays green.
 
 ## System-Wide Impact
 
@@ -358,20 +358,18 @@ flowchart TD
 
 ## 概览
 
-在不丢弃当前已经落地的可靠性工作的前提下，补齐 PortManager 已冻结的 V1 契约与当前实现分支之间的差距。
-这份计划假设 `2026-04-16` 的文档真相同步已经完成，关注点是让 Milestone 1 的验收变得可信，并让 Milestone 2 的表述保持准确。
+这份计划现在是 `2026-04-17` 落地的 Unit 0 到 Unit 5 闭环执行记录。
+它的任务是在不丢弃当前已落地可靠性工作的前提下，补齐 PortManager 已冻结 V1 契约与实现分支之间的剩余差距。
 
 ## 执行更新：2026-04-17
 
-当前仓库最强的已实现资产，是围绕 operations、diagnostics、backup、rollback、recovery 与 event history 形成的 evidence-first 控制平面内核。
-这是真实进展，不是只有展示层的推进。
-但更核心的结构性错位也已经更清楚了：对 `hosts`、`bridge-rules`、`exposure-policies`、live web truth 以及稳态 controller-agent 边界而言，公共契约表面仍然跑在运行时真实表面前面。
+当前仓库最强的已实现资产，仍然是围绕 operations、diagnostics、backup、rollback、recovery 与 event history 形成的 evidence-first 控制平面内核。
+不同的是，之前缺失的公共表面闭环现在也已经补齐了。
+截至 `2026-04-17`，Unit 4 与 Unit 5 都已经落地：agent 已经提供锁定的 `HTTP over Tailscale` 边界，controller 已经会通过 live service 同步 desired state，文档真相已重新同步，`pnpm acceptance:verify` 也已经在这同一条切片上重新转绿。
 
-截至 `2026-04-17`，这个错位已经不再和 gate 不确定性混在一起：GitHub Actions runs `24565361391`（`mainline-acceptance`）与 `24565361388`（`docs-pages`）已经在 `main` 的 commit `63a1257` 上同时通过。
-
-正因为存在这个错位，可重复的主线验收 gate 现在应被视为已经完成的工程前置条件，而不是当前正在补救的工作。
-`pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 现在代表 Unit 0 已经落地：它强化交付与分支保护，但并不会单独闭合 Milestone 1。
-当前主动实现焦点应转向 Unit 1 controller 表面一致性，而 Unit 0 继续作为必须保持的护栏。
+因此，可重复的主线验收 gate 现在既是持续生效的分支纪律，也是 Milestone 1 公共表面闭环的新鲜证据。
+但它依旧不代表 Milestone 2 可靠性已经完成验收。
+当前主动实现焦点应从“补齐一致性缺口”转向“继续加固 Milestone 2 可靠性”，而 Unit 0 继续作为必须保持的护栏。
 
 ## 问题框架
 
@@ -592,7 +590,7 @@ flowchart TD
 - Web 测试现在已经证明锁定的 V1 导航模型具备 live-data 渲染与路由一致性。
 - 状态更新：`tests/web/live-controller-shell.test.ts` 已证明 controller-backed 的 overview、host detail、operations、hosts、bridge-rules、backups、console 视图；`tests/web/web-shell.test.ts` 继续保证 preview-mode shell 与同一套信息架构对齐。
 
-- [ ] **Unit 4：Agent 稳态服务边界**
+- [x] **Unit 4：Agent 稳态服务边界**
 
 **目标：** 在不破坏现有产物契约的前提下，把 agent 从文件落盘式 CLI skeleton 推进到锁定的 `HTTP over Tailscale` 稳态边界。
 
@@ -624,9 +622,10 @@ flowchart TD
 - Integration：agent 响应继续产出现有 diagnostics 与 backup/rollback 消费方兼容的产物。
 
 **验证：**
-- controller 与 agent 测试证明最小可用的真实 controller-agent service path，同时保持现有产物兼容性。
+- `crates/portmanager-agent/tests/agent_cli.rs` 现在已经证明长驻 `serve` 命令下的 `/health`、`/runtime-state`、`/apply`、`/snapshot`、`/rollback` 全部可用，同时保住了原有产物格式。
+- `tests/controller/agent-service.test.ts` 已证明 controller 到 agent 的 live desired-state 同步路径，以及 agent 不可达时的显式 degraded 处理。
 
-- [ ] **Unit 5：验收闭环、Roadmap 同步与再验证**
+- [x] **Unit 5：验收闭环、Roadmap 同步与再验证**
 
 **目标：** 在代码一致性落地之后，重新执行完整验证矩阵，更新进度文档，并把仓库推进到真实的 Milestone 1 / Milestone 2 状态表述。
 
@@ -667,7 +666,7 @@ flowchart TD
 - Error path：如果验证仍显示验收缺口，则 docs 与 roadmap 状态不得升级。
 
 **验证：**
-- 在任何状态升级声明之前，`pnpm acceptance:verify` 必须成功。
+- 在 Unit 4 agent-service 交付与 Unit 5 文档同步完成之后，`pnpm acceptance:verify` 已重新通过；里程碑状态文案也只在这条证明链保持为绿之后才被提升。
 
 ## 系统级影响
 

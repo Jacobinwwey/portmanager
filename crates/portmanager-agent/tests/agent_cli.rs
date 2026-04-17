@@ -1,4 +1,11 @@
-use std::{fs, path::Path, process::Command};
+use std::{
+    fs,
+    net::TcpListener,
+    path::Path,
+    process::{Child, Command, Stdio},
+    thread,
+    time::{Duration, Instant},
+};
 
 use serde_json::{json, Value};
 use tempfile::TempDir;
@@ -36,6 +43,48 @@ fn bootstrap_agent(
 fn parse_json(output: &std::process::Output) -> Value {
     let stdout = String::from_utf8(output.stdout.clone()).expect("utf8 stdout");
     serde_json::from_str(&stdout).expect("json stdout")
+}
+
+fn reserve_port() -> u16 {
+    TcpListener::bind(("127.0.0.1", 0))
+        .expect("bind ephemeral port")
+        .local_addr()
+        .expect("port address")
+        .port()
+}
+
+fn wait_for_agent(base_url: &str) {
+    let start = Instant::now();
+    while start.elapsed() < Duration::from_secs(5) {
+        match ureq::get(&format!("{base_url}/health")).call() {
+            Ok(response) if response.status() == 200 => return,
+            _ => thread::sleep(Duration::from_millis(25)),
+        }
+    }
+
+    panic!("agent service did not become healthy: {base_url}");
+}
+
+fn spawn_agent_service(config_dir: &Path, state_dir: &Path, port: u16) -> Child {
+    let child = Command::new(env!("CARGO_BIN_EXE_portmanager-agent"))
+        .args([
+            "serve",
+            "--bind-address",
+            "127.0.0.1",
+            "--port",
+            &port.to_string(),
+            "--config-dir",
+            &config_dir.display().to_string(),
+            "--state-dir",
+            &state_dir.display().to_string(),
+        ])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("spawn portmanager-agent serve");
+
+    wait_for_agent(&format!("http://127.0.0.1:{port}"));
+    child
 }
 
 #[test]
@@ -256,4 +305,109 @@ fn rollback_writes_result_artifact() {
         serde_json::from_str(&fs::read_to_string(&result_path).expect("rollback result"))
             .expect("rollback result json");
     assert_eq!(persisted, rollback_result);
+}
+
+#[test]
+fn serve_exposes_collect_apply_snapshot_and_rollback_over_http() {
+    let sandbox = TempDir::new().expect("tempdir");
+    let config_dir = sandbox.path().join("config");
+    let state_dir = sandbox.path().join("state");
+
+    let bootstrap_output = bootstrap_agent(&config_dir, &state_dir, "op_bootstrap_serve_001");
+    assert!(bootstrap_output.status.success());
+
+    let bundle_a = sandbox.path().join("desired-state.toml");
+    let bundle_b = sandbox.path().join("nftables.rules");
+    let diagnostic_artifact = sandbox.path().join("snapshot-op_diag_001.html");
+    fs::write(&bundle_a, b"listen = 443\n").expect("write bundle a");
+    fs::write(&bundle_b, b"tcp dport 443 redirect to :3000\n").expect("write bundle b");
+    fs::write(&diagnostic_artifact, b"<html><title>Alpha Relay Healthy</title></html>")
+        .expect("write diagnostic artifact");
+
+    let port = reserve_port();
+    let mut child = spawn_agent_service(&config_dir, &state_dir, port);
+    let base_url = format!("http://127.0.0.1:{port}");
+
+    let runtime_state: Value = ureq::get(&format!("{base_url}/runtime-state"))
+        .call()
+        .expect("runtime-state response")
+        .into_json()
+        .expect("runtime-state json");
+    assert_eq!(runtime_state["hostId"], "host_alpha");
+    assert_eq!(runtime_state["agentState"], "ready");
+
+    let apply_result: Value = ureq::post(&format!("{base_url}/apply"))
+        .send_json(json!({
+            "operationId": "op_apply_http_001",
+            "desiredState": {
+                "schemaVersion": "0.1.0",
+                "hostId": "host_alpha",
+                "policy": {
+                    "allowedSources": ["tailscale"],
+                    "excludedPorts": [22],
+                    "samePortMirror": false,
+                    "conflictPolicy": "reject",
+                    "backupPolicy": "required"
+                },
+                "bridgeRules": [
+                    {
+                        "id": "rule_http_demo",
+                        "name": "demo",
+                        "protocol": "tcp",
+                        "listenPort": 443,
+                        "targetHost": "127.0.0.1",
+                        "targetPort": 3000
+                    }
+                ]
+            }
+        }))
+        .expect("apply response")
+        .into_json()
+        .expect("apply json");
+    assert_eq!(apply_result["type"], "apply_desired_state");
+    assert_eq!(apply_result["state"], "succeeded");
+
+    let updated_runtime_state: Value = ureq::get(&format!("{base_url}/runtime-state"))
+        .call()
+        .expect("runtime-state after apply")
+        .into_json()
+        .expect("runtime-state after apply json");
+    assert_eq!(updated_runtime_state["appliedRules"][0]["id"], "rule_http_demo");
+    assert_eq!(updated_runtime_state["appliedRules"][0]["status"], "applied_unverified");
+
+    let snapshot_manifest: Value = ureq::post(&format!("{base_url}/snapshot"))
+        .send_json(json!({
+            "operationId": "op_snapshot_http_001",
+            "hostId": "host_alpha",
+            "backupMode": "required",
+            "bundleFiles": [
+                bundle_a.display().to_string(),
+                bundle_b.display().to_string()
+            ],
+            "diagnosticArtifacts": [diagnostic_artifact.display().to_string()]
+        }))
+        .expect("snapshot response")
+        .into_json()
+        .expect("snapshot json");
+    assert_eq!(snapshot_manifest["operationId"], "op_snapshot_http_001");
+    assert_eq!(snapshot_manifest["checksums"].as_array().expect("checksums").len(), 2);
+
+    let rollback_result: Value = ureq::post(&format!("{base_url}/rollback"))
+        .send_json(json!({
+            "operationId": "op_rollback_http_001",
+            "rollbackPointId": "rp_http_001",
+            "restoreFiles": [
+                bundle_a.display().to_string(),
+                bundle_b.display().to_string()
+            ],
+            "notes": "http rollback verify"
+        }))
+        .expect("rollback response")
+        .into_json()
+        .expect("rollback json");
+    assert_eq!(rollback_result["rollbackPointId"], "rp_http_001");
+    assert_eq!(rollback_result["status"], "rolled_back");
+
+    let _ = child.kill();
+    let _ = child.wait();
 }

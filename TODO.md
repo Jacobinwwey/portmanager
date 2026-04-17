@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-17
-Version: v0.4.4-unit1-focus
+Version: v0.4.6-unit5-closure
 
 ## English
 
@@ -32,25 +32,31 @@ Version: v0.4.4-unit1-focus
 - [x] Milestone 2: filtered operation inventory with recovery-linked summaries across Web, CLI, and API.
 - [x] Milestone 2: selected-operation event timeline and filtered event history across Web, CLI, and API.
 - [x] Milestone 2: operation detail now carries direct selected-event replay path and linked recovery evidence across API and CLI.
-- [x] Delivery discipline: formalize and keep a repeatable mainline acceptance gate with `pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml`, now proved green on latest `main` runs `24565361391` and `24565361388`.
+- [x] Delivery discipline: formalize and keep a repeatable mainline acceptance gate with `pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml`, and keep that gate green on `main`.
 - [x] Milestone 1: controller `hosts`, `bridge-rules`, `exposure-policies`, host probe/bootstrap, and backup-aware destructive rule mutation are now real and covered by `tests/controller/host-rule-policy.test.ts`.
+- [x] Milestone 1: the agent now serves the locked `HTTP over Tailscale` boundary and controller syncs desired state over that live service while preserving snapshot and rollback artifacts.
+- [x] Unit 5: `pnpm acceptance:verify` re-ran green after docs sync, and Milestone 1 wording moved to accepted public-surface status.
 
-### Current acceptance gaps
+### Current post-Milestone-1 focus
 - [x] Milestone 1 acceptance closure: add real controller `hosts` resources and readiness lifecycle, not only operation evidence and diagnostics primitives.
 - [x] Milestone 1 acceptance closure: add real controller `bridge-rules` CRUD and `exposure-policies` surfaces.
 - [x] Milestone 1 acceptance closure: mirror controller host/rule/policy surfaces into CLI.
 - [x] Milestone 1 acceptance closure: mirror controller host/rule/policy surfaces into Web.
 - [x] Milestone 1 acceptance closure: replace Web mock-only states with controller-backed data and add dedicated `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics-detail surfaces.
-- [ ] Milestone 1 acceptance closure: evolve the agent from file-backed CLI skeleton to the locked `HTTP over Tailscale` steady-state service boundary.
-- [ ] Milestone 2 acceptance closure: keep reliability work grounded in the same host/rule/policy model instead of advancing milestone status from partial branch-only evidence.
+- [x] Milestone 1 acceptance closure: evolve the agent from file-backed CLI skeleton to the locked `HTTP over Tailscale` steady-state service boundary.
+- [x] Milestone 1 acceptance closure: rerun acceptance, sync roadmap and product docs, and move milestone wording only after the proof is green.
+- [ ] Milestone 2 acceptance closure: expose remote-backup setup and status more clearly across Web, CLI, API, and proof output so required-mode degradation is actionable.
+- [ ] Milestone 2 acceptance closure: expand live degraded/recovery/diagnostics-history UX plus agent heartbeat/version semantics on the same host/rule/policy model.
+- [ ] Milestone 2 acceptance closure: repeat end-to-end reliability proof on the live agent-backed slice until Milestone 2 status can advance without qualification.
 
 ### Recommended execution order
-- [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on latest `main` proof (`24565361391`, `24565361388`) while Unit 1 becomes the active lane.
+- [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
 - [x] Unit 1: implement controller `hosts`, `bridge-rules`, and `exposure-policies` as the shared runtime source of truth.
 - [x] Unit 2: add CLI parity for host, rule, and policy inspection and core write paths on top of completed Unit 1.
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
-- [ ] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
-- [ ] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
+- [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
+- [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
+- [ ] Next lane: harden Milestone 2 reliability on the same live slice instead of reopening Milestone 1 parity drift.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -86,25 +92,31 @@ Version: v0.4.4-unit1-focus
 - [x] 里程碑 2：补全 operation 列表筛选与 recovery 证据摘要，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：补全选中 operation 的事件时间线与 event history 筛选，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：让 operation detail 直接携带选中事件回放路径与 recovery 证据，并在 API、CLI 中统一暴露。
-- [x] 交付纪律：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化并持续保持可重复执行的主线验收 gate，最新 `main` runs `24565361391` 与 `24565361388` 已经转绿。
+- [x] 交付纪律：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化并持续保持可重复执行的主线验收 gate，并继续把这条 gate 在 `main` 上维持为绿。
 - [x] 里程碑 1：controller 的 `hosts`、`bridge-rules`、`exposure-policies`、host probe / bootstrap，以及带备份证据的 destructive rule mutation 已真实落地，并由 `tests/controller/host-rule-policy.test.ts` 覆盖。
+- [x] 里程碑 1：agent 已经提供锁定的 `HTTP over Tailscale` 服务边界，controller 现在会通过 live service 同步 desired state，同时保住 snapshot 与 rollback 产物兼容性。
+- [x] Unit 5：文档同步后 `pnpm acceptance:verify` 已重新转绿，Milestone 1 文案已经提升为公共表面已验收状态。
 
-### 当前验收缺口
+### 当前里程碑 1 之后的重点
 - [x] 里程碑 1 验收闭环：补上真实 controller `hosts` 资源与 readiness 生命周期，而不只是 operation 证据和 diagnostics 原语。
 - [x] 里程碑 1 验收闭环：补上真实 controller `bridge-rules` CRUD 与 `exposure-policies` 表面。
 - [x] 里程碑 1 验收闭环：把 controller 的 host/rule/policy 表面同步镜像到 CLI。
 - [x] 里程碑 1 验收闭环：把 controller 的 host/rule/policy 表面同步镜像到 Web。
 - [x] 里程碑 1 验收闭环：把 Web 从纯 mock 状态切到 controller 实时数据，并增加独立的 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail 页面。
-- [ ] 里程碑 1 验收闭环：把 agent 从文件落盘式 CLI 骨架推进到锁定的 `HTTP over Tailscale` 稳态服务边界。
-- [ ] 里程碑 2 验收闭环：让可靠性工作持续建立在统一 host/rule/policy 模型上，而不是只凭分支局部证据提前升级里程碑状态。
+- [x] 里程碑 1 验收闭环：把 agent 从文件落盘式 CLI 骨架推进到锁定的 `HTTP over Tailscale` 稳态服务边界。
+- [x] 里程碑 1 验收闭环：重新执行验收、同步 roadmap 与产品文档，并且只在证明链转绿后提升里程碑文案。
+- [ ] 里程碑 2 验收闭环：在 Web、CLI、API 与证明输出中更清楚地暴露远端备份配置与状态，让 required-mode 降级真正可操作。
+- [ ] 里程碑 2 验收闭环：继续在统一 host/rule/policy 模型上补强 live degraded/recovery/diagnostics-history UX 与 agent heartbeat/version 语义。
+- [ ] 里程碑 2 验收闭环：持续在 live agent-backed 切片上重放端到端可靠性证明，直到 Milestone 2 状态可以无保留提升。
 
 ### 推荐推进顺序
-- [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并在最新 `main` 证明（`24565361391`、`24565361388`）转绿后，把主动主线切到 Unit 1。
+- [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并继续把这条 gate 在 `main` 上维持为绿，再把主动主线切到 Unit 1。
 - [x] Unit 1：先把 controller 的 `hosts`、`bridge-rules`、`exposure-policies` 做成统一运行态真源。
 - [x] Unit 2：在已完成的 Unit 1 基础上补齐 CLI 对 host / rule / policy 的检查与核心写入路径。
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
-- [ ] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
-- [ ] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
+- [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
+- [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
+- [ ] 下一主线：继续在同一条 live 切片上加固 Milestone 2 可靠性，而不是重新打开 Milestone 1 的一致性漂移。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`

@@ -2,11 +2,14 @@ import { mkdirSync } from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
 
+import type { ApplyDesiredStateSchema, RuntimeStateSchema } from '@portmanager/typescript-contracts'
+
+import { createAgentClient } from './agent-client.ts'
 import type { ControllerEventBus } from './controller-events.ts'
 import { closeHttpServer } from './http-server-lifecycle.ts'
 import { createLocalBackupPrimitive } from './local-backup-primitive.ts'
 import { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.ts'
-import type { OperationStore } from './operation-store.ts'
+import type { BridgeRule, HostSummary, OperationStore } from './operation-store.ts'
 import { createOperationRunner } from './operation-runner.ts'
 
 export interface ControllerServer {
@@ -135,9 +138,227 @@ export function createControllerServer(options: {
   mkdirSync(artifactRoot, { recursive: true })
 
   const runner = createOperationRunner({ store, eventBus })
+  const agentClient = createAgentClient()
+  const agentEndpoints = new Map<string, string>()
   const backupPrimitive = createLocalBackupPrimitive({ artifactRoot, store })
   const diagnosticsPrimitive = createLocalDiagnosticsPrimitive({ artifactRoot })
   const subscriptions = new Set<() => void>()
+
+  function combineOperationState(
+    ...states: Array<'degraded' | 'succeeded' | undefined>
+  ): 'degraded' | 'succeeded' {
+    return states.some((state) => state === 'degraded') ? 'degraded' : 'succeeded'
+  }
+
+  function ruleLifecycleAfterSync(
+    runtimeState: RuntimeStateSchema,
+    ruleId: string
+  ): BridgeRule['lifecycleState'] | undefined {
+    const appliedRule = runtimeState.appliedRules.find((entry) => entry.id === ruleId)
+    return appliedRule?.status
+  }
+
+  function hostLifecycleFromAgentState(agentState: RuntimeStateSchema['agentState']) {
+    return agentState === 'ready' ? 'ready' : 'degraded'
+  }
+
+  function buildDesiredState(hostId: string): ApplyDesiredStateSchema {
+    const policy = store.getExposurePolicy(hostId)
+    if (!policy) {
+      throw new Error(`Exposure policy missing for host ${hostId}`)
+    }
+
+    return {
+      schemaVersion: '0.1.0',
+      hostId,
+      policy: {
+        allowedSources: [...policy.allowedSources],
+        excludedPorts: [...policy.excludedPorts],
+        samePortMirror: policy.samePortMirror,
+        conflictPolicy: policy.conflictPolicy,
+        backupPolicy: policy.backupPolicy
+      },
+      bridgeRules: store
+        .listBridgeRules({ hostId })
+        .filter((rule) => rule.lifecycleState !== 'removed')
+        .map((rule) => ({
+          id: rule.id,
+          ...(rule.name ? { name: rule.name } : {}),
+          protocol: rule.protocol,
+          listenPort: rule.listenPort,
+          targetHost: rule.targetHost,
+          targetPort: rule.targetPort
+        }))
+    }
+  }
+
+  function recordAgentHealthCheck(input: {
+    hostId: string
+    category: 'host_probe' | 'bridge_verify'
+    status: 'healthy' | 'degraded' | 'failed'
+    summary: string
+    ruleId?: string
+    backupPolicy?: 'best_effort' | 'required'
+  }) {
+    store.createHealthCheck({
+      id: `hc_${input.hostId}_${input.category}_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      hostId: input.hostId,
+      ruleId: input.ruleId,
+      category: input.category,
+      status: input.status,
+      summary: input.summary,
+      backupPolicy: input.backupPolicy
+    })
+  }
+
+  function markAgentSyncFailure(input: {
+    hostId: string
+    summary: string
+    category: 'host_probe' | 'bridge_verify'
+    ruleId?: string
+    backupPolicy?: 'best_effort' | 'required'
+    dropEndpoint?: boolean
+  }) {
+    if (input.dropEndpoint) {
+      agentEndpoints.delete(input.hostId)
+    }
+
+    store.updateHostRuntime(input.hostId, {
+      lifecycleState: 'degraded',
+      agentState: 'unreachable'
+    })
+
+    if (input.ruleId) {
+      store.updateBridgeRule(input.ruleId, {
+        lifecycleState: 'degraded'
+      })
+    }
+
+    recordAgentHealthCheck({
+      hostId: input.hostId,
+      ruleId: input.ruleId,
+      category: input.category,
+      status: 'failed',
+      summary: input.summary,
+      backupPolicy: input.backupPolicy
+    })
+
+    return {
+      state: 'degraded' as const,
+      resultSummary: input.summary
+    }
+  }
+
+  async function collectAgentRuntime(input: {
+    hostId: string
+    category: 'host_probe' | 'bridge_verify'
+    ruleId?: string
+    backupPolicy?: 'best_effort' | 'required'
+    dropEndpointOnFailure?: boolean
+  }) {
+    const baseUrl = agentEndpoints.get(input.hostId)
+    if (!baseUrl) {
+      return {
+        state: 'succeeded' as const,
+        resultSummary: `desired state stored locally for ${input.hostId} until bootstrap completes`
+      }
+    }
+
+    try {
+      const runtimeState = await agentClient.collectRuntimeState(baseUrl)
+      store.updateHostRuntime(input.hostId, {
+        lifecycleState: hostLifecycleFromAgentState(runtimeState.agentState),
+        agentState: runtimeState.agentState
+      })
+
+      for (const rule of store.listBridgeRules({ hostId: input.hostId })) {
+        if (rule.lifecycleState === 'removed') {
+          continue
+        }
+
+        const lifecycleState = ruleLifecycleAfterSync(runtimeState, rule.id)
+        if (lifecycleState) {
+          store.updateBridgeRule(rule.id, {
+            lifecycleState
+          })
+        } else if (rule.lifecycleState === 'applying') {
+          store.updateBridgeRule(rule.id, {
+            lifecycleState: 'desired'
+          })
+        }
+      }
+
+      recordAgentHealthCheck({
+        hostId: input.hostId,
+        ruleId: input.ruleId,
+        category: input.category,
+        status:
+          runtimeState.agentState === 'ready'
+            ? 'healthy'
+            : runtimeState.agentState === 'degraded'
+              ? 'degraded'
+              : 'failed',
+        summary: runtimeState.health?.summary ?? `agent state ${runtimeState.agentState}`,
+        backupPolicy: input.backupPolicy
+      })
+
+      return {
+        state: runtimeState.agentState === 'ready' ? ('succeeded' as const) : ('degraded' as const),
+        resultSummary:
+          runtimeState.health?.summary ??
+          `agent runtime collected for ${input.hostId} with state ${runtimeState.agentState}`,
+        runtimeState
+      }
+    } catch (error) {
+      return markAgentSyncFailure({
+        hostId: input.hostId,
+        ruleId: input.ruleId,
+        category: input.category,
+        backupPolicy: input.backupPolicy,
+        dropEndpoint: input.dropEndpointOnFailure,
+        summary: `agent sync failed for ${input.hostId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      })
+    }
+  }
+
+  async function pushDesiredStateToAgent(input: {
+    hostId: string
+    operationId: string
+    category: 'host_probe' | 'bridge_verify'
+    ruleId?: string
+    backupPolicy?: 'best_effort' | 'required'
+    dropEndpointOnFailure?: boolean
+  }) {
+    const baseUrl = agentEndpoints.get(input.hostId)
+    if (!baseUrl) {
+      return {
+        state: 'succeeded' as const,
+        resultSummary: `desired state stored locally for ${input.hostId} until bootstrap completes`
+      }
+    }
+
+    try {
+      await agentClient.applyDesiredState(baseUrl, {
+        operationId: input.operationId,
+        desiredState: buildDesiredState(input.hostId)
+      })
+    } catch (error) {
+      return markAgentSyncFailure({
+        hostId: input.hostId,
+        ruleId: input.ruleId,
+        category: input.category,
+        backupPolicy: input.backupPolicy,
+        dropEndpoint: input.dropEndpointOnFailure,
+        summary: `agent apply failed for ${input.hostId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      })
+    }
+
+    return collectAgentRuntime(input)
+  }
 
   const server = http.createServer((request, response) => {
     void handleRequest(request, response).catch((error) => {
@@ -312,12 +533,23 @@ export function createControllerServer(options: {
           }
 
           store.updateHostRuntime(hostId, {
-            lifecycleState: 'ready',
-            agentState: 'ready'
+            lifecycleState: 'bootstrapping',
+            agentState: 'unknown'
+          })
+
+          const agentBaseUrl = `http://${host.tailscaleAddress}:${desiredAgentPort}`
+          agentEndpoints.set(hostId, agentBaseUrl)
+          const sync = await pushDesiredStateToAgent({
+            hostId,
+            operationId,
+            category: 'host_probe',
+            backupPolicy,
+            dropEndpointOnFailure: true
           })
 
           return {
-            resultSummary: `host ${hostId} bootstrapped and ready`
+            state: sync.state,
+            resultSummary: `host ${hostId} bootstrapped via ${agentBaseUrl}; ${sync.resultSummary}`
           }
         })
       })
@@ -351,19 +583,20 @@ export function createControllerServer(options: {
         return
       }
 
+      const ruleId = createResourceId('rule', name ?? `${hostId}_${listenPort}`)
       const operationId = createOperationId('op_create_rule')
       const accepted = store.enqueueOperation({
         id: operationId,
         type: 'create_rule',
         initiator: 'web',
-        hostId
+        hostId,
+        ruleId
       })
 
       sendJson(response, 202, accepted)
 
       queueMicrotask(() => {
         void runner.run(operationId, async () => {
-          const ruleId = createResourceId('rule', name ?? `${hostId}_${listenPort}`)
           store.createBridgeRule({
             id: ruleId,
             hostId,
@@ -375,8 +608,16 @@ export function createControllerServer(options: {
             lifecycleState: 'desired'
           })
 
+          const sync = await pushDesiredStateToAgent({
+            hostId,
+            operationId,
+            ruleId,
+            category: 'bridge_verify'
+          })
+
           return {
-            resultSummary: `rule ${ruleId} created for host ${hostId}`
+            state: sync.state,
+            resultSummary: `rule ${ruleId} created for host ${hostId}; ${sync.resultSummary}`
           }
         })
       })
@@ -441,6 +682,7 @@ export function createControllerServer(options: {
       queueMicrotask(() => {
         void runner.run(operationId, async () => {
           const policy = store.getExposurePolicy(rule.hostId)
+          const hasAgentEndpoint = agentEndpoints.has(rule.hostId)
           const backup = backupPrimitive.runBackup({
             operationId,
             hostId: rule.hostId,
@@ -452,13 +694,34 @@ export function createControllerServer(options: {
             ...(listenPort !== undefined ? { listenPort } : {}),
             ...(targetHost !== undefined ? { targetHost } : {}),
             ...(targetPort !== undefined ? { targetPort } : {}),
-            lifecycleState: backup.operationState === 'degraded' ? 'degraded' : 'desired',
+            lifecycleState: 'applying',
             lastRollbackPointId: backup.rollbackPoint.id
           })
 
+          const sync = await pushDesiredStateToAgent({
+            hostId: rule.hostId,
+            operationId,
+            ruleId,
+            category: 'bridge_verify',
+            backupPolicy: policy?.backupPolicy ?? 'best_effort'
+          })
+          const finalState = combineOperationState(backup.operationState, sync.state)
+
+          if (!hasAgentEndpoint && backup.operationState !== 'degraded') {
+            store.updateBridgeRule(ruleId, {
+              lifecycleState: 'desired',
+              lastRollbackPointId: backup.rollbackPoint.id
+            })
+          } else if (backup.operationState === 'degraded') {
+            store.updateBridgeRule(ruleId, {
+              lifecycleState: 'degraded',
+              lastRollbackPointId: backup.rollbackPoint.id
+            })
+          }
+
           return {
-            state: backup.operationState,
-            resultSummary: `rule ${ruleId} updated; ${backup.resultSummary}`,
+            state: finalState,
+            resultSummary: `rule ${ruleId} updated; ${backup.resultSummary}; ${sync.resultSummary}`,
             backupId: backup.backup.id,
             rollbackPointId: backup.rollbackPoint.id
           }
@@ -500,9 +763,16 @@ export function createControllerServer(options: {
             lastRollbackPointId: backup.rollbackPoint.id
           })
 
+          const sync = await pushDesiredStateToAgent({
+            hostId: rule.hostId,
+            operationId,
+            category: 'bridge_verify',
+            backupPolicy: policy?.backupPolicy ?? 'best_effort'
+          })
+
           return {
-            state: backup.operationState,
-            resultSummary: `rule ${ruleId} removed; ${backup.resultSummary}`,
+            state: combineOperationState(backup.operationState, sync.state),
+            resultSummary: `rule ${ruleId} removed; ${backup.resultSummary}; ${sync.resultSummary}`,
             backupId: backup.backup.id,
             rollbackPointId: backup.rollbackPoint.id
           }
@@ -584,8 +854,16 @@ export function createControllerServer(options: {
             backupPolicy
           })
 
+          const sync = await pushDesiredStateToAgent({
+            hostId,
+            operationId,
+            category: 'bridge_verify',
+            backupPolicy
+          })
+
           return {
-            resultSummary: `policy applied for ${hostId}`
+            state: sync.state,
+            resultSummary: `policy applied for ${hostId}; ${sync.resultSummary}`
           }
         })
       })
@@ -773,6 +1051,16 @@ export function createControllerServer(options: {
             scheme,
             captureSnapshot
           })
+
+          const existingRule = ruleId ? store.getBridgeRule(ruleId) : null
+          if (existingRule) {
+            store.updateBridgeRule(existingRule.id, {
+              lifecycleState: result.state === 'succeeded' ? 'active' : 'degraded',
+              ...(result.state === 'succeeded'
+                ? { lastVerifiedAt: result.diagnosticResult.capturedAt }
+                : {})
+            })
+          }
 
           return {
             state: result.state,

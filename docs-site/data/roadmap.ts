@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes what is already real, which gate protects mainline, which gaps still block acceptance, and what developers should build next now that Unit 0 is green.',
-    zh: '这个页面现在直接暴露哪些能力已经真实存在、哪条 gate 正在保护主线、哪些缺口仍在阻塞验收，以及在 Unit 0 已转绿后开发者接下来该先做什么。'
+    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the reliability gaps that still belong to Milestone 2, and the next developer lane on top of the live agent-backed flow.',
+    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、仍然属于 Milestone 2 的可靠性缺口，以及建立在 live agent 切片之上的开发下一主线。'
   },
   buckets: [
     {
@@ -161,16 +161,18 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Docs-first baseline, contracts, and roadmap sequencing are locked.',
-          'Unit 0 is now achieved: `pnpm acceptance:verify`, `mainline-acceptance` run `24565361391`, and `docs-pages` run `24565361388` all proved green on `main` for commit `63a1257` on 2026-04-17.',
-          'Backup, rollback, diagnostics, drift, event history, and recovery evidence are already proved in controller, CLI, and milestone tests.',
-          'Mainline documentation now distinguishes contractual surface from delivered surface.'
+          'Docs-first baseline, contracts, and roadmap sequencing remain locked.',
+          'Units 0 through 5 are now complete: controller, CLI, web, live agent boundary, acceptance replay, and docs sync now tell one mainline story.',
+          '`pnpm acceptance:verify` passes on 2026-04-17 after the Unit 4 agent-service delivery and Unit 5 docs sync.',
+          'Milestone proof now shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.',
+          'Roadmap page, milestone docs, product spec, and root progress docs now reflect the same truth.'
         ],
         zh: [
-          'Docs-first 基线、契约和路线排序已经锁定。',
-          'Unit 0 已经成立：`pnpm acceptance:verify`、`mainline-acceptance` run `24565361391` 与 `docs-pages` run `24565361388` 已在 2026-04-17 的 `main` / `63a1257` 上共同证明 gate 为绿。',
-          'backup、rollback、diagnostics、drift、event history、recovery 证据已经在 controller、CLI、milestone 测试中被证明。',
-          '主线文档现在已经明确区分契约表面与已交付表面。'
+          'Docs-first 基线、契约和路线排序继续保持锁定。',
+          'Unit 0 到 Unit 5 现在都已完成：controller、CLI、web、live agent 边界、验收重放与文档同步已经讲同一条主线故事。',
+          '`pnpm acceptance:verify` 已在 2026-04-17 的 Unit 4 agent-service 交付与 Unit 5 文档同步之后重新转绿。',
+          'milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup/rollback 证据保持不变。',
+          'roadmap 页面、里程碑文档、产品规格与 root progress docs 现在已经反映同一套真实状态。'
         ]
       }
     },
@@ -183,16 +185,16 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Milestone 1 acceptance closure is now blocked on the agent steady-state service plus the final acceptance/doc resync pass; Web parity is already real.',
-          'Controller, CLI, and Web parity are now real for hosts, bridge rules, exposure policies, host probe/bootstrap, backups, operations, diagnostics, and event replay; the agent is still a file-backed CLI skeleton.',
-          'Cross-surface parity is now concentrated at the controller-agent boundary rather than the Web information architecture.',
-          'Milestone 2 reliability acceptance still has to be replayed on that same live host/rule/policy model instead of the current partial slice.'
+          'Milestone 2 reliability hardening is now the active lane, not Milestone 1 parity recovery.',
+          'Required-mode remote backup still degrades when GitHub backup is not configured in the proof environment, so remote-backup setup and status still need clearer operator-facing surfaces.',
+          'Raw agent runtime still reports `applied_unverified` until controller diagnostics promote the controller-side rule lifecycle to `active`; this shipped semantic split now needs clearer heartbeat/version and health-language polish.',
+          'Broader reliability replay on the same live agent-backed slice still needs more repeated proof across Web, CLI, API, and agent.'
         ],
         zh: [
-          '里程碑 1 验收闭环现在主要卡在 agent 稳态服务与最后的验收 / 文档重同步上；Web 一致性已经真实落地。',
-          'controller、CLI、Web 现在已经在 hosts、bridge rules、exposure policies、host probe / bootstrap、backups、operations、diagnostics、event replay 上形成真实一致性；agent 仍然是文件落盘式 CLI 骨架。',
-          '跨界面一致性缺口现在已经主要收缩到 controller-agent 边界，而不再是 Web 信息架构本身。',
-          '里程碑 2 仍然要把可靠性验收重放到同一套 live host/rule/policy 模型上，而不是继续停留在当前部分切片。'
+          '当前主线已经转到 Milestone 2 可靠性加固，而不再是 Milestone 1 一致性补洞。',
+          '当 proof 环境没有配置 GitHub backup 时，required-mode remote backup 仍会降级，因此远端备份配置与状态还需要更清楚的操作者界面。',
+          '原始 agent runtime 在 controller diagnostics 提升 controller 侧 rule lifecycle 到 `active` 之前仍会保持 `applied_unverified`；这条已交付语义现在还需要更清楚的 heartbeat/version 与健康状态文案。',
+          '同一条 live agent-backed 切片上的可靠性重放仍需要在 Web、CLI、API 与 agent 之间继续增加重复证明。'
         ]
       }
     },
@@ -205,18 +207,16 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Unit 1: complete. Controller source-of-truth resources for hosts, bridge rules, and exposure policies are now real.',
-          'Unit 2: complete. CLI host, bridge-rule, and exposure-policy inspection plus core write flows are now real.',
-          'Unit 3: complete. Web now renders live controller views and diagnostics detail across the locked information architecture.',
-          'Unit 4: move the agent to the locked HTTP-over-Tailscale steady-state boundary without breaking artifact compatibility.',
-          'Unit 5: rerun acceptance, sync roadmap and product docs, and only then advance milestone wording; keep Unit 0 green as mandatory baseline while doing this.'
+          'Keep Unit 0 green while Milestone 2 work lands.',
+          'Build richer live reliability views for remote-backup status, degraded/recovery history, and agent heartbeat/version on the same host/rule/policy model.',
+          'Replay reliability acceptance on the live agent-backed slice instead of reintroducing local-only shortcuts.',
+          'Keep Toward C deferred until Milestone 2 evidence becomes trustworthy.'
         ],
         zh: [
-          'Unit 1：已完成。controller 的 hosts、bridge rules、exposure policies 真源资源已经落地。',
-          'Unit 2：已完成。CLI 的 host、bridge-rule、exposure-policy 检查与核心写入流已经真实落地。',
-          'Unit 3：已完成。Web 现在已经在锁定的信息架构上渲染 live controller 视图与 diagnostics detail。',
-          'Unit 4：在不破坏当前产物兼容性的前提下，把 agent 推进到锁定的 HTTP-over-Tailscale 稳态边界。',
-          'Unit 5：重新执行验收、同步 roadmap 与产品文档，然后再提升里程碑文案；在整个过程中继续把 Unit 0 维持为必须为绿的基线。'
+          '继续把 Unit 0 保持为绿，再让 Milestone 2 工作落地。',
+          '继续在同一套 host/rule/policy 模型上补强远端备份状态、degraded/recovery 历史，以及 agent heartbeat/version 的 live 可靠性界面。',
+          '把可靠性验收继续重放在 live agent-backed 切片上，而不是重新引入本地捷径。',
+          '在 Milestone 2 证据真正可信之前，继续把 Toward C 保持为延后方向。'
         ]
       }
     }
@@ -228,14 +228,14 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     id: 'm1',
     stage: 'now',
     title: { en: 'Milestone 1: One Host, One Rule, One Rollback', zh: '里程碑 1：One Host, One Rule, One Rollback' },
-    status: { en: 'Acceptance Closure In Progress', zh: '验收闭环进行中' },
+    status: { en: 'Accepted Public Slice', zh: '公共切片已验收' },
     summary: {
-      en: 'Turn the frozen contracts and specs into the first credible control-plane slice; backup, diagnostics, rollback, and operations evidence are real, controller plus CLI plus Web host/rule/policy parity is now real, but the agent boundary and final acceptance replay are still incomplete.',
-      zh: '把已冻结的契约与规范落成第一条可信控制平面切片；backup、diagnostics、rollback、operations 证据已经真实存在，controller、CLI、Web 的 host/rule/policy 一致性也已落地，但 agent 边界与最后的验收重放仍未补齐。'
+      en: 'Turn the frozen contracts and specs into the first trusted control-plane slice; backup, diagnostics, rollback, operations evidence, controller/CLI/Web parity, and the live controller-agent service boundary are now real, and Unit 5 has replayed acceptance against that same slice.',
+      zh: '把已冻结的契约与规范落成第一条可信控制平面切片；backup、diagnostics、rollback、operations 证据、controller/CLI/Web 一致性以及 live controller-agent 服务边界都已真实落地，Unit 5 也已经在这同一条切片上重放验收。'
     },
     decision: {
-      en: 'Milestone 1 stays intentionally narrow so PortManager can prove practical value before broader reliability or distributed ambitions consume the roadmap; current work must close the missing public surfaces before status can advance.',
-      zh: '里程碑 1 必须刻意保持狭窄，让 PortManager 先证明实践价值，再去承担更广可靠性或分布式野心；当前工作必须先补齐缺失的公共表面，里程碑状态才有资格继续推进。'
+      en: 'Milestone 1 stayed intentionally narrow so PortManager could earn practical value before broader reliability or distributed ambitions consumed the roadmap; that narrow slice is now accepted and should not be reopened by new parity drift.',
+      zh: '里程碑 1 刻意保持狭窄，是为了让 PortManager 先挣到实践价值，再去承担更广的可靠性或分布式野心；这条狭窄切片现在已经完成验收，不应再被新的表面漂移重新打开。'
     },
     productOutcomes: {
       en: ['A host can become ready through real controller-managed lifecycle.', 'A single bridge rule can become active through real contract-backed flows.', 'Operators can inspect snapshots, diagnostics, and rollback evidence across live Web, CLI, and API surfaces.'],
@@ -259,44 +259,44 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Controller-backed hosts, host probe/bootstrap, bridge-rule CRUD, exposure-policy get/put, and backup-aware destructive rule mutation are now real and covered by `tests/controller/host-rule-policy.test.ts`.',
         'CLI host, bridge-rule, and exposure-policy list/detail plus core write flows are now real and covered by `crates/portmanager-cli/tests/host_rule_policy_cli.rs`.',
         'Web now renders controller-backed overview, host detail, hosts, bridge-rules, operations, backups, and console views with diagnostics detail, proved by `tests/web/live-controller-shell.test.ts`.',
+        'The agent now exposes `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback` through the long-lived `serve` command, and controller syncs desired state against that live boundary.',
         'CLI inspection flows for operations, backups, diagnostics, health checks, and rollback points are already real.',
-        'Milestone verification already proves backup-before-mutation, diagnostics evidence, rollback evidence, and degraded-state history.',
-        'Latest remote proof: `mainline-acceptance` run `24565361391` and `docs-pages` run `24565361388` both succeeded on `main` for commit `63a1257`, so Unit 0 is now achieved as standing branch discipline.'
+        'Milestone verification now proves backup-before-mutation, diagnostics evidence, rollback evidence, degraded-state history, host `draft -> ready`, and bridge rule `desired -> active` on the live agent-backed slice.',
+        '`pnpm acceptance:verify` passes on 2026-04-17 after the Unit 4 delivery and Unit 5 docs sync.'
       ],
       zh: [
         'controller 的 operations、backups、diagnostics、rollback points、event replay 表面已经真实存在。',
         'controller-backed 的 hosts、host probe / bootstrap、bridge-rule CRUD、exposure-policy get / put，以及带备份证据的 destructive rule mutation 现在都已真实存在，并由 `tests/controller/host-rule-policy.test.ts` 覆盖。',
         'CLI 的 host、bridge-rule、exposure-policy list/detail 与核心写入流现在都已真实存在，并由 `crates/portmanager-cli/tests/host_rule_policy_cli.rs` 覆盖。',
         'Web 现在已经能渲染 controller-backed 的 overview、host detail、hosts、bridge-rules、operations、backups、console 与 diagnostics detail，并由 `tests/web/live-controller-shell.test.ts` 证明。',
+        'agent 现在已经通过长驻 `serve` 命令暴露 `/health`、`/runtime-state`、`/apply`、`/snapshot`、`/rollback`，controller 也已经会对这条 live 边界同步 desired state。',
         'CLI 的 operations、backups、diagnostics、health checks、rollback points 检查流已经真实存在。',
-        '里程碑验证已经证明变更前备份、诊断证据、回滚证据与 degraded 状态历史。',
-        '最新远端证明显示：`mainline-acceptance` run `24565361391` 与 `docs-pages` run `24565361388` 已在 `main` 的 commit `63a1257` 上同时通过，因此 Unit 0 已经成为持续生效的分支纪律。'
+        'milestone verification 现在已经在 live agent-backed 切片上证明变更前备份、诊断证据、回滚证据、degraded 状态历史，以及 host `draft -> ready` 与 bridge rule `desired -> active`。',
+        '`pnpm acceptance:verify` 已在 2026-04-17 的 Unit 4 交付与 Unit 5 文档同步之后重新转绿。'
       ]
     },
     blockingGaps: {
       en: [
-        'Agent steady-state service over HTTP over Tailscale is still missing.',
-        'Final Unit 5 acceptance replay and doc resync still need to land on top of the completed Web parity.',
-        'Milestone 1 wording still cannot advance until Unit 4 and Unit 5 close the remaining public-surface gap.'
+        'No blocking gap remains for the locked Milestone 1 public-surface slice.',
+        'Remaining unfinished work now belongs to Milestone 2: remote-backup clarity, broader degraded/recovery UX, repeated live reliability replay, and clearer controller-agent health semantics.',
+        'Raw agent runtime intentionally remains `applied_unverified` until controller diagnostics promote the controller-side rule lifecycle to `active`; this is shipped verification sequencing, not a Milestone 1 blocker.'
       ],
       zh: [
-        '基于 HTTP over Tailscale 的 agent 稳态服务仍然缺失。',
-        '建立在已完成 Web 一致性之上的最终 Unit 5 验收重放与文档重同步仍需落地。',
-        '在 Unit 4 与 Unit 5 补齐剩余公共表面缺口之前，里程碑 1 文案都还不能继续提升。'
+        '锁定的 Milestone 1 公共表面切片已经没有阻塞缺口。',
+        '剩余未完成工作现在都属于 Milestone 2：远端备份清晰度、更广的 degraded/recovery UX、live 可靠性重复证明，以及更清楚的 controller-agent 健康语义。',
+        '原始 agent runtime 会在 controller diagnostics 把 controller 侧 rule lifecycle 提升到 `active` 之前保持 `applied_unverified`；这是已交付的验证顺序，而不是 Milestone 1 阻塞项。'
       ]
     },
     developerFocus: {
       en: [
-        'Unit 1: complete and now protected by the mainline gate.',
-        'Unit 2: complete and now protected by the mainline gate.',
-        'Unit 3: complete and now protected by the mainline gate.',
-        'Unit 4 + Unit 5: harden the agent boundary, rerun acceptance, resync docs, and keep Unit 0 green while parity closes.'
+        'Treat Milestone 1 as closed and protect it with the mainline gate.',
+        'Use the accepted live agent-backed slice as the only base for Milestone 2 reliability work.',
+        'Keep controller-side diagnostics as the rule-activation authority while clarifying agent heartbeat/version and health language.'
       ],
       zh: [
-        'Unit 1：已完成，并已纳入主线 gate 保护。',
-        'Unit 2：已完成，并已纳入主线 gate 保护。',
-        'Unit 3：已完成，并已纳入主线 gate 保护。',
-        'Unit 4 + Unit 5：继续加固 agent 边界、重跑验收、重同步文档，并在闭环过程中持续保持 Unit 0 为绿。'
+        '把 Milestone 1 当作已闭环状态，并继续用主线 gate 保护它。',
+        '把已经验收的 live agent-backed 切片作为 Milestone 2 可靠性工作的唯一底座。',
+        '继续让 controller-side diagnostics 承担规则激活权威，同时补强 agent heartbeat/version 与健康状态文案。'
       ]
     },
     dependencies: [],
@@ -306,14 +306,14 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     id: 'm2',
     stage: 'next',
     title: { en: 'Milestone 2: Engineering Reliability', zh: '里程碑 2：Engineering Reliability' },
-    status: { en: 'Reliability Slice Started', zh: '可靠性切片已启动' },
+    status: { en: 'Reliability Hardening In Progress', zh: '可靠性加固进行中' },
     summary: {
-      en: 'Strengthen the B-state slice until degraded handling, rollback confidence, and drift visibility become operationally trustworthy; branch-level reliability work exists, but acceptance still depends on live cross-surface parity.',
-      zh: '把 B 状态切片强化到 degraded 处理、rollback 信心和 drift 可见性都真正值得信任；当前分支已经有可靠性切片，但验收仍依赖真实跨界面一致性。'
+      en: 'Strengthen the accepted B-state slice until degraded handling, rollback confidence, remote-backup clarity, and drift visibility become operationally trustworthy across repeated real runs.',
+      zh: '把已经被接受的 B 状态切片继续强化到 degraded 处理、rollback 信心、远端备份清晰度与 drift 可见性都能在多次真实运行中值得信任。'
     },
     decision: {
-      en: 'Reliability stays ahead of platform expansion, but it also cannot be treated as accepted while the steady-state agent boundary and final acceptance replay still block truthful Web, CLI, and API alignment.',
-      zh: '可靠性仍然优先于平台扩展，但在稳态 agent 边界与最后的验收重放仍阻碍 Web、CLI、API 真实对齐之前，也不能把它当作已经验收完成。'
+      en: 'Reliability stays ahead of platform expansion, but it now builds on a completed Milestone 1 slice rather than a missing-parity story.',
+      zh: '可靠性仍然优先于平台扩展，但它现在建立在已经完成的 Milestone 1 切片之上，而不再建立在“缺表面”的叙事上。'
     },
     productOutcomes: {
       en: ['Degraded state becomes operationally visible across live surfaces.', 'Backup policy becomes explicit and enforceable with matching evidence trails.', 'Diagnostics and operations views mature without depending on mock-only presentation.'],
@@ -324,8 +324,8 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       zh: ['GitHub 备份接入与远端备份状态。', '建立在真实 host/rule/policy 资源之上的漂移检测与 degraded 处理。', '更强的 rollback 体验、产物保留与实时 event/history 一致性。']
     },
     entryCriteria: {
-      en: ['Milestone 1 slice is real end to end.', 'Local backup before mutation is already enforced.', 'Host/rule/operation state semantics are shared across Web, CLI, and API.'],
-      zh: ['里程碑 1 切片已经端到端成立。', '变更前本地备份已经是强制行为。', 'Web、CLI 与 API 已共享 host/rule/operation 状态语义。']
+      en: ['Milestone 1 slice is accepted end to end.', 'Local backup before mutation is already enforced.', 'Host/rule/operation state semantics are shared across Web, CLI, and API.'],
+      zh: ['里程碑 1 切片已经端到端完成验收。', '变更前本地备份已经是强制行为。', 'Web、CLI 与 API 已共享 host/rule/operation 状态语义。']
     },
     tradeoffs: {
       en: ['Still not broad multi-platform expansion.', 'Still not generic fleet orchestration.', 'PostgreSQL remains optional until there is real pressure.'],
@@ -336,37 +336,39 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Backup policy modes already behave differently and expose remote-backup status evidence.',
         'Drift detection already records explicit degraded state and recovery-linked summaries.',
         'Event history, operation detail replay paths, and rollback inspection are already richer than the original skeleton.',
-        'The mainline acceptance gate now protects this reliability slice from docs, contract, and test drift while Milestone 1 parity work continues.'
+        'Live agent-backed behavior now participates in degraded handling, rule verification, and controller-side activation semantics.',
+        'The mainline acceptance gate now protects this reliability slice from docs, contract, and test drift while Milestone 2 hardening continues.'
       ],
       zh: [
         'backup policy 模式已经具备真实行为差异，并暴露远端备份状态证据。',
         'drift detection 已经记录显式 degraded 状态与 recovery 关联摘要。',
         'event history、operation detail replay path、rollback inspection 已经比最初骨架更完整。',
-        '在里程碑 1 一致性工作继续推进时，主线验收 gate 也开始保护这条可靠性切片，避免文档、契约和测试发生漂移。'
+        'live agent-backed 行为现在也已经进入 degraded 处理、规则验证与 controller-side 激活语义。',
+        '在 Milestone 2 可靠性加固继续推进时，主线验收 gate 也继续保护这条切片，避免文档、契约和测试发生漂移。'
       ]
     },
     blockingGaps: {
       en: [
-        'Web still lacks live-data parity for the broader reliability surfaces.',
-        'The steady-state agent boundary is still missing, so cross-interface reliability cannot yet be declared finished.',
-        'Milestone 2 still depends on Milestone 1 parity closure before acceptance language can advance.'
+        'Required-mode remote backup still degrades when GitHub backup is absent in the proof environment.',
+        'Broader reliability UX for degraded history, recovery guidance, and agent heartbeat/version still needs stronger live parity.',
+        'Milestone 2 acceptance still needs repeated end-to-end replay on the same live agent-backed slice before status can advance.'
       ],
       zh: [
-        'Web 仍然缺少覆盖更广可靠性表面的 live-data 一致性。',
-        '稳态 agent 边界仍然缺失，所以还不能宣布跨界面可靠性已经完成。',
-        '在里程碑 1 一致性闭环前，里程碑 2 仍不能推进到验收完成表述。'
+        '当 proof 环境缺少 GitHub backup 配置时，required-mode remote backup 仍会降级。',
+        'degraded 历史、恢复指引，以及 agent heartbeat/version 的更广可靠性 UX 仍需要更强的 live 一致性。',
+        '在同一条 live agent-backed 切片上，Milestone 2 的验收仍需要更多端到端重复重放后，状态才有资格继续提升。'
       ]
     },
     developerFocus: {
       en: [
-        'Keep Milestone 2 behind the Unit 1 through Unit 4 closure path instead of promoting it from partial evidence.',
-        'Harden reliability UX only on the same live host/rule/policy surfaces that replace current mocks.',
-        'Keep one evidence model and one acceptance gate across controller, CLI, web, and agent instead of growing parallel reliability stories.'
+        'Build Milestone 2 on the completed Unit 0 through Unit 5 lane instead of reopening Milestone 1 parity work.',
+        'Deepen live reliability surfaces and proofs across remote-backup status, degraded recovery, diagnostics history, and agent health semantics.',
+        'Keep one evidence model and one acceptance gate across controller, CLI, web, and agent.'
       ],
       zh: [
-        '把里程碑 2 保持在 Unit 1 到 Unit 4 的闭环路径之后，而不是靠部分证据提前升级。',
-        '只在替换掉当前 mock 的同一套 live host/rule/policy 表面上继续加固可靠性 UX。',
-        '让 controller、CLI、web、agent 继续共用同一套证据模型与验收 gate，而不是分裂出多套可靠性叙事。'
+        '把 Milestone 2 建立在已经完成的 Unit 0 到 Unit 5 主线之上，而不是重新打开 Milestone 1 的表面补洞。',
+        '继续在远端备份状态、degraded 恢复、diagnostics 历史，以及 agent 健康语义上加深 live 可靠性界面与证明。',
+        '继续让 controller、CLI、web、agent 共用同一套证据模型与同一条验收 gate。'
       ]
     },
     dependencies: ['m1'],
@@ -415,14 +417,14 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     blockingGaps: {
       en: [
-        'B-state trust is not yet fully earned.',
-        'Controller, CLI, web, and agent public-surface parity is still incomplete.',
-        'Starting distributed separation now would amplify documentation and implementation drift.'
+        'B-state trust beyond Milestone 1 is not yet fully earned.',
+        'Milestone 2 reliability proof is still incomplete across repeated real use.',
+        'Starting distributed separation now would amplify reliability drift instead of resolving it.'
       ],
       zh: [
-        'B 状态可信度还没有完全挣出来。',
-        'controller、CLI、web、agent 的公共表面一致性仍未补齐。',
-        '现在就启动分布式拆分，只会放大文档和实现漂移。'
+        '超出 Milestone 1 之后的 B 状态可信度还没有完全挣出来。',
+        'Milestone 2 的可靠性证明在重复真实使用中仍未闭环。',
+        '现在就启动分布式拆分，只会放大可靠性漂移，而不是解决它。'
       ]
     },
     developerFocus: {

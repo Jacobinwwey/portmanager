@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-v1-product-spec.md`
 > Audience: `shared` | Section: `overview` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.4.0-mainline-progress-sync
+> Updated: 2026-04-17 | Version: v0.4.1-m1-accepted
 ### Summary
 PortManager V1 is a control plane for exposing selected remote localhost services over Tailscale without treating ad-hoc shell commands as the operating model.
 The product goal is not only exposure, but safe exposure: desired state, operations history, diagnostics visibility, backup-before-mutation, and explicit rollback points.
@@ -82,6 +82,7 @@ A V1 implementation will be considered valid only if all of the following become
 - Web, CLI, and API observe the same host, rule, operation, and degraded state model
 
 ### Current implementation progress snapshot
-- Already evidenced in code and tests: backup-before-mutation, rollback evidence, controller-side diagnostics capture, operation history, event replay, drift-driven degraded status, and CLI/controller inspection of operations, backups, diagnostics, health checks, and rollback points.
-- Not yet sufficient for Milestone 1 acceptance: real host lifecycle resources, real bridge-rule CRUD, real exposure-policy management, live Web parity across the locked information architecture, and a controller-agent steady-state `HTTP over Tailscale` service path.
-- Current product conclusion: PortManager is beyond "docs baseline only" but still short of the full first trusted control-plane slice promised by the frozen V1 product boundary.
+- Already evidenced in code and tests: backup-before-mutation, rollback evidence, controller-side diagnostics capture, operation history, event replay, drift-driven degraded status, real host lifecycle resources, real bridge-rule CRUD, real exposure-policy management, live Web parity across the locked information architecture, and a controller-agent steady-state `HTTP over Tailscale` service path.
+- Fresh acceptance evidence on `2026-04-17`: `pnpm acceptance:verify` passes; the embedded milestone proof now shows live bootstrap to `ready`, bridge-rule activation to `active` after controller diagnostics, live agent HTTP apply/runtime collection, and preserved backup/rollback evidence.
+- Controller-side rule lifecycle intentionally becomes `active` only after diagnostics while raw agent runtime remains `applied_unverified` until verification. That split keeps operator truth on the controller side without breaking current artifact compatibility.
+- Current product conclusion: the first trusted public control-plane slice is now real and accepted; Milestone 2 reliability hardening is the next active lane.
