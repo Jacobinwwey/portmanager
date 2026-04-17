@@ -27,7 +27,7 @@ As of `2026-04-17`, that mismatch is no longer mixed with gate uncertainty: GitH
 
 Because of that mismatch, the repeatable mainline acceptance gate should now be treated as completed engineering precondition rather than active recovery work.
 `pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml` therefore mark Unit 0 as achieved branch discipline: they harden delivery and branch protection, but they do not by themselves close Milestone 1.
-Active implementation focus now shifts to Unit 1 controller surface parity while Unit 0 remains a mandatory guardrail.
+Unit 1 controller surface parity has now landed, so active implementation focus shifts to Unit 2 CLI parity plus Unit 3 Web live-data parity while Unit 0 remains a mandatory guardrail.
 
 ## Problem Frame
 
@@ -147,7 +147,7 @@ flowchart TD
 **Verification:**
 - `pnpm acceptance:verify` is the canonical mainline verification entrypoint, is wired into GitHub Actions, and latest `main` runs `24565361391` / `24565361388` prove the gate is green on GitHub-hosted runners.
 
-- [ ] **Unit 1: Controller Host, Rule, and Policy Surface Parity**
+- [x] **Unit 1: Controller Host, Rule, and Policy Surface Parity**
 
 **Goal:** Implement the missing contract-backed controller resources so the repository serves real `hosts`, `bridge-rules`, and `exposure-policies` data and mutations instead of only operations/reliability slices.
 
@@ -158,16 +158,12 @@ flowchart TD
 **Files:**
 - Modify: `apps/controller/src/controller-server.ts`
 - Modify: `apps/controller/src/operation-store.ts`
-- Modify: `apps/controller/src/operation-runner.ts`
-- Modify: `packages/contracts/openapi/openapi.yaml`
-- Modify: `packages/typescript-contracts/src/generated/openapi.ts`
 - Create: `tests/controller/host-rule-policy.test.ts`
-- Modify: `tests/contracts/generate-contracts.test.mjs`
 
 **Approach:**
 - Add controller read and write paths for hosts, bridge rules, and exposure policies by extending the existing store and operation runner.
 - Keep operation creation, rollback evidence, and degraded-state semantics consistent with current backup and diagnostics flows.
-- Regenerate contract outputs whenever the public surface changes.
+- Reuse the already-frozen contract surface without changing generated outputs, because OpenAPI already declared these Unit 1 resources.
 
 **Patterns to follow:**
 - `apps/controller/src/controller-server.ts`
@@ -182,7 +178,7 @@ flowchart TD
 - Integration: drift-check, diagnostics, and rollback views stay consistent after new host/rule/policy state is introduced.
 
 **Verification:**
-- Controller test suite proves real host/rule/policy surface parity alongside existing reliability primitives.
+- `tests/controller/host-rule-policy.test.ts` proves real host/rule/policy surface parity, host probe/bootstrap lifecycle, backup-aware destructive rule mutation, and 404 guards alongside existing reliability primitives.
 
 - [ ] **Unit 2: CLI Public Surface Expansion**
 

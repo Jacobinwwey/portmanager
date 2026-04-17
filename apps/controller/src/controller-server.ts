@@ -24,6 +24,67 @@ function createOperationId(prefix: string) {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`
 }
 
+function createResourceId(prefix: string, label: string) {
+  const slug = label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+
+  return `${prefix}_${slug || 'item'}_${Date.now()}_${Math.floor(Math.random() * 1000)}`
+}
+
+function parseBackupPolicy(value: unknown) {
+  if (value === 'required') {
+    return 'required' as const
+  }
+
+  if (value === 'best_effort') {
+    return 'best_effort' as const
+  }
+
+  return undefined
+}
+
+function parseConflictPolicy(value: unknown) {
+  if (value === 'reject' || value === 'replace_existing') {
+    return value
+  }
+
+  return undefined
+}
+
+function parseInteger(value: unknown) {
+  if (typeof value === 'number' && Number.isInteger(value)) {
+    return value
+  }
+
+  return undefined
+}
+
+function parseNumberArray(value: unknown) {
+  if (!Array.isArray(value)) {
+    return undefined
+  }
+
+  const parsed = value
+    .map((entry) => parseInteger(entry))
+    .filter((entry): entry is number => entry !== undefined)
+
+  return parsed.length === value.length ? parsed : undefined
+}
+
+function parseStringArray(value: unknown) {
+  if (!Array.isArray(value)) {
+    return undefined
+  }
+
+  const parsed = value
+    .map((entry) => (typeof entry === 'string' ? entry : undefined))
+    .filter((entry): entry is string => entry !== undefined)
+
+  return parsed.length === value.length ? parsed : undefined
+}
+
 function sendJson(response: http.ServerResponse, status: number, payload: unknown) {
   response.writeHead(status, { 'content-type': 'application/json' })
   response.end(JSON.stringify(payload))
@@ -95,6 +156,442 @@ export function createControllerServer(options: {
       ruleId: requestUrl.searchParams.get('ruleId') ?? undefined
     }
 
+    if (request.method === 'GET' && requestUrl.pathname === '/hosts') {
+      sendJson(response, 200, {
+        items: store.listHosts()
+      })
+      return
+    }
+
+    if (request.method === 'POST' && requestUrl.pathname === '/hosts') {
+      const payload = await readJsonBody(request)
+      const name = typeof payload.name === 'string' ? payload.name.trim() : ''
+      const labels = payload.labels === undefined ? [] : parseStringArray(payload.labels)
+      const ssh = payload.ssh && typeof payload.ssh === 'object'
+        ? (payload.ssh as Record<string, unknown>)
+        : undefined
+      const sshHost = typeof ssh?.host === 'string' ? ssh.host.trim() : ''
+      const sshPort = parseInteger(ssh?.port)
+
+      if (!name || !labels || !sshHost || !sshPort || sshPort < 1 || sshPort > 65_535) {
+        sendJson(response, 400, { error: 'invalid_host_request' })
+        return
+      }
+
+      const hostId = createResourceId('host', name)
+      const operationId = createOperationId('op_create_host')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'create_host',
+        initiator: 'web',
+        hostId
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          store.createHost({
+            id: hostId,
+            name,
+            labels,
+            sshHost,
+            sshPort
+          })
+
+          return {
+            resultSummary: `host ${hostId} created as draft`
+          }
+        })
+      })
+      return
+    }
+
+    const hostDetailMatch =
+      request.method === 'GET' ? requestUrl.pathname.match(/^\/hosts\/([^/]+)$/) : null
+
+    if (hostDetailMatch) {
+      const hostId = decodeURIComponent(hostDetailMatch[1] ?? '')
+      const detail = store.getHostDetail(hostId)
+      if (!detail) {
+        sendJson(response, 404, { error: 'host_not_found' })
+        return
+      }
+
+      sendJson(response, 200, detail)
+      return
+    }
+
+    const hostProbeMatch =
+      request.method === 'POST' ? requestUrl.pathname.match(/^\/hosts\/([^/]+)\/probe$/) : null
+
+    if (hostProbeMatch) {
+      const hostId = decodeURIComponent(hostProbeMatch[1] ?? '')
+      const host = store.getHost(hostId)
+      if (!host) {
+        sendJson(response, 404, { error: 'host_not_found' })
+        return
+      }
+
+      const payload = await readJsonBody(request)
+      const mode = payload.mode === 'read_only' ? 'read_only' : undefined
+      if (payload.mode !== undefined && !mode) {
+        sendJson(response, 400, { error: 'invalid_probe_request' })
+        return
+      }
+
+      const operationId = createOperationId('op_probe_host')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'probe_host',
+        initiator: 'web',
+        hostId
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          store.createHealthCheck({
+            id: `hc_${hostId}_${operationId}`,
+            hostId,
+            category: 'host_probe',
+            status: 'healthy',
+            summary: `host probe succeeded${mode ? ` (${mode})` : ''}`
+          })
+
+          return {
+            resultSummary: `host ${hostId} probe completed`
+          }
+        })
+      })
+      return
+    }
+
+    const hostBootstrapMatch =
+      request.method === 'POST' ? requestUrl.pathname.match(/^\/hosts\/([^/]+)\/bootstrap$/) : null
+
+    if (hostBootstrapMatch) {
+      const hostId = decodeURIComponent(hostBootstrapMatch[1] ?? '')
+      const host = store.getHost(hostId)
+      if (!host) {
+        sendJson(response, 404, { error: 'host_not_found' })
+        return
+      }
+
+      const payload = await readJsonBody(request)
+      const sshUser = typeof payload.sshUser === 'string' ? payload.sshUser.trim() : ''
+      const desiredAgentPort = parseInteger(payload.desiredAgentPort)
+      const backupPolicy = parseBackupPolicy(payload.backupPolicy)
+
+      if (!sshUser || !desiredAgentPort || desiredAgentPort < 1 || desiredAgentPort > 65_535) {
+        sendJson(response, 400, { error: 'invalid_bootstrap_request' })
+        return
+      }
+
+      const operationId = createOperationId('op_bootstrap_host')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'bootstrap_host',
+        initiator: 'web',
+        hostId
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          if (backupPolicy) {
+            const currentPolicy = store.getExposurePolicy(hostId)
+            if (currentPolicy) {
+              store.replaceExposurePolicy({
+                ...currentPolicy,
+                backupPolicy
+              })
+            }
+          }
+
+          store.updateHostRuntime(hostId, {
+            lifecycleState: 'ready',
+            agentState: 'ready'
+          })
+
+          return {
+            resultSummary: `host ${hostId} bootstrapped and ready`
+          }
+        })
+      })
+      return
+    }
+
+    if (request.method === 'GET' && requestUrl.pathname === '/bridge-rules') {
+      sendJson(response, 200, {
+        items: store.listBridgeRules()
+      })
+      return
+    }
+
+    if (request.method === 'POST' && requestUrl.pathname === '/bridge-rules') {
+      const payload = await readJsonBody(request)
+      const hostId = typeof payload.hostId === 'string' ? payload.hostId : undefined
+      const host = hostId ? store.getHost(hostId) : null
+      const name = typeof payload.name === 'string' ? payload.name.trim() : undefined
+      const protocol = payload.protocol === 'tcp' ? 'tcp' : undefined
+      const listenPort = parseInteger(payload.listenPort)
+      const targetHost = typeof payload.targetHost === 'string' ? payload.targetHost.trim() : ''
+      const targetPort = parseInteger(payload.targetPort)
+
+      if (!hostId || !host) {
+        sendJson(response, 404, { error: 'host_not_found' })
+        return
+      }
+
+      if (!protocol || !listenPort || listenPort < 1 || listenPort > 65_535 || !targetHost || !targetPort || targetPort < 1 || targetPort > 65_535) {
+        sendJson(response, 400, { error: 'invalid_bridge_rule_request' })
+        return
+      }
+
+      const operationId = createOperationId('op_create_rule')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'create_rule',
+        initiator: 'web',
+        hostId
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          const ruleId = createResourceId('rule', name ?? `${hostId}_${listenPort}`)
+          store.createBridgeRule({
+            id: ruleId,
+            hostId,
+            name,
+            protocol,
+            listenPort,
+            targetHost,
+            targetPort,
+            lifecycleState: 'desired'
+          })
+
+          return {
+            resultSummary: `rule ${ruleId} created for host ${hostId}`
+          }
+        })
+      })
+      return
+    }
+
+    const bridgeRuleDetailMatch =
+      ['GET', 'PATCH', 'DELETE'].includes(request.method ?? '')
+        ? requestUrl.pathname.match(/^\/bridge-rules\/([^/]+)$/)
+        : null
+
+    if (bridgeRuleDetailMatch && request.method === 'GET') {
+      const ruleId = decodeURIComponent(bridgeRuleDetailMatch[1] ?? '')
+      const rule = store.getBridgeRule(ruleId)
+      if (!rule) {
+        sendJson(response, 404, { error: 'bridge_rule_not_found' })
+        return
+      }
+
+      sendJson(response, 200, rule)
+      return
+    }
+
+    if (bridgeRuleDetailMatch && request.method === 'PATCH') {
+      const ruleId = decodeURIComponent(bridgeRuleDetailMatch[1] ?? '')
+      const rule = store.getBridgeRule(ruleId)
+      if (!rule) {
+        sendJson(response, 404, { error: 'bridge_rule_not_found' })
+        return
+      }
+
+      const payload = await readJsonBody(request)
+      const name =
+        payload.name === undefined ? undefined : typeof payload.name === 'string' ? payload.name.trim() : null
+      const listenPort =
+        payload.listenPort === undefined ? undefined : parseInteger(payload.listenPort)
+      const targetHost =
+        payload.targetHost === undefined
+          ? undefined
+          : typeof payload.targetHost === 'string'
+            ? payload.targetHost.trim()
+            : null
+      const targetPort =
+        payload.targetPort === undefined ? undefined : parseInteger(payload.targetPort)
+
+      if (name === null || targetHost === null || (payload.listenPort !== undefined && (!listenPort || listenPort < 1 || listenPort > 65_535)) || (payload.targetPort !== undefined && (!targetPort || targetPort < 1 || targetPort > 65_535))) {
+        sendJson(response, 400, { error: 'invalid_bridge_rule_update' })
+        return
+      }
+
+      const operationId = createOperationId('op_update_rule')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'update_rule',
+        initiator: 'web',
+        hostId: rule.hostId,
+        ruleId
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          const policy = store.getExposurePolicy(rule.hostId)
+          const backup = backupPrimitive.runBackup({
+            operationId,
+            hostId: rule.hostId,
+            mode: policy?.backupPolicy ?? 'best_effort'
+          })
+
+          store.updateBridgeRule(ruleId, {
+            ...(name !== undefined ? { name } : {}),
+            ...(listenPort !== undefined ? { listenPort } : {}),
+            ...(targetHost !== undefined ? { targetHost } : {}),
+            ...(targetPort !== undefined ? { targetPort } : {}),
+            lifecycleState: backup.operationState === 'degraded' ? 'degraded' : 'desired',
+            lastRollbackPointId: backup.rollbackPoint.id
+          })
+
+          return {
+            state: backup.operationState,
+            resultSummary: `rule ${ruleId} updated; ${backup.resultSummary}`,
+            backupId: backup.backup.id,
+            rollbackPointId: backup.rollbackPoint.id
+          }
+        })
+      })
+      return
+    }
+
+    if (bridgeRuleDetailMatch && request.method === 'DELETE') {
+      const ruleId = decodeURIComponent(bridgeRuleDetailMatch[1] ?? '')
+      const rule = store.getBridgeRule(ruleId)
+      if (!rule) {
+        sendJson(response, 404, { error: 'bridge_rule_not_found' })
+        return
+      }
+
+      const operationId = createOperationId('op_remove_rule')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'remove_rule',
+        initiator: 'web',
+        hostId: rule.hostId,
+        ruleId
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          const policy = store.getExposurePolicy(rule.hostId)
+          const backup = backupPrimitive.runBackup({
+            operationId,
+            hostId: rule.hostId,
+            mode: policy?.backupPolicy ?? 'best_effort'
+          })
+
+          store.updateBridgeRule(ruleId, {
+            lifecycleState: 'removed',
+            lastRollbackPointId: backup.rollbackPoint.id
+          })
+
+          return {
+            state: backup.operationState,
+            resultSummary: `rule ${ruleId} removed; ${backup.resultSummary}`,
+            backupId: backup.backup.id,
+            rollbackPointId: backup.rollbackPoint.id
+          }
+        })
+      })
+      return
+    }
+
+    const exposurePolicyMatch =
+      ['GET', 'PUT'].includes(request.method ?? '')
+        ? requestUrl.pathname.match(/^\/exposure-policies\/([^/]+)$/)
+        : null
+
+    if (exposurePolicyMatch && request.method === 'GET') {
+      const hostId = decodeURIComponent(exposurePolicyMatch[1] ?? '')
+      const host = store.getHost(hostId)
+      if (!host) {
+        sendJson(response, 404, { error: 'host_not_found' })
+        return
+      }
+
+      const policy = store.getExposurePolicy(hostId)
+      if (!policy) {
+        sendJson(response, 404, { error: 'exposure_policy_not_found' })
+        return
+      }
+
+      sendJson(response, 200, policy)
+      return
+    }
+
+    if (exposurePolicyMatch && request.method === 'PUT') {
+      const hostId = decodeURIComponent(exposurePolicyMatch[1] ?? '')
+      const host = store.getHost(hostId)
+      if (!host) {
+        sendJson(response, 404, { error: 'host_not_found' })
+        return
+      }
+
+      const payload = await readJsonBody(request)
+      const bodyHostId = typeof payload.hostId === 'string' ? payload.hostId : undefined
+      const allowedSources = parseStringArray(payload.allowedSources)
+      const excludedPorts = parseNumberArray(payload.excludedPorts)
+      const samePortMirror =
+        typeof payload.samePortMirror === 'boolean' ? payload.samePortMirror : undefined
+      const conflictPolicy = parseConflictPolicy(payload.conflictPolicy)
+      const backupPolicy = parseBackupPolicy(payload.backupPolicy)
+
+      if (
+        bodyHostId !== hostId ||
+        !allowedSources ||
+        !excludedPorts ||
+        samePortMirror === undefined ||
+        !conflictPolicy ||
+        !backupPolicy
+      ) {
+        sendJson(response, 400, { error: 'invalid_exposure_policy_request' })
+        return
+      }
+
+      const operationId = createOperationId('op_apply_policy')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'apply_policy',
+        initiator: 'web',
+        hostId
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          store.replaceExposurePolicy({
+            hostId,
+            allowedSources,
+            excludedPorts,
+            samePortMirror,
+            conflictPolicy,
+            backupPolicy
+          })
+
+          return {
+            resultSummary: `policy applied for ${hostId}`
+          }
+        })
+      })
+      return
+    }
+
     if (request.method === 'GET' && requestUrl.pathname === '/operations') {
       sendJson(response, 200, {
         items: store.listOperations({
@@ -162,8 +659,7 @@ export function createControllerServer(options: {
         typeof payload.expectedStateHash === 'string' ? payload.expectedStateHash : undefined
       const observedStateHash =
         typeof payload.observedStateHash === 'string' ? payload.observedStateHash : undefined
-      const backupPolicy =
-        payload.backupPolicy === 'required' ? 'required' : payload.backupPolicy === 'best_effort' ? 'best_effort' : undefined
+      const backupPolicy = parseBackupPolicy(payload.backupPolicy)
 
       if (!hostId || !expectedStateHash || !observedStateHash || !backupPolicy) {
         sendJson(response, 400, { error: 'invalid_drift_check_request' })

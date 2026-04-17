@@ -184,14 +184,14 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Milestone 1 acceptance closure is still blocked on real hosts, bridge rules, exposure policies, live web parity, and the agent steady-state service.',
-          'Controller runtime still exposes operations, events, health checks, diagnostics, backups, rollback points, and drift check, but not contract-backed hosts, bridge rules, or exposure policies.',
-          'CLI, Web, and agent still lag the contract surface: CLI has no host/rule/policy flows, Web still renders mock-only overview/host-detail/operations shells, and the agent is still a file-backed CLI skeleton.',
+          'Controller parity is now real, but CLI, Web, and agent still lag the contract surface: CLI has no host/rule/policy flows, Web still renders mock-only overview/host-detail/operations shells, and the agent is still a file-backed CLI skeleton.',
+          'Cross-surface parity is still incomplete even though controller now serves hosts, bridge rules, exposure policies, host probe/bootstrap, and backup-aware destructive rule mutation.',
           'Milestone 2 reliability acceptance still has to be replayed on that same live host/rule/policy model instead of the current partial slice.'
         ],
         zh: [
           '里程碑 1 验收闭环仍然卡在真实 hosts、bridge rules、exposure policies、live web 一致性与 agent 稳态服务上。',
-          'controller 运行时目前仍只暴露 operations、events、health checks、diagnostics、backups、rollback points 与 drift check，还没有 contract-backed 的 hosts、bridge rules、exposure policies。',
-          'CLI、Web 与 agent 仍然落后于契约表面：CLI 还没有 host/rule/policy 工作流，Web 仍只渲染 mock-only 的 overview/host-detail/operations shell，agent 也仍是文件落盘式 CLI 骨架。',
+          'controller 一致性现在已经落地，但 CLI、Web 与 agent 仍然落后于契约表面：CLI 还没有 host/rule/policy 工作流，Web 仍只渲染 mock-only 的 overview/host-detail/operations shell，agent 也仍是文件落盘式 CLI 骨架。',
+          '虽然 controller 已经提供 hosts、bridge rules、exposure policies、host probe / bootstrap 与带备份证据的 destructive rule mutation，但跨界面一致性仍未闭环。',
           '里程碑 2 仍然要把可靠性验收重放到同一套 live host/rule/policy 模型上，而不是继续停留在当前部分切片。'
         ]
       }
@@ -205,14 +205,14 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Unit 1: implement controller source-of-truth resources for hosts, bridge rules, and exposure policies.',
-          'Unit 2 + Unit 3: mirror those resources into CLI commands and replace Web mock routes with live controller views.',
+          'Unit 1: complete. Controller source-of-truth resources for hosts, bridge rules, and exposure policies are now real.',
+          'Unit 2 + Unit 3: mirror those controller resources into CLI commands and replace Web mock routes with live controller views.',
           'Unit 4: move the agent to the locked HTTP-over-Tailscale steady-state boundary without breaking artifact compatibility.',
           'Unit 5: rerun acceptance, sync roadmap and product docs, and only then advance milestone wording; keep Unit 0 green as mandatory baseline while doing this.'
         ],
         zh: [
-          'Unit 1：先把 controller 的 hosts、bridge rules、exposure policies 资源做成真实真源。',
-          'Unit 2 + Unit 3：把这些资源同步到 CLI 命令，并把 Web mock 路由切到 live controller 视图。',
+          'Unit 1：已完成。controller 的 hosts、bridge rules、exposure policies 真源资源已经落地。',
+          'Unit 2 + Unit 3：把这些 controller 资源同步到 CLI 命令，并把 Web mock 路由切到 live controller 视图。',
           'Unit 4：在不破坏当前产物兼容性的前提下，把 agent 推进到锁定的 HTTP-over-Tailscale 稳态边界。',
           'Unit 5：重新执行验收、同步 roadmap 与产品文档，然后再提升里程碑文案；在整个过程中继续把 Unit 0 维持为必须为绿的基线。'
         ]
@@ -254,12 +254,14 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     verifiedNow: {
       en: [
         'Controller operations, backups, diagnostics, rollback points, and event replay surfaces are already real.',
+        'Controller-backed hosts, host probe/bootstrap, bridge-rule CRUD, exposure-policy get/put, and backup-aware destructive rule mutation are now real and covered by `tests/controller/host-rule-policy.test.ts`.',
         'CLI inspection flows for operations, backups, diagnostics, health checks, and rollback points are already real.',
         'Milestone verification already proves backup-before-mutation, diagnostics evidence, rollback evidence, and degraded-state history.',
         'Latest remote proof: `mainline-acceptance` run `24565361391` and `docs-pages` run `24565361388` both succeeded on `main` for commit `63a1257`, so Unit 0 is now achieved as standing branch discipline.'
       ],
       zh: [
         'controller 的 operations、backups、diagnostics、rollback points、event replay 表面已经真实存在。',
+        'controller-backed 的 hosts、host probe / bootstrap、bridge-rule CRUD、exposure-policy get / put，以及带备份证据的 destructive rule mutation 现在都已真实存在，并由 `tests/controller/host-rule-policy.test.ts` 覆盖。',
         'CLI 的 operations、backups、diagnostics、health checks、rollback points 检查流已经真实存在。',
         '里程碑验证已经证明变更前备份、诊断证据、回滚证据与 degraded 状态历史。',
         '最新远端证明显示：`mainline-acceptance` run `24565361391` 与 `docs-pages` run `24565361388` 已在 `main` 的 commit `63a1257` 上同时通过，因此 Unit 0 已经成为持续生效的分支纪律。'
@@ -267,14 +269,12 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     blockingGaps: {
       en: [
-        'Real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources are still missing from controller runtime.',
         'CLI still lacks host/rule/policy public commands and write paths.',
         'Web roadmap IA still relies on mock-only overview, host detail, and operations shells rather than live controller routes.',
         'Agent steady-state service over HTTP over Tailscale is still missing.',
         'Milestone 1 wording still cannot advance until Unit 1 through Unit 4 close the public-surface gap.'
       ],
       zh: [
-        'controller 运行时中的真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源仍然缺失。',
         'CLI 仍然缺少 host/rule/policy 的公共命令与写入路径。',
         'Web 的 roadmap 信息架构仍然依赖 mock-only 的 overview、host detail、operations shell，而不是真实 controller 路由。',
         '基于 HTTP over Tailscale 的 agent 稳态服务仍然缺失。',
@@ -283,13 +283,13 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     developerFocus: {
       en: [
-        'Unit 1: build controller source-of-truth resources for hosts, rules, and policies.',
+        'Unit 1: complete and now protected by the mainline gate.',
         'Unit 2: mirror those resources into CLI inspection and write flows.',
         'Unit 3: replace Web mocks with live routes and diagnostics detail.',
         'Unit 4 + Unit 5: harden the agent boundary, rerun acceptance, resync docs, and keep Unit 0 green while parity closes.'
       ],
       zh: [
-        'Unit 1：先补齐 controller 中作为真源的 hosts、rules、policies 资源。',
+        'Unit 1：已完成，并已纳入主线 gate 保护。',
         'Unit 2：把这些资源同步到 CLI 的检查与写入流。',
         'Unit 3：把 Web mock 替换成 live 路由与 diagnostics detail。',
         'Unit 4 + Unit 5：继续加固 agent 边界、重跑验收、重同步文档，并在闭环过程中持续保持 Unit 0 为绿。'
