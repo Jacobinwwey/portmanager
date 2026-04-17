@@ -9,7 +9,7 @@ origin: docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps
 # PortManager Mainline Reconciliation Plan
 
 Updated: 2026-04-17
-Version: v0.1.2-unit1-focus
+Version: v0.1.3-unit3-web-parity
 
 ## English
 
@@ -22,12 +22,12 @@ This plan assumes the 2026-04-16 docs truth-sync has landed and focuses on the e
 
 The repository's strongest implemented asset is now an evidence-first control-plane nucleus around operations, diagnostics, backup, rollback, recovery, and event history.
 That is real progress, not presentation-only work.
-The biggest structural mismatch is also now clearer: the public contract surface still outruns the runtime surface for `hosts`, `bridge-rules`, `exposure-policies`, live web truth, and the steady-state controller-agent boundary.
+The biggest structural mismatch is also now clearer: the public contract surface gap is now concentrated at the steady-state controller-agent boundary plus the final Milestone 1 acceptance/doc resync pass.
 As of `2026-04-17`, that mismatch is no longer mixed with gate uncertainty: GitHub Actions runs `24565361391` (`mainline-acceptance`) and `24565361388` (`docs-pages`) both succeeded on `main` for commit `63a1257`.
 
 Because of that mismatch, the repeatable mainline acceptance gate should now be treated as completed engineering precondition rather than active recovery work.
 `pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml` therefore mark Unit 0 as achieved branch discipline: they harden delivery and branch protection, but they do not by themselves close Milestone 1.
-Units 1 and 2 controller-plus-CLI parity have now landed, so active implementation focus shifts to Unit 3 Web live-data parity plus Unit 4 agent steady-state integration while Unit 0 remains a mandatory guardrail.
+Units 1 through 3 controller-plus-CLI-plus-Web parity have now landed, so active implementation focus shifts to Unit 4 agent steady-state integration plus Unit 5 acceptance/doc resync while Unit 0 remains a mandatory guardrail.
 
 ## Problem Frame
 
@@ -211,7 +211,7 @@ flowchart TD
 - CLI tests prove contract-aligned read and write behavior for the missing public resources.
 - Status update: `crates/portmanager-cli/tests/host_rule_policy_cli.rs` now proves list/get/create/probe/bootstrap for hosts, list/get/create/update/delete for bridge rules, and get/set for exposure policies.
 
-- [ ] **Unit 3: Web Live Data and Route Parity**
+- [x] **Unit 3: Web Live Data and Route Parity**
 
 **Goal:** Replace mock-only web state with controller-backed data and add the missing navigation surfaces promised by the product information architecture.
 
@@ -221,9 +221,7 @@ flowchart TD
 
 **Files:**
 - Modify: `apps/web/src/main.ts`
-- Modify: `packages/typescript-contracts/src/index.ts`
 - Modify: `tests/web/web-shell.test.ts`
-- Modify: `tests/web/event-stream.test.ts`
 - Create: `tests/web/live-controller-shell.test.ts`
 
 **Approach:**
@@ -243,7 +241,8 @@ flowchart TD
 - Integration: hosts, bridge rules, backups, and diagnostics detail stay semantically aligned with controller payloads.
 
 **Verification:**
-- Web tests prove live-data rendering and route parity across the locked V1 navigation model.
+- Web tests now prove live-data rendering and route parity across the locked V1 navigation model.
+- Status update: `tests/web/live-controller-shell.test.ts` proves controller-backed overview, host detail, operations, hosts, bridge-rules, backups, and console views; `tests/web/web-shell.test.ts` keeps preview-mode shells aligned with the same information architecture.
 
 - [ ] **Unit 4: Agent Steady-State Service Boundary**
 
@@ -560,7 +559,7 @@ flowchart TD
 - CLI 测试证明缺失公共资源的 contract-aligned 读写行为已经补齐。
 - 状态更新：`crates/portmanager-cli/tests/host_rule_policy_cli.rs` 已证明 hosts 的 list/get/create/probe/bootstrap、bridge rules 的 list/get/create/update/delete，以及 exposure policies 的 get/set。
 
-- [ ] **Unit 3：Web 实时数据与路由一致性**
+- [x] **Unit 3：Web 实时数据与路由一致性**
 
 **目标：** 用 controller-backed 数据替换纯 mock Web 状态，并补齐产品信息架构中承诺的缺失导航面。
 
@@ -570,9 +569,7 @@ flowchart TD
 
 **文件：**
 - Modify: `apps/web/src/main.ts`
-- Modify: `packages/typescript-contracts/src/index.ts`
 - Modify: `tests/web/web-shell.test.ts`
-- Modify: `tests/web/event-stream.test.ts`
 - Create: `tests/web/live-controller-shell.test.ts`
 
 **方案：**
@@ -592,7 +589,8 @@ flowchart TD
 - Integration：hosts、bridge rules、backups 与 diagnostics detail 的语义与 controller payload 保持一致。
 
 **验证：**
-- Web 测试证明在锁定的 V1 导航模型下，实时数据渲染与路由一致性都已建立。
+- Web 测试现在已经证明锁定的 V1 导航模型具备 live-data 渲染与路由一致性。
+- 状态更新：`tests/web/live-controller-shell.test.ts` 已证明 controller-backed 的 overview、host detail、operations、hosts、bridge-rules、backups、console 视图；`tests/web/web-shell.test.ts` 继续保证 preview-mode shell 与同一套信息架构对齐。
 
 - [ ] **Unit 4：Agent 稳态服务边界**
 

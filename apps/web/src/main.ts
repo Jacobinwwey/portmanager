@@ -23,6 +23,7 @@ export type WebContracts = {
   backupSummary: BackupSummary
 }
 
+export type OperationDetailContract = components['schemas']['OperationDetail']
 export interface EventStreamEntry {
   id: string
   level: 'info' | 'success' | 'warn'
@@ -31,13 +32,24 @@ export interface EventStreamEntry {
 }
 
 export type OperationEventContract = components['schemas']['OperationEvent']
+type FetchLike = typeof fetch
+
+interface ControllerListEnvelope<T> {
+  items: T[]
+}
+
+export interface ControllerLoadOptions {
+  baseUrl: string
+  fetchImpl?: FetchLike
+  eventLimit?: number
+}
 
 export interface HostDetailState {
   host: HostDetail
   healthChecks: HealthCheck[]
   backups: BackupSummary[]
   rollbackPoints: RollbackPoint[]
-  diagnostics: components['schemas']['OperationDetail'][]
+  diagnostics: OperationDetailContract[]
   localArtifacts: string[]
   eventStream: EventStreamEntry[]
 }
@@ -45,14 +57,14 @@ export interface HostDetailState {
 export interface OverviewState {
   controllerHealth: 'healthy' | 'degraded'
   managedHosts: HostSummary[]
-  selectedHost: HostDetailState
+  selectedHost: HostDetailState | null
   activeOperations: number
   degradedCount: number
   eventStream: EventStreamEntry[]
 }
 
 export interface OperationInventoryEntry {
-  operation: components['schemas']['OperationDetail']
+  operation: OperationDetailContract
   requestSource: string
   linkedRuleId?: string
   linkedArtifacts: string[]
@@ -64,7 +76,48 @@ export interface OperationsState {
   timeline: OperationEventContract[]
 }
 
-export type WebView = 'overview' | 'host-detail' | 'operations'
+export interface HostsState {
+  hosts: HostSummary[]
+  selectedHost: HostDetailState | null
+  eventStream: EventStreamEntry[]
+}
+
+export interface BridgeRulesState {
+  rules: BridgeRule[]
+  selectedRule: BridgeRule | null
+  selectedHost: HostDetailState | null
+  healthChecks: HealthCheck[]
+  operations: OperationSummary[]
+  diagnostics: OperationDetailContract[]
+  eventStream: EventStreamEntry[]
+}
+
+export interface BackupsState {
+  backups: BackupSummary[]
+  selectedBackup: BackupSummary | null
+  selectedHost: HostDetailState | null
+  rollbackPoints: RollbackPoint[]
+  operations: OperationSummary[]
+  eventStream: EventStreamEntry[]
+}
+
+export interface ConsoleState {
+  operations: OperationDetailContract[]
+  selectedOperation: OperationDetailContract | null
+  diagnostics: OperationDetailContract[]
+  selectedDiagnostic: OperationDetailContract | null
+  events: OperationEventContract[]
+  eventStream: EventStreamEntry[]
+}
+
+export type WebView =
+  | 'overview'
+  | 'host-detail'
+  | 'hosts'
+  | 'bridge-rules'
+  | 'operations'
+  | 'backups'
+  | 'console'
 
 const mountedRoots = new WeakMap<Element, Root>()
 const navigationItems = ['Overview', 'Hosts', 'Bridge Rules', 'Operations', 'Backups', 'Console']
@@ -76,6 +129,117 @@ export function eventEntryFromOperationEvent(event: OperationEventContract): Eve
     timestamp: shortTime(event.emittedAt),
     summary: event.summary
   }
+}
+
+function defaultFetch(input: string | URL | Request, init?: RequestInit) {
+  return fetch(input, init)
+}
+
+function controllerUrl(baseUrl: string, pathname: string, params?: Record<string, string | number | undefined>) {
+  const url = new URL(pathname, baseUrl)
+
+  for (const [key, value] of Object.entries(params ?? {})) {
+    if (value !== undefined) {
+      url.searchParams.set(key, String(value))
+    }
+  }
+
+  return url
+}
+
+async function fetchControllerJson<T>(
+  baseUrl: string,
+  pathname: string,
+  options: {
+    params?: Record<string, string | number | undefined>
+    fetchImpl?: FetchLike
+  } = {}
+) {
+  const fetchImpl = options.fetchImpl ?? defaultFetch
+  const response = await fetchImpl(controllerUrl(baseUrl, pathname, options.params))
+
+  if (!response.ok) {
+    const body = await response.text()
+    throw new Error(`controller request failed for ${pathname}: ${response.status} ${body}`)
+  }
+
+  return (await response.json()) as T
+}
+
+async function fetchControllerList<T>(
+  baseUrl: string,
+  pathname: string,
+  options: {
+    params?: Record<string, string | number | undefined>
+    fetchImpl?: FetchLike
+  } = {}
+) {
+  const payload = await fetchControllerJson<ControllerListEnvelope<T>>(baseUrl, pathname, options)
+  return payload.items
+}
+
+function selectById<T extends { id: string }>(items: T[], preferredId?: string) {
+  if (!items.length) {
+    return null
+  }
+
+  if (!preferredId) {
+    return items[0] ?? null
+  }
+
+  return items.find((item) => item.id === preferredId) ?? items[0] ?? null
+}
+
+function dedupeStrings(values: Array<string | undefined>) {
+  return [...new Set(values.filter((value): value is string => Boolean(value)))]
+}
+
+function artifactPathsFromOperations(operations: Array<OperationSummary | OperationDetailContract>) {
+  return dedupeStrings(
+    operations.flatMap((operation) => {
+      const snapshotArtifact =
+        'snapshotResult' in operation && operation.snapshotResult?.artifactPath
+          ? operation.snapshotResult.artifactPath
+          : undefined
+
+      return [snapshotArtifact]
+    })
+  )
+}
+
+function requestSourceFromOperation(operation: OperationDetailContract) {
+  return `${operation.initiator ?? 'controller'}/${operation.type}`
+}
+
+function readControllerBaseUrl(container?: Element | null) {
+  if (container instanceof HTMLElement) {
+    const datasetBaseUrl = container.dataset.controllerBaseUrl?.trim()
+    if (datasetBaseUrl) {
+      return datasetBaseUrl
+    }
+  }
+
+  const globalConfig = globalThis as typeof globalThis & {
+    PORTMANAGER_CONTROLLER_BASE_URL?: string
+    __PORTMANAGER_CONTROLLER_BASE_URL__?: string
+  }
+
+  if (typeof globalConfig.PORTMANAGER_CONTROLLER_BASE_URL === 'string' && globalConfig.PORTMANAGER_CONTROLLER_BASE_URL) {
+    return globalConfig.PORTMANAGER_CONTROLLER_BASE_URL
+  }
+
+  if (
+    typeof globalConfig.__PORTMANAGER_CONTROLLER_BASE_URL__ === 'string' &&
+    globalConfig.__PORTMANAGER_CONTROLLER_BASE_URL__
+  ) {
+    return globalConfig.__PORTMANAGER_CONTROLLER_BASE_URL__
+  }
+
+  if (typeof process !== 'undefined' && typeof process.env?.PORTMANAGER_CONTROLLER_BASE_URL === 'string') {
+    return process.env.PORTMANAGER_CONTROLLER_BASE_URL
+  }
+
+  return undefined
 }
 
 export const webSkeletonStyles = `
@@ -506,6 +670,15 @@ body {
   padding: 12px 14px;
   background: rgba(248, 243, 234, 0.78);
   border: 1px solid rgba(92, 105, 110, 0.1);
+}
+
+.pm-empty-state {
+  border-radius: 18px;
+  padding: 16px;
+  color: var(--pm-muted);
+  background: rgba(246, 240, 229, 0.68);
+  border: 1px dashed rgba(92, 105, 110, 0.2);
+  line-height: 1.6;
 }
 
 .pm-stream-list {
@@ -957,6 +1130,428 @@ export function createMockOperationsState(): OperationsState {
   }
 }
 
+export function createMockHostsState(): HostsState {
+  const overview = createMockOverviewState()
+
+  return {
+    hosts: overview.managedHosts,
+    selectedHost: overview.selectedHost,
+    eventStream: overview.eventStream
+  }
+}
+
+export function createMockBridgeRulesState(): BridgeRulesState {
+  const selectedHost = createMockHostDetailState()
+  const selectedRule = selectedHost.host.recentRules[0] ?? null
+
+  return {
+    rules: selectedHost.host.recentRules,
+    selectedRule,
+    selectedHost,
+    healthChecks: selectedHost.healthChecks.filter(
+      (check) => !selectedRule || check.ruleId === selectedRule.id
+    ),
+    operations: selectedHost.host.recentOperations.filter(
+      (operation) => !selectedRule || operation.ruleId === selectedRule.id
+    ),
+    diagnostics: selectedHost.diagnostics.filter(
+      (diagnostic) => !selectedRule || diagnostic.ruleId === selectedRule.id
+    ),
+    eventStream: selectedHost.eventStream
+  }
+}
+
+export function createMockBackupsState(): BackupsState {
+  const selectedHost = createMockHostDetailState()
+
+  return {
+    backups: selectedHost.backups,
+    selectedBackup: selectedHost.backups[0] ?? null,
+    selectedHost,
+    rollbackPoints: selectedHost.rollbackPoints,
+    operations: selectedHost.host.recentOperations.filter(
+      (operation) =>
+        operation.type === 'backup' ||
+        operation.type === 'rollback' ||
+        Boolean(operation.backupId) ||
+        Boolean(operation.rollbackPointId)
+    ),
+    eventStream: selectedHost.eventStream
+  }
+}
+
+export function createMockConsoleState(): ConsoleState {
+  const operationsState = createMockOperationsState()
+  const hostDetailState = createMockHostDetailState()
+
+  return {
+    operations: operationsState.operations.map((entry) => entry.operation),
+    selectedOperation: operationsState.operations[0]?.operation ?? null,
+    diagnostics: hostDetailState.diagnostics,
+    selectedDiagnostic: hostDetailState.diagnostics[0] ?? null,
+    events: operationsState.timeline,
+    eventStream: operationsState.timeline.map(eventEntryFromOperationEvent)
+  }
+}
+
+async function loadOperationDetails(
+  baseUrl: string,
+  options: {
+    params?: Record<string, string | number | undefined>
+    fetchImpl?: FetchLike
+  } = {}
+) {
+  const operations = await fetchControllerList<OperationSummary>(baseUrl, '/operations', options)
+
+  if (!operations.length) {
+    return []
+  }
+
+  return Promise.all(
+    operations.map((operation) =>
+      fetchControllerJson<OperationDetailContract>(baseUrl, `/operations/${encodeURIComponent(operation.id)}`, {
+        fetchImpl: options.fetchImpl
+      })
+    )
+  )
+}
+
+export async function loadHostDetailState(
+  options: ControllerLoadOptions & {
+    hostId: string
+  }
+): Promise<HostDetailState> {
+  const eventLimit = options.eventLimit ?? 20
+  const [host, healthChecks, backups, rollbackPoints, diagnostics, events] = await Promise.all([
+    fetchControllerJson<HostDetail>(options.baseUrl, `/hosts/${encodeURIComponent(options.hostId)}`, {
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<HealthCheck>(options.baseUrl, '/health-checks', {
+      params: { hostId: options.hostId },
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<BackupSummary>(options.baseUrl, '/backups', {
+      params: { hostId: options.hostId },
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<RollbackPoint>(options.baseUrl, '/rollback-points', {
+      params: { hostId: options.hostId },
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<OperationDetailContract>(options.baseUrl, '/diagnostics', {
+      params: { hostId: options.hostId },
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
+      params: { hostId: options.hostId, limit: eventLimit },
+      fetchImpl: options.fetchImpl
+    })
+  ])
+
+  return {
+    host,
+    healthChecks,
+    backups,
+    rollbackPoints,
+    diagnostics,
+    localArtifacts: dedupeStrings([
+      ...backups.map((backup) => backup.manifestPath),
+      ...artifactPathsFromOperations(diagnostics)
+    ]),
+    eventStream: events.map(eventEntryFromOperationEvent)
+  }
+}
+
+export async function loadOverviewState(
+  options: ControllerLoadOptions & {
+    hostId?: string
+  }
+): Promise<OverviewState> {
+  const eventLimit = options.eventLimit ?? 20
+  const [managedHosts, operations, events] = await Promise.all([
+    fetchControllerList<HostSummary>(options.baseUrl, '/hosts', {
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<OperationSummary>(options.baseUrl, '/operations', {
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
+      params: { limit: eventLimit },
+      fetchImpl: options.fetchImpl
+    })
+  ])
+
+  const selectedHostSummary = selectById(managedHosts, options.hostId)
+  const selectedHost = selectedHostSummary
+    ? await loadHostDetailState({
+        baseUrl: options.baseUrl,
+        fetchImpl: options.fetchImpl,
+        eventLimit,
+        hostId: selectedHostSummary.id
+      })
+    : null
+
+  const degradedCount = managedHosts.filter(
+    (host) => host.lifecycleState === 'degraded' || host.agentState === 'degraded'
+  ).length
+  const activeOperations = operations.filter(
+    (operation) => operation.state === 'queued' || operation.state === 'running'
+  ).length
+
+  return {
+    controllerHealth: degradedCount > 0 ? 'degraded' : 'healthy',
+    managedHosts,
+    selectedHost,
+    activeOperations,
+    degradedCount,
+    eventStream: events.map(eventEntryFromOperationEvent)
+  }
+}
+
+export async function loadOperationsState(
+  options: ControllerLoadOptions & {
+    hostId?: string
+    ruleId?: string
+    operationId?: string
+  }
+): Promise<OperationsState> {
+  const eventLimit = options.eventLimit ?? 20
+  const [operationDetails, backups] = await Promise.all([
+    loadOperationDetails(options.baseUrl, {
+      params: {
+        hostId: options.hostId,
+        ruleId: options.ruleId
+      },
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<BackupSummary>(options.baseUrl, '/backups', {
+      fetchImpl: options.fetchImpl
+    })
+  ])
+
+  const selectedOperation = selectById(operationDetails, options.operationId)
+  const timeline = selectedOperation
+    ? await fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
+        params: {
+          operationId: selectedOperation.id,
+          limit: eventLimit
+        },
+        fetchImpl: options.fetchImpl
+      })
+    : []
+
+  const backupManifestById = new Map(
+    backups.map((backup) => [backup.id, backup.manifestPath] as const)
+  )
+
+  return {
+    operations: operationDetails.map((operation) => ({
+      operation,
+      requestSource: requestSourceFromOperation(operation),
+      linkedRuleId: operation.ruleId,
+      linkedArtifacts: dedupeStrings([
+        operation.backupId ? backupManifestById.get(operation.backupId) : undefined,
+        ...artifactPathsFromOperations([operation])
+      ])
+    })),
+    selectedOperationId: selectedOperation?.id ?? '',
+    timeline
+  }
+}
+
+export async function loadHostsState(
+  options: ControllerLoadOptions & {
+    hostId?: string
+  }
+): Promise<HostsState> {
+  const eventLimit = options.eventLimit ?? 20
+  const hosts = await fetchControllerList<HostSummary>(options.baseUrl, '/hosts', {
+    fetchImpl: options.fetchImpl
+  })
+  const selectedHostSummary = selectById(hosts, options.hostId)
+
+  return {
+    hosts,
+    selectedHost: selectedHostSummary
+      ? await loadHostDetailState({
+          baseUrl: options.baseUrl,
+          fetchImpl: options.fetchImpl,
+          eventLimit,
+          hostId: selectedHostSummary.id
+        })
+      : null,
+    eventStream: (
+      await fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
+        params: {
+          hostId: selectedHostSummary?.id,
+          limit: eventLimit
+        },
+        fetchImpl: options.fetchImpl
+      })
+    ).map(eventEntryFromOperationEvent)
+  }
+}
+
+export async function loadBridgeRulesState(
+  options: ControllerLoadOptions & {
+    hostId?: string
+    ruleId?: string
+  }
+): Promise<BridgeRulesState> {
+  const eventLimit = options.eventLimit ?? 20
+  const rules = await fetchControllerList<BridgeRule>(options.baseUrl, '/bridge-rules', {
+    params: { hostId: options.hostId },
+    fetchImpl: options.fetchImpl
+  })
+  const selectedRule = selectById(rules, options.ruleId)
+  const selectedHostId = options.hostId ?? selectedRule?.hostId
+  const [selectedHost, healthChecks, operations, diagnostics, events] = await Promise.all([
+    selectedHostId
+      ? loadHostDetailState({
+          baseUrl: options.baseUrl,
+          fetchImpl: options.fetchImpl,
+          eventLimit,
+          hostId: selectedHostId
+        })
+      : Promise.resolve(null),
+    selectedRule
+      ? fetchControllerList<HealthCheck>(options.baseUrl, '/health-checks', {
+          params: {
+            hostId: selectedRule.hostId,
+            ruleId: selectedRule.id
+          },
+          fetchImpl: options.fetchImpl
+        })
+      : Promise.resolve([]),
+    selectedRule
+      ? fetchControllerList<OperationSummary>(options.baseUrl, '/operations', {
+          params: {
+            hostId: selectedRule.hostId,
+            ruleId: selectedRule.id
+          },
+          fetchImpl: options.fetchImpl
+        })
+      : Promise.resolve([]),
+    selectedRule
+      ? fetchControllerList<OperationDetailContract>(options.baseUrl, '/diagnostics', {
+          params: {
+            hostId: selectedRule.hostId,
+            ruleId: selectedRule.id
+          },
+          fetchImpl: options.fetchImpl
+        })
+      : Promise.resolve([]),
+    fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
+      params: {
+        hostId: selectedHostId,
+        ruleId: selectedRule?.id,
+        limit: eventLimit
+      },
+      fetchImpl: options.fetchImpl
+    })
+  ])
+
+  return {
+    rules,
+    selectedRule,
+    selectedHost,
+    healthChecks,
+    operations,
+    diagnostics,
+    eventStream: events.map(eventEntryFromOperationEvent)
+  }
+}
+
+export async function loadBackupsState(
+  options: ControllerLoadOptions & {
+    hostId?: string
+  }
+): Promise<BackupsState> {
+  const eventLimit = options.eventLimit ?? 20
+  const backups = await fetchControllerList<BackupSummary>(options.baseUrl, '/backups', {
+    params: { hostId: options.hostId },
+    fetchImpl: options.fetchImpl
+  })
+  const selectedBackup = backups[0] ?? null
+  const selectedHostId = options.hostId ?? selectedBackup?.hostId
+  const [selectedHost, rollbackPoints, operations, events] = await Promise.all([
+    selectedHostId
+      ? loadHostDetailState({
+          baseUrl: options.baseUrl,
+          fetchImpl: options.fetchImpl,
+          eventLimit,
+          hostId: selectedHostId
+        })
+      : Promise.resolve(null),
+    fetchControllerList<RollbackPoint>(options.baseUrl, '/rollback-points', {
+      params: { hostId: selectedHostId },
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<OperationSummary>(options.baseUrl, '/operations', {
+      params: { hostId: selectedHostId },
+      fetchImpl: options.fetchImpl
+    }).then((items) =>
+      items.filter((operation) => operation.type === 'backup' || operation.type === 'rollback')
+    ),
+    fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
+      params: {
+        hostId: selectedHostId,
+        limit: eventLimit
+      },
+      fetchImpl: options.fetchImpl
+    })
+  ])
+
+  return {
+    backups,
+    selectedBackup,
+    selectedHost,
+    rollbackPoints,
+    operations,
+    eventStream: events.map(eventEntryFromOperationEvent)
+  }
+}
+
+export async function loadConsoleState(
+  options: ControllerLoadOptions & {
+    hostId?: string
+    operationId?: string
+  }
+): Promise<ConsoleState> {
+  const eventLimit = options.eventLimit ?? 20
+  const [operations, diagnostics, events] = await Promise.all([
+    loadOperationDetails(options.baseUrl, {
+      params: { hostId: options.hostId },
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<OperationDetailContract>(options.baseUrl, '/diagnostics', {
+      params: { hostId: options.hostId },
+      fetchImpl: options.fetchImpl
+    }),
+    fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
+      params: {
+        hostId: options.hostId,
+        limit: eventLimit
+      },
+      fetchImpl: options.fetchImpl
+    })
+  ])
+
+  const selectedOperation = selectById(operations, options.operationId)
+  const selectedDiagnostic = diagnostics.find(
+    (diagnostic) => diagnostic.id === selectedOperation?.id
+  ) ?? diagnostics[0] ?? null
+
+  return {
+    operations,
+    selectedOperation,
+    diagnostics,
+    selectedDiagnostic,
+    events,
+    eventStream: events.map(eventEntryFromOperationEvent)
+  }
+}
+
 export function OverviewPage(props: { state: OverviewState }) {
   const { state } = props
 
@@ -1032,11 +1627,8 @@ export function HostDetailPage(props: { state: HostDetailState }) {
 export function OperationsPage(props: { state: OperationsState }) {
   const selected =
     props.state.operations.find((entry) => entry.operation.id === props.state.selectedOperationId) ??
-    props.state.operations[0]
-
-  if (!selected) {
-    throw new Error('OperationsPage requires at least one operation entry')
-  }
+    props.state.operations[0] ??
+    null
 
   return h(ShellFrame, {
     currentView: 'Operations',
@@ -1056,8 +1648,8 @@ export function OperationsPage(props: { state: OperationsState }) {
       },
       {
         label: 'Selected Host',
-        value: selected.operation.hostId ?? 'n/a',
-        tone: 'info'
+        value: selected?.operation.hostId ?? 'n/a',
+        tone: selected ? 'info' : 'warn'
       },
       {
         label: 'Timeline Events',
@@ -1071,16 +1663,313 @@ export function OperationsPage(props: { state: OperationsState }) {
   })
 }
 
+export function HostsPage(props: { state: HostsState }) {
+  const readyCount = props.state.hosts.filter((host) => host.lifecycleState === 'ready').length
+  const degradedCount = props.state.hosts.filter(
+    (host) => host.lifecycleState === 'degraded' || host.agentState === 'degraded'
+  ).length
+
+  return h(ShellFrame, {
+    currentView: 'Hosts',
+    title: 'Hosts',
+    lede:
+      'Host inventory stays controller-backed: rollout readiness, latest health evidence, and bootstrap lineage remain visible together.',
+    metrics: [
+      {
+        label: 'Managed Hosts',
+        value: String(props.state.hosts.length),
+        tone: 'info'
+      },
+      {
+        label: 'Ready Hosts',
+        value: String(readyCount),
+        tone: readyCount > 0 ? 'success' : 'info'
+      },
+      {
+        label: 'Degraded Hosts',
+        value: String(degradedCount),
+        tone: degradedCount > 0 ? 'warn' : 'success'
+      },
+      {
+        label: 'Selected Host',
+        value: props.state.selectedHost?.host.id ?? 'n/a',
+        tone: props.state.selectedHost ? 'info' : 'warn'
+      }
+    ],
+    main: h(HostsMain, { state: props.state }),
+    rail: h(HostsRail, { state: props.state }),
+    eventStream: props.state.eventStream
+  })
+}
+
+export function BridgeRulesPage(props: { state: BridgeRulesState }) {
+  const degradedRules = props.state.rules.filter((rule) => rule.lifecycleState === 'degraded').length
+
+  return h(ShellFrame, {
+    currentView: 'Bridge Rules',
+    title: 'Bridge Rules',
+    lede:
+      'Bridge rule view keeps topology, verification evidence, and recovery links coupled so drift never hides behind pretty charts.',
+    metrics: [
+      {
+        label: 'Tracked Rules',
+        value: String(props.state.rules.length),
+        tone: 'info'
+      },
+      {
+        label: 'Degraded Rules',
+        value: String(degradedRules),
+        tone: degradedRules > 0 ? 'warn' : 'success'
+      },
+      {
+        label: 'Diagnostics',
+        value: String(props.state.diagnostics.length),
+        tone: props.state.diagnostics.length > 0 ? 'success' : 'warn'
+      },
+      {
+        label: 'Selected Host',
+        value: props.state.selectedHost?.host.id ?? 'n/a',
+        tone: props.state.selectedHost ? 'info' : 'warn'
+      }
+    ],
+    main: h(BridgeRulesMain, { state: props.state }),
+    rail: h(BridgeRulesRail, { state: props.state }),
+    eventStream: props.state.eventStream
+  })
+}
+
+export function BackupsPage(props: { state: BackupsState }) {
+  const requiredBackups = props.state.backups.filter((backup) => backup.backupMode === 'required').length
+
+  return h(ShellFrame, {
+    currentView: 'Backups',
+    title: 'Backups',
+    lede:
+      'Backup view stays recovery-first: manifests, rollback candidates, and operation lineage remain visible without leaving page.',
+    metrics: [
+      {
+        label: 'Backups',
+        value: String(props.state.backups.length),
+        tone: 'info'
+      },
+      {
+        label: 'Required Mode',
+        value: String(requiredBackups),
+        tone: requiredBackups > 0 ? 'warn' : 'info'
+      },
+      {
+        label: 'Rollback Points',
+        value: String(props.state.rollbackPoints.length),
+        tone: props.state.rollbackPoints.length > 0 ? 'success' : 'warn'
+      },
+      {
+        label: 'Selected Host',
+        value: props.state.selectedHost?.host.id ?? 'n/a',
+        tone: props.state.selectedHost ? 'info' : 'warn'
+      }
+    ],
+    main: h(BackupsMain, { state: props.state }),
+    rail: h(BackupsRail, { state: props.state }),
+    eventStream: props.state.eventStream
+  })
+}
+
+export function ConsolePage(props: { state: ConsoleState }) {
+  return h(ShellFrame, {
+    currentView: 'Console',
+    title: 'Console',
+    lede:
+      'Console keeps controller replay honest: recent events, selected operation replay, and diagnostics detail all stay in one audit surface.',
+    metrics: [
+      {
+        label: 'Recent Events',
+        value: String(props.state.events.length),
+        tone: props.state.events.length > 0 ? 'info' : 'warn'
+      },
+      {
+        label: 'Operations',
+        value: String(props.state.operations.length),
+        tone: 'info'
+      },
+      {
+        label: 'Diagnostics',
+        value: String(props.state.diagnostics.length),
+        tone: props.state.diagnostics.length > 0 ? 'success' : 'warn'
+      },
+      {
+        label: 'Selected Host',
+        value: props.state.selectedOperation?.hostId ?? props.state.selectedDiagnostic?.hostId ?? 'n/a',
+        tone: props.state.selectedOperation || props.state.selectedDiagnostic ? 'info' : 'warn'
+      }
+    ],
+    main: h(ConsoleMain, { state: props.state }),
+    rail: h(ConsoleRail, { state: props.state }),
+    eventStream: props.state.eventStream
+  })
+}
+
 function pageForView(view: WebView) {
   if (view === 'host-detail') {
     return h(HostDetailPage, { state: createMockHostDetailState() })
+  }
+
+  if (view === 'hosts') {
+    return h(HostsPage, { state: createMockHostsState() })
+  }
+
+  if (view === 'bridge-rules') {
+    return h(BridgeRulesPage, { state: createMockBridgeRulesState() })
   }
 
   if (view === 'operations') {
     return h(OperationsPage, { state: createMockOperationsState() })
   }
 
+  if (view === 'backups') {
+    return h(BackupsPage, { state: createMockBackupsState() })
+  }
+
+  if (view === 'console') {
+    return h(ConsolePage, { state: createMockConsoleState() })
+  }
+
   return h(OverviewPage, { state: createMockOverviewState() })
+}
+
+function navigationLabelForView(view: WebView) {
+  if (view === 'overview') {
+    return 'Overview'
+  }
+  if (view === 'host-detail' || view === 'hosts') {
+    return 'Hosts'
+  }
+  if (view === 'bridge-rules') {
+    return 'Bridge Rules'
+  }
+  if (view === 'operations') {
+    return 'Operations'
+  }
+  if (view === 'backups') {
+    return 'Backups'
+  }
+  return 'Console'
+}
+
+function isWebView(value?: string): value is WebView {
+  return (
+    value === 'overview' ||
+    value === 'host-detail' ||
+    value === 'hosts' ||
+    value === 'bridge-rules' ||
+    value === 'operations' ||
+    value === 'backups' ||
+    value === 'console'
+  )
+}
+
+async function livePageForView(
+  view: WebView,
+  options: {
+    baseUrl: string
+    hostId?: string
+    ruleId?: string
+    operationId?: string
+    fetchImpl?: FetchLike
+  }
+) {
+  if (view === 'overview') {
+    return h(
+      OverviewPage,
+      { state: await loadOverviewState({ baseUrl: options.baseUrl, hostId: options.hostId, fetchImpl: options.fetchImpl }) }
+    )
+  }
+
+  if (view === 'host-detail') {
+    const hostsState = await loadHostsState({
+      baseUrl: options.baseUrl,
+      hostId: options.hostId,
+      fetchImpl: options.fetchImpl
+    })
+
+    if (!hostsState.selectedHost) {
+      return renderControllerErrorPage(view, 'No host detail available from controller.')
+    }
+
+    return h(HostDetailPage, { state: hostsState.selectedHost })
+  }
+
+  if (view === 'hosts') {
+    return h(
+      HostsPage,
+      { state: await loadHostsState({ baseUrl: options.baseUrl, hostId: options.hostId, fetchImpl: options.fetchImpl }) }
+    )
+  }
+
+  if (view === 'bridge-rules') {
+    return h(
+      BridgeRulesPage,
+      {
+        state: await loadBridgeRulesState({
+          baseUrl: options.baseUrl,
+          hostId: options.hostId,
+          ruleId: options.ruleId,
+          fetchImpl: options.fetchImpl
+        })
+      }
+    )
+  }
+
+  if (view === 'operations') {
+    return h(
+      OperationsPage,
+      {
+        state: await loadOperationsState({
+          baseUrl: options.baseUrl,
+          hostId: options.hostId,
+          ruleId: options.ruleId,
+          operationId: options.operationId,
+          fetchImpl: options.fetchImpl
+        })
+      }
+    )
+  }
+
+  if (view === 'backups') {
+    return h(
+      BackupsPage,
+      { state: await loadBackupsState({ baseUrl: options.baseUrl, hostId: options.hostId, fetchImpl: options.fetchImpl }) }
+    )
+  }
+
+  return h(
+    ConsolePage,
+    {
+      state: await loadConsoleState({
+        baseUrl: options.baseUrl,
+        hostId: options.hostId,
+        operationId: options.operationId,
+        fetchImpl: options.fetchImpl
+      })
+    }
+  )
+}
+
+function renderControllerErrorPage(view: WebView, message: string) {
+  return h(ShellFrame, {
+    currentView: navigationLabelForView(view),
+    title: 'Controller sync unavailable',
+    lede:
+      'Live controller fetch failed. Verify controller base URL, selected ids, and endpoint readiness before trusting this page.',
+    metrics: [
+      { label: 'View', value: view, tone: 'warn' },
+      { label: 'Controller', value: 'unavailable', tone: 'warn' },
+      { label: 'Recovered', value: 'mock disabled', tone: 'warn' },
+      { label: 'Action', value: 'inspect logs', tone: 'info' }
+    ],
+    main: emptyState(message),
+    rail: emptyState('Check `PORTMANAGER_CONTROLLER_BASE_URL`, selected resource ids, and controller server health.'),
+    eventStream: []
+  })
 }
 
 export function renderWebPreviewDocument(view: WebView = 'overview') {
@@ -1102,7 +1991,17 @@ export function renderWebPreviewDocument(view: WebView = 'overview') {
   ].join('\n')
 }
 
-export function mountWebSkeleton(options: { container?: Element | null; view?: WebView } = {}) {
+export function mountWebSkeleton(
+  options: {
+    container?: Element | null
+    view?: WebView
+    controllerBaseUrl?: string
+    hostId?: string
+    ruleId?: string
+    operationId?: string
+    fetchImpl?: FetchLike
+  } = {}
+) {
   if (typeof document === 'undefined') {
     return
   }
@@ -1110,12 +2009,8 @@ export function mountWebSkeleton(options: { container?: Element | null; view?: W
   ensureWebStyles(document)
 
   const container = options.container ?? document.getElementById('app') ?? document.body
-  const view =
-    options.view ??
-    ((container instanceof HTMLElement &&
-    (container.dataset.view === 'host-detail' || container.dataset.view === 'operations')
-      ? container.dataset.view
-      : 'overview') as WebView)
+  const datasetView = container instanceof HTMLElement ? container.dataset.view : undefined
+  const view = options.view ?? (isWebView(datasetView) ? datasetView : 'overview')
 
   let root = mountedRoots.get(container)
   if (!root) {
@@ -1123,9 +2018,33 @@ export function mountWebSkeleton(options: { container?: Element | null; view?: W
     mountedRoots.set(container, root)
   }
 
-  const page = pageForView(view)
+  root.render(pageForView(view))
 
-  root.render(page)
+  const controllerBaseUrl = options.controllerBaseUrl ?? readControllerBaseUrl(container)
+  if (!controllerBaseUrl) {
+    return
+  }
+
+  const hostId = options.hostId ?? (container instanceof HTMLElement ? container.dataset.hostId : undefined)
+  const ruleId = options.ruleId ?? (container instanceof HTMLElement ? container.dataset.ruleId : undefined)
+  const operationId =
+    options.operationId ?? (container instanceof HTMLElement ? container.dataset.operationId : undefined)
+
+  void livePageForView(view, {
+    baseUrl: controllerBaseUrl,
+    hostId,
+    ruleId,
+    operationId,
+    fetchImpl: options.fetchImpl
+  })
+    .then((page) => {
+      root?.render(page)
+    })
+    .catch((error) => {
+      root?.render(
+        renderControllerErrorPage(view, error instanceof Error ? error.message : String(error))
+      )
+    })
 }
 
 function ensureWebStyles(doc: Document) {
@@ -1225,6 +2144,8 @@ function Sidebar(props: { currentView: string }) {
 }
 
 function OverviewMain(props: { state: OverviewState }) {
+  const selectedHostId = props.state.selectedHost?.host.id
+
   return h('section', { className: 'pm-panel-stack' }, [
     h('section', { className: 'pm-card', key: 'hosts' }, [
       h(SectionHeading, {
@@ -1254,7 +2175,7 @@ function OverviewMain(props: { state: OverviewState }) {
                 'tr',
                 {
                   key: host.id,
-                  'data-selected': host.id === props.state.selectedHost.host.id ? 'true' : undefined
+                  'data-selected': host.id === selectedHostId ? 'true' : undefined
                 },
                 [
                   h('td', { key: 'host' }, [
@@ -1278,6 +2199,20 @@ function OverviewMain(props: { state: OverviewState }) {
 
 function OverviewRail(props: { state: OverviewState }) {
   const detailState = props.state.selectedHost
+
+  if (!detailState) {
+    return h('div', { className: 'pm-panel-stack' }, [
+      h('section', { className: 'pm-card', key: 'selected-host' }, [
+        h(SectionHeading, { key: 'heading', title: 'Selected Host', detail: 'awaiting enrollment' }),
+        emptyState('No controller-backed host detail yet. Create one host to unlock live rollout detail.')
+      ]),
+      h('section', { className: 'pm-card', key: 'policy' }, [
+        h(SectionHeading, { key: 'heading', title: 'Effective Policy', detail: 'no host selected' }),
+        emptyState('Effective exposure policy appears after one host is present.')
+      ])
+    ])
+  }
+
   const policy = detailState.host.effectivePolicy
 
   return h('div', { className: 'pm-panel-stack' }, [
@@ -1350,7 +2285,11 @@ function HostDetailMain(props: { state: HostDetailState }) {
         { className: 'pm-list', key: 'list' },
         props.state.host.recentRules.map((rule) =>
           h('li', { className: 'pm-list-item', key: rule.id }, [
-            h('div', { key: 'line1' }, `${rule.id} · ${rule.listenPort} -> ${rule.targetPort}`),
+            h(
+              'div',
+              { key: 'line1' },
+              `${rule.id} · ${rule.name ?? 'unnamed rule'} · ${rule.listenPort} -> ${rule.targetPort}`
+            ),
             h('div', { className: 'pm-microcopy', key: 'line2' }, `${rule.protocol} · ${rule.targetHost}`),
             h(StatusBadge, { key: 'badge', state: rule.lifecycleState })
           ])
@@ -1496,7 +2435,7 @@ function HostDetailRail(props: { state: HostDetailState }) {
   ])
 }
 
-function OperationsMain(props: { state: OperationsState; selected: OperationInventoryEntry }) {
+function OperationsMain(props: { state: OperationsState; selected: OperationInventoryEntry | null }) {
   return h('div', { className: 'pm-detail-grid' }, [
     h('section', { className: 'pm-card', key: 'inventory' }, [
       h(SectionHeading, {
@@ -1504,96 +2443,118 @@ function OperationsMain(props: { state: OperationsState; selected: OperationInve
         title: 'Active and recent operations list',
         detail: `${props.state.operations.length} entries`
       }),
-      h(
-        'ul',
-        { className: 'pm-list', key: 'list' },
-        props.state.operations.map((entry) =>
-          h('li', { className: 'pm-list-item', key: entry.operation.id }, [
-            h('div', { key: 'line1' }, `${entry.operation.id} · ${entry.operation.type}`),
-            h(
-              'div',
-              { className: 'pm-microcopy', key: 'line2' },
-              `${entry.operation.hostId ?? 'n/a'} · ${entry.requestSource}`
-            ),
-            h('div', { key: 'line3' }, entry.operation.resultSummary ?? 'No summary'),
-            h(StatusBadge, { key: 'badge', state: entry.operation.state })
-          ])
-        )
-      )
+      props.state.operations.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.operations.map((entry) =>
+              h('li', { className: 'pm-list-item', key: entry.operation.id }, [
+                h('div', { key: 'line1' }, `${entry.operation.id} · ${entry.operation.type}`),
+                h(
+                  'div',
+                  { className: 'pm-microcopy', key: 'line2' },
+                  `${entry.operation.hostId ?? 'n/a'} · ${entry.requestSource}`
+                ),
+                h('div', { key: 'line3' }, entry.operation.resultSummary ?? 'No summary'),
+                h(StatusBadge, { key: 'badge', state: entry.operation.state })
+              ])
+            )
+          )
+        : emptyState('No operations recorded yet.')
     ]),
     h('section', { className: 'pm-card', key: 'timeline' }, [
       h(SectionHeading, {
         key: 'heading',
         title: 'Operation state timeline',
-        detail: props.selected.operation.id
+        detail: props.selected?.operation.id ?? 'no selection'
       }),
-      h(
-        'ul',
-        { className: 'pm-list', key: 'list' },
-        props.state.timeline.map((event) =>
-          h('li', { className: 'pm-list-item', key: event.id }, [
-            h('div', { key: 'line1' }, `${shortTime(event.emittedAt)} · ${event.state}`),
-            h('div', { className: 'pm-microcopy', key: 'line2' }, event.level),
-            h('div', { key: 'line3' }, event.summary),
-            h(StatusBadge, { key: 'badge', state: event.state })
-          ])
-        )
-      )
+      props.state.timeline.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.timeline.map((event) =>
+              h('li', { className: 'pm-list-item', key: event.id }, [
+                h('div', { key: 'line1' }, `${shortTime(event.emittedAt)} · ${event.state}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, event.level),
+                h('div', { key: 'line3' }, event.summary),
+                h(StatusBadge, { key: 'badge', state: event.state })
+              ])
+            )
+          )
+        : emptyState('No timeline replay yet for selected operation.')
     ]),
     h('section', { className: 'pm-card', key: 'initiator' }, [
       h(SectionHeading, {
         key: 'heading',
         title: 'Initiator and request source',
-        detail: props.selected.operation.id
+        detail: props.selected?.operation.id ?? 'no selection'
       }),
-      h('div', { className: 'pm-kv', key: 'kv' }, [
-        kvRow('Initiator', props.selected.operation.initiator ?? 'unknown'),
-        kvRow('Request Source', props.selected.requestSource),
-        kvRow('Host', props.selected.operation.hostId ?? 'n/a'),
-        kvRow('Rule', props.selected.operation.ruleId ?? props.selected.linkedRuleId ?? 'n/a'),
-        kvRow('Replay Path', props.selected.operation.eventStreamUrl ?? '/operations/events')
-      ])
+      props.selected
+        ? h('div', { className: 'pm-kv', key: 'kv' }, [
+            kvRow('Initiator', props.selected.operation.initiator ?? 'unknown'),
+            kvRow('Request Source', props.selected.requestSource),
+            kvRow('Host', props.selected.operation.hostId ?? 'n/a'),
+            kvRow('Rule', props.selected.operation.ruleId ?? props.selected.linkedRuleId ?? 'n/a'),
+            kvRow('Replay Path', props.selected.operation.eventStreamUrl ?? '/operations/events')
+          ])
+        : emptyState('Select one operation to inspect initiator and replay path.')
     ]),
     h('section', { className: 'pm-card', key: 'artifacts' }, [
       h(SectionHeading, {
         key: 'heading',
         title: 'Linked host, rule, backup, rollback, and diagnostic artifacts',
-        detail: props.selected.operation.hostId ?? 'n/a'
+        detail: props.selected?.operation.hostId ?? 'n/a'
       }),
-      h('div', { className: 'pm-kv', key: 'kv' }, [
-        kvRow('Host', props.selected.operation.hostId ?? 'n/a'),
-        kvRow('Rule', props.selected.operation.ruleId ?? props.selected.linkedRuleId ?? 'n/a'),
-        kvRow('Backup', props.selected.operation.backupId ?? 'n/a'),
-        kvRow('Rollback', props.selected.operation.rollbackPointId ?? 'n/a')
-      ]),
-      h(
-        'ul',
-        { className: 'pm-list', key: 'list' },
-        props.selected.linkedArtifacts.map((artifact) =>
-          h('li', { className: 'pm-list-item', key: artifact }, [
-            h('div', { className: 'pm-artifact', key: 'artifact' }, artifact)
-          ])
-        )
-      )
+      props.selected
+        ? [
+            h('div', { className: 'pm-kv', key: 'kv' }, [
+              kvRow('Host', props.selected.operation.hostId ?? 'n/a'),
+              kvRow('Rule', props.selected.operation.ruleId ?? props.selected.linkedRuleId ?? 'n/a'),
+              kvRow('Backup', props.selected.operation.backupId ?? 'n/a'),
+              kvRow('Rollback', props.selected.operation.rollbackPointId ?? 'n/a')
+            ]),
+            props.selected.linkedArtifacts.length
+              ? h(
+                  'ul',
+                  { className: 'pm-list', key: 'list' },
+                  props.selected.linkedArtifacts.map((artifact) =>
+                    h('li', { className: 'pm-list-item', key: artifact }, [
+                      h('div', { className: 'pm-artifact', key: 'artifact' }, artifact)
+                    ])
+                  )
+                )
+              : emptyState('No linked artifact paths were published for this operation.')
+          ]
+        : emptyState('Select one operation to inspect linked recovery evidence.')
     ])
   ])
 }
 
-function OperationsRail(props: { state: OperationsState; selected: OperationInventoryEntry }) {
+function OperationsRail(props: { state: OperationsState; selected: OperationInventoryEntry | null }) {
   return h('div', { className: 'pm-panel-stack' }, [
     h('section', { className: 'pm-card', key: 'selected' }, [
       h(SectionHeading, {
         key: 'heading',
         title: 'Selected operation',
-        detail: props.selected.operation.type
+        detail: props.selected?.operation.type ?? 'no selection'
       }),
-      h('h2', { className: 'pm-hostname', key: 'name' }, props.selected.operation.id),
-      h('div', { className: 'pm-kv', key: 'kv' }, [
-        kvRow('State', h(StatusBadge, { state: props.selected.operation.state })),
-        kvRow('Started', shortTime(props.selected.operation.startedAt)),
-        kvRow('Finished', shortTime(props.selected.operation.finishedAt)),
-        kvRow('Summary', props.selected.operation.resultSummary ?? 'No summary')
-      ])
+      props.selected
+        ? [
+            h('h2', { className: 'pm-hostname', key: 'name' }, props.selected.operation.id),
+            h('div', { className: 'pm-kv', key: 'kv' }, [
+              kvRow('State', h(StatusBadge, { state: props.selected.operation.state })),
+              kvRow('Started', shortTime(props.selected.operation.startedAt)),
+              kvRow('Finished', shortTime(props.selected.operation.finishedAt)),
+              kvRow('Summary', props.selected.operation.resultSummary ?? 'No summary'),
+              props.selected.operation.snapshotResult?.pageTitle
+                ? kvRow('Diagnostic Page', props.selected.operation.snapshotResult.pageTitle)
+                : null,
+              props.selected.operation.snapshotResult?.artifactPath
+                ? kvRow('Snapshot Artifact', props.selected.operation.snapshotResult.artifactPath)
+                : null
+            ])
+          ]
+        : emptyState('No selected operation yet.')
     ]),
     h('section', { className: 'pm-card', key: 'stream' }, [
       h(SectionHeading, {
@@ -1601,10 +2562,466 @@ function OperationsRail(props: { state: OperationsState; selected: OperationInve
         title: 'Selected operation event stream',
         detail: `${props.state.timeline.length} events`
       }),
-      h('div', { className: 'pm-kv', key: 'kv' }, [
-        kvRow('Replay Path', props.selected.operation.eventStreamUrl ?? '/operations/events'),
-        kvRow('Latest Event', props.state.timeline[0]?.summary ?? 'No events')
-      ])
+      props.selected
+        ? h('div', { className: 'pm-kv', key: 'kv' }, [
+            kvRow('Replay Path', props.selected.operation.eventStreamUrl ?? '/operations/events'),
+            kvRow('Latest Event', props.state.timeline[0]?.summary ?? 'No events')
+          ])
+        : emptyState('No replay path until one operation is selected.')
+    ])
+  ])
+}
+
+function HostsMain(props: { state: HostsState }) {
+  return h('div', { className: 'pm-detail-grid' }, [
+    h('section', { className: 'pm-card', key: 'inventory' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Managed host inventory',
+        detail: `${props.state.hosts.length} hosts`
+      }),
+      props.state.hosts.length
+        ? h(
+            'table',
+            { className: 'pm-table', key: 'table' },
+            [
+              h('thead', { key: 'head' }, [
+                h('tr', { key: 'row' }, [
+                  h('th', { key: 'host' }, 'Host'),
+                  h('th', { key: 'tailscale' }, 'Tailscale'),
+                  h('th', { key: 'lifecycle' }, 'Lifecycle'),
+                  h('th', { key: 'agent' }, 'Agent'),
+                  h('th', { key: 'backup' }, 'Last Backup'),
+                  h('th', { key: 'diagnostics' }, 'Diagnostics')
+                ])
+              ]),
+              h(
+                'tbody',
+                { key: 'body' },
+                props.state.hosts.map((host) =>
+                  h(
+                    'tr',
+                    {
+                      key: host.id,
+                      'data-selected':
+                        host.id === props.state.selectedHost?.host.id ? 'true' : undefined
+                    },
+                    [
+                      h('td', { key: 'host' }, [
+                        h('div', { key: 'name' }, host.name),
+                        h('div', { className: 'pm-microcopy', key: 'id' }, host.id)
+                      ]),
+                      h('td', { key: 'tailscale' }, host.tailscaleAddress),
+                      h('td', { key: 'lifecycle' }, h(StatusBadge, { state: host.lifecycleState })),
+                      h('td', { key: 'agent' }, h(StatusBadge, { state: host.agentState })),
+                      h('td', { key: 'backup' }, shortTime(host.lastBackupAt)),
+                      h('td', { key: 'diagnostics' }, shortTime(host.lastDiagnosticsAt))
+                    ]
+                  )
+                )
+              )
+            ]
+          )
+        : emptyState('No managed hosts have reported to controller yet.')
+    ]),
+    h('section', { className: 'pm-card', key: 'health' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Recent host health checks',
+        detail: `${props.state.selectedHost?.healthChecks.length ?? 0} samples`
+      }),
+      props.state.selectedHost?.healthChecks.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.selectedHost.healthChecks.map((check) =>
+              h('li', { className: 'pm-list-item', key: check.id }, [
+                h('div', { key: 'line1' }, `${check.category} · ${shortTime(check.checkedAt)}`),
+                h('div', { key: 'line2' }, check.summary ?? 'No summary'),
+                h(StatusBadge, { key: 'badge', state: check.status })
+              ])
+            )
+          )
+        : emptyState('No host health checks recorded yet.')
+    ])
+  ])
+}
+
+function HostsRail(props: { state: HostsState }) {
+  return h('div', { className: 'pm-panel-stack' }, [
+    h('section', { className: 'pm-card', key: 'selected' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Selected host rollout',
+        detail: props.state.selectedHost?.host.id ?? 'no selection'
+      }),
+      props.state.selectedHost
+        ? [
+            h('h2', { className: 'pm-hostname', key: 'name' }, props.state.selectedHost.host.name),
+            h('div', { className: 'pm-kv', key: 'kv' }, [
+              kvRow('Lifecycle', h(StatusBadge, { state: props.state.selectedHost.host.lifecycleState })),
+              kvRow('Agent', h(StatusBadge, { state: props.state.selectedHost.host.agentState })),
+              kvRow('Tailscale', props.state.selectedHost.host.tailscaleAddress),
+              kvRow('Last Backup', shortTime(props.state.selectedHost.host.lastBackupAt)),
+              kvRow('Last Diagnostics', shortTime(props.state.selectedHost.host.lastDiagnosticsAt))
+            ])
+          ]
+        : emptyState('Select one host to inspect rollout status.')
+    ]),
+    h('section', { className: 'pm-card', key: 'operations' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Bootstrap and recent operations',
+        detail: `${props.state.selectedHost?.host.recentOperations.length ?? 0} entries`
+      }),
+      props.state.selectedHost?.host.recentOperations.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.selectedHost.host.recentOperations.map((operation) =>
+              h('li', { className: 'pm-list-item', key: operation.id }, [
+                h('div', { key: 'line1' }, `${operation.id} · ${operation.type}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, shortTime(operation.startedAt)),
+                h('div', { key: 'line3' }, operation.resultSummary ?? 'No summary'),
+                h(StatusBadge, { key: 'badge', state: operation.state })
+              ])
+            )
+          )
+        : emptyState('No rollout operations recorded for selected host.')
+    ])
+  ])
+}
+
+function BridgeRulesMain(props: { state: BridgeRulesState }) {
+  return h('div', { className: 'pm-detail-grid' }, [
+    h('section', { className: 'pm-card', key: 'inventory' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Bridge rule inventory',
+        detail: `${props.state.rules.length} rules`
+      }),
+      props.state.rules.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.rules.map((rule) =>
+              h('li', { className: 'pm-list-item', key: rule.id }, [
+                h('div', { key: 'line1' }, `${rule.id} · ${rule.name ?? 'unnamed rule'}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, `${rule.listenPort} -> ${rule.targetHost}:${rule.targetPort}`),
+                h(StatusBadge, { key: 'badge', state: rule.lifecycleState })
+              ])
+            )
+          )
+        : emptyState('No bridge rules are tracked for this host yet.')
+    ]),
+    h('section', { className: 'pm-card', key: 'topology' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Selected rule topology',
+        detail: props.state.selectedRule?.id ?? 'no selection'
+      }),
+      props.state.selectedRule
+        ? h('div', { className: 'pm-kv', key: 'kv' }, [
+            kvRow('Host', props.state.selectedRule.hostId),
+            kvRow('Protocol', props.state.selectedRule.protocol),
+            kvRow('Listen', String(props.state.selectedRule.listenPort)),
+            kvRow('Target', `${props.state.selectedRule.targetHost}:${props.state.selectedRule.targetPort}`),
+            kvRow('Last Verified', shortTime(props.state.selectedRule.lastVerifiedAt)),
+            kvRow('Rollback Point', props.state.selectedRule.lastRollbackPointId ?? 'n/a')
+          ])
+        : emptyState('No bridge rule selected yet.')
+    ]),
+    h('section', { className: 'pm-card', key: 'verification' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Verification and diagnostics',
+        detail: `${props.state.healthChecks.length + props.state.diagnostics.length} records`
+      }),
+      props.state.healthChecks.length || props.state.diagnostics.length
+        ? h('ul', { className: 'pm-list', key: 'list' }, [
+            ...props.state.healthChecks.map((check) =>
+              h('li', { className: 'pm-list-item', key: check.id }, [
+                h('div', { key: 'line1' }, `${check.category} · ${shortTime(check.checkedAt)}`),
+                h('div', { key: 'line2' }, check.summary ?? 'No summary'),
+                h(StatusBadge, { key: 'badge', state: check.status })
+              ])
+            ),
+            ...props.state.diagnostics.map((diagnostic) =>
+              h('li', { className: 'pm-list-item', key: diagnostic.id }, [
+                h('div', { key: 'line1' }, `${diagnostic.id} · ${diagnostic.type}`),
+                h(
+                  'div',
+                  { className: 'pm-microcopy', key: 'line2' },
+                  diagnostic.snapshotResult?.pageTitle ?? diagnostic.resultSummary ?? 'No diagnostics detail'
+                ),
+                h(
+                  'div',
+                  { className: 'pm-artifact', key: 'line3' },
+                  diagnostic.snapshotResult?.artifactPath ?? 'no snapshot artifact'
+                ),
+                h(StatusBadge, { key: 'badge', state: diagnostic.state })
+              ])
+            )
+          ])
+        : emptyState('No verification or diagnostics evidence published for selected rule.')
+    ])
+  ])
+}
+
+function BridgeRulesRail(props: { state: BridgeRulesState }) {
+  return h('div', { className: 'pm-panel-stack' }, [
+    h('section', { className: 'pm-card', key: 'operations' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Linked operations and recovery',
+        detail: `${props.state.operations.length} entries`
+      }),
+      props.state.operations.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.operations.map((operation) =>
+              h('li', { className: 'pm-list-item', key: operation.id }, [
+                h('div', { key: 'line1' }, `${operation.id} · ${operation.type}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, shortTime(operation.startedAt)),
+                h('div', { key: 'line3' }, operation.resultSummary ?? 'No summary'),
+                h(
+                  'div',
+                  { className: 'pm-artifact', key: 'line4' },
+                  [
+                    operation.backupId ? `backup ${operation.backupId}` : null,
+                    operation.rollbackPointId ? `rollback ${operation.rollbackPointId}` : null
+                  ]
+                    .filter(Boolean)
+                    .join(' · ') || 'no linked recovery evidence'
+                ),
+                h(StatusBadge, { key: 'badge', state: operation.state })
+              ])
+            )
+          )
+        : emptyState('No linked operations recorded for selected bridge rule.')
+    ]),
+    h('section', { className: 'pm-card', key: 'policy' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Effective host policy',
+        detail: props.state.selectedHost?.host.effectivePolicy.backupPolicy ?? 'n/a'
+      }),
+      props.state.selectedHost
+        ? h('div', { className: 'pm-kv', key: 'kv' }, [
+            kvRow('Allowed Sources', props.state.selectedHost.host.effectivePolicy.allowedSources.join(', ')),
+            kvRow('Excluded Ports', props.state.selectedHost.host.effectivePolicy.excludedPorts.map(String).join(', ')),
+            kvRow('Conflict Policy', props.state.selectedHost.host.effectivePolicy.conflictPolicy),
+            kvRow(
+              'Same Port Mirror',
+              props.state.selectedHost.host.effectivePolicy.samePortMirror ? 'enabled' : 'disabled'
+            )
+          ])
+        : emptyState('No host policy available until one host is selected.')
+    ])
+  ])
+}
+
+function BackupsMain(props: { state: BackupsState }) {
+  return h('div', { className: 'pm-detail-grid' }, [
+    h('section', { className: 'pm-card', key: 'inventory' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Backup inventory and manifests',
+        detail: `${props.state.backups.length} backups`
+      }),
+      props.state.backups.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.backups.map((backup) =>
+              h('li', { className: 'pm-list-item', key: backup.id }, [
+                h('div', { key: 'line1' }, `${backup.id} · ${shortTime(backup.createdAt)}`),
+                h(
+                  'div',
+                  { className: 'pm-microcopy', key: 'line2' },
+                  `${backup.hostId} · ${backup.backupMode} · ${backup.githubStatus ?? 'github unknown'}`
+                ),
+                h('div', { className: 'pm-artifact', key: 'line3' }, backup.manifestPath ?? 'no manifest path'),
+                h(StatusBadge, { key: 'badge', state: backup.localStatus })
+              ])
+            )
+          )
+        : emptyState('No backup manifests recorded yet.')
+    ]),
+    h('section', { className: 'pm-card', key: 'rollback' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Rollback readiness',
+        detail: `${props.state.rollbackPoints.length} points`
+      }),
+      props.state.rollbackPoints.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.rollbackPoints.map((rollbackPoint) =>
+              h('li', { className: 'pm-list-item', key: rollbackPoint.id }, [
+                h('div', { key: 'line1' }, `${rollbackPoint.id} · ${rollbackPoint.operationId}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, `host ${rollbackPoint.hostId}`),
+                h('div', { key: 'line3' }, `created ${shortTime(rollbackPoint.createdAt)}`),
+                h(StatusBadge, { key: 'badge', state: rollbackPoint.state })
+              ])
+            )
+          )
+        : emptyState('No rollback points published yet.')
+    ])
+  ])
+}
+
+function BackupsRail(props: { state: BackupsState }) {
+  return h('div', { className: 'pm-panel-stack' }, [
+    h('section', { className: 'pm-card', key: 'selected' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Selected backup detail',
+        detail: props.state.selectedBackup?.id ?? 'no selection'
+      }),
+      props.state.selectedBackup
+        ? h('div', { className: 'pm-kv', key: 'kv' }, [
+            kvRow('Host', props.state.selectedBackup.hostId),
+            kvRow('Created', shortTime(props.state.selectedBackup.createdAt)),
+            kvRow('Mode', props.state.selectedBackup.backupMode),
+            kvRow('Local', h(StatusBadge, { state: props.state.selectedBackup.localStatus })),
+            kvRow('GitHub', props.state.selectedBackup.githubStatus ?? 'not_configured'),
+            kvRow('Manifest', props.state.selectedBackup.manifestPath ?? 'n/a')
+          ])
+        : emptyState('No backup selected yet.')
+    ]),
+    h('section', { className: 'pm-card', key: 'operations' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Recovery operations',
+        detail: `${props.state.operations.length} entries`
+      }),
+      props.state.operations.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.operations.map((operation) =>
+              h('li', { className: 'pm-list-item', key: operation.id }, [
+                h('div', { key: 'line1' }, `${operation.id} · ${operation.type}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, shortTime(operation.startedAt)),
+                h('div', { key: 'line3' }, operation.resultSummary ?? 'No summary'),
+                h(StatusBadge, { key: 'badge', state: operation.state })
+              ])
+            )
+          )
+        : emptyState('No recovery operations recorded yet.')
+    ])
+  ])
+}
+
+function ConsoleMain(props: { state: ConsoleState }) {
+  return h('div', { className: 'pm-detail-grid' }, [
+    h('section', { className: 'pm-card', key: 'events' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Recent controller events',
+        detail: `${props.state.events.length} events`
+      }),
+      props.state.events.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.events.map((event) =>
+              h('li', { className: 'pm-list-item', key: event.id }, [
+                h('div', { key: 'line1' }, `${shortTime(event.emittedAt)} · ${event.operationType}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, `${event.operationId} · ${event.level}`),
+                h('div', { key: 'line3' }, event.summary),
+                h(StatusBadge, { key: 'badge', state: event.state })
+              ])
+            )
+          )
+        : emptyState('No controller events have been replayed yet.')
+    ]),
+    h('section', { className: 'pm-card', key: 'operations' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Recent operations',
+        detail: `${props.state.operations.length} operations`
+      }),
+      props.state.operations.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.operations.map((operation) =>
+              h('li', { className: 'pm-list-item', key: operation.id }, [
+                h('div', { key: 'line1' }, `${operation.id} · ${operation.type}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, `${operation.hostId ?? 'n/a'} · ${operation.initiator ?? 'unknown'}`),
+                h('div', { key: 'line3' }, operation.resultSummary ?? 'No summary'),
+                h(StatusBadge, { key: 'badge', state: operation.state })
+              ])
+            )
+          )
+        : emptyState('No operations available in controller console yet.')
+    ]),
+    h('section', { className: 'pm-card', key: 'diagnostic' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Selected diagnostic detail',
+        detail: props.state.selectedDiagnostic?.id ?? 'no diagnostic'
+      }),
+      props.state.selectedDiagnostic
+        ? h('div', { className: 'pm-kv', key: 'kv' }, [
+            kvRow('Host', props.state.selectedDiagnostic.hostId ?? 'n/a'),
+            kvRow('Rule', props.state.selectedDiagnostic.ruleId ?? 'n/a'),
+            kvRow('HTTP Status', String(props.state.selectedDiagnostic.diagnosticResult?.httpStatus ?? 'n/a')),
+            kvRow('Page Title', props.state.selectedDiagnostic.snapshotResult?.pageTitle ?? 'n/a'),
+            kvRow('Final URL', props.state.selectedDiagnostic.diagnosticResult?.finalUrl ?? 'n/a'),
+            kvRow('Artifact', props.state.selectedDiagnostic.snapshotResult?.artifactPath ?? 'n/a')
+          ])
+        : emptyState('No diagnostic detail available yet.')
+    ])
+  ])
+}
+
+function ConsoleRail(props: { state: ConsoleState }) {
+  return h('div', { className: 'pm-panel-stack' }, [
+    h('section', { className: 'pm-card', key: 'selected' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Controller console and replay',
+        detail: props.state.selectedOperation?.id ?? 'no selection'
+      }),
+      props.state.selectedOperation
+        ? h('div', { className: 'pm-kv', key: 'kv' }, [
+            kvRow('Type', props.state.selectedOperation.type),
+            kvRow('State', h(StatusBadge, { state: props.state.selectedOperation.state })),
+            kvRow('Initiator', props.state.selectedOperation.initiator ?? 'unknown'),
+            kvRow('Replay Path', props.state.selectedOperation.eventStreamUrl ?? '/operations/events'),
+            kvRow('Summary', props.state.selectedOperation.resultSummary ?? 'No summary')
+          ])
+        : emptyState('No operation selected for replay.')
+    ]),
+    h('section', { className: 'pm-card', key: 'diagnostics' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Diagnostics inventory',
+        detail: `${props.state.diagnostics.length} diagnostics`
+      }),
+      props.state.diagnostics.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.state.diagnostics.map((diagnostic) =>
+              h('li', { className: 'pm-list-item', key: diagnostic.id }, [
+                h('div', { key: 'line1' }, `${diagnostic.id} · ${diagnostic.type}`),
+                h(
+                  'div',
+                  { className: 'pm-microcopy', key: 'line2' },
+                  diagnostic.snapshotResult?.pageTitle ?? shortTime(diagnostic.finishedAt)
+                ),
+                h('div', { key: 'line3' }, diagnostic.resultSummary ?? 'No summary'),
+                h(StatusBadge, { key: 'badge', state: diagnostic.state })
+              ])
+            )
+          )
+        : emptyState('No diagnostics inventory recorded yet.')
     ])
   ])
 }
@@ -1612,17 +3029,19 @@ function OperationsRail(props: { state: OperationsState; selected: OperationInve
 function EventStreamPanel(props: { entries: EventStreamEntry[] }) {
   return h('section', { className: 'pm-stream' }, [
     h(SectionHeading, { key: 'heading', title: 'Event Stream', detail: 'terminal evidence' }),
-    h(
-      'ul',
-      { className: 'pm-stream-list', key: 'list' },
-      props.entries.map((entry) =>
-        h('li', { className: 'pm-stream-item', key: entry.id }, [
-          h('span', { className: 'pm-stream-time', key: 'time' }, entry.timestamp),
-          h('span', { className: `pm-tone pm-tone-${entry.level}`, key: 'level' }, entry.level),
-          h('span', { key: 'summary' }, entry.summary)
-        ])
-      )
-    )
+    props.entries.length
+      ? h(
+          'ul',
+          { className: 'pm-stream-list', key: 'list' },
+          props.entries.map((entry) =>
+            h('li', { className: 'pm-stream-item', key: entry.id }, [
+              h('span', { className: 'pm-stream-time', key: 'time' }, entry.timestamp),
+              h('span', { className: `pm-tone pm-tone-${entry.level}`, key: 'level' }, entry.level),
+              h('span', { key: 'summary' }, entry.summary)
+            ])
+          )
+        )
+      : emptyState('No recent controller events to replay.')
   ])
 }
 
@@ -1642,6 +3061,10 @@ function kvRow(key: string, value: ReactNode) {
     h('span', { className: 'pm-kv-key', key: 'key' }, key),
     h('div', { key: 'value' }, value)
   ])
+}
+
+function emptyState(copy: string) {
+  return h('div', { className: 'pm-empty-state' }, copy)
 }
 
 type Tone = 'success' | 'info' | 'warn'

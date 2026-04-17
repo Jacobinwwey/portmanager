@@ -39,8 +39,8 @@ Version: v0.4.4-unit1-focus
 - [x] Milestone 1 acceptance closure: add real controller `hosts` resources and readiness lifecycle, not only operation evidence and diagnostics primitives.
 - [x] Milestone 1 acceptance closure: add real controller `bridge-rules` CRUD and `exposure-policies` surfaces.
 - [x] Milestone 1 acceptance closure: mirror controller host/rule/policy surfaces into CLI.
-- [ ] Milestone 1 acceptance closure: mirror controller host/rule/policy surfaces into Web.
-- [ ] Milestone 1 acceptance closure: replace Web mock-only states with controller-backed data and add dedicated `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics-detail surfaces.
+- [x] Milestone 1 acceptance closure: mirror controller host/rule/policy surfaces into Web.
+- [x] Milestone 1 acceptance closure: replace Web mock-only states with controller-backed data and add dedicated `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics-detail surfaces.
 - [ ] Milestone 1 acceptance closure: evolve the agent from file-backed CLI skeleton to the locked `HTTP over Tailscale` steady-state service boundary.
 - [ ] Milestone 2 acceptance closure: keep reliability work grounded in the same host/rule/policy model instead of advancing milestone status from partial branch-only evidence.
 
@@ -48,7 +48,7 @@ Version: v0.4.4-unit1-focus
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on latest `main` proof (`24565361391`, `24565361388`) while Unit 1 becomes the active lane.
 - [x] Unit 1: implement controller `hosts`, `bridge-rules`, and `exposure-policies` as the shared runtime source of truth.
 - [x] Unit 2: add CLI parity for host, rule, and policy inspection and core write paths on top of completed Unit 1.
-- [ ] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
+- [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [ ] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [ ] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
 
@@ -93,8 +93,8 @@ Version: v0.4.4-unit1-focus
 - [x] 里程碑 1 验收闭环：补上真实 controller `hosts` 资源与 readiness 生命周期，而不只是 operation 证据和 diagnostics 原语。
 - [x] 里程碑 1 验收闭环：补上真实 controller `bridge-rules` CRUD 与 `exposure-policies` 表面。
 - [x] 里程碑 1 验收闭环：把 controller 的 host/rule/policy 表面同步镜像到 CLI。
-- [ ] 里程碑 1 验收闭环：把 controller 的 host/rule/policy 表面同步镜像到 Web。
-- [ ] 里程碑 1 验收闭环：把 Web 从纯 mock 状态切到 controller 实时数据，并增加独立的 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail 页面。
+- [x] 里程碑 1 验收闭环：把 controller 的 host/rule/policy 表面同步镜像到 Web。
+- [x] 里程碑 1 验收闭环：把 Web 从纯 mock 状态切到 controller 实时数据，并增加独立的 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail 页面。
 - [ ] 里程碑 1 验收闭环：把 agent 从文件落盘式 CLI 骨架推进到锁定的 `HTTP over Tailscale` 稳态服务边界。
 - [ ] 里程碑 2 验收闭环：让可靠性工作持续建立在统一 host/rule/policy 模型上，而不是只凭分支局部证据提前升级里程碑状态。
 
@@ -102,7 +102,7 @@ Version: v0.4.4-unit1-focus
 - [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并在最新 `main` 证明（`24565361391`、`24565361388`）转绿后，把主动主线切到 Unit 1。
 - [x] Unit 1：先把 controller 的 `hosts`、`bridge-rules`、`exposure-policies` 做成统一运行态真源。
 - [x] Unit 2：在已完成的 Unit 1 基础上补齐 CLI 对 host / rule / policy 的检查与核心写入路径。
-- [ ] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
+- [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [ ] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [ ] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
 

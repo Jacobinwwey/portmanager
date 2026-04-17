@@ -55,13 +55,13 @@ Milestone 1 is only accepted when all of the following become true:
 - GitHub Actions already proved Unit 0 green on `main` on `2026-04-17`, so it should be treated as standing branch discipline rather than active recovery work.
 - Verified now from Unit 1: controller-backed `/hosts`, `/hosts/{hostId}`, `/hosts/{hostId}/probe`, `/hosts/{hostId}/bootstrap`, `/bridge-rules`, `/bridge-rules/{ruleId}`, and `GET/PUT /exposure-policies/{hostId}` are now real, and destructive rule mutation preserves backup and rollback evidence before state changes.
 - Verified now from Unit 2: CLI `hosts`, `bridge-rules`, and `exposure-policies` read/write flows now mirror those controller resources with the existing `--json` and wait-aware conventions, and `crates/portmanager-cli/tests/host_rule_policy_cli.rs` proves the public command surface end to end.
-- Still missing before acceptance: live web parity beyond mock shells and the steady-state controller-agent `HTTP over Tailscale` service boundary.
+- Still missing before acceptance: the steady-state controller-agent `HTTP over Tailscale` service boundary plus the final acceptance/doc resync pass.
 
 #### Current development sequence
 - `Unit 0`: complete and mandatory. Keep the gate green while later units land, but do not treat gate work as the current milestone-closure objective.
 - `Unit 1`: complete. Controller `hosts`, `bridge-rules`, and `exposure-policies` now run through the shared store and runner with host lifecycle and backup-aware rule mutation.
 - `Unit 2`: complete. CLI now mirrors those same resources so controller and CLI share one truthful public surface.
-- `Unit 3`: replace Web mock-only routes with controller-backed views and diagnostics detail.
+- `Unit 3`: complete. Web now renders controller-backed views and diagnostics detail across overview, host detail, hosts, bridge rules, operations, backups, and console.
 - `Unit 4`: move the agent toward the minimum `HTTP over Tailscale` steady-state service boundary without breaking current artifact compatibility.
 - `Unit 5`: rerun `pnpm acceptance:verify`, sync roadmap and product docs, and only then reassess Milestone 1 wording.
 
@@ -98,7 +98,7 @@ Milestone 2 is only accepted when all of the following become true:
 - Reliability work has already started on this branch.
 - Verified now: backup-policy visibility, drift-driven degraded records, recovery-linked operation summaries, rollback inspection, and richer event history flows in controller and CLI tests.
 - Verified now from the Windows acceptance pass: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures, and the CLI test harness no longer flakes on Windows nonblocking accepted sockets.
-- Milestone 2 still remains in progress because Web surfaces are not yet live-data truthful and the steady-state agent boundary still prevents full cross-interface reliability claims.
+- Milestone 2 still remains in progress because the steady-state agent boundary and final acceptance replay still prevent full cross-interface reliability claims.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.
