@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.3.2-roadmap-solidification
+> Updated: 2026-04-16 | Version: v0.4.0-mainline-progress-sync
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -47,6 +47,11 @@ Milestone 1 is only accepted when all of the following become true:
 - diagnostics produce both machine-readable results and webpage snapshot artifacts
 - Web, CLI, and API observe the same host, rule, operation, and degraded-state model
 
+#### Current verified status
+- Progress is real, but acceptance is still open.
+- Verified now: backup-before-mutation, rollback evidence, diagnostics capture, drift-driven degraded state, filtered operation history, event replay, and controller/CLI inspection surfaces for operations, backups, diagnostics, health checks, and rollback points.
+- Still missing before acceptance: real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources, CLI parity for those resources, live web parity beyond mock shells, and the steady-state controller-agent `HTTP over Tailscale` service boundary.
+
 #### What remains intentionally deferred
 - PostgreSQL as the default store
 - batch orchestration and fleet management
@@ -75,6 +80,11 @@ Milestone 2 is only accepted when all of the following become true:
 - drift detection can move a resource into `degraded` without semantic ambiguity
 - rollback flows are easier to inspect and execute without weakening evidence trails
 - diagnostics, backups, and operations surfaces are materially more complete than the Milestone 1 skeleton
+
+#### Current verified status
+- Reliability work has already started on this branch.
+- Verified now: backup-policy visibility, drift-driven degraded records, recovery-linked operation summaries, rollback inspection, and richer event history flows in controller and CLI tests.
+- Milestone 2 still remains in progress because Web surfaces are not yet live-data truthful and the missing host/rule/policy public surfaces still prevent full cross-interface reliability claims.
 
 #### What remains intentionally deferred
 - full broad-platform support

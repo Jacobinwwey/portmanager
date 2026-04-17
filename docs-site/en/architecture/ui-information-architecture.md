@@ -10,7 +10,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-ui-information-architecture.md`
 > Audience: `human` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.3.0-docs-site-design-alignment
+> Updated: 2026-04-16 | Version: v0.4.0-mainline-progress-sync
 ### Scope boundary
 This document defines the product web control-plane information architecture.
 It does not define the public VitePress docs site.
@@ -119,3 +119,13 @@ It must aggregate:
 The provided HTML remains the product web visual mother template.
 This rule applies to the future React SPA control plane, not to `docs-site/`.
 Any deviation from its core layout language must be preceded by a design baseline update in `docs/design/`.
+
+### Current implementation parity snapshot
+- `Overview`: shell exists and follows the intended visual language, but currently renders mock state rather than controller-backed data.
+- `Hosts`: present only as navigation text; dedicated page and live host inventory are still missing.
+- `Bridge Rules`: present only as navigation text; dedicated rule list and rule-detail surfaces are still missing.
+- `Host detail`: shell exists with policy, health, backups, rollback, diagnostics, and artifact cards, but all content is still mock data.
+- `Port diagnostics detail`: required by the architecture, but still missing as a dedicated route or view.
+- `Operations`: shell exists, including selected-operation timeline and replay references, but it still uses mock data instead of controller responses and live SSE updates.
+- `Backups`: represented only as a subsection inside mock host detail; dedicated page is still missing.
+- `Console`: represented only as the bottom stream inside current shells; dedicated evidence console is still missing.

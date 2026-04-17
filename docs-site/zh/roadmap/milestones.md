@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-16 | Version：v0.3.2-roadmap-solidification
+> Updated：2026-04-16 | Version：v0.4.0-mainline-progress-sync
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -47,6 +47,11 @@ status: active
 - diagnostics 同时产出机器可读结果与网页快照产物
 - Web、CLI 与 API 对 host、rule、operation 与 degraded 状态的观察一致
 
+#### 当前已验证状态
+- 进展是真实存在的，但验收仍未闭环。
+- 当前已验证：变更前备份、回滚证据、诊断抓取、drift 驱动 degraded 状态、筛选后的 operation 历史、事件回放，以及 controller/CLI 对 operations、backups、diagnostics、health checks、rollback points 的检查表面。
+- 验收前仍缺失：真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源，这些资源在 CLI 中的对等能力，超出 mock shell 的 live Web 一致性，以及稳态 controller-agent `HTTP over Tailscale` 服务边界。
+
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
 - 批量编排与 fleet 管理
@@ -75,6 +80,11 @@ status: active
 - drift detection 能在无语义歧义的情况下把资源推进 `degraded`
 - rollback 更容易检查与执行，但不会削弱证据轨迹
 - diagnostics、backups 与 operations 页面相较于里程碑 1 骨架有实质补全
+
+#### 当前已验证状态
+- 可靠性工作已经在当前分支启动。
+- 当前已验证：backup policy 可见性、drift 驱动 degraded 记录、带 recovery 关联的 operation 摘要、rollback 检查能力，以及更丰富的 controller/CLI 事件历史流。
+- 里程碑 2 仍然处于进行中，因为 Web 表面还不是真实 live-data truth，而缺失的 host/rule/policy 公共表面也让跨界面的完整可靠性声明还站不住。
 
 #### 明确延后的内容
 - 完整的广平台支持

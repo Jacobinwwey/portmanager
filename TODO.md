@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-16
-Version: v0.3.0-docs-site-design-alignment
+Version: v0.4.0-mainline-progress-sync
 
 ## English
 
@@ -33,6 +33,18 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] Milestone 2: selected-operation event timeline and filtered event history across Web, CLI, and API.
 - [x] Milestone 2: operation detail now carries direct selected-event replay path and linked recovery evidence across API and CLI.
 
+### Current acceptance gaps
+- [ ] Milestone 1 acceptance closure: add real controller `hosts` resources and readiness lifecycle, not only operation evidence and diagnostics primitives.
+- [ ] Milestone 1 acceptance closure: add real controller `bridge-rules` CRUD and `exposure-policies` surfaces, then mirror them into CLI and Web.
+- [ ] Milestone 1 acceptance closure: replace Web mock-only states with controller-backed data and add dedicated `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics-detail surfaces.
+- [ ] Milestone 1 acceptance closure: evolve the agent from file-backed CLI skeleton to the locked `HTTP over Tailscale` steady-state service boundary.
+- [ ] Milestone 2 acceptance closure: keep reliability work grounded in the same host/rule/policy model instead of advancing milestone status from partial branch-only evidence.
+
+### Current direction documents
+- [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
+- [x] Land implementation plan: `docs/plans/2026-04-16-portmanager-mainline-reconciliation-plan.md`
+- [x] Sync progress language across root docs and roadmap docs before merging into `main`.
+
 ## 中文
 
 ### 已完成的基线工作
@@ -62,3 +74,15 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] 里程碑 2：补全 operation 列表筛选与 recovery 证据摘要，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：补全选中 operation 的事件时间线与 event history 筛选，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：让 operation detail 直接携带选中事件回放路径与 recovery 证据，并在 API、CLI 中统一暴露。
+
+### 当前验收缺口
+- [ ] 里程碑 1 验收闭环：补上真实 controller `hosts` 资源与 readiness 生命周期，而不只是 operation 证据和 diagnostics 原语。
+- [ ] 里程碑 1 验收闭环：补上真实 controller `bridge-rules` CRUD 与 `exposure-policies` 表面，并同步镜像到 CLI 与 Web。
+- [ ] 里程碑 1 验收闭环：把 Web 从纯 mock 状态切到 controller 实时数据，并增加独立的 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail 页面。
+- [ ] 里程碑 1 验收闭环：把 agent 从文件落盘式 CLI 骨架推进到锁定的 `HTTP over Tailscale` 稳态服务边界。
+- [ ] 里程碑 2 验收闭环：让可靠性工作持续建立在统一 host/rule/policy 模型上，而不是只凭分支局部证据提前升级里程碑状态。
+
+### 当前方向文档
+- [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
+- [x] 落盘实现计划：`docs/plans/2026-04-16-portmanager-mainline-reconciliation-plan.md`
+- [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

@@ -137,22 +137,22 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     id: 'm1',
     stage: 'now',
     title: { en: 'Milestone 1: One Host, One Rule, One Rollback', zh: '里程碑 1：One Host, One Rule, One Rollback' },
-    status: { en: 'Docs Baseline Locked', zh: '文档基线已锁定' },
+    status: { en: 'Acceptance Closure In Progress', zh: '验收闭环进行中' },
     summary: {
-      en: 'Turn the frozen contracts and specs into the first credible control-plane slice and start the B-state validation.',
-      zh: '把已冻结的契约与规范落成第一条可信控制平面切片，并启动 B 状态验证。'
+      en: 'Turn the frozen contracts and specs into the first credible control-plane slice; backup, diagnostics, rollback, and operations evidence are real, but host/rule/policy parity is still incomplete.',
+      zh: '把已冻结的契约与规范落成第一条可信控制平面切片；backup、diagnostics、rollback、operations 证据已经真实存在，但 host/rule/policy 一致性仍未补齐。'
     },
     decision: {
-      en: 'Milestone 1 stays intentionally narrow so PortManager can prove practical value before broader reliability or distributed ambitions consume the roadmap.',
-      zh: '里程碑 1 必须刻意保持狭窄，让 PortManager 先证明实践价值，再去承担更广可靠性或分布式野心。'
+      en: 'Milestone 1 stays intentionally narrow so PortManager can prove practical value before broader reliability or distributed ambitions consume the roadmap; current work must close the missing public surfaces before status can advance.',
+      zh: '里程碑 1 必须刻意保持狭窄，让 PortManager 先证明实践价值，再去承担更广可靠性或分布式野心；当前工作必须先补齐缺失的公共表面，里程碑状态才有资格继续推进。'
     },
     productOutcomes: {
-      en: ['A host can become ready.', 'A single bridge rule can become active.', 'Operators can inspect snapshots, diagnostics, and rollback evidence.'],
-      zh: ['一台主机可以进入 ready。', '单条 bridge rule 可以进入 active。', '操作者可以检查快照、诊断与回滚证据。']
+      en: ['A host can become ready through real controller-managed lifecycle.', 'A single bridge rule can become active through real contract-backed flows.', 'Operators can inspect snapshots, diagnostics, and rollback evidence across live Web, CLI, and API surfaces.'],
+      zh: ['一台主机可以通过真实 controller 生命周期进入 ready。', '单条 bridge rule 可以通过真实契约驱动流程进入 active。', '操作者可以在 live Web、CLI、API 中检查快照、诊断与回滚证据。']
     },
     engineeringWork: {
-      en: ['Contracts foundation and codegen.', 'Controller, CLI, agent, and web skeletons.', 'Backup-before-mutation and diagnostics flow.'],
-      zh: ['契约基础设施与 codegen。', 'Controller、CLI、agent 与 web 骨架。', '变更前备份与诊断链路。']
+      en: ['Contracts foundation and codegen.', 'Close controller, CLI, and web parity for hosts, bridge rules, and exposure policies.', 'Keep backup-before-mutation, rollback evidence, diagnostics flow, and event history intact while adding the missing public surfaces.'],
+      zh: ['契约基础设施与 codegen。', '补齐 controller、CLI、web 在 hosts、bridge rules、exposure policies 上的一致性。', '在补全缺失公共表面的同时，保住变更前备份、回滚证据、诊断链路与事件历史能力。']
     },
     entryCriteria: {
       en: ['Docs-first baseline is frozen.', 'Product-console and docs-site boundaries are separated.', 'Ubuntu 24.04 + systemd + Tailscale target remains the only primary host profile.'],
@@ -169,22 +169,22 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     id: 'm2',
     stage: 'next',
     title: { en: 'Milestone 2: Engineering Reliability', zh: '里程碑 2：Engineering Reliability' },
-    status: { en: 'Planned', zh: '计划中' },
+    status: { en: 'Reliability Slice Started', zh: '可靠性切片已启动' },
     summary: {
-      en: 'Strengthen the B-state slice until degraded handling, rollback confidence, and drift visibility become operationally trustworthy.',
-      zh: '把 B 状态切片强化到 degraded 处理、rollback 信心和 drift 可见性都真正值得信任。'
+      en: 'Strengthen the B-state slice until degraded handling, rollback confidence, and drift visibility become operationally trustworthy; branch-level reliability work exists, but acceptance still depends on live cross-surface parity.',
+      zh: '把 B 状态切片强化到 degraded 处理、rollback 信心和 drift 可见性都真正值得信任；当前分支已经有可靠性切片，但验收仍依赖真实跨界面一致性。'
     },
     decision: {
-      en: 'Reliability is sequenced before platform expansion because scope growth on top of weak rollback and weak degraded handling would only multiply ambiguity.',
-      zh: '可靠性被排在平台扩展之前，因为在 rollback 和 degraded 处理仍薄弱时先扩范围，只会放大歧义。'
+      en: 'Reliability stays ahead of platform expansion, but it also cannot be treated as accepted while the missing host/rule/policy surfaces still block truthful Web, CLI, and API alignment.',
+      zh: '可靠性仍然优先于平台扩展，但在缺失的 host/rule/policy 表面仍阻碍 Web、CLI、API 真实对齐之前，也不能把它当作已经验收完成。'
     },
     productOutcomes: {
-      en: ['Degraded state becomes operationally visible.', 'Backup policy becomes explicit and enforceable.', 'Diagnostics and operations views mature.'],
-      zh: ['Degraded 状态具备操作可见性。', '备份策略变得明确且可执行。', 'Diagnostics 与 operations 视图成熟。']
+      en: ['Degraded state becomes operationally visible across live surfaces.', 'Backup policy becomes explicit and enforceable with matching evidence trails.', 'Diagnostics and operations views mature without depending on mock-only presentation.'],
+      zh: ['Degraded 状态在真实界面中具备操作可见性。', '备份策略变得明确且可执行，并保持一致的证据链。', 'Diagnostics 与 operations 视图成熟，不再依赖纯 mock 展示。']
     },
     engineeringWork: {
-      en: ['GitHub backup integration.', 'Drift detection and degraded handling.', 'Stronger rollback UX and artifact retention.'],
-      zh: ['GitHub 备份接入。', '漂移检测与 degraded 处理。', '更强的 rollback 体验与产物保留策略。']
+      en: ['GitHub backup integration and remote-backup status.', 'Drift detection and degraded handling on top of real host/rule/policy resources.', 'Stronger rollback UX, artifact retention, and live event/history parity.'],
+      zh: ['GitHub 备份接入与远端备份状态。', '建立在真实 host/rule/policy 资源之上的漂移检测与 degraded 处理。', '更强的 rollback 体验、产物保留与实时 event/history 一致性。']
     },
     entryCriteria: {
       en: ['Milestone 1 slice is real end to end.', 'Local backup before mutation is already enforced.', 'Host/rule/operation state semantics are shared across Web, CLI, and API.'],
