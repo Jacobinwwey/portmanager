@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version and GitHub-backup reliability slices, and the remaining repeated-proof work on top of the same live agent-backed flow.',
-    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version 与 GitHub-backup 可靠性切片，以及建立在同一条 live agent 切片之上的剩余重复证明工作。'
+    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version, GitHub-backup, and remote-backup-replay slices, and the remaining work to keep that evidence routine on the same live agent-backed flow.',
+    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version、GitHub-backup 与 remote-backup-replay 切片，以及建立在同一条 live agent 切片之上的剩余常态化证据工作。'
   },
   buckets: [
     {
@@ -167,6 +167,7 @@ export const roadmapDeveloperProgress = {
           'Milestone proof now shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.',
           'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
           'Configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and publishes explicit succeeded remote redundancy state across API, CLI, web, and dedicated reliability proof.',
+          'Remote-backup replay is now durable in repo: one proof replays local-only, configured-success, and configured-failure required backups on the same live agent-backed slice across API, CLI, Web backup views, and agent runtime.',
           'Roadmap page, milestone docs, product spec, and root progress docs now reflect the same truth.'
         ],
         zh: [
@@ -176,6 +177,7 @@ export const roadmapDeveloperProgress = {
           'milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup/rollback 证据保持不变。',
           'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
           '当 GitHub backup 已配置时，controller backup bundle 现在会通过 GitHub Contents API 上传，并在 API、CLI、web 与专门的可靠性证明里显式暴露远端冗余成功状态。',
+          'repo 内已经落地可重复执行的 remote-backup replay：同一条 live agent-backed 切片现在会重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据保持一致。',
           'roadmap 页面、里程碑文档、产品规格与 root progress docs 现在已经反映同一套真实状态。'
         ]
       }
@@ -190,15 +192,15 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Milestone 2 reliability hardening is now the active lane, not Milestone 1 parity recovery.',
-          'Configured, failed, and local-only GitHub backup paths now all exist on the same live slice; remaining work is repeated replay and confidence building, not first delivery.',
+          'Configured, failed, and local-only GitHub backup paths now all exist inside one durable replay proof on the same live slice; remaining work is confidence maintenance, not first delivery.',
           'Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host/rule/policy slice.',
-          'Broader reliability replay on the same live agent-backed slice still needs more repeated proof across Web, CLI, API, agent, and mixed remote-backup states.'
+          'Broader reliability replay on the same live agent-backed slice still needs continued reruns across Web, CLI, API, agent, and mixed remote-backup states before the status language can simplify.'
         ],
         zh: [
           '当前主线已经转到 Milestone 2 可靠性加固，而不再是 Milestone 1 一致性补洞。',
-          'configured、failed、local-only 三类 GitHub backup 路径现在都已经落在同一条 live 切片上；剩余工作不再是首次交付，而是重复重放与可信度加深。',
+          'configured、failed、local-only 三类 GitHub backup 路径现在都已经落在同一条 durable replay proof 的 live 切片上；剩余工作不再是首次交付，而是常态化维持与可信度加深。',
           'controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经在同一条 live host/rule/policy 切片上分组展示最新诊断、degraded diagnostics history 与 recovery-ready 成功证据。',
-          '同一条 live agent-backed 切片上的可靠性重放仍需要在 Web、CLI、API、agent 以及多种 remote-backup 状态之间继续增加重复证明。'
+          '同一条 live agent-backed 切片上的可靠性重放仍需要在 Web、CLI、API、agent 以及多种 remote-backup 状态之间持续重跑，之后状态文案才能继续收窄。'
         ]
       }
     },
@@ -212,14 +214,14 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Keep Unit 0 green while Milestone 2 work lands.',
-          'Replay reliability acceptance on the live agent-backed slice across configured, failed, and local-only remote-backup evidence.',
-          'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of reintroducing local-only shortcuts.',
+          'Keep rerunning the combined remote-backup replay on the live agent-backed slice across configured, failed, and local-only evidence.',
+          'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the new replay proof drift.',
           'Keep Toward C deferred until Milestone 2 evidence becomes trustworthy.'
         ],
         zh: [
           '继续把 Unit 0 保持为绿，再让 Milestone 2 工作落地。',
-          '围绕 configured、failed、local-only 三类 remote-backup 证据，继续在同一条 live agent-backed 切片上重放可靠性验收。',
-          '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是重新引入本地捷径。',
+          '围绕 configured、failed、local-only 三类 remote-backup 证据，继续在同一条 live agent-backed 切片上重跑 combined replay。',
+          '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新 replay proof 自身发生漂移。',
           '在 Milestone 2 证据真正可信之前，继续把 Toward C 保持为延后方向。'
         ]
       }
@@ -340,6 +342,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Backup policy modes already behave differently and expose remote-backup status evidence.',
         'Remote-backup setup, status, and operator action are now explicit across API, CLI, web, and proof output instead of being buried behind raw enum state.',
         'Configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and reports explicit remote redundancy success/failure across API, CLI, web, and dedicated reliability proof.',
+        'One durable replay proof now covers local-only, configured-success, and configured-failure required backups on the same live agent-backed slice across API, CLI, Web backup views, and agent runtime.',
         'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
         'Drift detection already records explicit degraded state and recovery-linked summaries.',
         'Controller `GET /diagnostics` now filters by `state`, and Web host detail now shows degraded diagnostics history alongside recovery-ready successful evidence.',
@@ -351,6 +354,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'backup policy 模式已经具备真实行为差异，并暴露远端备份状态证据。',
         '远端备份的配置、状态与操作者动作现在已经在 API、CLI、Web 与 proof 输出中显式可见，不再只是埋在原始枚举状态后面。',
         '当 GitHub backup 已配置时，controller backup bundle 现在会通过 GitHub Contents API 上传，并在 API、CLI、Web 与专门的可靠性证明里显式暴露远端冗余成功/失败状态。',
+        '同一条 live agent-backed 切片上，现在已经有一条 durable replay proof 覆盖 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 对齐。',
         'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
         'drift detection 已经记录显式 degraded 状态与 recovery 关联摘要。',
         'controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经把 degraded diagnostics history 与 recovery-ready 成功证据并排展示出来。',
@@ -361,25 +365,25 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     blockingGaps: {
       en: [
-        'Milestone 2 acceptance still needs repeated end-to-end replay on the same live agent-backed slice across configured, failed, and local-only remote-backup states before status can advance.',
-        'The remaining gap is repeated proof and trust-building, not first-delivery parity.'
+        'Milestone 2 acceptance still needs continued reruns of the combined replay and the acceptance gate on the same live agent-backed slice before status can advance.',
+        'The remaining gap is trust that stays green over time, not discovery of a missing remote-backup state.'
       ],
       zh: [
-        '在同一条 live agent-backed 切片上，Milestone 2 的验收仍需要围绕 configured、failed、local-only 三类 remote-backup 状态做更多端到端重复重放后，状态才有资格继续提升。',
-        '当前剩余缺口是重复证明与可信度积累，而不是首次交付一致性。'
+        '在同一条 live agent-backed 切片上，Milestone 2 的验收仍需要把 combined replay 与 acceptance gate 持续重跑之后，状态才有资格继续提升。',
+        '当前剩余缺口是能长期保持为绿的可信度，而不是缺失某个 remote-backup 状态。'
       ]
     },
     developerFocus: {
       en: [
         'Build Milestone 2 on the completed Unit 0 through Unit 5 lane instead of reopening Milestone 1 parity work.',
         'Keep configured, failed, and local-only backup evidence aligned across controller, CLI, web, and agent.',
-        'Deepen repeated live reliability proof on the same accepted agent-backed slice.',
+        'Keep rerunning the combined replay and the mainline acceptance gate on the same accepted agent-backed slice.',
         'Keep one evidence model and one acceptance gate across controller, CLI, web, and agent.'
       ],
       zh: [
         '把 Milestone 2 建立在已经完成的 Unit 0 到 Unit 5 主线之上，而不是重新打开 Milestone 1 的表面补洞。',
         '继续让 controller、CLI、web、agent 在 configured、failed、local-only 三类 backup 证据上保持一致。',
-        '继续在同一条已验收的 live agent-backed 切片上加深重复可靠性证明。',
+        '继续在同一条已验收的 live agent-backed 切片上反复重跑 combined replay 与主线 acceptance gate。',
         '继续让 controller、CLI、web、agent 共用同一套证据模型与同一条验收 gate。'
       ]
     },

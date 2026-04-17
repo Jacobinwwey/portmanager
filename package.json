@@ -10,6 +10,7 @@
     "acceptance:verify": "node scripts/acceptance/verify.mjs",
     "contracts:generate": "node scripts/contracts/generate-contracts.mjs",
     "contracts:check": "node scripts/contracts/generate-contracts.mjs --check",
+    "milestone:verify:reliability-remote-backup-replay": "node --experimental-strip-types scripts/milestone/verify-reliability-remote-backup-replay.ts",
     "test": "node --experimental-strip-types --test tests/contracts/*.test.mjs tests/docs/*.test.mjs tests/controller/*.test.ts tests/web/*.test.ts tests/milestone/*.test.ts",
     "typecheck": "pnpm exec tsc -p packages/typescript-contracts/tsconfig.json --noEmit && pnpm exec tsc -p apps/controller/tsconfig.json --noEmit && pnpm exec tsc -p apps/web/tsconfig.json --noEmit",
     "rust:check": "cargo test --workspace",

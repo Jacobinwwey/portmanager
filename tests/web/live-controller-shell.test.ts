@@ -31,6 +31,7 @@ import {
   OperationsPage,
   OverviewPage
 } from '../../apps/web/src/main.ts'
+import { verifyReliabilityRemoteBackupReplayFlow } from '../../scripts/milestone/verify-reliability-remote-backup-replay.ts'
 
 function tempPaths() {
   const directory = mkdtempSync(path.join(tmpdir(), 'portmanager-web-live-'))
@@ -416,4 +417,19 @@ test('web live loaders render successful GitHub backup status when remote backup
     await closeHttpServer(github.server)
     rmSync(directory, { recursive: true, force: true })
   }
+})
+
+test('web live loaders replay local-only failed and successful remote-backup guidance on the same live slice', async () => {
+  const result = await verifyReliabilityRemoteBackupReplayFlow()
+
+  assert.match(result.localOnly.backupsPageHtml, /needs setup/i)
+  assert.match(result.localOnly.backupsPageHtml, /configure github backup/i)
+
+  assert.match(result.configuredFailure.backupsPageHtml, /failed/i)
+  assert.match(result.configuredFailure.backupsPageHtml, /remote redundancy is missing/i)
+  assert.match(result.configuredFailure.backupsPageHtml, /inspect github backup credentials/i)
+
+  assert.match(result.configuredSuccess.backupsPageHtml, /succeeded/i)
+  assert.match(result.configuredSuccess.backupsPageHtml, /remote redundancy is available/i)
+  assert.match(result.configuredSuccess.backupsPageHtml, /no remote action required/i)
 })
