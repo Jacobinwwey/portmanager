@@ -7,6 +7,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "acceptance:verify": "node scripts/acceptance/verify.mjs",
     "contracts:generate": "node scripts/contracts/generate-contracts.mjs",
     "contracts:check": "node scripts/contracts/generate-contracts.mjs --check",
     "test": "node --experimental-strip-types --test tests/contracts/*.test.mjs tests/docs/*.test.mjs tests/controller/*.test.ts tests/web/*.test.ts tests/milestone/*.test.ts",

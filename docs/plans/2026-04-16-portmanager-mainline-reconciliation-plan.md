@@ -8,10 +8,24 @@ origin: docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps
 
 # PortManager Mainline Reconciliation Plan
 
+Updated: 2026-04-17
+Version: v0.1.1-mainline-acceptance-gate
+
+## English
+
 ## Overview
 
 Close the gap between PortManager's frozen V1 contracts and the currently implemented branch slice without abandoning the reliability work already in place.
 This plan assumes the 2026-04-16 docs truth-sync has landed and focuses on the executable work required to make Milestone 1 acceptance credible and to frame Milestone 2 accurately.
+
+## Execution Update: 2026-04-17
+
+The repository's strongest implemented asset is now an evidence-first control-plane nucleus around operations, diagnostics, backup, rollback, recovery, and event history.
+That is real progress, not presentation-only work.
+The biggest structural mismatch is also now clearer: the public contract surface still outruns the runtime surface for `hosts`, `bridge-rules`, `exposure-policies`, live web truth, and the steady-state controller-agent boundary.
+
+Because of that mismatch, a repeatable mainline acceptance gate is now treated as an engineering precondition rather than a milestone-status shortcut.
+`pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml` should be read as Unit 0 discipline: it hardens delivery and branch protection, but it does not by itself close Milestone 1.
 
 ## Problem Frame
 
@@ -28,6 +42,7 @@ If the project moves toward Milestone 3 or broader distributed architecture now,
 - R5. Keep progress docs and roadmap surfaces synchronized as implementation lands.
 - R6. Prioritize `hosts`, `bridge-rules`, `exposure-policies`, live web parity, and controller-agent steady-state integration before Milestone 3.
 - R7. Preserve and extend the current reliability slice rather than discarding it.
+- R8. Formalize a repeatable local and CI acceptance gate without overstating milestone status.
 
 ## Scope Boundaries
 
@@ -61,6 +76,7 @@ If the project moves toward Milestone 3 or broader distributed architecture now,
 
 ## Key Technical Decisions
 
+- Add a Unit 0 delivery discipline layer before more feature work: one local command and one mainline CI workflow should exercise the same verification matrix.
 - Extend the existing controller store and runner instead of adding a second state-management path for hosts, rules, and policies.
 - Add controller surface parity before deepening agent distribution work, because web and CLI cannot become truthful first-class peers without these resources.
 - Replace web mock data incrementally: wire controller-backed reads and event streams first, then add missing pages and detail surfaces.
@@ -73,6 +89,7 @@ If the project moves toward Milestone 3 or broader distributed architecture now,
 
 - Should Milestone 3 work begin before interface parity closes? No. Interface parity and steady-state agent integration must land first.
 - Should current reliability work be rolled back to reduce scope? No. It should be kept and used as the verified base for acceptance closure.
+- Should a mainline acceptance gate be treated as a roadmap reorder? No. It is a precondition for truthful delivery, not a substitute for missing surface parity.
 
 ### Deferred to Implementation
 
@@ -83,9 +100,10 @@ If the project moves toward Milestone 3 or broader distributed architecture now,
 
 ```mermaid
 flowchart TD
-  U1[Unit 1 Controller Surface Parity] --> U2[Unit 2 CLI Parity]
+  U0[Unit 0 Mainline Acceptance Gate] --> U1[Unit 1 Controller Surface Parity]
   U1 --> U3[Unit 3 Web Live Data and Route Parity]
   U1 --> U4[Unit 4 Agent Service Boundary]
+  U1 --> U2[Unit 2 CLI Parity]
   U2 --> U5[Unit 5 Acceptance Closure and Docs Sync]
   U3 --> U5
   U4 --> U5
@@ -93,13 +111,47 @@ flowchart TD
 
 ## Implementation Units
 
+- [x] **Unit 0: Mainline Acceptance Gate and CI Baseline**
+
+**Goal:** Formalize one repeatable verification entrypoint for local development and mainline CI so branch health is checked consistently before milestone status language moves.
+
+**Requirements:** R1, R4, R5, R7, R8
+
+**Dependencies:** None
+
+**Files:**
+- Modify: `package.json`
+- Create: `scripts/acceptance/verify.mjs`
+- Create: `.github/workflows/mainline-acceptance.yml`
+- Modify: `README.md`
+- Modify: `docs/specs/portmanager-milestones.md`
+- Modify: `TODO.md`
+
+**Approach:**
+- Add a single local command that runs the same validation sequence the repository already depends on: tests, type checks, Rust workspace tests, contract drift checks, docs build, and milestone verification.
+- Mirror that sequence in GitHub Actions for `pull_request`, `push` to `main`, and `workflow_dispatch`.
+- Treat the result as branch-discipline evidence, not as automatic milestone acceptance.
+
+**Patterns to follow:**
+- Existing docs-pages workflow in `.github/workflows/docs-pages.yml`
+- Existing milestone verification command shape in `package.json`
+
+**Test scenarios:**
+- Happy path: local `pnpm acceptance:verify` succeeds from repo root.
+- Happy path: CI job provisions Node, pnpm, Rust, and both dependency roots, then runs the same acceptance command.
+- Error path: the local runner fails fast on the first broken step and returns a non-zero exit code.
+- Error path: docs generation drift or contract drift fails the same gate rather than silently passing.
+
+**Verification:**
+- `pnpm acceptance:verify` becomes the canonical mainline verification entrypoint and is wired into GitHub Actions.
+
 - [ ] **Unit 1: Controller Host, Rule, and Policy Surface Parity**
 
 **Goal:** Implement the missing contract-backed controller resources so the repository serves real `hosts`, `bridge-rules`, and `exposure-policies` data and mutations instead of only operations/reliability slices.
 
 **Requirements:** R2, R3, R6, R7
 
-**Dependencies:** None
+**Dependencies:** Unit 0
 
 **Files:**
 - Modify: `apps/controller/src/controller-server.ts`
@@ -269,11 +321,12 @@ flowchart TD
 - Error path: docs and roadmap statuses are not advanced when verification still shows acceptance gaps.
 
 **Verification:**
-- `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `corepack pnpm --dir docs-site run docs:build`, and `pnpm milestone:verify` all succeed before any status upgrade is declared.
+- `pnpm acceptance:verify` succeeds before any status upgrade is declared.
 
 ## System-Wide Impact
 
-- **Interaction graph:** Controller routes, operation store, CLI command tree, web render flow, and agent execution boundary all change together; contracts remain the shared seam.
+- **Interaction graph:** Controller routes, operation store, CLI command tree, web render flow, agent execution boundary, and the mainline acceptance gate all change together; contracts remain the shared seam.
+- **Delivery discipline:** Mainline CI should fail on the same conditions as local acceptance, or branch truth will drift again.
 - **Error propagation:** Controller validation and transport failures must propagate into explicit operation states and degraded signals instead of generic 500-style ambiguity.
 - **State lifecycle risks:** Adding host/rule/policy persistence increases partial-write and evidence-link risks; backup and rollback association must stay atomic from the user's perspective.
 - **API surface parity:** Every new controller surface must be mirrored into CLI and web consumption before milestone status changes.
@@ -288,10 +341,11 @@ flowchart TD
 | Web route expansion drifts from controller contracts and reintroduces mock-only behavior. | Consume generated contract types and back every new route with controller integration tests. |
 | Agent service work destabilizes existing snapshot and rollback artifacts. | Preserve current artifact schemas and cover compatibility with controller and agent tests before flipping docs language. |
 | Reliability slice gets blocked behind too much UI work. | Land controller and CLI parity first, then use those surfaces to drive web and agent work incrementally. |
+| Acceptance gate becomes mistaken for milestone completion. | Re-state in root docs and milestone docs that `acceptance:verify` is a branch-discipline gate, not acceptance closure. |
 
 ## Documentation / Operational Notes
 
-- Keep progress documents bilingual and preserve the existing `Updated` / `Version` metadata format.
+- Keep progress documents bilingual and preserve the existing `Updated` / `Version` metadata format where present.
 - Merge work into local `main` only after verification passes and both the feature branch and source clone return to a clean working tree.
 
 ## Sources & References
@@ -301,3 +355,348 @@ flowchart TD
 - Related code: `crates/portmanager-cli/src/main.rs`
 - Related code: `apps/web/src/main.ts`
 - Related code: `crates/portmanager-agent/src/main.rs`
+
+## 中文
+
+## 概览
+
+在不丢弃当前已经落地的可靠性工作的前提下，补齐 PortManager 已冻结的 V1 契约与当前实现分支之间的差距。
+这份计划假设 `2026-04-16` 的文档真相同步已经完成，关注点是让 Milestone 1 的验收变得可信，并让 Milestone 2 的表述保持准确。
+
+## 执行更新：2026-04-17
+
+当前仓库最强的已实现资产，是围绕 operations、diagnostics、backup、rollback、recovery 与 event history 形成的 evidence-first 控制平面内核。
+这是真实进展，不是只有展示层的推进。
+但更核心的结构性错位也已经更清楚了：对 `hosts`、`bridge-rules`、`exposure-policies`、live web truth 以及稳态 controller-agent 边界而言，公共契约表面仍然跑在运行时真实表面前面。
+
+正因为存在这个错位，可重复的主线验收 gate 现在应被视为工程前置条件，而不是里程碑状态捷径。
+`pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 应该被理解为 Unit 0 的纪律建设：它强化交付与分支保护，但并不会单独闭合 Milestone 1。
+
+## 问题框架
+
+PortManager 已经通过 controller、CLI 与 milestone 测试证明了 backup、rollback、diagnostics、operations、drift 可见性与 event history 这条切片。
+但它仍然没有覆盖原始需求文档中描述的更完整 V1 契约表面与产品 Web 信息架构（见原始文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`）。
+如果项目此时就进入 Milestone 3 或更广的分布式架构扩展，只会进一步放大文档漂移与界面不一致，而不是解决它们。
+
+## 需求追踪
+
+- R1. 区分已经冻结的基线工作与已经验证的实现工作。
+- R2. 在已交付行为中明确 controller、CLI、web 与 agent 的真实能力边界。
+- R3. 在缺失表面补齐之前，不宣称 Milestone 1 或 Milestone 2 已完成验收。
+- R4. 在仓库内保留可持续维护的需求与实现指导。
+- R5. 随着实现落地，持续同步 progress docs 与 roadmap 面。
+- R6. 在 Milestone 3 之前，优先补齐 `hosts`、`bridge-rules`、`exposure-policies`、live web parity 与 controller-agent 稳态集成。
+- R7. 保留并扩展当前已经存在的可靠性切片，而不是把它推倒重来。
+- R8. 固化一个可重复执行的本地与 CI 验收 gate，但不能因此夸大里程碑状态。
+
+## 范围边界
+
+- 不重设 V1 产品边界、里程碑顺序或 `Toward C` 策略。
+- 不因为当前代码缺失，就把这些公共资源从契约中删掉。
+- 不用新语言或新框架替换当前 controller、CLI 或 agent 技术栈。
+
+### 延后到独立任务
+
+- Milestone 3 的分布式平台扩展：只有在 Milestone 1 验收闭环且 Milestone 2 拿到可信证据后才进入。
+- 超出首个 Ubuntu 24.04 目标之外的广平台支持：等 controller-agent 边界可信之后再推进。
+
+## 上下文与研究
+
+### 相关代码与模式
+
+- `apps/controller/src/controller-server.ts` 已经展示了当前仓库的 REST/SSE 路由风格、operation 入队模式与异步 runner 集成方式。
+- `apps/controller/src/operation-store.ts` 集中了 operation、backup、rollback-point 与 diagnostics 的持久化模式；新的 host/rule/policy 表面应扩展这里，而不是分叉出并行状态路径。
+- `crates/portmanager-cli/src/main.rs` 已经实现 controller-backed 的读取命令、`--json` 与 wait-aware operation polling；新的 CLI 表面应沿用这条 contract-first 形状。
+- `apps/web/src/main.ts` 已经承载当前 visual shell、排版与 evidence-heavy 布局语言；下一阶段 Web 工作应替换 mock state 并补页面，而不是推翻现有 shell。
+- `crates/portmanager-agent/src/main.rs` 已经定义 runtime-state、snapshot-manifest 与 rollback-result 等文件形态；稳态 agent 工作应在保留这些产物的同时，补上网络服务行为。
+- `tests/controller/`、`tests/milestone/`、`tests/web/`、`crates/portmanager-cli/tests/` 与 `crates/portmanager-agent/tests/` 已经提供了后续扩展应遵循的验证风格。
+
+### 组织内经验
+
+- 本轮规划扫描期间，仓库内没有可复用的 `docs/solutions/` 条目。
+
+### 外部参考
+
+- 未使用外部资料。当前仓库中的契约与代码模式已经足够支撑下一步规划。
+
+## 关键技术决策
+
+- 在继续扩展功能前，先补一层 Unit 0 交付纪律：一个本地命令和一个主线 CI workflow 应执行同一套验证矩阵。
+- 对 hosts、rules、policies 的支持应建立在现有 controller store 与 runner 上，而不是新增第二套状态管理路径。
+- 在加深 agent 分布式能力之前，先补 controller 表面一致性，因为没有这些资源，web 与 CLI 无法成为真实可信的一等同行。
+- Web 的 mock 数据替换应渐进完成：先接入 controller-backed reads 与 event streams，再增加缺失页面与详情面。
+- agent 应在原地从 CLI skeleton 演进为 steady-state service，并保留当前文件产物格式，使 diagnostics、snapshot 与 rollback 证据保持兼容。
+- 任何公共表面的变动都必须伴随 contract generation，使 docs、controller、CLI 与 web 始终维持一致。
+
+## 开放问题
+
+### 规划中已解决
+
+- 是否应在 interface parity 补齐前启动 Milestone 3？不应。必须先完成 interface parity 与稳态 agent 集成。
+- 是否应为了缩小范围而回退当前可靠性工作？不应。它应保留，并作为后续验收闭环的已验证基础。
+- 是否应把主线验收 gate 视为路线重排？不应。它只是保证真实交付的前置条件，不是对缺失表面的一种替代。
+
+### 留待实现阶段
+
+- host/rule/policy 的写路径应在一个 controller PR 中一起落，还是先只落 read，再补 write。
+- 稳态 agent service 最初应继续留在 `crates/portmanager-agent/src/main.rs`，还是在路由复杂度出现后拆成新的 `service` 模块。
+
+## 高层技术设计
+
+```mermaid
+flowchart TD
+  U0[Unit 0 主线验收 Gate] --> U1[Unit 1 Controller 表面一致性]
+  U1 --> U2[Unit 2 CLI 一致性]
+  U1 --> U3[Unit 3 Web 实时数据与路由一致性]
+  U1 --> U4[Unit 4 Agent 服务边界]
+  U2 --> U5[Unit 5 验收闭环与文档同步]
+  U3 --> U5
+  U4 --> U5
+```
+
+## 实施单元
+
+- [x] **Unit 0：主线验收 Gate 与 CI 基线**
+
+**目标：** 固化一个可重复执行的本地与主线 CI 验证入口，让分支健康度在里程碑状态表述变更前就能被一致校验。
+
+**对应需求：** R1、R4、R5、R7、R8
+
+**依赖：** 无
+
+**文件：**
+- Modify: `package.json`
+- Create: `scripts/acceptance/verify.mjs`
+- Create: `.github/workflows/mainline-acceptance.yml`
+- Modify: `README.md`
+- Modify: `docs/specs/portmanager-milestones.md`
+- Modify: `TODO.md`
+
+**方案：**
+- 增加一个本地命令，按仓库现有真实依赖顺序执行测试、类型检查、Rust workspace 测试、契约漂移检查、docs 构建与 milestone 验证。
+- 在 GitHub Actions 中镜像这条顺序，覆盖 `pull_request`、推送到 `main` 以及 `workflow_dispatch`。
+- 把结果视为分支纪律证据，而不是自动里程碑验收。
+
+**参考模式：**
+- `.github/workflows/docs-pages.yml` 中已有的 workflow 形状
+- `package.json` 中已有的 milestone verification 命令形状
+
+**测试场景：**
+- Happy path：在仓库根目录执行 `pnpm acceptance:verify` 成功。
+- Happy path：CI job 正确准备 Node、pnpm、Rust 以及两个依赖根目录，然后执行同一条 acceptance 命令。
+- Error path：本地 runner 在第一步失败时快速终止并返回非零退出码。
+- Error path：docs 生成漂移或 contract 漂移会让同一个 gate 失败，而不是被静默跳过。
+
+**验证：**
+- `pnpm acceptance:verify` 成为主线验证的规范入口，并已接入 GitHub Actions。
+
+- [ ] **Unit 1：Controller 的 Host / Rule / Policy 表面一致性**
+
+**目标：** 实现缺失的 contract-backed controller 资源，让仓库对外提供真实的 `hosts`、`bridge-rules` 与 `exposure-policies` 数据和变更路径，而不只是 operations / reliability 切片。
+
+**对应需求：** R2、R3、R6、R7
+
+**依赖：** Unit 0
+
+**文件：**
+- Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/controller/src/operation-store.ts`
+- Modify: `apps/controller/src/operation-runner.ts`
+- Modify: `packages/contracts/openapi/openapi.yaml`
+- Modify: `packages/typescript-contracts/src/generated/openapi.ts`
+- Create: `tests/controller/host-rule-policy.test.ts`
+- Modify: `tests/contracts/generate-contracts.test.mjs`
+
+**方案：**
+- 通过扩展现有 store 与 operation runner，为 hosts、bridge rules 与 exposure policies 增加 controller 读写路径。
+- 保持 operation 创建、rollback 证据与 degraded 语义与当前 backup / diagnostics 流一致。
+- 每次公共表面变更都重新生成契约输出。
+
+**参考模式：**
+- `apps/controller/src/controller-server.ts`
+- `tests/controller/drift-reliability.test.ts`
+- `tests/milestone/one-host-one-rule.test.ts`
+
+**测试场景：**
+- Happy path：通过 controller 创建或更新 host、bridge rule 与 exposure policy，并观察契约一致的响应。
+- Happy path：controller 的 list/detail endpoint 暴露的 host/rule/policy 状态，后续能被 CLI 与 web 消费。
+- Edge case：缺失 host 或 rule 标识时，返回显式 404 或验证失败，而不是静默 no-op。
+- Error path：destructive rule mutation 在状态变更前仍会留下 backup 与 rollback 证据。
+- Integration：引入新的 host/rule/policy 状态后，drift-check、diagnostics 与 rollback 视图仍保持一致。
+
+**验证：**
+- controller 测试套件在现有 reliability primitives 之外，补充证明真实 host/rule/policy 表面一致性。
+
+- [ ] **Unit 2：CLI 公共表面扩展**
+
+**目标：** 让 CLI 在 host、bridge-rule 与 exposure-policy 的检查及核心写操作上，成为 controller 的真实同行。
+
+**对应需求：** R2、R3、R6、R7
+
+**依赖：** Unit 1
+
+**文件：**
+- Modify: `crates/portmanager-cli/src/main.rs`
+- Modify: `crates/portmanager-cli/tests/operation_get_cli.rs`
+- Create: `crates/portmanager-cli/tests/host_rule_policy_cli.rs`
+
+**方案：**
+- 在当前 `clap` 命令树中扩展 host、bridge-rule 与 exposure-policy 子命令，并保持 `--json` 行为一致。
+- 对会入队 operation 的写命令，复用现有 wait-aware operation polling 路径。
+
+**参考模式：**
+- `crates/portmanager-cli/src/main.rs`
+- `crates/portmanager-cli/tests/operation_get_cli.rs`
+
+**测试场景：**
+- Happy path：以 text 与 JSON 两种输出列出并检查 hosts、rules 与 policies。
+- Happy path：写型 CLI 命令返回 accepted operation ID，并可选择等待终态。
+- Edge case：controller 响应缺失或非法时，产生结构化 JSON 错误与明确的文本错误。
+- Integration：CLI 输出与 controller detail payload 以及 operation replay URL 保持一致。
+
+**验证：**
+- CLI 测试证明缺失公共资源的 contract-aligned 读写行为已经补齐。
+
+- [ ] **Unit 3：Web 实时数据与路由一致性**
+
+**目标：** 用 controller-backed 数据替换纯 mock Web 状态，并补齐产品信息架构中承诺的缺失导航面。
+
+**对应需求：** R1、R2、R3、R6、R7
+
+**依赖：** Unit 1
+
+**文件：**
+- Modify: `apps/web/src/main.ts`
+- Modify: `packages/typescript-contracts/src/index.ts`
+- Modify: `tests/web/web-shell.test.ts`
+- Modify: `tests/web/event-stream.test.ts`
+- Create: `tests/web/live-controller-shell.test.ts`
+
+**方案：**
+- 在不推翻当前设计基线的前提下，为现有 web shell 接入 controller fetch 与 event-stream 消费。
+- 新增 `Hosts`、`Bridge Rules`、`Backups`、`Console` 与 diagnostics detail 的独立路由或视图状态，同时保持 overview、host detail 与 operations 的 evidence-heavy 方向。
+- 复用生成的 contract types，而不是在视图层再造并行 schema。
+
+**参考模式：**
+- `apps/web/src/main.ts`
+- `tests/web/web-shell.test.ts`
+- `tests/controller/event-stream.test.ts`
+
+**测试场景：**
+- Happy path：overview 与 host detail 使用实时 controller 数据渲染，而不是 mock factories。
+- Happy path：operations 与 console 表面消费实时 event history 与 selected-operation replay stream。
+- Edge case：degraded 或部分缺失数据时，界面显式显示 empty state 或 warning，而不是整块消失。
+- Integration：hosts、bridge rules、backups 与 diagnostics detail 的语义与 controller payload 保持一致。
+
+**验证：**
+- Web 测试证明在锁定的 V1 导航模型下，实时数据渲染与路由一致性都已建立。
+
+- [ ] **Unit 4：Agent 稳态服务边界**
+
+**目标：** 在不破坏现有产物契约的前提下，把 agent 从文件落盘式 CLI skeleton 推进到锁定的 `HTTP over Tailscale` 稳态边界。
+
+**对应需求：** R2、R3、R6、R7
+
+**依赖：** Unit 1
+
+**文件：**
+- Modify: `crates/portmanager-agent/src/main.rs`
+- Modify: `crates/portmanager-agent/tests/agent_cli.rs`
+- Create: `apps/controller/src/agent-client.ts`
+- Modify: `apps/controller/src/controller-server.ts`
+- Create: `tests/controller/agent-service.test.ts`
+
+**方案：**
+- 保留当前 runtime-state、snapshot 与 rollback 产物格式，同时增加一个能通过锁定协议提供稳态执行能力的 agent service 路径。
+- 把 bootstrap / rescue 行为与 steady-state service 语义明确分离。
+- 在 controller 侧新增一个薄客户端或适配层，让 host 与 rule operation 不再依赖纯本地 mock 执行。
+
+**参考模式：**
+- `crates/portmanager-agent/src/main.rs`
+- `apps/controller/src/controller-server.ts`
+- `crates/portmanager-agent/tests/agent_cli.rs`
+
+**测试场景：**
+- Happy path：controller 能通过稳态服务边界访问 agent，完成 collect、apply、snapshot 与 rollback。
+- Edge case：agent 不可用或响应过旧时，相关资源进入显式 degraded 状态。
+- Error path：远端变更失败仍保留 operation 证据与 rollback 资格。
+- Integration：agent 响应继续产出现有 diagnostics 与 backup/rollback 消费方兼容的产物。
+
+**验证：**
+- controller 与 agent 测试证明最小可用的真实 controller-agent service path，同时保持现有产物兼容性。
+
+- [ ] **Unit 5：验收闭环、Roadmap 同步与再验证**
+
+**目标：** 在代码一致性落地之后，重新执行完整验证矩阵，更新进度文档，并把仓库推进到真实的 Milestone 1 / Milestone 2 状态表述。
+
+**对应需求：** R1、R3、R4、R5、R6
+
+**依赖：** Units 2、3、4
+
+**文件：**
+- Modify: `README.md`
+- Modify: `Interface Document.md`
+- Modify: `TODO.md`
+- Modify: `docs/specs/portmanager-milestones.md`
+- Modify: `docs/specs/portmanager-v1-product-spec.md`
+- Modify: `docs/specs/portmanager-ui-information-architecture.md`
+- Modify: `docs-site/en/roadmap/milestones.md`
+- Modify: `docs-site/zh/roadmap/milestones.md`
+- Modify: `docs-site/data/roadmap.ts`
+- Test: `tests/milestone/one-host-one-rule.test.ts`
+- Test: `tests/milestone/reliability-backup-policy.test.ts`
+- Test: `tests/milestone/reliability-drift.test.ts`
+- Test: `tests/milestone/reliability-event-history.test.ts`
+- Test: `tests/milestone/reliability-operations.test.ts`
+- Test: `tests/milestone/reliability-recovery.test.ts`
+
+**方案：**
+- 只有在 controller、CLI、web 与 agent 的证据都验证通过后，才更新 progress language。
+- 让 roadmap 阶段与状态表述始终与真实验收状态一致，而不是使用愿景化标签。
+- 把 docs sync 视为最终验收活动的一部分，而不是替代缺失实现的文档动作。
+
+**参考模式：**
+- `README.md`
+- `docs/specs/portmanager-milestones.md`
+- `docs-site/data/roadmap.ts`
+
+**测试场景：**
+- Integration：Milestone 1 证明链路覆盖真实 host/rule readiness、backup-before-mutation、rollback 证据、diagnostics 证据与跨界面状态一致性。
+- Integration：在 host/rule/policy 与 live web 工作落地后，现有 reliability 测试仍持续通过。
+- Error path：如果验证仍显示验收缺口，则 docs 与 roadmap 状态不得升级。
+
+**验证：**
+- 在任何状态升级声明之前，`pnpm acceptance:verify` 必须成功。
+
+## 系统级影响
+
+- **交互图谱：** controller routes、operation store、CLI 命令树、web 渲染流、agent 执行边界，以及新增的 mainline acceptance gate 会一起演进；contracts 仍然是共享接缝。
+- **错误传播：** controller 的验证错误与传输错误必须落成显式 operation 状态与 degraded 信号，不能退化为模糊的 500 式错误。
+- **状态生命周期风险：** 引入 host/rule/policy 持久化后，部分写入与证据关联出错的风险会上升；从用户视角看，backup 与 rollback 关联必须保持原子性。
+- **API 表面一致性：** 在里程碑状态变更前，每一个新的 controller 表面都必须被 CLI 与 web 同步消费。
+- **集成覆盖：** 仅靠 unit tests 不能证明跨界面一致性；milestone verification 与 live web/controller 集成测试仍然必要。
+- **交付纪律：** mainline CI 必须和本地 acceptance 在相同条件下失败，否则分支真相会再次漂移。
+- **保持不变的约束：** docs-first 治理、契约生成、controller-side diagnostics capture、destructive mutation 前的必需本地备份，以及 `Toward C` 的进入门槛都保持不变。
+
+## 风险与依赖
+
+| 风险 | 缓解措施 |
+|------|----------|
+| host/rule/policy 表面扩展在 `operation-store` 之外复制了一套状态逻辑。 | 扩展现有 store 与 runner 模式，拒绝并行内存模型。 |
+| Web 路由扩展偏离 controller 契约，又重新引入 mock-only 行为。 | 统一消费生成的 contract types，并为每个新路由补 controller 集成测试。 |
+| Agent service 工作破坏现有 snapshot 与 rollback 产物。 | 保留当前 artifact schema，并在调整文档语言前先用 controller 与 agent 测试覆盖兼容性。 |
+| 可靠性切片被过多 UI 工作拖住。 | 先完成 controller 与 CLI 一致性，再用这些表面渐进驱动 web 与 agent 工作。 |
+| acceptance gate 被误解为里程碑已经完成。 | 在 root docs 与 milestone docs 中反复强调：`acceptance:verify` 是分支纪律 gate，不是验收闭环。 |
+
+## 文档 / 运维说明
+
+- 进度文档应保持双语；对于有 `Updated` / `Version` 元数据格式的文件，继续沿用原有风格。
+- 只有在验证通过且特性分支与源克隆都回到干净工作树后，才允许把工作并入本地 `main`。
+
+## 来源与引用
+
+- **原始文档：** `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
+- 相关代码：`apps/controller/src/controller-server.ts`
+- 相关代码：`crates/portmanager-cli/src/main.rs`
+- 相关代码：`apps/web/src/main.ts`
+- 相关代码：`crates/portmanager-agent/src/main.rs`

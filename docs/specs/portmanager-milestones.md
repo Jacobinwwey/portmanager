@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-17
-Version: v0.4.1-windows-acceptance-sync
+Version: v0.4.2-mainline-acceptance-gate
 
 ## English
 
@@ -44,6 +44,7 @@ Milestone 1 is only accepted when all of the following become true:
 - Progress is real, but acceptance is still open.
 - Verified now: backup-before-mutation, rollback evidence, diagnostics capture, drift-driven degraded state, filtered operation history, event replay, and controller/CLI inspection surfaces for operations, backups, diagnostics, health checks, and rollback points.
 - Acceptance evidence re-ran successfully on a Windows real machine on `2026-04-17`: `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `pnpm --dir docs-site run docs:build`, and `pnpm milestone:verify` all passed after closing Windows-specific validation blockers in contract generation, SQLite test cleanup, CLI transport classification, and mock-server socket handling.
+- Mainline acceptance is now formalized as a repeatable gate through `pnpm acceptance:verify` and the `mainline-acceptance` GitHub Actions workflow. This improves delivery rigor, but it does not change Milestone 1 acceptance status by itself.
 - Still missing before acceptance: real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources, CLI parity for those resources, live web parity beyond mock shells, and the steady-state controller-agent `HTTP over Tailscale` service boundary.
 
 #### What remains intentionally deferred
@@ -170,6 +171,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - 进展是真实存在的，但验收仍未闭环。
 - 当前已验证：变更前备份、回滚证据、诊断抓取、drift 驱动 degraded 状态、筛选后的 operation 历史、事件回放，以及 controller/CLI 对 operations、backups、diagnostics、health checks、rollback points 的检查表面。
 - 已在 `2026-04-17` 于 Windows 真机重新跑通验收证据：`pnpm test`、`pnpm typecheck`、`cargo test --workspace`、`pnpm --dir docs-site run docs:build`、`pnpm milestone:verify` 全部通过；同时补齐了 Windows 侧契约生成、SQLite 测试清理、CLI transport 分类以及 mock server socket 处理的阻塞项。
+- 主线验收现在已经通过 `pnpm acceptance:verify` 与 `mainline-acceptance` GitHub Actions workflow 被固化为可重复执行的 gate。它提高了交付纪律，但并不会单独改变里程碑 1 的验收状态。
 - 验收前仍缺失：真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源，这些资源在 CLI 中的对等能力，超出 mock shell 的 live Web 一致性，以及稳态 controller-agent `HTTP over Tailscale` 服务边界。
 
 #### 明确延后的内容

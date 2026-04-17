@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-17 | Version：v0.4.1-windows-acceptance-sync
+> Updated：2026-04-17 | Version：v0.4.2-mainline-acceptance-gate
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -51,6 +51,7 @@ status: active
 - 进展是真实存在的，但验收仍未闭环。
 - 当前已验证：变更前备份、回滚证据、诊断抓取、drift 驱动 degraded 状态、筛选后的 operation 历史、事件回放，以及 controller/CLI 对 operations、backups、diagnostics、health checks、rollback points 的检查表面。
 - 已在 `2026-04-17` 于 Windows 真机重新跑通验收证据：`pnpm test`、`pnpm typecheck`、`cargo test --workspace`、`pnpm --dir docs-site run docs:build`、`pnpm milestone:verify` 全部通过；同时补齐了 Windows 侧契约生成、SQLite 测试清理、CLI transport 分类以及 mock server socket 处理的阻塞项。
+- 主线验收现在已经通过 `pnpm acceptance:verify` 与 `mainline-acceptance` GitHub Actions workflow 被固化为可重复执行的 gate。它提高了交付纪律，但并不会单独改变里程碑 1 的验收状态。
 - 验收前仍缺失：真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源，这些资源在 CLI 中的对等能力，超出 mock shell 的 live Web 一致性，以及稳态 controller-agent `HTTP over Tailscale` 服务边界。
 
 #### 明确延后的内容

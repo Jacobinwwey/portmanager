@@ -1,7 +1,7 @@
 # Interface Document
 
-Updated: 2026-04-16
-Version: v0.2.0-mainline-progress-sync
+Updated: 2026-04-17
+Version: v0.2.1-mainline-acceptance-sync
 
 ## English
 
@@ -47,6 +47,12 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 | `snapshots/diagnostics` | Diagnostics run/list plus snapshot evidence | Implemented for controller run/list and CLI list. Web shows only mock diagnostics evidence; dedicated diagnostics detail is still missing. |
 | Controller-agent steady state | `HTTP over Tailscale` | Not yet implemented. `crates/portmanager-agent/src/main.rs` is still a file-backed CLI skeleton, not a long-lived service. |
 
+### Verification boundary
+- The repository now has a repeatable mainline verification gate: `pnpm acceptance:verify`.
+- The main branch CI mirror for that gate is `.github/workflows/mainline-acceptance.yml`.
+- This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
+- This gate does **not** mean interface parity is complete. Missing `hosts`, `bridge-rules`, `exposure-policies`, live web parity, and the steady-state agent service remain delivery obligations.
+
 ## 中文
 
 本文档汇总 PortManager V1 的公共接口边界。
@@ -90,3 +96,9 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 | `backups` | 备份清单与执行入口 | controller 的 list/run 与 CLI 的 list 已实现；Web backup 仍只是 mock 子模块，不是 live 页面。 |
 | `snapshots/diagnostics` | 诊断执行、列表与快照证据 | controller 的 run/list 与 CLI 的 list 已实现；Web 只显示 mock diagnostics 证据，独立 diagnostics detail 仍缺失。 |
 | controller-agent 稳态通信 | `HTTP over Tailscale` | 尚未实现。`crates/portmanager-agent/src/main.rs` 仍是文件落盘式 CLI 骨架，而不是长驻服务。 |
+
+### 验证边界
+- 当前仓库已经具备可重复执行的主线验证 gate：`pnpm acceptance:verify`。
+- 该 gate 在主分支上的 CI 镜像为 `.github/workflows/mainline-acceptance.yml`。
+- 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
+- 但它**并不**意味着接口一致性已经闭环。`hosts`、`bridge-rules`、`exposure-policies`、live web parity 与稳态 agent service 仍然是必须补齐的交付项。

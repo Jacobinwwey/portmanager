@@ -1,7 +1,7 @@
 # PortManager
 
-Updated: 2026-04-16
-Version: v0.4.0-mainline-progress-sync
+Updated: 2026-04-17
+Version: v0.4.2-mainline-acceptance-gate
 
 ## English
 
@@ -32,6 +32,7 @@ Version: v0.4.0-mainline-progress-sync
 - [x] Milestone 2: filtered operation inventory with recovery-linked summaries across Web, CLI, and API.
 - [x] Milestone 2: selected-operation event timeline and filtered event history across Web, CLI, and API.
 - [x] Milestone 2: operation detail now carries direct selected-event replay path and linked recovery evidence across API and CLI.
+- [x] Delivery discipline: formalize a repeatable mainline acceptance gate with `pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml`.
 
 ### Current acceptance gaps
 - [ ] Milestone 1 acceptance closure: add real controller `hosts` resources and readiness lifecycle, not only operation evidence and diagnostics primitives.
@@ -74,6 +75,7 @@ Version: v0.4.0-mainline-progress-sync
 - [x] 里程碑 2：补全 operation 列表筛选与 recovery 证据摘要，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：补全选中 operation 的事件时间线与 event history 筛选，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：让 operation detail 直接携带选中事件回放路径与 recovery 证据，并在 API、CLI 中统一暴露。
+- [x] 交付纪律：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复执行的主线验收 gate。
 
 ### 当前验收缺口
 - [ ] 里程碑 1 验收闭环：补上真实 controller `hosts` 资源与 readiness 生命周期，而不只是 operation 证据和 diagnostics 原语。
