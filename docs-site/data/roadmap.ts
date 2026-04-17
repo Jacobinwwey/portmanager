@@ -184,13 +184,13 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Milestone 1 acceptance closure is still blocked on real hosts, bridge rules, exposure policies, live web parity, and the agent steady-state service.',
-          'GitHub runner parity still needs one stabilization pass because workflow run `24564534909` failed on the one-host verification teardown with `ERR_SERVER_NOT_RUNNING`.',
+          'GitHub runner parity still needs Unit 0 stabilization because runs `24564534909` and `24565049655` exposed one-host teardown idempotence and Rust dependency drift beyond the pinned `1.86` floor.',
           'Milestone 2 reliability acceptance still has to be replayed on that same live host/rule/policy model instead of the current partial slice.',
           'Roadmap status sync is still required between root specs, docs-site detail pages, and the roadmap index each time acceptance evidence changes.'
         ],
         zh: [
           '里程碑 1 验收闭环仍然卡在真实 hosts、bridge rules、exposure policies、live web 一致性与 agent 稳态服务上。',
-          'GitHub runner 一致性还需要再做一次稳定化，因为 workflow run `24564534909` 在 one-host 验证 teardown 上命中了 `ERR_SERVER_NOT_RUNNING`。',
+          'GitHub runner 一致性还需要继续做 Unit 0 稳定化，因为 runs `24564534909` 和 `24565049655` 暴露了 one-host teardown 幂等性问题，以及超出已锁定 `1.86` floor 的 Rust 依赖漂移。',
           '里程碑 2 仍然要把可靠性验收重放到同一套 live host/rule/policy 模型上，而不是继续停留在当前部分切片。',
           '每次验收证据变化后，路线状态仍然需要在 root specs、docs-site 详情页和 roadmap 首页之间继续同步。'
         ]
@@ -205,13 +205,13 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Unit 0: keep `mainline-acceptance` green on GitHub runner parity by making one-host verification teardown idempotent.',
+          'Unit 0: keep `mainline-acceptance` green on GitHub runner parity by hardening one-host teardown and pinning Rust-compatible dependencies.',
           'Unit 1: make controller host, bridge-rule, and exposure-policy resources real without regressing current evidence flows.',
           'Unit 2 + Unit 3: mirror those resources into CLI commands and replace web mock routes with live views before advancing milestone status.',
           'Unit 4 + Unit 5: move the agent to the locked HTTP-over-Tailscale steady-state boundary, rerun acceptance, and only then rewrite milestone language.'
         ],
         zh: [
-          'Unit 0：先把 one-host 验证 teardown 做成幂等，在 GitHub runner 一致性下保持 `mainline-acceptance` 为绿。',
+          'Unit 0：先加固 one-host 验证 teardown，并锁住兼容 Rust 的依赖版本，在 GitHub runner 一致性下保持 `mainline-acceptance` 为绿。',
           'Unit 1：先把 controller 的 host、bridge-rule、exposure-policy 资源做成真实表面，同时不回退现有证据链。',
           'Unit 2 + Unit 3：在提升里程碑状态前，把这些表面同步镜像到 CLI 命令，并把 Web mock 路由切到 live 视图。',
           'Unit 4 + Unit 5：把 agent 推进到锁定的 HTTP-over-Tailscale 稳态边界，重新跑验收，然后再重写里程碑文案。'
@@ -268,14 +268,14 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     blockingGaps: {
       en: [
         'Real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources are still missing.',
-        'GitHub runner parity still needs idempotent teardown in the one-host verification flow to keep `mainline-acceptance` green.',
+        'GitHub runner parity still needs one-host teardown hardening plus Rust-compatible dependency pins to keep `mainline-acceptance` green.',
         'Web roadmap IA still relies on mock-only overview, host detail, and operations shells.',
         'Agent steady-state service over HTTP over Tailscale is still missing.',
         'Milestone 1 wording still cannot advance until Unit 1 through Unit 4 close the public-surface gap.'
       ],
       zh: [
         '真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源仍然缺失。',
-        'one-host 验证流还需要补上幂等 teardown，GitHub runner 一致性下的 `mainline-acceptance` 才能持续保持绿色。',
+        'GitHub runner 一致性下还需要同时补上 one-host 幂等 teardown 和兼容 Rust 的依赖锁定，`mainline-acceptance` 才能持续保持绿色。',
         'Web 的 roadmap 信息架构仍然依赖 mock-only 的 overview、host detail、operations shell。',
         '基于 HTTP over Tailscale 的 agent 稳态服务仍然缺失。',
         '在 Unit 1 到 Unit 4 补齐公共表面缺口之前，里程碑 1 文案都还不能继续提升。'
@@ -283,13 +283,13 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     developerFocus: {
       en: [
-        'Unit 0: harden the one-host verification teardown so GitHub runner parity keeps `mainline-acceptance` green.',
+        'Unit 0: harden the one-host verification teardown and pin Rust-compatible dependencies so GitHub runner parity keeps `mainline-acceptance` green.',
         'Unit 1: build controller source-of-truth resources for hosts, rules, and policies.',
         'Unit 2 + Unit 3: mirror those resources into CLI and live web routes without losing current verification coverage.',
         'Unit 4 + Unit 5: keep Milestone 1 proof green while the agent boundary hardens and docs are resynced.'
       ],
       zh: [
-        'Unit 0：先把 one-host 验证 teardown 加固成幂等，让 GitHub runner 一致性下的 `mainline-acceptance` 持续为绿。',
+        'Unit 0：先把 one-host 验证 teardown 加固成幂等，并锁住兼容 Rust 的依赖版本，让 GitHub runner 一致性下的 `mainline-acceptance` 持续为绿。',
         'Unit 1：先补齐 controller 中作为真源的 hosts、rules、policies 资源。',
         'Unit 2 + Unit 3：在不丢失当前验证覆盖的前提下，把这些资源同步到 CLI 和 live Web 路由。',
         'Unit 4 + Unit 5：在 agent 边界加固和文档重同步过程中，保持里程碑 1 验证持续为绿。'
