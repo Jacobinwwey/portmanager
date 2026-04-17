@@ -37,7 +37,7 @@ jobs:
             docs-site/pnpm-lock.yaml
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@1.81.0
+        uses: dtolnay/rust-toolchain@1.85.1
 
       - name: Restore Rust cache
         uses: Swatinem/rust-cache@v2
