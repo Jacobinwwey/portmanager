@@ -365,6 +365,113 @@ fn events_list_json_reads_shared_event_stream_history() {
 }
 
 #[test]
+fn events_list_json_filters_by_operation_id() {
+    let server = MockHttpServer::start(vec![(
+        "/events?limit=20&operationId=op_backup_required_001",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "evt_011",
+                        "kind": "operation_state_changed",
+                        "operationId": "op_backup_required_001",
+                        "operationType": "backup",
+                        "state": "degraded",
+                        "level": "warn",
+                        "summary": "required GitHub backup is not configured",
+                        "hostId": "host_alpha",
+                        "emittedAt": "2026-04-16T19:00:02.000Z"
+                    },
+                    {
+                        "id": "evt_010",
+                        "kind": "operation_state_changed",
+                        "operationId": "op_backup_required_001",
+                        "operationType": "backup",
+                        "state": "running",
+                        "level": "info",
+                        "summary": "backup operation entered running",
+                        "hostId": "host_alpha",
+                        "emittedAt": "2026-04-16T19:00:00.000Z"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &[
+            "events",
+            "list",
+            "--json",
+            "--operation-id",
+            "op_backup_required_001",
+        ],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["items"][0]["operationId"], "op_backup_required_001");
+    assert_eq!(parsed["items"][0]["state"], "degraded");
+    assert_eq!(parsed["items"][1]["state"], "running");
+}
+
+#[test]
+fn events_list_text_surfaces_selected_operation_timeline() {
+    let server = MockHttpServer::start(vec![(
+        "/events?limit=20&operationId=op_backup_required_001",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "id": "evt_011",
+                        "kind": "operation_state_changed",
+                        "operationId": "op_backup_required_001",
+                        "operationType": "backup",
+                        "state": "degraded",
+                        "level": "warn",
+                        "summary": "required GitHub backup is not configured",
+                        "hostId": "host_alpha",
+                        "emittedAt": "2026-04-16T19:00:02.000Z"
+                    },
+                    {
+                        "id": "evt_010",
+                        "kind": "operation_state_changed",
+                        "operationId": "op_backup_required_001",
+                        "operationType": "backup",
+                        "state": "running",
+                        "level": "info",
+                        "summary": "backup operation entered running",
+                        "hostId": "host_alpha",
+                        "emittedAt": "2026-04-16T19:00:00.000Z"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["events", "list", "--operation-id", "op_backup_required_001"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("op_backup_required_001"));
+    assert!(stdout.contains("degraded"));
+    assert!(stdout.contains("running"));
+    assert!(stdout.contains("required GitHub backup is not configured"));
+}
+
+#[test]
 fn health_checks_list_json_reads_degraded_bridge_verify_checks() {
     let server = MockHttpServer::start(vec![(
         "/health-checks?hostId=host_alpha&ruleId=rule_alpha_https",

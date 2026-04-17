@@ -13,6 +13,12 @@ export interface ControllerServer {
   listen(port?: number): Promise<{ port: number; baseUrl: string }>
 }
 
+interface EventFilters {
+  operationId?: string
+  hostId?: string
+  ruleId?: string
+}
+
 function createOperationId(prefix: string) {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`
 }
@@ -20,6 +26,25 @@ function createOperationId(prefix: string) {
 function sendJson(response: http.ServerResponse, status: number, payload: unknown) {
   response.writeHead(status, { 'content-type': 'application/json' })
   response.end(JSON.stringify(payload))
+}
+
+function matchesEventFilters(
+  event: { operationId?: string; hostId?: string; ruleId?: string },
+  filters: EventFilters
+) {
+  if (filters.operationId && event.operationId !== filters.operationId) {
+    return false
+  }
+
+  if (filters.hostId && event.hostId !== filters.hostId) {
+    return false
+  }
+
+  if (filters.ruleId && event.ruleId !== filters.ruleId) {
+    return false
+  }
+
+  return true
 }
 
 async function readJsonBody(request: http.IncomingMessage) {
@@ -63,6 +88,11 @@ export function createControllerServer(options: {
 
   async function handleRequest(request: http.IncomingMessage, response: http.ServerResponse) {
     const requestUrl = new URL(request.url ?? '/', 'http://127.0.0.1')
+    const eventFilters: EventFilters = {
+      operationId: requestUrl.searchParams.get('operationId') ?? undefined,
+      hostId: requestUrl.searchParams.get('hostId') ?? undefined,
+      ruleId: requestUrl.searchParams.get('ruleId') ?? undefined
+    }
 
     if (request.method === 'GET' && requestUrl.pathname === '/operations') {
       sendJson(response, 200, {
@@ -79,8 +109,12 @@ export function createControllerServer(options: {
     if (request.method === 'GET' && requestUrl.pathname === '/events') {
       const rawLimit = Number(requestUrl.searchParams.get('limit') ?? '20')
       const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 20
+      const items = eventBus
+        .listRecent(200)
+        .filter((event) => matchesEventFilters(event, eventFilters))
+        .slice(0, limit)
 
-      sendJson(response, 200, { items: eventBus.listRecent(limit) })
+      sendJson(response, 200, { items })
       return
     }
 
@@ -311,19 +345,27 @@ export function createControllerServer(options: {
       const operationId = requestUrl.pathname.slice('/operations/'.length)
 
       if (operationId === 'events') {
+        const replay = eventBus
+          .listRecent(200)
+          .filter((event) => matchesEventFilters(event, eventFilters))
+          .slice(0, 50)
+
         response.writeHead(200, {
           'cache-control': 'no-cache',
           connection: 'keep-alive',
           'content-type': 'text/event-stream'
         })
         response.write(': connected\n\n')
-        for (const event of [...eventBus.listRecent(50)].reverse()) {
+        for (const event of [...replay].reverse()) {
           response.write(`id: ${event.id}\n`)
           response.write(`event: ${event.kind}\n`)
           response.write(`data: ${JSON.stringify(event)}\n\n`)
         }
 
         const unsubscribe = eventBus.subscribe((event) => {
+          if (!matchesEventFilters(event, eventFilters)) {
+            return
+          }
           response.write(`id: ${event.id}\n`)
           response.write(`event: ${event.kind}\n`)
           response.write(`data: ${JSON.stringify(event)}\n\n`)

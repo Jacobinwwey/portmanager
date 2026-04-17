@@ -127,6 +127,12 @@ struct EventsListArgs {
     json: bool,
     #[arg(long, default_value_t = 20)]
     limit: u16,
+    #[arg(long)]
+    operation_id: Option<String>,
+    #[arg(long)]
+    host_id: Option<String>,
+    #[arg(long)]
+    rule_id: Option<String>,
     #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
     controller_base_url: String,
 }
@@ -363,7 +369,16 @@ async fn run_operation_get(args: OperationGetArgs) -> ExecutionResult {
 }
 
 async fn run_events_list(args: EventsListArgs) -> ExecutionResult {
-    match fetch_events(&Client::new(), &args.controller_base_url, args.limit).await {
+    match fetch_events(
+        &Client::new(),
+        &args.controller_base_url,
+        args.limit,
+        args.operation_id.as_deref(),
+        args.host_id.as_deref(),
+        args.rule_id.as_deref(),
+    )
+    .await
+    {
         Ok(events) => {
             if args.json {
                 ExecutionResult::success_json(&events)
@@ -374,9 +389,10 @@ async fn run_events_list(args: EventsListArgs) -> ExecutionResult {
                     .flatten()
                     .map(|event| {
                         format!(
-                            "{} {} {}",
+                            "{} {} {} {}",
                             event["emittedAt"].as_str().unwrap_or("unknown"),
-                            event["level"].as_str().unwrap_or("info"),
+                            event["operationId"].as_str().unwrap_or("unknown"),
+                            event["state"].as_str().unwrap_or("unknown"),
                             event["summary"].as_str().unwrap_or("missing summary")
                         )
                     })
@@ -743,12 +759,25 @@ async fn fetch_events(
     client: &Client,
     controller_base_url: &str,
     limit: u16,
+    operation_id: Option<&str>,
+    host_id: Option<&str>,
+    rule_id: Option<&str>,
 ) -> Result<Value, JsonErrorOutput> {
     let url = format!("{}/events", controller_base_url.trim_end_matches('/'));
+    let mut query = vec![("limit".to_string(), limit.to_string())];
+    if let Some(operation_id) = operation_id {
+        query.push(("operationId".to_string(), operation_id.to_string()));
+    }
+    if let Some(host_id) = host_id {
+        query.push(("hostId".to_string(), host_id.to_string()));
+    }
+    if let Some(rule_id) = rule_id {
+        query.push(("ruleId".to_string(), rule_id.to_string()));
+    }
 
     let response = client
         .get(url)
-        .query(&[("limit", limit)])
+        .query(&query)
         .send()
         .await
         .map_err(|error| JsonErrorOutput {

@@ -105,3 +105,94 @@ test('controller server replays structured event stream entries and exposes rece
     rmSync(directory, { recursive: true, force: true })
   }
 })
+
+test('controller server filters event history and SSE replay for one selected operation', async () => {
+  const { directory, databasePath } = tempDbPath()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const runner = createOperationRunner({ store, eventBus })
+    const server = createControllerServer({ store, eventBus })
+
+    store.enqueueOperation({
+      id: 'op_events_target_001',
+      type: 'backup',
+      initiator: 'web',
+      hostId: 'host_alpha'
+    })
+    store.enqueueOperation({
+      id: 'op_events_other_001',
+      type: 'diagnostics',
+      initiator: 'web',
+      hostId: 'host_alpha',
+      ruleId: 'rule_alpha_https'
+    })
+
+    const listening = await server.listen(0)
+
+    try {
+      await runner.run('op_events_target_001', async () => {
+        await delay(5)
+        return {
+          state: 'degraded',
+          resultSummary: 'required GitHub backup is not configured'
+        }
+      })
+
+      await runner.run('op_events_other_001', async () => ({
+        resultSummary: 'diagnostics refreshed relay evidence'
+      }))
+
+      const eventsResponse = await fetch(
+        `${listening.baseUrl}/events?limit=10&operationId=op_events_target_001`
+      )
+      assert.equal(eventsResponse.status, 200)
+      const eventsPayload = (await eventsResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+
+      assert.equal(eventsPayload.items.length, 2)
+      assert.equal(
+        eventsPayload.items.every((event) => event.operationId === 'op_events_target_001'),
+        true
+      )
+      assert.equal(eventsPayload.items[0]?.state, 'degraded')
+      assert.equal(eventsPayload.items[1]?.state, 'running')
+
+      const sseResponse = await fetch(
+        `${listening.baseUrl}/operations/events?operationId=op_events_target_001`,
+        {
+          headers: {
+            accept: 'text/event-stream'
+          }
+        }
+      )
+      assert.equal(sseResponse.status, 200)
+
+      const reader = sseResponse.body?.getReader()
+      assert.ok(reader)
+
+      const decoder = new TextDecoder()
+      let received = ''
+      while (!received.includes('required GitHub backup is not configured')) {
+        const next = await reader.read()
+        if (next.done) {
+          break
+        }
+        received += decoder.decode(next.value, { stream: true })
+      }
+
+      await reader.cancel()
+
+      assert.match(received, /op_events_target_001/)
+      assert.doesNotMatch(received, /op_events_other_001/)
+      assert.match(received, /required GitHub backup is not configured/)
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})

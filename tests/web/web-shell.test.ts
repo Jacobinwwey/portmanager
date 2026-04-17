@@ -8,7 +8,9 @@ import {
   createMockHostDetailState,
   createMockOverviewState,
   HostDetailPage,
+  OperationsPage,
   OverviewPage,
+  createMockOperationsState,
   renderWebPreviewDocument,
   webBootstrapMessage
 } from '../../apps/web/src/main.ts'
@@ -75,6 +77,28 @@ test('host detail shell surfaces operation summaries and linked recovery evidenc
   assert.match(html, /rp_alpha_002/i)
 })
 
+test('operations shell renders required operations page sections', () => {
+  const html = renderToStaticMarkup(h(OperationsPage, { state: createMockOperationsState() }))
+
+  assert.match(html, /active and recent operations list/i)
+  assert.match(html, /operation state timeline/i)
+  assert.match(html, /initiator and request source/i)
+  assert.match(html, /linked host, rule, backup, rollback, and diagnostic artifacts/i)
+  assert.match(html, /selected operation event stream/i)
+})
+
+test('operations shell surfaces selected operation timeline and linked artifacts', () => {
+  const html = renderToStaticMarkup(h(OperationsPage, { state: createMockOperationsState() }))
+
+  assert.match(html, /op_backup_required_001/i)
+  assert.match(html, /required github backup is not configured/i)
+  assert.match(html, /web/i)
+  assert.match(html, /policy-runbook\/backup-required/i)
+  assert.match(html, /backup_alpha_002/i)
+  assert.match(html, /rp_alpha_002/i)
+  assert.match(html, /snapshot-op_diag_001\.html/i)
+})
+
 test('preview document embeds styles and web skeleton copy', () => {
   const html = renderWebPreviewDocument('overview')
 
@@ -82,4 +106,11 @@ test('preview document embeds styles and web skeleton copy', () => {
   assert.match(html, /--pm-accent/)
   assert.match(html, /Managed Hosts/)
   assert.equal(webBootstrapMessage(), 'PortManager web skeleton')
+})
+
+test('preview document renders operations shell when requested', () => {
+  const html = renderWebPreviewDocument('operations')
+
+  assert.match(html, /Selected operation event stream/i)
+  assert.match(html, /Operation state timeline/i)
 })

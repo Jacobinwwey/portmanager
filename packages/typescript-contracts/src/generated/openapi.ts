@@ -327,7 +327,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    hostId?: string;
                     limit?: number;
+                    operationId?: string;
+                    ruleId?: string;
                 };
                 header?: never;
                 path?: never;
@@ -734,7 +737,11 @@ export interface paths {
         /** Subscribe to operation and event stream */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    hostId?: string;
+                    operationId?: string;
+                    ruleId?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;

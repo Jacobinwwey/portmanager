@@ -51,7 +51,20 @@ export interface OverviewState {
   eventStream: EventStreamEntry[]
 }
 
-export type WebView = 'overview' | 'host-detail'
+export interface OperationInventoryEntry {
+  operation: components['schemas']['OperationDetail']
+  requestSource: string
+  linkedRuleId?: string
+  linkedArtifacts: string[]
+}
+
+export interface OperationsState {
+  operations: OperationInventoryEntry[]
+  selectedOperationId: string
+  timeline: OperationEventContract[]
+}
+
+export type WebView = 'overview' | 'host-detail' | 'operations'
 
 const mountedRoots = new WeakMap<Element, Root>()
 const navigationItems = ['Overview', 'Hosts', 'Bridge Rules', 'Operations', 'Backups', 'Console']
@@ -855,6 +868,95 @@ export function createMockOverviewState(): OverviewState {
   }
 }
 
+export function createMockOperationsState(): OperationsState {
+  return {
+    operations: [
+      {
+        operation: {
+          id: 'op_backup_required_001',
+          type: 'backup',
+          state: 'degraded',
+          initiator: 'web',
+          hostId: 'host_alpha',
+          startedAt: '2026-04-16T18:11:00.000Z',
+          finishedAt: '2026-04-16T18:12:00.000Z',
+          resultSummary: 'required GitHub backup is not configured',
+          backupId: 'backup_alpha_002',
+          rollbackPointId: 'rp_alpha_002',
+          eventStreamUrl: '/operations/events?operationId=op_backup_required_001'
+        },
+        requestSource: 'policy-runbook/backup-required',
+        linkedRuleId: 'rule_alpha_https',
+        linkedArtifacts: [
+          '/var/lib/portmanager/snapshots/op_snapshot_002-manifest.json',
+          '/var/lib/portmanager/rollback/rp_alpha_002-result.json',
+          '/var/lib/portmanager/snapshots/snapshot-op_diag_001.html'
+        ]
+      },
+      {
+        operation: {
+          id: 'op_diag_001',
+          type: 'diagnostics',
+          state: 'succeeded',
+          initiator: 'web',
+          hostId: 'host_alpha',
+          ruleId: 'rule_alpha_https',
+          startedAt: '2026-04-16T17:49:00.000Z',
+          finishedAt: '2026-04-16T17:52:00.000Z',
+          resultSummary: 'diagnostics confirmed https relay and refreshed host readiness evidence',
+          eventStreamUrl: '/operations/events?operationId=op_diag_001'
+        },
+        requestSource: 'host-detail/diagnostics',
+        linkedRuleId: 'rule_alpha_https',
+        linkedArtifacts: ['/var/lib/portmanager/snapshots/snapshot-op_diag_001.html']
+      },
+      {
+        operation: {
+          id: 'op_verify_001',
+          type: 'verify_rule',
+          state: 'degraded',
+          initiator: 'automation',
+          hostId: 'host_alpha',
+          ruleId: 'rule_alpha_https',
+          startedAt: '2026-04-16T18:08:00.000Z',
+          finishedAt: '2026-04-16T18:09:00.000Z',
+          resultSummary:
+            'drift detected: expected expected_hash_alpha, observed observed_hash_bravo, rollback inspection required',
+          eventStreamUrl: '/operations/events?operationId=op_verify_001'
+        },
+        requestSource: 'drift-watch/bridge-verify',
+        linkedRuleId: 'rule_alpha_https',
+        linkedArtifacts: ['/var/lib/portmanager/rollback/rp_alpha_001-result.json']
+      }
+    ],
+    selectedOperationId: 'op_backup_required_001',
+    timeline: [
+      {
+        id: 'evt_010',
+        kind: 'operation_state_changed',
+        operationId: 'op_backup_required_001',
+        operationType: 'backup',
+        state: 'running',
+        level: 'info',
+        summary: 'backup operation entered running',
+        hostId: 'host_alpha',
+        emittedAt: '2026-04-16T18:11:10.000Z'
+      },
+      {
+        id: 'evt_011',
+        kind: 'operation_state_changed',
+        operationId: 'op_backup_required_001',
+        operationType: 'backup',
+        state: 'degraded',
+        level: 'warn',
+        summary: 'required GitHub backup is not configured',
+        hostId: 'host_alpha',
+        emittedAt: '2026-04-16T18:12:00.000Z'
+      }
+    ]
+  }
+}
+
 export function OverviewPage(props: { state: OverviewState }) {
   const { state } = props
 
@@ -927,11 +1029,62 @@ export function HostDetailPage(props: { state: HostDetailState }) {
   })
 }
 
+export function OperationsPage(props: { state: OperationsState }) {
+  const selected =
+    props.state.operations.find((entry) => entry.operation.id === props.state.selectedOperationId) ??
+    props.state.operations[0]
+
+  if (!selected) {
+    throw new Error('OperationsPage requires at least one operation entry')
+  }
+
+  return h(ShellFrame, {
+    currentView: 'Operations',
+    title: 'Operations',
+    lede:
+      'Operations page stays audit-first: recent inventory, selected timeline, request source, and linked evidence remain visible together.',
+    metrics: [
+      {
+        label: 'Recent Operations',
+        value: String(props.state.operations.length),
+        tone: 'info'
+      },
+      {
+        label: 'Degraded Operations',
+        value: String(props.state.operations.filter((entry) => entry.operation.state === 'degraded').length),
+        tone: 'warn'
+      },
+      {
+        label: 'Selected Host',
+        value: selected.operation.hostId ?? 'n/a',
+        tone: 'info'
+      },
+      {
+        label: 'Timeline Events',
+        value: String(props.state.timeline.length),
+        tone: 'info'
+      }
+    ],
+    main: h(OperationsMain, { state: props.state, selected }),
+    rail: h(OperationsRail, { state: props.state, selected }),
+    eventStream: props.state.timeline.map(eventEntryFromOperationEvent)
+  })
+}
+
+function pageForView(view: WebView) {
+  if (view === 'host-detail') {
+    return h(HostDetailPage, { state: createMockHostDetailState() })
+  }
+
+  if (view === 'operations') {
+    return h(OperationsPage, { state: createMockOperationsState() })
+  }
+
+  return h(OverviewPage, { state: createMockOverviewState() })
+}
+
 export function renderWebPreviewDocument(view: WebView = 'overview') {
-  const page =
-    view === 'host-detail'
-      ? h(HostDetailPage, { state: createMockHostDetailState() })
-      : h(OverviewPage, { state: createMockOverviewState() })
+  const page = pageForView(view)
 
   return [
     '<!doctype html>',
@@ -959,8 +1112,9 @@ export function mountWebSkeleton(options: { container?: Element | null; view?: W
   const container = options.container ?? document.getElementById('app') ?? document.body
   const view =
     options.view ??
-    ((container instanceof HTMLElement && container.dataset.view === 'host-detail'
-      ? 'host-detail'
+    ((container instanceof HTMLElement &&
+    (container.dataset.view === 'host-detail' || container.dataset.view === 'operations')
+      ? container.dataset.view
       : 'overview') as WebView)
 
   let root = mountedRoots.get(container)
@@ -969,10 +1123,7 @@ export function mountWebSkeleton(options: { container?: Element | null; view?: W
     mountedRoots.set(container, root)
   }
 
-  const page =
-    view === 'host-detail'
-      ? h(HostDetailPage, { state: createMockHostDetailState() })
-      : h(OverviewPage, { state: createMockOverviewState() })
+  const page = pageForView(view)
 
   root.render(page)
 }
@@ -1341,6 +1492,119 @@ function HostDetailRail(props: { state: HostDetailState }) {
           ])
         )
       )
+    ])
+  ])
+}
+
+function OperationsMain(props: { state: OperationsState; selected: OperationInventoryEntry }) {
+  return h('div', { className: 'pm-detail-grid' }, [
+    h('section', { className: 'pm-card', key: 'inventory' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Active and recent operations list',
+        detail: `${props.state.operations.length} entries`
+      }),
+      h(
+        'ul',
+        { className: 'pm-list', key: 'list' },
+        props.state.operations.map((entry) =>
+          h('li', { className: 'pm-list-item', key: entry.operation.id }, [
+            h('div', { key: 'line1' }, `${entry.operation.id} · ${entry.operation.type}`),
+            h(
+              'div',
+              { className: 'pm-microcopy', key: 'line2' },
+              `${entry.operation.hostId ?? 'n/a'} · ${entry.requestSource}`
+            ),
+            h('div', { key: 'line3' }, entry.operation.resultSummary ?? 'No summary'),
+            h(StatusBadge, { key: 'badge', state: entry.operation.state })
+          ])
+        )
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'timeline' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Operation state timeline',
+        detail: props.selected.operation.id
+      }),
+      h(
+        'ul',
+        { className: 'pm-list', key: 'list' },
+        props.state.timeline.map((event) =>
+          h('li', { className: 'pm-list-item', key: event.id }, [
+            h('div', { key: 'line1' }, `${shortTime(event.emittedAt)} · ${event.state}`),
+            h('div', { className: 'pm-microcopy', key: 'line2' }, event.level),
+            h('div', { key: 'line3' }, event.summary),
+            h(StatusBadge, { key: 'badge', state: event.state })
+          ])
+        )
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'initiator' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Initiator and request source',
+        detail: props.selected.operation.id
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Initiator', props.selected.operation.initiator ?? 'unknown'),
+        kvRow('Request Source', props.selected.requestSource),
+        kvRow('Host', props.selected.operation.hostId ?? 'n/a'),
+        kvRow('Rule', props.selected.operation.ruleId ?? props.selected.linkedRuleId ?? 'n/a'),
+        kvRow('Replay Path', props.selected.operation.eventStreamUrl ?? '/operations/events')
+      ])
+    ]),
+    h('section', { className: 'pm-card', key: 'artifacts' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Linked host, rule, backup, rollback, and diagnostic artifacts',
+        detail: props.selected.operation.hostId ?? 'n/a'
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Host', props.selected.operation.hostId ?? 'n/a'),
+        kvRow('Rule', props.selected.operation.ruleId ?? props.selected.linkedRuleId ?? 'n/a'),
+        kvRow('Backup', props.selected.operation.backupId ?? 'n/a'),
+        kvRow('Rollback', props.selected.operation.rollbackPointId ?? 'n/a')
+      ]),
+      h(
+        'ul',
+        { className: 'pm-list', key: 'list' },
+        props.selected.linkedArtifacts.map((artifact) =>
+          h('li', { className: 'pm-list-item', key: artifact }, [
+            h('div', { className: 'pm-artifact', key: 'artifact' }, artifact)
+          ])
+        )
+      )
+    ])
+  ])
+}
+
+function OperationsRail(props: { state: OperationsState; selected: OperationInventoryEntry }) {
+  return h('div', { className: 'pm-panel-stack' }, [
+    h('section', { className: 'pm-card', key: 'selected' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Selected operation',
+        detail: props.selected.operation.type
+      }),
+      h('h2', { className: 'pm-hostname', key: 'name' }, props.selected.operation.id),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('State', h(StatusBadge, { state: props.selected.operation.state })),
+        kvRow('Started', shortTime(props.selected.operation.startedAt)),
+        kvRow('Finished', shortTime(props.selected.operation.finishedAt)),
+        kvRow('Summary', props.selected.operation.resultSummary ?? 'No summary')
+      ])
+    ]),
+    h('section', { className: 'pm-card', key: 'stream' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Selected operation event stream',
+        detail: `${props.state.timeline.length} events`
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Replay Path', props.selected.operation.eventStreamUrl ?? '/operations/events'),
+        kvRow('Latest Event', props.state.timeline[0]?.summary ?? 'No events')
+      ])
     ])
   ])
 }
