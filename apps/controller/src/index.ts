@@ -9,6 +9,7 @@ export type ControllerContracts = {
 export { createControllerEventBus } from './controller-events.ts'
 export { createOperationRunner } from './operation-runner.ts'
 export { createControllerServer } from './controller-server.ts'
+export { closeHttpServer } from './http-server-lifecycle.ts'
 export { createLocalBackupPrimitive } from './local-backup-primitive.ts'
 export { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.ts'
 export { createOperationStore } from './operation-store.ts'

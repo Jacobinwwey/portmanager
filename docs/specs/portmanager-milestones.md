@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-17
-Version: v0.4.3-mainline-progress-sync
+Version: v0.4.4-mainline-gate-hardening
 
 ## English
 
@@ -45,9 +45,11 @@ Milestone 1 is only accepted when all of the following become true:
 - Verified now: backup-before-mutation, rollback evidence, diagnostics capture, drift-driven degraded state, filtered operation history, event replay, and controller/CLI inspection surfaces for operations, backups, diagnostics, health checks, and rollback points.
 - Acceptance evidence re-ran successfully on a Windows real machine on `2026-04-17`: `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `pnpm --dir docs-site --ignore-workspace run docs:build`, and `pnpm milestone:verify` all passed after closing Windows-specific validation blockers in contract generation, SQLite test cleanup, CLI transport classification, and mock-server socket handling.
 - Mainline acceptance is now formalized as a repeatable gate through `pnpm acceptance:verify` and the `mainline-acceptance` GitHub Actions workflow. This improves delivery rigor, but it does not change Milestone 1 acceptance status by itself.
+- `main` still needs one gate-stability pass on GitHub runner parity: workflow run `24564534909` failed on `2026-04-17` because the one-host verification teardown hit `ERR_SERVER_NOT_RUNNING`, so immediate work now includes making that cleanup idempotent and returning `mainline-acceptance` to green.
 - Still missing before acceptance: real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources, CLI parity for those resources, live web parity beyond mock shells, and the steady-state controller-agent `HTTP over Tailscale` service boundary.
 
 #### Current development sequence
+- `Unit 0`: keep `mainline-acceptance` green under GitHub-runner parity, starting with idempotent teardown in the one-host verification flow.
 - `Unit 1`: make controller `hosts`, `bridge-rules`, and `exposure-policies` real before widening any milestone status claim.
 - `Unit 2`: extend CLI into those same resources so controller and CLI share one truthful public surface.
 - `Unit 3`: replace Web mock-only routes with controller-backed views and diagnostics detail.

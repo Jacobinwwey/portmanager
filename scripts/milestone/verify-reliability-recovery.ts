@@ -6,7 +6,12 @@ import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 
-import { createControllerEventBus, createControllerServer, createOperationStore } from '../../apps/controller/src/index.ts'
+import {
+  closeHttpServer,
+  createControllerEventBus,
+  createControllerServer,
+  createOperationStore
+} from '../../apps/controller/src/index.ts'
 
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url))
 
@@ -313,15 +318,7 @@ export async function verifyReliabilityRecoveryFlow(): Promise<ReliabilityRecove
       cliRollbackPoints
     }
   } finally {
-    await new Promise<void>((resolve, reject) => {
-      diagnosticTarget.close((error) => {
-        if (error) {
-          reject(error)
-          return
-        }
-        resolve()
-      })
-    })
+    await closeHttpServer(diagnosticTarget)
     await server.close()
     store.close()
     rmSync(sandbox, { recursive: true, force: true })

@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os'
 import { setTimeout as delay } from 'node:timers/promises'
 
 import {
+  closeHttpServer,
   createControllerEventBus,
   createControllerServer,
   createOperationStore
@@ -127,15 +128,7 @@ test('controller server captures diagnostic result and webpage snapshot artifact
       store.close()
     }
   } finally {
-    await new Promise<void>((resolve, reject) => {
-      target.close((error) => {
-        if (error) {
-          reject(error)
-          return
-        }
-        resolve()
-      })
-    })
+    await closeHttpServer(target)
     rmSync(directory, { recursive: true, force: true })
   }
 })

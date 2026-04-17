@@ -7,6 +7,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 
 import {
+  closeHttpServer,
   createControllerEventBus,
   createControllerServer,
   createOperationRunner,
@@ -435,15 +436,7 @@ export async function verifyOneHostOneRuleFlow(): Promise<OneHostOneRuleVerifica
       rollbackOperation
     }
   } finally {
-    await new Promise<void>((resolve, reject) => {
-      diagnosticTarget.close((error) => {
-        if (error) {
-          reject(error)
-          return
-        }
-        resolve()
-      })
-    })
+    await closeHttpServer(diagnosticTarget)
     await server.close()
     store.close()
     rmSync(sandbox, { recursive: true, force: true })

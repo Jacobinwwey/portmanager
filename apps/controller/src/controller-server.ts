@@ -3,6 +3,7 @@ import http from 'node:http'
 import path from 'node:path'
 
 import type { ControllerEventBus } from './controller-events.ts'
+import { closeHttpServer } from './http-server-lifecycle.ts'
 import { createLocalBackupPrimitive } from './local-backup-primitive.ts'
 import { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.ts'
 import type { OperationStore } from './operation-store.ts'
@@ -418,15 +419,7 @@ export function createControllerServer(options: {
       }
       subscriptions.clear()
 
-      await new Promise<void>((resolve, reject) => {
-        server.close((error) => {
-          if (error) {
-            reject(error)
-            return
-          }
-          resolve()
-        })
-      })
+      await closeHttpServer(server)
     }
   }
 }
