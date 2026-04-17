@@ -921,7 +921,8 @@ export function createControllerServer(options: {
       sendJson(response, 200, {
         items: store.listDiagnostics({
           hostId: requestUrl.searchParams.get('hostId') ?? undefined,
-          ruleId: requestUrl.searchParams.get('ruleId') ?? undefined
+          ruleId: requestUrl.searchParams.get('ruleId') ?? undefined,
+          state: requestUrl.searchParams.get('state') ?? undefined
         })
       })
       return

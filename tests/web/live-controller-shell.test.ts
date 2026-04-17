@@ -219,6 +219,29 @@ test('web live loaders render controller-backed overview, host, rules, backups, 
       const diagnosticsAccepted = (await diagnosticsResponse.json()) as { operationId: string }
       await waitForTerminalOperation(listening.baseUrl, diagnosticsAccepted.operationId)
 
+      const degradedAccepted = store.enqueueOperation({
+        id: 'op_diag_degraded_live_001',
+        type: 'diagnostics',
+        initiator: 'automation',
+        hostId,
+        ruleId
+      })
+      store.markRunning(degradedAccepted.operationId)
+      store.markFinished(degradedAccepted.operationId, {
+        state: 'degraded',
+        resultSummary: 'diagnostics detected drift and rollback inspection remains required',
+        diagnosticResult: {
+          hostId,
+          ruleId,
+          capturedAt: '2026-04-17T01:00:00.000Z',
+          port: address.port,
+          tcpReachable: true,
+          httpStatus: 502,
+          pageTitle: 'Alpha Relay Degraded',
+          finalUrl: 'http://127.0.0.1/degraded'
+        }
+      })
+
       const overviewState = await loadOverviewState({ baseUrl: listening.baseUrl, hostId })
       const hostDetailState = await loadHostDetailState({ baseUrl: listening.baseUrl, hostId })
       const operationsState = await loadOperationsState({
@@ -243,7 +266,12 @@ test('web live loaders render controller-backed overview, host, rules, backups, 
       assert.equal(consoleState.selectedOperation?.id, diagnosticsAccepted.operationId)
 
       assert.match(renderToStaticMarkup(h(OverviewPage, { state: overviewState })), /Bootstrap Alpha/)
-      assert.match(renderToStaticMarkup(h(HostDetailPage, { state: hostDetailState })), /HTTPS Relay/)
+      const hostDetailHtml = renderToStaticMarkup(h(HostDetailPage, { state: hostDetailState }))
+      assert.match(hostDetailHtml, /HTTPS Relay/)
+      assert.match(hostDetailHtml, /Degraded diagnostics history/i)
+      assert.match(hostDetailHtml, /Recovery-ready diagnostics/i)
+      assert.match(hostDetailHtml, /rollback inspection remains required/i)
+      assert.match(hostDetailHtml, /Alpha Relay Healthy/i)
       assert.match(renderToStaticMarkup(h(OperationsPage, { state: operationsState })), /Alpha Relay Healthy/)
       assert.match(renderToStaticMarkup(h(HostsPage, { state: hostsState })), /Managed host inventory/i)
       assert.match(renderToStaticMarkup(h(BridgeRulesPage, { state: bridgeRulesState })), /Selected rule topology/i)

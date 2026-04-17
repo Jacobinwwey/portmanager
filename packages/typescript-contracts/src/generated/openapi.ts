@@ -288,6 +288,7 @@ export interface paths {
                 query?: {
                     hostId?: string;
                     ruleId?: string;
+                    state?: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
                 };
                 header?: never;
                 path?: never;

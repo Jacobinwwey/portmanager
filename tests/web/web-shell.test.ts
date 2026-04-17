@@ -94,6 +94,40 @@ test('host detail shell surfaces operation summaries and linked recovery evidenc
   assert.match(html, /rp_alpha_002/i)
 })
 
+test('host detail shell groups degraded diagnostics history and recovery-ready evidence', () => {
+  const state = createMockHostDetailState()
+  state.diagnostics = [
+    {
+      id: 'op_diag_degraded_000',
+      type: 'diagnostics',
+      state: 'degraded',
+      hostId: 'host_alpha',
+      ruleId: 'rule_alpha_https',
+      startedAt: '2026-04-16T17:44:00.000Z',
+      finishedAt: '2026-04-16T17:45:00.000Z',
+      resultSummary: 'diagnostics detected drift and rollback inspection remains required',
+      diagnosticResult: {
+        hostId: 'host_alpha',
+        ruleId: 'rule_alpha_https',
+        capturedAt: '2026-04-16T17:45:00.000Z',
+        port: 443,
+        tcpReachable: true,
+        httpStatus: 502,
+        pageTitle: 'Alpha Relay Degraded',
+        finalUrl: 'http://127.0.0.1/degraded'
+      }
+    },
+    ...state.diagnostics
+  ]
+
+  const html = renderToStaticMarkup(h(HostDetailPage, { state }))
+
+  assert.match(html, /degraded diagnostics history/i)
+  assert.match(html, /recovery-ready diagnostics/i)
+  assert.match(html, /rollback inspection remains required/i)
+  assert.match(html, /alpha relay healthy/i)
+})
+
 test('operations shell renders required operations page sections', () => {
   const html = renderToStaticMarkup(h(OperationsPage, { state: createMockOperationsState() }))
 

@@ -469,6 +469,11 @@ paths:
           in: query
           schema:
             type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+            enum: [queued, running, succeeded, failed, degraded, cancelled]
       responses:
         '200':
           description: Diagnostics operation list

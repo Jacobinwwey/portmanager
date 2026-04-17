@@ -207,6 +207,108 @@ function artifactPathsFromOperations(operations: Array<OperationSummary | Operat
   )
 }
 
+function diagnosticsInState(
+  diagnostics: OperationDetailContract[],
+  state: Extract<OperationDetailContract['state'], 'degraded' | 'succeeded'>
+) {
+  return diagnostics.filter((diagnostic) => diagnostic.state === state)
+}
+
+function diagnosticHeadline(diagnostic: OperationDetailContract) {
+  return (
+    diagnostic.snapshotResult?.pageTitle ??
+    diagnostic.diagnosticResult?.pageTitle ??
+    diagnostic.resultSummary ??
+    `finished ${shortTime(diagnostic.finishedAt)}`
+  )
+}
+
+function diagnosticDetail(diagnostic: OperationDetailContract) {
+  return (
+    diagnostic.resultSummary ??
+    diagnostic.diagnosticResult?.finalUrl ??
+    diagnostic.snapshotResult?.artifactPath ??
+    'No summary'
+  )
+}
+
+function diagnosticArtifact(diagnostic: OperationDetailContract) {
+  return diagnostic.snapshotResult?.artifactPath ?? diagnostic.diagnosticResult?.finalUrl ?? 'no snapshot artifact'
+}
+
+function operationMomentValue(operation: Pick<OperationDetailContract, 'startedAt' | 'finishedAt'>) {
+  const value = Date.parse(operation.finishedAt ?? operation.startedAt ?? '')
+  return Number.isFinite(value) ? value : Number.NEGATIVE_INFINITY
+}
+
+function diagnosticsRecoveryVerdict(diagnostics: OperationDetailContract[]) {
+  const degradedDiagnostics = diagnosticsInState(diagnostics, 'degraded')
+  const recoveryDiagnostics = diagnosticsInState(diagnostics, 'succeeded')
+  const latestDegraded = degradedDiagnostics[0] ?? null
+  const latestRecovery = recoveryDiagnostics[0] ?? null
+
+  if (latestDegraded && latestRecovery) {
+    if (operationMomentValue(latestRecovery) >= operationMomentValue(latestDegraded)) {
+      return {
+        state: 'succeeded',
+        summary: 'Latest successful diagnostics prove recovery after degraded verification.',
+        detail: `${latestRecovery.id} closed after ${latestDegraded.id}.`
+      }
+    }
+
+    return {
+      state: 'degraded',
+      summary: 'Latest degraded diagnostic still needs fresh success evidence.',
+      detail: `${latestDegraded.id} is newer than ${latestRecovery.id}.`
+    }
+  }
+
+  if (latestRecovery) {
+    return {
+      state: 'succeeded',
+      summary: 'Recovery-ready diagnostics available for replay and artifact review.',
+      detail: `${latestRecovery.id} remains the freshest successful evidence.`
+    }
+  }
+
+  if (latestDegraded) {
+    return {
+      state: 'degraded',
+      summary: 'Degraded diagnostics remain active without recovery confirmation.',
+      detail: `${latestDegraded.id} is the freshest diagnostic evidence.`
+    }
+  }
+
+  return null
+}
+
+function renderDiagnosticsList(
+  diagnostics: OperationDetailContract[],
+  emptyCopy: string,
+  key: string
+) {
+  return diagnostics.length
+    ? h(
+        'ul',
+        { className: 'pm-list', key },
+        diagnostics.map((diagnostic) =>
+          h('li', { className: 'pm-list-item', key: diagnostic.id }, [
+            h('div', { key: 'line1' }, `${diagnostic.id} · ${diagnostic.type}`),
+            h(
+              'div',
+              { className: 'pm-microcopy', key: 'line2' },
+              `${diagnostic.ruleId ?? 'host-wide'} · finished ${shortTime(diagnostic.finishedAt)}`
+            ),
+            h('div', { key: 'line3' }, diagnosticHeadline(diagnostic)),
+            h('div', { key: 'line4' }, diagnosticDetail(diagnostic)),
+            h('div', { className: 'pm-artifact', key: 'line5' }, diagnosticArtifact(diagnostic)),
+            h(StatusBadge, { key: 'badge', state: diagnostic.state })
+          ])
+        )
+      )
+    : h('div', { key }, emptyState(emptyCopy))
+}
+
 function backupRemoteConfiguredCopy(backup: BackupSummary) {
   return backup.remoteConfigured ? 'configured' : 'needs setup'
 }
@@ -2425,6 +2527,10 @@ function HostDetailMain(props: { state: HostDetailState }) {
 }
 
 function HostDetailRail(props: { state: HostDetailState }) {
+  const degradedDiagnostics = diagnosticsInState(props.state.diagnostics, 'degraded')
+  const recoveryDiagnostics = diagnosticsInState(props.state.diagnostics, 'succeeded')
+  const recoveryVerdict = diagnosticsRecoveryVerdict(props.state.diagnostics)
+
   return h('div', { className: 'pm-panel-stack' }, [
     h('section', { className: 'pm-card', key: 'diagnostics' }, [
       h(SectionHeading, {
@@ -2432,25 +2538,45 @@ function HostDetailRail(props: { state: HostDetailState }) {
         title: 'Latest diagnostics and snapshots',
         detail: `${props.state.diagnostics.length} operations`
       }),
-      h(
-        'ul',
-        { className: 'pm-list', key: 'list' },
-        props.state.diagnostics.map((diagnostic) =>
-          h('li', { className: 'pm-list-item', key: diagnostic.id }, [
-            h('div', { key: 'line1' }, `${diagnostic.id} · ${diagnostic.type}`),
-            h(
-              'div',
-              { className: 'pm-microcopy', key: 'line2' },
-              diagnostic.snapshotResult?.pageTitle ?? `finished ${shortTime(diagnostic.finishedAt)}`
-            ),
-            h(
-              'div',
-              { className: 'pm-artifact', key: 'line3' },
-              diagnostic.snapshotResult?.artifactPath ?? 'no snapshot artifact'
-            ),
-            h(StatusBadge, { key: 'badge', state: diagnostic.state })
+      renderDiagnosticsList(
+        props.state.diagnostics,
+        'No diagnostics snapshots recorded yet.',
+        'latest-list'
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'degraded-diagnostics' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Degraded diagnostics history',
+        detail: `${degradedDiagnostics.length} degraded checks`
+      }),
+      renderDiagnosticsList(
+        degradedDiagnostics,
+        'No degraded diagnostics history recorded for this host.',
+        'degraded-list'
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'recovery-diagnostics' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Recovery-ready diagnostics',
+        detail: `${recoveryDiagnostics.length} successful checks`
+      }),
+      recoveryVerdict
+        ? h('div', { className: 'pm-kv', key: 'verdict' }, [
+            kvRow('Recovery Verdict', recoveryVerdict.summary),
+            kvRow('Evidence', recoveryVerdict.detail),
+            kvRow('Latest State', h(StatusBadge, { state: recoveryVerdict.state }))
           ])
-        )
+        : h(
+            'div',
+            { key: 'verdict-empty' },
+            emptyState('No diagnostics recovery verdict recorded yet.')
+          ),
+      renderDiagnosticsList(
+        recoveryDiagnostics,
+        'No successful diagnostics recorded yet for recovery replay.',
+        'recovery-list'
       )
     ]),
     h('section', { className: 'pm-card', key: 'artifacts' }, [

@@ -132,3 +132,85 @@ test('controller server captures diagnostic result and webpage snapshot artifact
     rmSync(directory, { recursive: true, force: true })
   }
 })
+
+test('controller server filters diagnostics by state for degraded and recovery history', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+  const store = createOperationStore({ databasePath })
+  const eventBus = createControllerEventBus()
+  const server = createControllerServer({ store, eventBus, artifactRoot })
+  const listening = await server.listen(0)
+
+  try {
+    const degradedAccepted = store.enqueueOperation({
+      id: 'op_diag_degraded_001',
+      type: 'diagnostics',
+      initiator: 'automation',
+      hostId: 'host_alpha',
+      ruleId: 'rule_alpha_http'
+    })
+    store.markRunning(degradedAccepted.operationId)
+    store.markFinished(degradedAccepted.operationId, {
+      state: 'degraded',
+      resultSummary: 'diagnostics detected drift and rollback inspection remains required',
+      diagnosticResult: {
+        hostId: 'host_alpha',
+        ruleId: 'rule_alpha_http',
+        capturedAt: '2026-04-17T00:00:00.000Z',
+        port: 443,
+        tcpReachable: true,
+        httpStatus: 502,
+        pageTitle: 'Alpha Relay Degraded',
+        finalUrl: 'http://127.0.0.1/degraded'
+      }
+    })
+
+    const succeededAccepted = store.enqueueOperation({
+      id: 'op_diag_recovery_001',
+      type: 'diagnostics',
+      initiator: 'automation',
+      hostId: 'host_alpha',
+      ruleId: 'rule_alpha_http'
+    })
+    store.markRunning(succeededAccepted.operationId)
+    store.markFinished(succeededAccepted.operationId, {
+      state: 'succeeded',
+      resultSummary: 'diagnostics confirmed relay recovery after degraded verification',
+      diagnosticResult: {
+        hostId: 'host_alpha',
+        ruleId: 'rule_alpha_http',
+        capturedAt: '2026-04-17T00:05:00.000Z',
+        port: 443,
+        tcpReachable: true,
+        httpStatus: 200,
+        pageTitle: 'Alpha Relay Healthy',
+        finalUrl: 'http://127.0.0.1/status'
+      }
+    })
+
+    const degradedResponse = await fetch(`${listening.baseUrl}/diagnostics?hostId=host_alpha&state=degraded`)
+    assert.equal(degradedResponse.status, 200)
+    const degradedPayload = (await degradedResponse.json()) as {
+      items: Array<Record<string, unknown>>
+    }
+    assert.deepEqual(
+      degradedPayload.items.map((item) => item.id),
+      ['op_diag_degraded_001']
+    )
+
+    const succeededResponse = await fetch(
+      `${listening.baseUrl}/diagnostics?hostId=host_alpha&state=succeeded`
+    )
+    assert.equal(succeededResponse.status, 200)
+    const succeededPayload = (await succeededResponse.json()) as {
+      items: Array<Record<string, unknown>>
+    }
+    assert.deepEqual(
+      succeededPayload.items.map((item) => item.id),
+      ['op_diag_recovery_001']
+    )
+  } finally {
+    await server.close()
+    store.close()
+    rmSync(directory, { recursive: true, force: true })
+  }
+})

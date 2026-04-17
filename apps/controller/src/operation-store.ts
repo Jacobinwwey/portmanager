@@ -147,7 +147,7 @@ export interface OperationStore {
   getRollbackPoint(id: string): RollbackPoint | null
   listBackups(filters?: { hostId?: string; operationId?: string }): BackupSummary[]
   listBridgeRules(filters?: { hostId?: string }): BridgeRule[]
-  listDiagnostics(filters?: { hostId?: string; ruleId?: string }): OperationDetail[]
+  listDiagnostics(filters?: { hostId?: string; ruleId?: string; state?: string }): OperationDetail[]
   listHealthChecks(filters?: { hostId?: string; ruleId?: string }): HealthCheck[]
   listHosts(): HostSummary[]
   listRollbackPoints(filters?: {
@@ -1311,6 +1311,10 @@ export function createOperationStore(options: { databasePath: string }): Operati
           }
 
           if (filters?.ruleId && row.ruleId !== filters.ruleId) {
+            return false
+          }
+
+          if (filters?.state && row.state !== filters.state) {
             return false
           }
 
