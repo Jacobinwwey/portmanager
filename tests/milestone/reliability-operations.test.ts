@@ -12,4 +12,17 @@ test('reliability operations verification proves filtered operation inventory ac
   assert.equal(result.apiOperations.items[0]?.rollbackPointId, 'rp_alpha_002')
   assert.equal(result.cliOperations.items[0]?.id, result.apiOperations.items[0]?.id)
   assert.match(result.cliOperations.items[0]?.resultSummary ?? '', /required github backup is not configured/i)
+  assert.equal(
+    result.apiOperationDetail.eventStreamUrl,
+    `/operations/events?operationId=${result.apiOperationDetail.id}`
+  )
+  assert.equal(
+    result.cliOperationDetail.eventStreamUrl,
+    result.apiOperationDetail.eventStreamUrl
+  )
+  assert.equal(result.cliOperationDetail.backupId, result.apiOperationDetail.backupId)
+  assert.equal(
+    result.cliOperationDetail.rollbackPointId,
+    result.apiOperationDetail.rollbackPointId
+  )
 })

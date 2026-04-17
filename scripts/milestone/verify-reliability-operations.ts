@@ -30,9 +30,16 @@ interface OperationInventory {
   items: OperationInventoryItem[]
 }
 
+interface OperationDetail extends OperationInventoryItem {
+  initiator?: string
+  eventStreamUrl?: string
+}
+
 export interface ReliabilityOperationsVerificationResult {
   apiOperations: OperationInventory
   cliOperations: OperationInventory
+  apiOperationDetail: OperationDetail
+  cliOperationDetail: OperationDetail
 }
 
 function runJsonCommandAsync<T>(command: string, args: string[], env: NodeJS.ProcessEnv = {}) {
@@ -137,10 +144,22 @@ export async function verifyReliabilityOperationsFlow(): Promise<ReliabilityOper
         PORTMANAGER_CONTROLLER_BASE_URL: listening.baseUrl
       }
     )
+    const apiOperationDetail = await fetchJson<OperationDetail>(
+      `${listening.baseUrl}/operations/op_backup_required_001`
+    )
+    const cliOperationDetail = await runJsonCommandAsync<OperationDetail>(
+      'cargo',
+      ['run', '-q', '-p', 'portmanager-cli', '--', 'operation', 'get', 'op_backup_required_001', '--json'],
+      {
+        PORTMANAGER_CONTROLLER_BASE_URL: listening.baseUrl
+      }
+    )
 
     return {
       apiOperations,
-      cliOperations
+      cliOperations,
+      apiOperationDetail,
+      cliOperationDetail
     }
   } finally {
     await server.close()

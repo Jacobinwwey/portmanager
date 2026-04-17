@@ -158,6 +158,22 @@ fn operation_detail(state: &str) -> Value {
     })
 }
 
+fn operation_detail_with_evidence() -> Value {
+    json!({
+        "id": "op_123",
+        "type": "backup",
+        "state": "degraded",
+        "initiator": "cli",
+        "hostId": "host_alpha",
+        "startedAt": "2026-04-16T12:00:00.000Z",
+        "finishedAt": "2026-04-16T12:00:01.000Z",
+        "resultSummary": "required GitHub backup is not configured",
+        "backupId": "backup_alpha_002",
+        "rollbackPointId": "rp_alpha_002",
+        "eventStreamUrl": "/operations/events?operationId=op_123"
+    })
+}
+
 fn run_portmanager(args: &[&str], base_url: &str) -> std::process::Output {
     Command::new(env!("CARGO_BIN_EXE_portmanager"))
         .args(args)
@@ -266,6 +282,28 @@ fn operation_get_wait_reports_timeout_explicitly() {
     assert_eq!(parsed["operationId"], "op_123");
     assert_eq!(parsed["lastState"], "running");
     assert_eq!(parsed["timeoutMs"], 30);
+}
+
+#[test]
+fn operation_get_text_surfaces_summary_recovery_and_event_replay_path() {
+    let server = MockHttpServer::start(vec![(
+        "/operations/op_123",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: operation_detail_with_evidence(),
+        }],
+    )]);
+
+    let output = run_portmanager(&["operation", "get", "op_123"], &server.base_url());
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("required GitHub backup is not configured"));
+    assert!(stdout.contains("backup_alpha_002"));
+    assert!(stdout.contains("rp_alpha_002"));
+    assert!(stdout.contains("/operations/events?operationId=op_123"));
 }
 
 #[test]

@@ -330,10 +330,20 @@ async fn run_operation_get(args: OperationGetArgs) -> ExecutionResult {
                         ExecutionResult::success_json(&operation)
                     } else {
                         ExecutionResult::success_text(format!(
-                            "{} {} {}",
+                            "{} {} {} {} {} {} {}",
                             operation["id"].as_str().unwrap_or(&args.operation_id),
                             operation["type"].as_str().unwrap_or("unknown"),
-                            state
+                            state,
+                            operation["resultSummary"]
+                                .as_str()
+                                .unwrap_or("missing-summary"),
+                            operation["backupId"].as_str().unwrap_or("backup-n/a"),
+                            operation["rollbackPointId"]
+                                .as_str()
+                                .unwrap_or("rollback-n/a"),
+                            operation["eventStreamUrl"]
+                                .as_str()
+                                .unwrap_or("/operations/events")
                         ))
                     };
                 }

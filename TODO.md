@@ -31,6 +31,7 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] Milestone 2: best_effort versus required backup policy enforcement with visible remote-backup status.
 - [x] Milestone 2: filtered operation inventory with recovery-linked summaries across Web, CLI, and API.
 - [x] Milestone 2: selected-operation event timeline and filtered event history across Web, CLI, and API.
+- [x] Milestone 2: operation detail now carries direct selected-event replay path and linked recovery evidence across API and CLI.
 
 ## 中文
 
@@ -60,3 +61,4 @@ Version: v0.3.0-docs-site-design-alignment
 - [x] 里程碑 2：落地 best_effort 与 required 的 backup policy 行为差异，并显式暴露远端备份状态。
 - [x] 里程碑 2：补全 operation 列表筛选与 recovery 证据摘要，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：补全选中 operation 的事件时间线与 event history 筛选，并在 Web、CLI、API 中统一暴露。
+- [x] 里程碑 2：让 operation detail 直接携带选中事件回放路径与 recovery 证据，并在 API、CLI 中统一暴露。

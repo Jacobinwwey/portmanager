@@ -50,7 +50,7 @@ test('controller server replays structured event stream entries and exposes rece
       const detailResponse = await fetch(`${listening.baseUrl}/operations/op_events_001`)
       assert.equal(detailResponse.status, 200)
       const detail = (await detailResponse.json()) as Record<string, unknown>
-      assert.equal(detail.eventStreamUrl, '/operations/events')
+      assert.equal(detail.eventStreamUrl, '/operations/events?operationId=op_events_001')
 
       const eventsResponse = await fetch(`${listening.baseUrl}/events?limit=5`)
       assert.equal(eventsResponse.status, 200)

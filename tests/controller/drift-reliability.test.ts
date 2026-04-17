@@ -72,7 +72,10 @@ test('controller server records degraded drift check and explicit bridge verific
       assert.equal(operation.type, 'verify_rule')
       assert.equal(operation.state, 'degraded')
       assert.match(String(operation.resultSummary), /drift detected/i)
-      assert.equal(operation.eventStreamUrl, '/operations/events')
+      assert.equal(
+        operation.eventStreamUrl,
+        `/operations/events?operationId=${accepted.operationId}`
+      )
 
       const healthResponse = await fetch(
         `${listening.baseUrl}/health-checks?hostId=host_alpha&ruleId=rule_alpha_https`
