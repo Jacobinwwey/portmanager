@@ -48,14 +48,12 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
-        working-directory: docs-site
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: pnpm --dir docs-site --ignore-workspace install --frozen-lockfile --prefer-offline
 
       - name: Build docs site
-        working-directory: docs-site
         env:
           PORTMANAGER_DOCS_BASE: /portmanager/
-        run: pnpm run docs:build
+        run: pnpm --dir docs-site --ignore-workspace run docs:build
 
       - name: Verify generated locale pages are committed
         run: git diff --exit-code -- docs-site/en docs-site/zh
