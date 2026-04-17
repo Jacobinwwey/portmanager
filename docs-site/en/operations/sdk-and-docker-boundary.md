@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-sdk-and-docker.md`
 > Audience: `shared` | Section: `operations` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.1.0-docs-baseline
+> Updated: 2026-04-17 | Version: v0.1.1-github-backup
 ### SDKs locked for V1
 - `TypeScript SDK`: for Web, Node scripts, automation, and future external tooling
 - `Rust crate`: for CLI, agent reuse, and later infrastructure integrations
@@ -40,7 +40,7 @@ status: active
 - log strategy
 - upgrade / rollback expectations for control plane containers
 
-### Environment variable contract to preserve for later implementation
+### Environment variable contract now used by controller backup flow
 - `PORTMANAGER_CONTROLLER_PORT`
 - `PORTMANAGER_CONTROLLER_BASE_URL`
 - `PORTMANAGER_SQLITE_PATH`
@@ -48,6 +48,11 @@ status: active
 - `PORTMANAGER_GITHUB_BACKUP_ENABLED`
 - `PORTMANAGER_GITHUB_BACKUP_REPO`
 - `PORTMANAGER_GITHUB_BACKUP_TOKEN`
+
+The controller now actively consumes the GitHub backup trio for real remote-backup delivery:
+- `PORTMANAGER_GITHUB_BACKUP_ENABLED`: turns remote upload behavior on or off.
+- `PORTMANAGER_GITHUB_BACKUP_REPO`: selects the `owner/repo` target for GitHub Contents uploads.
+- `PORTMANAGER_GITHUB_BACKUP_TOKEN`: authenticates the controller-side upload and must stay outside agent scope.
 
 ### Future migration note
 PostgreSQL is a deliberate future reliability path, but it must not distort the V1 default deployment shape.

@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.4.9-diagnostics-history
+> Updated: 2026-04-17 | Version: v0.5.0-github-backup
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -66,7 +66,8 @@ Milestone 1 is only accepted when all of the following become true:
 - `Unit 5`: complete. `pnpm acceptance:verify` was replayed, roadmap and product docs were synced, and Milestone 1 wording moved only after proof stayed green.
 - `Heartbeat/version slice`: complete. Agent `/health` + `/runtime-state`, controller host summary/detail, CLI host output, and Web host detail now share `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.
 - `Diagnostics-history slice`: complete. Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host / rule / policy slice.
-- `Next lane`: Milestone 2 reliability hardening on the same live host / rule / policy slice with repeated proof and real GitHub backup delivery.
+- `GitHub-backup slice`: complete. Controller backup bundles now upload through the GitHub Contents API when configured, and required-mode success/failure paths stay explicit across API, CLI, Web, and dedicated reliability proof.
+- `Next lane`: Milestone 2 reliability hardening on the same live host / rule / policy slice with repeated proof across configured, failed, and local-only remote-backup evidence.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -101,9 +102,10 @@ Milestone 2 is only accepted when all of the following become true:
 - Reliability work has already started on this branch.
 - Verified now: backup-policy visibility, drift-driven degraded records, recovery-linked operation summaries, rollback inspection, and richer event history flows in controller and CLI tests.
 - Verified now: remote-backup guidance is now explicit across Web, CLI, API, and proof output; backup summaries now publish remote target, setup state, status summary, and operator action instead of only raw `not_configured` state.
+- Verified now: configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and reports explicit remote redundancy success/failure state across API, CLI, Web, and `tests/milestone/reliability-github-backup.test.ts`.
 - Verified now: agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics on the accepted live slice.
 - Verified now from the accepted Milestone 1 slice: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures; live unreachable-agent paths now degrade hosts and rules explicitly; controller-side diagnostics promote rules to `active` after real verification.
-- Milestone 2 still remains in progress because required-mode remote backup is still degraded when GitHub backup is not configured in the proof environment even though setup/action guidance is now explicit, and repeated reliability replay on the same live slice is not yet deep enough to advance status.
+- Milestone 2 still remains in progress because repeated reliability replay on the same live slice is not yet deep enough to advance status; GitHub backup delivery is now real, but configured, failed, and local-only remote-backup paths still need broader repeated replay before reliability language can advance again.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.

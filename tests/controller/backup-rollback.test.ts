@@ -1,11 +1,13 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { createServer } from 'node:http'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import { tmpdir } from 'node:os'
 import { setTimeout as delay } from 'node:timers/promises'
 
 import {
+  closeHttpServer,
   createControllerEventBus,
   createControllerServer,
   createOperationStore
@@ -38,6 +40,69 @@ async function waitForTerminalOperation(baseUrl: string, operationId: string) {
   }
 
   throw new Error(`operation did not settle: ${operationId}`)
+}
+
+async function startGitHubMockServer(options: { fail?: boolean } = {}) {
+  const uploads: Array<{
+    authorization?: string
+    path: string
+    body: {
+      message?: string
+      content?: string
+    }
+  }> = []
+
+  const server = createServer((request, response) => {
+    const url = request.url ?? ''
+
+    if (request.method !== 'PUT' || !url.startsWith('/repos/Jacobinwwey/portmanager-backups/contents/')) {
+      response.writeHead(404)
+      response.end()
+      return
+    }
+
+    const chunks: Buffer[] = []
+    request.on('data', (chunk) => {
+      chunks.push(Buffer.from(chunk))
+    })
+    request.on('end', () => {
+      const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as {
+        message?: string
+        content?: string
+      }
+      uploads.push({
+        authorization: request.headers.authorization,
+        path: decodeURIComponent(url.slice('/repos/Jacobinwwey/portmanager-backups/contents/'.length)),
+        body
+      })
+
+      if (options.fail) {
+        response.writeHead(500, { 'content-type': 'application/json' })
+        response.end(JSON.stringify({ message: 'mock GitHub failure' }))
+        return
+      }
+
+      response.writeHead(201, { 'content-type': 'application/json' })
+      response.end(JSON.stringify({ content: { path: uploads[uploads.length - 1]?.path } }))
+    })
+  })
+
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', reject)
+      resolve()
+    })
+  })
+
+  const address = server.address()
+  assert.ok(address && typeof address !== 'string')
+
+  return {
+    uploads,
+    server,
+    baseUrl: `http://127.0.0.1:${address.port}`
+  }
 }
 
 test('controller server runs best_effort backup and exposes local-only safety evidence', async () => {
@@ -207,6 +272,158 @@ test('controller server marks required backup degraded when remote backup is una
       store.close()
     }
   } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('controller server uploads required backup bundle to GitHub when remote backup is configured', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+  const github = await startGitHubMockServer()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({
+      store,
+      eventBus,
+      artifactRoot,
+      githubBackup: {
+        apiBaseUrl: github.baseUrl,
+        env: {
+          PORTMANAGER_GITHUB_BACKUP_ENABLED: 'true',
+          PORTMANAGER_GITHUB_BACKUP_REPO: 'Jacobinwwey/portmanager-backups',
+          PORTMANAGER_GITHUB_BACKUP_TOKEN: 'ghs_test_token'
+        }
+      }
+    })
+
+    const listening = await server.listen(0)
+
+    try {
+      const response = await fetch(`${listening.baseUrl}/backups/run`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId: 'host_alpha',
+          mode: 'required'
+        })
+      })
+
+      assert.equal(response.status, 202)
+      const accepted = (await response.json()) as { operationId: string }
+      const operation = await waitForTerminalOperation(listening.baseUrl, accepted.operationId)
+
+      assert.equal(operation.state, 'succeeded')
+      assert.match(operation.resultSummary ?? '', /github backup uploaded/i)
+
+      const backupsResponse = await fetch(`${listening.baseUrl}/backups?operationId=${accepted.operationId}`)
+      assert.equal(backupsResponse.status, 200)
+      const backupsPayload = (await backupsResponse.json()) as {
+        items: Array<{
+          id: string
+          githubStatus?: string
+          remoteConfigured?: boolean
+          remoteStatusSummary?: string
+          remoteAction?: string
+        }>
+      }
+
+      assert.equal(backupsPayload.items[0]?.githubStatus, 'succeeded')
+      assert.equal(backupsPayload.items[0]?.remoteConfigured, true)
+      assert.match(backupsPayload.items[0]?.remoteStatusSummary ?? '', /remote redundancy is available/i)
+      assert.match(backupsPayload.items[0]?.remoteAction ?? '', /no remote action required/i)
+      assert.equal(github.uploads.length, 1)
+      assert.equal(github.uploads[0]?.authorization, 'Bearer ghs_test_token')
+      assert.match(github.uploads[0]?.path ?? '', /host_alpha/)
+
+      const bundle = JSON.parse(
+        Buffer.from(github.uploads[0]?.body.content ?? '', 'base64').toString('utf8')
+      ) as {
+        backupId: string
+        manifest: {
+          operationId: string
+        }
+        files: Array<{ path: string }>
+      }
+      assert.equal(bundle.backupId, backupsPayload.items[0]?.id)
+      assert.equal(bundle.manifest.operationId, accepted.operationId)
+      assert.equal(bundle.files.length >= 5, true)
+      assert.equal(bundle.files.some((file) => file.path === 'manifest.json'), true)
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    await closeHttpServer(github.server)
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('controller server keeps required backup degraded when configured GitHub upload fails', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+  const github = await startGitHubMockServer({ fail: true })
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({
+      store,
+      eventBus,
+      artifactRoot,
+      githubBackup: {
+        apiBaseUrl: github.baseUrl,
+        env: {
+          PORTMANAGER_GITHUB_BACKUP_ENABLED: 'true',
+          PORTMANAGER_GITHUB_BACKUP_REPO: 'Jacobinwwey/portmanager-backups',
+          PORTMANAGER_GITHUB_BACKUP_TOKEN: 'ghs_test_token'
+        }
+      }
+    })
+
+    const listening = await server.listen(0)
+
+    try {
+      const response = await fetch(`${listening.baseUrl}/backups/run`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId: 'host_alpha',
+          mode: 'required'
+        })
+      })
+
+      assert.equal(response.status, 202)
+      const accepted = (await response.json()) as { operationId: string }
+      const operation = await waitForTerminalOperation(listening.baseUrl, accepted.operationId)
+
+      assert.equal(operation.state, 'degraded')
+      assert.match(operation.resultSummary ?? '', /github backup upload failed/i)
+
+      const backupsResponse = await fetch(`${listening.baseUrl}/backups?operationId=${accepted.operationId}`)
+      assert.equal(backupsResponse.status, 200)
+      const backupsPayload = (await backupsResponse.json()) as {
+        items: Array<{
+          githubStatus?: string
+          remoteConfigured?: boolean
+          remoteStatusSummary?: string
+          remoteAction?: string
+        }>
+      }
+
+      assert.equal(backupsPayload.items[0]?.githubStatus, 'failed')
+      assert.equal(backupsPayload.items[0]?.remoteConfigured, true)
+      assert.match(backupsPayload.items[0]?.remoteStatusSummary ?? '', /remote redundancy is missing/i)
+      assert.match(backupsPayload.items[0]?.remoteAction ?? '', /inspect github backup credentials/i)
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    await closeHttpServer(github.server)
     rmSync(directory, { recursive: true, force: true })
   }
 })

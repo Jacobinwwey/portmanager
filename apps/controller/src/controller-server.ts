@@ -7,6 +7,7 @@ import type { ApplyDesiredStateSchema, RuntimeStateSchema } from '@portmanager/t
 import { createAgentClient } from './agent-client.ts'
 import type { ControllerEventBus } from './controller-events.ts'
 import { closeHttpServer } from './http-server-lifecycle.ts'
+import { createGitHubBackupClient } from './github-backup-client.ts'
 import { createLocalBackupPrimitive } from './local-backup-primitive.ts'
 import { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.ts'
 import type { BridgeRule, HostSummary, OperationStore } from './operation-store.ts'
@@ -130,6 +131,11 @@ export function createControllerServer(options: {
   store: OperationStore
   eventBus: ControllerEventBus
   artifactRoot?: string
+  githubBackup?: {
+    apiBaseUrl?: string
+    env?: NodeJS.ProcessEnv
+    fetchImpl?: typeof fetch
+  }
 }): ControllerServer {
   const { store, eventBus } = options
   const artifactRoot =
@@ -140,7 +146,11 @@ export function createControllerServer(options: {
   const runner = createOperationRunner({ store, eventBus })
   const agentClient = createAgentClient()
   const agentEndpoints = new Map<string, string>()
-  const backupPrimitive = createLocalBackupPrimitive({ artifactRoot, store })
+  const backupPrimitive = createLocalBackupPrimitive({
+    artifactRoot,
+    store,
+    githubBackupClient: createGitHubBackupClient(options.githubBackup)
+  })
   const diagnosticsPrimitive = createLocalDiagnosticsPrimitive({ artifactRoot })
   const subscriptions = new Set<() => void>()
 
@@ -686,7 +696,7 @@ export function createControllerServer(options: {
         void runner.run(operationId, async () => {
           const policy = store.getExposurePolicy(rule.hostId)
           const hasAgentEndpoint = agentEndpoints.has(rule.hostId)
-          const backup = backupPrimitive.runBackup({
+          const backup = await backupPrimitive.runBackup({
             operationId,
             hostId: rule.hostId,
             mode: policy?.backupPolicy ?? 'best_effort'
@@ -755,7 +765,7 @@ export function createControllerServer(options: {
       queueMicrotask(() => {
         void runner.run(operationId, async () => {
           const policy = store.getExposurePolicy(rule.hostId)
-          const backup = backupPrimitive.runBackup({
+          const backup = await backupPrimitive.runBackup({
             operationId,
             hostId: rule.hostId,
             mode: policy?.backupPolicy ?? 'best_effort'
@@ -1003,7 +1013,7 @@ export function createControllerServer(options: {
 
       queueMicrotask(() => {
         void runner.run(operationId, async () => {
-          const { backup, operationState, rollbackPoint, resultSummary } = backupPrimitive.runBackup({
+          const { backup, operationState, rollbackPoint, resultSummary } = await backupPrimitive.runBackup({
             operationId,
             hostId,
             mode

@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/operations/portmanager-backup-rollback-policy.md`
 > Audience: `shared` | Section: `operations` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.1.0-docs-baseline
+> Updated: 2026-04-17 | Version: v0.2.0-github-backup
 ### Hard safety rule
 Every destructive operation must create a backup before mutation.
 Rollback itself is also a destructive operation and therefore follows the same rule.
@@ -27,6 +27,13 @@ Rollback itself is also a destructive operation and therefore follows the same r
 ### Authentication baseline
 - GitHub private backup uses a fine-grained PAT in V1.
 - The token is controller-side only and must not be propagated to agents.
+
+### Current controller implementation
+- Controller always writes the local backup artifacts first and preserves the manifest path as the rollback anchor.
+- When `PORTMANAGER_GITHUB_BACKUP_ENABLED`, `PORTMANAGER_GITHUB_BACKUP_REPO`, and `PORTMANAGER_GITHUB_BACKUP_TOKEN` are configured, controller uploads one JSON bundle through the GitHub Contents API to `portmanager-backups/{hostId}/{backupId}.bundle.json`.
+- The uploaded bundle contains the manifest plus the serialized local artifact files so rollback evidence and remote redundancy stay aligned.
+- `required` degrades when GitHub upload is missing or fails.
+- `best_effort` keeps the operation succeeded on local backup success while still publishing explicit remote failure or setup guidance.
 
 ### Managed rollback boundary
 Rollback restores only PortManager-managed assets, including:
@@ -50,5 +57,6 @@ Rollback does not claim ownership over unrelated workloads, user applications, o
 The product must show:
 - whether a local backup succeeded
 - whether GitHub backup was attempted and succeeded
+- which GitHub repo/path received the remote bundle or why upload failed
 - which rollback points are valid candidates
 - which operation created each backup and rollback point

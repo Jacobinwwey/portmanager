@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-sdk-and-docker.md`
 > Audience：`shared` | Section：`operations` | Status：`active`
-> Updated：2026-04-16 | Version：v0.1.0-docs-baseline
+> Updated：2026-04-17 | Version：v0.1.1-github-backup
 ### V1 锁定的 SDK
 - `TypeScript SDK`：面向 Web、Node 脚本、自动化与未来外部工具
 - `Rust crate`：面向 CLI、agent 复用与后续基础设施集成
@@ -40,7 +40,7 @@ status: active
 - 日志策略
 - 控制平面容器升级 / 回滚预期
 
-### 需要保留的环境变量契约
+### 当前已经被 controller backup 流程使用的环境变量契约
 - `PORTMANAGER_CONTROLLER_PORT`
 - `PORTMANAGER_CONTROLLER_BASE_URL`
 - `PORTMANAGER_SQLITE_PATH`
@@ -48,6 +48,11 @@ status: active
 - `PORTMANAGER_GITHUB_BACKUP_ENABLED`
 - `PORTMANAGER_GITHUB_BACKUP_REPO`
 - `PORTMANAGER_GITHUB_BACKUP_TOKEN`
+
+controller 现在已经真实消费 GitHub backup 三个变量来交付远端备份：
+- `PORTMANAGER_GITHUB_BACKUP_ENABLED`：打开或关闭远端上传行为。
+- `PORTMANAGER_GITHUB_BACKUP_REPO`：指定 GitHub Contents 上传目标的 `owner/repo`。
+- `PORTMANAGER_GITHUB_BACKUP_TOKEN`：为 controller 侧上传提供认证，并且必须继续留在 agent 作用域之外。
 
 ### 未来迁移说明
 PostgreSQL 是明确保留的未来可靠性迁移方向，但它不应反过来扭曲 V1 的默认部署形态。

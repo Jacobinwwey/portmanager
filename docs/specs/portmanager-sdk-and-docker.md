@@ -1,7 +1,7 @@
 # PortManager SDK and Docker Boundary
 
-Updated: 2026-04-16
-Version: v0.1.0-docs-baseline
+Updated: 2026-04-17
+Version: v0.1.1-github-backup
 
 ## English
 
@@ -33,7 +33,7 @@ Version: v0.1.0-docs-baseline
 - log strategy
 - upgrade / rollback expectations for control plane containers
 
-### Environment variable contract to preserve for later implementation
+### Environment variable contract now used by controller backup flow
 - `PORTMANAGER_CONTROLLER_PORT`
 - `PORTMANAGER_CONTROLLER_BASE_URL`
 - `PORTMANAGER_SQLITE_PATH`
@@ -41,6 +41,11 @@ Version: v0.1.0-docs-baseline
 - `PORTMANAGER_GITHUB_BACKUP_ENABLED`
 - `PORTMANAGER_GITHUB_BACKUP_REPO`
 - `PORTMANAGER_GITHUB_BACKUP_TOKEN`
+
+The controller now actively consumes the GitHub backup trio for real remote-backup delivery:
+- `PORTMANAGER_GITHUB_BACKUP_ENABLED`: turns remote upload behavior on or off.
+- `PORTMANAGER_GITHUB_BACKUP_REPO`: selects the `owner/repo` target for GitHub Contents uploads.
+- `PORTMANAGER_GITHUB_BACKUP_TOKEN`: authenticates the controller-side upload and must stay outside agent scope.
 
 ### Future migration note
 PostgreSQL is a deliberate future reliability path, but it must not distort the V1 default deployment shape.
@@ -76,7 +81,7 @@ The Docker baseline is intentionally optimized for fast self-hosted adoption bef
 - 日志策略
 - 控制平面容器升级 / 回滚预期
 
-### 需要保留的环境变量契约
+### 当前已经被 controller backup 流程使用的环境变量契约
 - `PORTMANAGER_CONTROLLER_PORT`
 - `PORTMANAGER_CONTROLLER_BASE_URL`
 - `PORTMANAGER_SQLITE_PATH`
@@ -84,6 +89,11 @@ The Docker baseline is intentionally optimized for fast self-hosted adoption bef
 - `PORTMANAGER_GITHUB_BACKUP_ENABLED`
 - `PORTMANAGER_GITHUB_BACKUP_REPO`
 - `PORTMANAGER_GITHUB_BACKUP_TOKEN`
+
+controller 现在已经真实消费 GitHub backup 三个变量来交付远端备份：
+- `PORTMANAGER_GITHUB_BACKUP_ENABLED`：打开或关闭远端上传行为。
+- `PORTMANAGER_GITHUB_BACKUP_REPO`：指定 GitHub Contents 上传目标的 `owner/repo`。
+- `PORTMANAGER_GITHUB_BACKUP_TOKEN`：为 controller 侧上传提供认证，并且必须继续留在 agent 作用域之外。
 
 ### 未来迁移说明
 PostgreSQL 是明确保留的未来可靠性迁移方向，但它不应反过来扭曲 V1 的默认部署形态。

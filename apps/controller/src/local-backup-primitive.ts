@@ -9,6 +9,7 @@ import type {
   SnapshotManifestSchema
 } from '@portmanager/typescript-contracts'
 
+import { createGitHubBackupClient, type GitHubBackupClient } from './github-backup-client.ts'
 import type { BackupSummary, OperationStore, RollbackPoint } from './operation-store.ts'
 
 interface RunBackupInput {
@@ -27,12 +28,12 @@ export interface LocalBackupPrimitive {
     rollbackPoint: RollbackPoint
     rollbackResultPath: string
   }
-  runBackup(input: RunBackupInput): {
+  runBackup(input: RunBackupInput): Promise<{
     backup: BackupSummary
     operationState: 'succeeded' | 'degraded'
     rollbackPoint: RollbackPoint
     resultSummary: string
-  }
+  }>
 }
 
 const SCHEMA_VERSION = '0.1.0'
@@ -58,11 +59,13 @@ function writeJsonArtifact(filePath: string, value: unknown) {
 export function createLocalBackupPrimitive(options: {
   artifactRoot: string
   store: OperationStore
+  githubBackupClient?: GitHubBackupClient
 }): LocalBackupPrimitive {
   const { artifactRoot, store } = options
+  const githubBackupClient = options.githubBackupClient ?? createGitHubBackupClient()
 
   return {
-    runBackup(input) {
+    async runBackup(input) {
       const createdAt = nowIso()
       const backupId = `backup_${input.operationId}`
       const backupDirectory = path.join(artifactRoot, 'backups', backupId)
@@ -159,6 +162,27 @@ export function createLocalBackupPrimitive(options: {
       const manifestPath = path.join(backupDirectory, 'manifest.json')
       writeJsonArtifact(manifestPath, manifest)
 
+      const remoteBundle = {
+        schemaVersion: SCHEMA_VERSION,
+        backupId,
+        hostId: input.hostId,
+        backupMode: input.mode,
+        createdAt,
+        manifest,
+        files: [manifestPath, ...manifest.bundleFiles].map((filePath) => ({
+          path: path.relative(backupDirectory, filePath).replaceAll(path.sep, '/'),
+          content: readFileSync(filePath, 'utf8')
+        }))
+      }
+
+      const remoteBackup = await githubBackupClient.uploadBackupBundle({
+        backupId,
+        hostId: input.hostId,
+        backupMode: input.mode,
+        createdAt,
+        bundle: JSON.stringify(remoteBundle, null, 2)
+      })
+
       const backup = store.createBackup({
         id: backupId,
         hostId: input.hostId,
@@ -166,7 +190,7 @@ export function createLocalBackupPrimitive(options: {
         createdAt,
         backupMode: input.mode,
         localStatus: 'succeeded',
-        githubStatus: 'not_configured',
+        githubStatus: remoteBackup.githubStatus,
         manifestPath
       })
 
@@ -179,13 +203,24 @@ export function createLocalBackupPrimitive(options: {
       })
 
       const resultSummary =
-        input.mode === 'required'
-          ? `backup ${backup.id} created with rollback point ${rollbackPoint.id}, but required GitHub backup is not configured`
-          : `backup ${backup.id} created with rollback point ${rollbackPoint.id}; best_effort permits local-only continuation while GitHub backup is not configured`
+        remoteBackup.githubStatus === 'succeeded'
+          ? `backup ${backup.id} created with rollback point ${rollbackPoint.id}; GitHub backup uploaded to ${remoteBackup.repo}:${remoteBackup.remotePath}`
+          : remoteBackup.githubStatus === 'failed'
+            ? input.mode === 'required'
+              ? `backup ${backup.id} created with rollback point ${rollbackPoint.id}, but GitHub backup upload failed: ${remoteBackup.errorMessage ?? 'unknown remote failure'}`
+              : `backup ${backup.id} created with rollback point ${rollbackPoint.id}; best_effort continues after GitHub backup upload failed: ${remoteBackup.errorMessage ?? 'unknown remote failure'}`
+            : input.mode === 'required'
+              ? `backup ${backup.id} created with rollback point ${rollbackPoint.id}, but required GitHub backup is not configured`
+              : `backup ${backup.id} created with rollback point ${rollbackPoint.id}; best_effort permits local-only continuation while GitHub backup is not configured`
 
       return {
         backup,
-        operationState: input.mode === 'required' ? 'degraded' : 'succeeded',
+        operationState:
+          remoteBackup.githubStatus === 'succeeded'
+            ? 'succeeded'
+            : input.mode === 'required'
+              ? 'degraded'
+              : 'succeeded',
         rollbackPoint,
         resultSummary
       }

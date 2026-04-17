@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-17
-Version: v0.2.7-diagnostics-history
+Version: v0.2.8-github-backup
 
 ## English
 
@@ -43,7 +43,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 | `health-checks` | Shared inspection surface for host/rule health evidence | Implemented for controller and CLI reads. Web now renders live host and bridge-rule health evidence from controller-backed `health-checks` data. |
 | `operations` | Shared audit record plus detail and replay | Implemented for controller and CLI reads, including detail and replay URLs. Web operations and console surfaces now consume live controller data, replay URLs, and selected diagnostic detail. |
 | `rollback-points` | Recovery inventory plus apply flow | Implemented for controller and CLI list/apply flows. Web now renders live rollback readiness and linked recovery evidence in host-detail and backups views. |
-| `backups` | Backup inventory plus backup execution | Implemented for controller list/run and CLI list. Web now renders live backup inventory, manifest paths, and related recovery operations in dedicated `Backups` and controller-backed host views. |
+| `backups` | Backup inventory plus backup execution | Implemented for controller list/run and CLI list. Web now renders live backup inventory, manifest paths, and related recovery operations in dedicated `Backups` and controller-backed host views. When `PORTMANAGER_GITHUB_BACKUP_ENABLED`, `PORTMANAGER_GITHUB_BACKUP_REPO`, and `PORTMANAGER_GITHUB_BACKUP_TOKEN` are configured, controller also uploads the backup bundle JSON through the GitHub Contents API and publishes `succeeded` / `failed` / `not_configured` remote status across API, CLI, and Web. |
 | `snapshots/diagnostics` | Diagnostics run/list plus snapshot evidence | Implemented for controller run/list and CLI list. Controller `GET /diagnostics` now also accepts `state` for degraded-versus-recovery history filtering, and Web host detail now renders latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence inside controller-backed host-level surfaces. |
 | Controller-agent steady state | `HTTP over Tailscale` | Implemented. `crates/portmanager-agent/src/main.rs` now exposes long-lived `serve` with `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback`; controller uses `apps/controller/src/agent-client.ts` to push desired state, collect runtime state, and explicitly degrade unreachable hosts and rules. |
 
@@ -63,7 +63,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Unit 5`: complete. Acceptance was replayed and milestone language updated only after the proof stayed green.
 - `Milestone 2 slice shipped`: agent `/health` + `/runtime-state`, controller host summary/detail, CLI host output, and Web host detail now share `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.
 - `Milestone 2 slice shipped`: controller `GET /diagnostics` now filters by `state`, and Web host detail now groups degraded diagnostics history with recovery-ready successful evidence.
-- `Next lane`: Milestone 2 reliability hardening on the same live host / rule / policy slice with repeated proof and real GitHub backup delivery.
+- `Milestone 2 slice shipped`: controller backup bundles now upload through the GitHub Contents API when configured, and required-mode success/failure stays explicit across API, CLI, Web, and milestone proof.
+- `Next lane`: Milestone 2 reliability hardening on the same live host / rule / policy slice with repeated proof across configured, failed, and local-only remote-backup evidence.
 
 ## 中文
 
@@ -105,7 +106,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 | `health-checks` | 跨界面共享的 host/rule 健康证据面 | controller 与 CLI 的读取能力已实现；Web 现在也会从 controller-backed `health-checks` 渲染 live host / rule 健康证据。 |
 | `operations` | 共享审计记录、详情与回放入口 | controller 与 CLI 的读取能力已实现，包括 detail 与 replay URL；Web 的 operations 与 console 页面现在也会消费 live controller 数据、replay URL 与 diagnostics detail。 |
 | `rollback-points` | 恢复点清单与 apply 流程 | controller 与 CLI 的 list/apply 已实现；Web 现在也会在 host-detail 与 backups 页面中渲染 live rollback readiness 与恢复证据。 |
-| `backups` | 备份清单与执行入口 | controller 的 list/run 与 CLI 的 list 已实现；Web 现在也已经在独立 `Backups` 与 controller-backed host 视图里渲染 live backup inventory、manifest 路径与恢复操作。 |
+| `backups` | 备份清单与执行入口 | controller 的 list/run 与 CLI 的 list 已实现；Web 现在也已经在独立 `Backups` 与 controller-backed host 视图里渲染 live backup inventory、manifest 路径与恢复操作。当 `PORTMANAGER_GITHUB_BACKUP_ENABLED`、`PORTMANAGER_GITHUB_BACKUP_REPO`、`PORTMANAGER_GITHUB_BACKUP_TOKEN` 已配置时，controller 还会通过 GitHub Contents API 上传 backup bundle JSON，并把 `succeeded` / `failed` / `not_configured` 远端状态同步暴露给 API、CLI 与 Web。 |
 | `snapshots/diagnostics` | 诊断执行、列表与快照证据 | controller 的 run/list 与 CLI 的 list 已实现；controller `GET /diagnostics` 现在还支持 `state` 过滤 degraded 与 recovery 历史，Web host detail 也已经在 controller-backed host 证据面里分组渲染最新诊断、degraded 诊断历史与 recovery-ready 成功证据。 |
 | controller-agent 稳态通信 | `HTTP over Tailscale` | 已实现。`crates/portmanager-agent/src/main.rs` 现在已经提供长驻 `serve` 以及 `/health`、`/runtime-state`、`/apply`、`/snapshot`、`/rollback`；controller 会通过 `apps/controller/src/agent-client.ts` 推送 desired state、收集 runtime state，并在 agent 不可达时显式把 host / rule 置为 degraded。 |
 
@@ -124,4 +125,5 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Unit 4`：已完成。在不破坏现有证据产物的前提下，controller 与 agent 已通过锁定的 `HTTP over Tailscale` 稳态边界接通。
 - `Unit 5`：已完成。只有在证明链保持为绿之后，验收才被重跑，里程碑状态表述也才被更新。
 - `Milestone 2 切片已交付`：controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经把 degraded diagnostics history 与 recovery-ready 成功证据成组展示出来。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 可靠性加固：重复证明，以及 GitHub backup 真正交付。
+- `Milestone 2 切片已交付`：当配置存在时，controller backup bundle 现在会通过 GitHub Contents API 上传，required-mode 成功/失败路径也已经在 API、CLI、Web 与 milestone proof 中保持显式一致。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 可靠性加固：围绕 configured、failed、local-only 三类 remote-backup 证据继续重复证明。

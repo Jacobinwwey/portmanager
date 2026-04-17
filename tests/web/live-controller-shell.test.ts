@@ -41,6 +41,52 @@ function tempPaths() {
   }
 }
 
+async function startGitHubMockServer() {
+  const server = createServer((request, response) => {
+    if (
+      request.method !== 'PUT' ||
+      !(request.url ?? '').startsWith('/repos/Jacobinwwey/portmanager-backups/contents/')
+    ) {
+      response.writeHead(404)
+      response.end()
+      return
+    }
+
+    const chunks: Buffer[] = []
+    request.on('data', (chunk) => {
+      chunks.push(Buffer.from(chunk))
+    })
+    request.on('end', () => {
+      response.writeHead(201, { 'content-type': 'application/json' })
+      response.end(
+        JSON.stringify({
+          content: {
+            path: decodeURIComponent(
+              (request.url ?? '').slice('/repos/Jacobinwwey/portmanager-backups/contents/'.length)
+            )
+          }
+        })
+      )
+    })
+  })
+
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', reject)
+      resolve()
+    })
+  })
+
+  const address = server.address()
+  assert.ok(address && typeof address !== 'string')
+
+  return {
+    server,
+    baseUrl: `http://127.0.0.1:${address.port}`
+  }
+}
+
 async function waitForTerminalOperation(baseUrl: string, operationId: string) {
   for (let attempt = 0; attempt < 60; attempt += 1) {
     const response = await fetch(`${baseUrl}/operations/${operationId}`)
@@ -287,6 +333,87 @@ test('web live loaders render controller-backed overview, host, rules, backups, 
     }
   } finally {
     await closeHttpServer(target)
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('web live loaders render successful GitHub backup status when remote backup is configured', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+  const github = await startGitHubMockServer()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({
+      store,
+      eventBus,
+      artifactRoot,
+      githubBackup: {
+        apiBaseUrl: github.baseUrl,
+        env: {
+          PORTMANAGER_GITHUB_BACKUP_ENABLED: 'true',
+          PORTMANAGER_GITHUB_BACKUP_REPO: 'Jacobinwwey/portmanager-backups',
+          PORTMANAGER_GITHUB_BACKUP_TOKEN: 'ghs_test_token'
+        }
+      }
+    })
+    const listening = await server.listen(0)
+
+    try {
+      const createHostResponse = await fetch(`${listening.baseUrl}/hosts`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: 'host_alpha',
+          name: 'Alpha Relay',
+          labels: ['edge'],
+          ssh: {
+            host: '100.64.0.10',
+            port: 22
+          }
+        })
+      })
+      assert.equal(createHostResponse.status, 202)
+      const createHostAccepted = (await createHostResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, createHostAccepted.operationId)
+
+      const hostsResponse = await fetch(`${listening.baseUrl}/hosts`)
+      assert.equal(hostsResponse.status, 200)
+      const hostsPayload = (await hostsResponse.json()) as {
+        items: Array<{ id: string }>
+      }
+      const hostId = hostsPayload.items[0]?.id
+      assert.ok(hostId)
+
+      const backupResponse = await fetch(`${listening.baseUrl}/backups/run`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId,
+          mode: 'required'
+        })
+      })
+
+      assert.equal(backupResponse.status, 202)
+      const accepted = (await backupResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, accepted.operationId)
+
+      const backupsState = await loadBackupsState({ baseUrl: listening.baseUrl, hostId })
+      const html = renderToStaticMarkup(h(BackupsPage, { state: backupsState }))
+
+      assert.match(html, /succeeded/i)
+      assert.match(html, /remote redundancy is available/i)
+      assert.match(html, /no remote action required/i)
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    await closeHttpServer(github.server)
     rmSync(directory, { recursive: true, force: true })
   }
 })
