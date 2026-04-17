@@ -47,6 +47,10 @@ interface BackupInventory {
     operationId?: string
     localStatus: string
     githubStatus?: string
+    remoteTarget?: string
+    remoteConfigured?: boolean
+    remoteStatusSummary?: string
+    remoteAction?: string
     manifestPath?: string
   }>
 }

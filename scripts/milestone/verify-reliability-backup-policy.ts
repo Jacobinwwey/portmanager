@@ -26,6 +26,10 @@ interface BackupSummary {
   backupMode?: string
   localStatus: string
   githubStatus?: string
+  remoteTarget?: string
+  remoteConfigured?: boolean
+  remoteStatusSummary?: string
+  remoteAction?: string
 }
 
 interface BackupInventory {

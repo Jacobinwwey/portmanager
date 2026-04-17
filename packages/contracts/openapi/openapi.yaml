@@ -823,7 +823,7 @@ components:
           format: date-time
     BackupSummary:
       type: object
-      required: [id, hostId, createdAt, backupMode, localStatus]
+      required: [id, hostId, createdAt, backupMode, localStatus, remoteTarget, remoteConfigured, remoteStatusSummary, remoteAction]
       properties:
         id:
           type: string
@@ -843,6 +843,15 @@ components:
         githubStatus:
           type: string
           enum: [not_configured, skipped, succeeded, failed]
+        remoteTarget:
+          type: string
+          enum: [github]
+        remoteConfigured:
+          type: boolean
+        remoteStatusSummary:
+          type: string
+        remoteAction:
+          type: string
         manifestPath:
           type: string
     RunBackupRequest:

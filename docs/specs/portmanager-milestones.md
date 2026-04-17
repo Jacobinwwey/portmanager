@@ -91,8 +91,9 @@ Milestone 2 is only accepted when all of the following become true:
 #### Current verified status
 - Reliability work has already started on this branch.
 - Verified now: backup-policy visibility, drift-driven degraded records, recovery-linked operation summaries, rollback inspection, and richer event history flows in controller and CLI tests.
+- Verified now: remote-backup guidance is now explicit across Web, CLI, API, and proof output; backup summaries now publish remote target, setup state, status summary, and operator action instead of only raw `not_configured` state.
 - Verified now from the accepted Milestone 1 slice: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures; live unreachable-agent paths now degrade hosts and rules explicitly; controller-side diagnostics promote rules to `active` after real verification.
-- Milestone 2 still remains in progress because required-mode remote backup is still degraded when GitHub backup is not configured in the proof environment, broader degraded/recovery UX still needs more live polish, and repeated reliability replay on the same live slice is not yet deep enough to advance status.
+- Milestone 2 still remains in progress because required-mode remote backup is still degraded when GitHub backup is not configured in the proof environment even though setup/action guidance is now explicit, broader degraded/recovery UX still needs more live polish, and repeated reliability replay on the same live slice is not yet deep enough to advance status.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.
@@ -235,8 +236,9 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 #### 当前已验证状态
 - 可靠性工作已经在当前分支启动。
 - 当前已验证：backup policy 可见性、drift 驱动 degraded 记录、带 recovery 关联的 operation 摘要、rollback 检查能力，以及更丰富的 controller/CLI 事件历史流。
+- 当前已验证：远端备份提示现在已经在 Web、CLI、API 与 proof 输出中显式可见；backup 摘要不再只暴露原始 `not_configured`，而是会同时给出远端目标、配置状态、状态摘要与操作者动作。
 - 已被接受的 Milestone 1 切片进一步证明：即使上游断连在本机上表现为 `502`，CLI 仍将其明确归类为 transport 级故障，而不是 controller 业务错误；live unreachable-agent 路径现在也会显式把 host / rule 置为 degraded；controller-side diagnostics 还会在真实验证后把规则提升到 `active`。
-- 里程碑 2 仍然处于进行中，因为 proof 环境中未配置 GitHub backup 时 required-mode 仍会降级，更广的 degraded/recovery UX 仍需要 live 打磨，而且同一条 live 切片上的可靠性重复证明还不够深。
+- 里程碑 2 仍然处于进行中，因为即使远端备份的配置/动作提示现在已经显式暴露，proof 环境中未配置 GitHub backup 时 required-mode 仍会降级；此外更广的 degraded/recovery UX 仍需要 live 打磨，而且同一条 live 切片上的可靠性重复证明还不够深。
 
 #### 可靠性推进规则
 - 里程碑 2 的推进必须建立在同一套 host/rule/policy 公共模型之上，而不是绕过里程碑 1 缺口。

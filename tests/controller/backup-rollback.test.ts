@@ -80,6 +80,10 @@ test('controller server runs best_effort backup and exposes local-only safety ev
           localStatus: string
           backupMode?: string
           githubStatus?: string
+          remoteTarget?: string
+          remoteConfigured?: boolean
+          remoteStatusSummary?: string
+          remoteAction?: string
           manifestPath?: string
           operationId?: string
         }>
@@ -90,6 +94,10 @@ test('controller server runs best_effort backup and exposes local-only safety ev
       assert.equal(backupsPayload.items[0]?.localStatus, 'succeeded')
       assert.equal(backupsPayload.items[0]?.backupMode, 'best_effort')
       assert.equal(backupsPayload.items[0]?.githubStatus, 'not_configured')
+      assert.equal(backupsPayload.items[0]?.remoteTarget, 'github')
+      assert.equal(backupsPayload.items[0]?.remoteConfigured, false)
+      assert.match(backupsPayload.items[0]?.remoteStatusSummary ?? '', /local-only continuation/i)
+      assert.match(backupsPayload.items[0]?.remoteAction ?? '', /configure github backup/i)
       assert.equal(backupsPayload.items[0]?.operationId, accepted.operationId)
 
       const manifestPath = backupsPayload.items[0]?.manifestPath
@@ -170,6 +178,10 @@ test('controller server marks required backup degraded when remote backup is una
           backupMode?: string
           githubStatus?: string
           localStatus: string
+          remoteTarget?: string
+          remoteConfigured?: boolean
+          remoteStatusSummary?: string
+          remoteAction?: string
         }>
       }
 
@@ -177,6 +189,10 @@ test('controller server marks required backup degraded when remote backup is una
       assert.equal(backupsPayload.items[0]?.backupMode, 'required')
       assert.equal(backupsPayload.items[0]?.localStatus, 'succeeded')
       assert.equal(backupsPayload.items[0]?.githubStatus, 'not_configured')
+      assert.equal(backupsPayload.items[0]?.remoteTarget, 'github')
+      assert.equal(backupsPayload.items[0]?.remoteConfigured, false)
+      assert.match(backupsPayload.items[0]?.remoteStatusSummary ?? '', /required-mode degradation/i)
+      assert.match(backupsPayload.items[0]?.remoteAction ?? '', /configure github backup/i)
 
       const rollbackResponse = await fetch(
         `${listening.baseUrl}/rollback-points?hostId=host_alpha&state=ready`

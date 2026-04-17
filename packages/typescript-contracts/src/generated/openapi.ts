@@ -903,6 +903,11 @@ export interface components {
             localStatus: "succeeded" | "failed";
             manifestPath?: string;
             operationId?: string;
+            remoteAction: string;
+            remoteConfigured: boolean;
+            remoteStatusSummary: string;
+            /** @enum {string} */
+            remoteTarget: "github";
         };
         BootstrapHostRequest: {
             /** @enum {string} */

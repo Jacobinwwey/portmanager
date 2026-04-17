@@ -207,6 +207,18 @@ function artifactPathsFromOperations(operations: Array<OperationSummary | Operat
   )
 }
 
+function backupRemoteConfiguredCopy(backup: BackupSummary) {
+  return backup.remoteConfigured ? 'configured' : 'needs setup'
+}
+
+function backupRemoteStatusSummary(backup: BackupSummary) {
+  return backup.remoteStatusSummary ?? `${backup.remoteTarget ?? 'remote'} backup guidance unavailable`
+}
+
+function backupRemoteAction(backup: BackupSummary) {
+  return backup.remoteAction ?? 'No remote backup action guidance published.'
+}
+
 function requestSourceFromOperation(operation: OperationDetailContract) {
   return `${operation.initiator ?? 'controller'}/${operation.type}`
 }
@@ -928,6 +940,11 @@ export function createMockHostDetailState(): HostDetailState {
         backupMode: 'required',
         localStatus: 'succeeded',
         githubStatus: 'not_configured',
+        remoteTarget: 'github',
+        remoteConfigured: false,
+        remoteStatusSummary:
+          'GitHub backup missing; required-mode degradation stays active until remote backup is configured.',
+        remoteAction: 'Configure GitHub backup before rerunning required-mode mutations.',
         manifestPath: '/var/lib/portmanager/snapshots/op_snapshot_002-manifest.json',
         operationId: 'op_snapshot_002'
       },
@@ -938,6 +955,12 @@ export function createMockHostDetailState(): HostDetailState {
         backupMode: 'best_effort',
         localStatus: 'succeeded',
         githubStatus: 'not_configured',
+        remoteTarget: 'github',
+        remoteConfigured: false,
+        remoteStatusSummary:
+          'GitHub backup missing; best_effort keeps local-only continuation with backup evidence.',
+        remoteAction:
+          'Configure GitHub backup for remote redundancy or keep best_effort local-only behavior.',
         manifestPath: '/var/lib/portmanager/snapshots/op_snapshot_001-manifest.json',
         operationId: 'op_snapshot_001'
       }
@@ -2358,9 +2381,11 @@ function HostDetailMain(props: { state: HostDetailState }) {
             h(
               'div',
               { className: 'pm-microcopy', key: 'line2' },
-              `${backup.backupMode} · ${backup.githubStatus ?? 'unknown'}`
+              `${backup.backupMode} · ${backup.githubStatus ?? 'unknown'} · ${backupRemoteConfiguredCopy(backup)}`
             ),
-            h('div', { className: 'pm-artifact', key: 'line3' }, backup.manifestPath ?? 'no manifest path'),
+            h('div', { key: 'line3' }, backupRemoteStatusSummary(backup)),
+            h('div', { className: 'pm-microcopy', key: 'line4' }, backupRemoteAction(backup)),
+            h('div', { className: 'pm-artifact', key: 'line5' }, backup.manifestPath ?? 'no manifest path'),
             h(StatusBadge, { key: 'badge', state: backup.localStatus })
           ])
         )
@@ -2842,7 +2867,9 @@ function BackupsMain(props: { state: BackupsState }) {
                   { className: 'pm-microcopy', key: 'line2' },
                   `${backup.hostId} · ${backup.backupMode} · ${backup.githubStatus ?? 'github unknown'}`
                 ),
-                h('div', { className: 'pm-artifact', key: 'line3' }, backup.manifestPath ?? 'no manifest path'),
+                h('div', { key: 'line3' }, backupRemoteStatusSummary(backup)),
+                h('div', { className: 'pm-microcopy', key: 'line4' }, backupRemoteAction(backup)),
+                h('div', { className: 'pm-artifact', key: 'line5' }, backup.manifestPath ?? 'no manifest path'),
                 h(StatusBadge, { key: 'badge', state: backup.localStatus })
               ])
             )
@@ -2888,6 +2915,10 @@ function BackupsRail(props: { state: BackupsState }) {
             kvRow('Mode', props.state.selectedBackup.backupMode),
             kvRow('Local', h(StatusBadge, { state: props.state.selectedBackup.localStatus })),
             kvRow('GitHub', props.state.selectedBackup.githubStatus ?? 'not_configured'),
+            kvRow('Remote Target', props.state.selectedBackup.remoteTarget ?? 'github'),
+            kvRow('Remote Setup', backupRemoteConfiguredCopy(props.state.selectedBackup)),
+            kvRow('Remote Status', backupRemoteStatusSummary(props.state.selectedBackup)),
+            kvRow('Operator Action', backupRemoteAction(props.state.selectedBackup)),
             kvRow('Manifest', props.state.selectedBackup.manifestPath ?? 'n/a')
           ])
         : emptyState('No backup selected yet.')

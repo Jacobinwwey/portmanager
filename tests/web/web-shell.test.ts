@@ -75,6 +75,7 @@ test('host detail shell surfaces backup policy modes and remote backup status', 
   assert.match(html, /best_effort/i)
   assert.match(html, /required/i)
   assert.match(html, /not_configured/i)
+  assert.match(html, /configure github backup/i)
 })
 
 test('host detail shell surfaces operation summaries and linked recovery evidence', () => {
@@ -136,6 +137,8 @@ test('backups shell renders backup manifests and rollback readiness detail', () 
   assert.match(html, /rollback readiness/i)
   assert.match(html, /backup_alpha_002/i)
   assert.match(html, /op_snapshot_002-manifest\.json/i)
+  assert.match(html, /required-mode degradation/i)
+  assert.match(html, /configure github backup/i)
 })
 
 test('console shell renders controller replay and selected diagnostic detail', () => {

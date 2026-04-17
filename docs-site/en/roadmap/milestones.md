@@ -98,8 +98,9 @@ Milestone 2 is only accepted when all of the following become true:
 #### Current verified status
 - Reliability work has already started on this branch.
 - Verified now: backup-policy visibility, drift-driven degraded records, recovery-linked operation summaries, rollback inspection, and richer event history flows in controller and CLI tests.
+- Verified now: remote-backup guidance is now explicit across Web, CLI, API, and proof output; backup summaries now publish remote target, setup state, status summary, and operator action instead of only raw `not_configured` state.
 - Verified now from the accepted Milestone 1 slice: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures; live unreachable-agent paths now degrade hosts and rules explicitly; controller-side diagnostics promote rules to `active` after real verification.
-- Milestone 2 still remains in progress because required-mode remote backup is still degraded when GitHub backup is not configured in the proof environment, broader degraded/recovery UX still needs more live polish, and repeated reliability replay on the same live slice is not yet deep enough to advance status.
+- Milestone 2 still remains in progress because required-mode remote backup is still degraded when GitHub backup is not configured in the proof environment even though setup/action guidance is now explicit, broader degraded/recovery UX still needs more live polish, and repeated reliability replay on the same live slice is not yet deep enough to advance status.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.

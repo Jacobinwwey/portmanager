@@ -32,6 +32,8 @@ test('one host bootstrap and one rule apply verification proves milestone slice'
   assert.equal(result.backups.items.length >= 1, true)
   assert.equal(result.backups.items[0]?.hostId, hostId)
   assert.equal(result.backups.items[0]?.localStatus, 'succeeded')
+  assert.equal(result.backups.items[0]?.remoteConfigured, false)
+  assert.match(result.backups.items[0]?.remoteAction ?? '', /configure github backup/i)
   assert.equal(result.rollbackPoints.items[0]?.state, 'applied')
   assert.equal(result.rollbackOperation.state, 'succeeded')
   assert.equal(result.controllerBaseUrl.startsWith('http://127.0.0.1:'), true)

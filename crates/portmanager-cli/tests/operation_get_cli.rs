@@ -574,6 +574,10 @@ fn backups_list_json_filters_by_host() {
                         "backupMode": "required",
                         "localStatus": "succeeded",
                         "githubStatus": "not_configured",
+                        "remoteTarget": "github",
+                        "remoteConfigured": false,
+                        "remoteStatusSummary": "GitHub backup missing; required-mode degradation stays active until remote backup is configured.",
+                        "remoteAction": "Configure GitHub backup before rerunning required-mode mutations.",
                         "manifestPath": "/var/lib/portmanager/snapshots/op_backup_alpha_001-manifest.json"
                     }
                 ]
@@ -596,6 +600,12 @@ fn backups_list_json_filters_by_host() {
     assert_eq!(parsed["items"][0]["localStatus"], "succeeded");
     assert_eq!(parsed["items"][0]["backupMode"], "required");
     assert_eq!(parsed["items"][0]["githubStatus"], "not_configured");
+    assert_eq!(parsed["items"][0]["remoteTarget"], "github");
+    assert_eq!(parsed["items"][0]["remoteConfigured"], false);
+    assert_eq!(
+        parsed["items"][0]["remoteAction"],
+        "Configure GitHub backup before rerunning required-mode mutations."
+    );
 }
 
 #[test]
@@ -614,6 +624,10 @@ fn backups_list_text_surfaces_backup_policy_and_remote_status() {
                         "backupMode": "best_effort",
                         "localStatus": "succeeded",
                         "githubStatus": "not_configured",
+                        "remoteTarget": "github",
+                        "remoteConfigured": false,
+                        "remoteStatusSummary": "GitHub backup missing; best_effort continues with local-only backup evidence.",
+                        "remoteAction": "Configure GitHub backup for remote redundancy or keep best_effort local-only behavior.",
                         "manifestPath": "/var/lib/portmanager/snapshots/op_backup_alpha_001-manifest.json"
                     }
                 ]
@@ -629,6 +643,7 @@ fn backups_list_text_surfaces_backup_policy_and_remote_status() {
     let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
     assert!(stdout.contains("best_effort"));
     assert!(stdout.contains("not_configured"));
+    assert!(stdout.contains("Configure GitHub backup"));
 }
 
 #[test]

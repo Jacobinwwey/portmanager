@@ -275,8 +275,73 @@ function parseStringArray(serialized: string | null) {
   return parsed.map((value) => String(value))
 }
 
-function rowToBackup(row: BackupRow): BackupSummary {
+function backupRemoteConfigured(status: BackupSummary['githubStatus']) {
+  return Boolean(status && status !== 'not_configured')
+}
+
+function backupRemoteStatusSummary(backup: {
+  backupMode: NonNullable<BackupSummary['backupMode']>
+  githubStatus?: NonNullable<BackupSummary['githubStatus']>
+}) {
+  switch (backup.githubStatus) {
+    case 'succeeded':
+      return 'GitHub backup succeeded; remote redundancy is available for this snapshot.'
+    case 'failed':
+      return 'GitHub backup failed; local rollback evidence remains available but remote redundancy is missing.'
+    case 'skipped':
+      return backup.backupMode === 'required'
+        ? 'GitHub backup was skipped; required-mode degradation stays active until remote backup is trustworthy.'
+        : 'GitHub backup was skipped; best_effort continues with local evidence only.'
+    case 'not_configured':
+    default:
+      return backup.backupMode === 'required'
+        ? 'GitHub backup missing; required-mode degradation stays active until remote backup is configured.'
+        : 'GitHub backup missing; best_effort keeps local-only continuation with backup evidence.'
+  }
+}
+
+function backupRemoteAction(backup: {
+  backupMode: NonNullable<BackupSummary['backupMode']>
+  githubStatus?: NonNullable<BackupSummary['githubStatus']>
+}) {
+  switch (backup.githubStatus) {
+    case 'succeeded':
+      return 'No remote action required.'
+    case 'failed':
+      return 'Inspect GitHub backup credentials and connectivity, then rerun the backup.'
+    case 'skipped':
+      return backup.backupMode === 'required'
+        ? 'Restore GitHub backup execution before trusting required-mode runs.'
+        : 'Enable GitHub backup if remote redundancy should become mandatory.'
+    case 'not_configured':
+    default:
+      return backup.backupMode === 'required'
+        ? 'Configure GitHub backup before rerunning required-mode mutations.'
+        : 'Configure GitHub backup for remote redundancy or keep best_effort local-only behavior.'
+  }
+}
+
+function enrichBackupSummary(backup: {
+  id: string
+  hostId: string
+  operationId?: string
+  createdAt: string
+  backupMode: NonNullable<BackupSummary['backupMode']>
+  localStatus: BackupSummary['localStatus']
+  githubStatus?: NonNullable<BackupSummary['githubStatus']>
+  manifestPath?: string
+}): BackupSummary {
   return {
+    ...backup,
+    remoteTarget: 'github',
+    remoteConfigured: backupRemoteConfigured(backup.githubStatus),
+    remoteStatusSummary: backupRemoteStatusSummary(backup),
+    remoteAction: backupRemoteAction(backup)
+  }
+}
+
+function rowToBackup(row: BackupRow): BackupSummary {
+  return enrichBackupSummary({
     id: row.id,
     hostId: row.host_id,
     operationId: row.operation_id ?? undefined,
@@ -285,7 +350,7 @@ function rowToBackup(row: BackupRow): BackupSummary {
     localStatus: row.local_status,
     githubStatus: row.github_status ?? undefined,
     manifestPath: row.manifest_path ?? undefined
-  }
+  })
 }
 
 function rowToBridgeRule(row: BridgeRuleRow): BridgeRule {
@@ -1039,7 +1104,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       const row = findBackupByOperationIdQuery.get(input.operationId ?? null) as BackupRow | undefined
       return row
         ? rowToBackup(row)
-        : {
+        : enrichBackupSummary({
             id: input.id,
             hostId: input.hostId,
             operationId: input.operationId,
@@ -1048,7 +1113,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
             localStatus: input.localStatus,
             githubStatus: input.githubStatus,
             manifestPath: input.manifestPath
-          }
+          })
     },
     createBridgeRule(input) {
       requireHost(input.hostId)

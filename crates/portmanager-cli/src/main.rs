@@ -1041,12 +1041,18 @@ async fn run_backups_list(args: BackupsListArgs) -> ExecutionResult {
                     .flatten()
                     .map(|backup| {
                         format!(
-                            "{} {} {} {} {}",
+                            "{} {} {} {} {} | {} | action: {}",
                             backup["createdAt"].as_str().unwrap_or("unknown"),
                             backup["hostId"].as_str().unwrap_or("unknown"),
                             backup["backupMode"].as_str().unwrap_or("unknown"),
                             backup["localStatus"].as_str().unwrap_or("unknown"),
                             backup["githubStatus"].as_str().unwrap_or("unknown"),
+                            backup["remoteStatusSummary"]
+                                .as_str()
+                                .unwrap_or("remote backup guidance unavailable"),
+                            backup["remoteAction"]
+                                .as_str()
+                                .unwrap_or("no remote action guidance"),
                         )
                     })
                     .collect::<Vec<_>>()
