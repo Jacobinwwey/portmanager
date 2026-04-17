@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-17 | Version：v0.5.1-remote-backup-replay
+> Updated：2026-04-17 | Version：v0.5.2-m2-confidence-plan
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -68,7 +68,7 @@ status: active
 - `Diagnostics-history 切片`：已完成。controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经在同一条 live host / rule / policy 切片上分组展示最新诊断、degraded diagnostics history 与 recovery-ready 成功证据。
 - `GitHub-backup 切片`：已完成。当配置存在时，controller backup bundle 现在会通过 GitHub Contents API 上传，required-mode 成功/失败路径也已经在 API、CLI、Web 与专门的可靠性证明里保持显式一致。
 - `Remote-backup replay 切片`：已完成。`scripts/milestone/verify-reliability-remote-backup-replay.ts` 现在会在同一条 live agent-backed host / rule 流程上重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据保持对齐。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 可靠性加固，把 combined replay 与 acceptance gate 持续保持为绿，直到可信度变成常态。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-routine 加固，把当前 acceptance 加 replay 的双入口故事收敛成一条规范 routine，再用持续为绿的历史把可信度变成常态。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
@@ -107,7 +107,8 @@ status: active
 - 当前已验证：repo 里已经存在可重复执行的 remote-backup replay 证明。`scripts/milestone/verify-reliability-remote-backup-replay.ts` 与 `tests/milestone/reliability-remote-backup-replay.test.ts` 现在会在同一条 live agent-backed host / rule 切片上证明 local-only、configured-success、configured-failure 三类 required backup，而 `tests/web/live-controller-shell.test.ts` 则继续把 Web backup 表面对齐到同一套证据。
 - 当前已验证：agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会在同一条 live 切片上统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。
 - 已被接受的 Milestone 1 切片进一步证明：即使上游断连在本机上表现为 `502`，CLI 仍将其明确归类为 transport 级故障，而不是 controller 业务错误；live unreachable-agent 路径现在也会显式把 host / rule 置为 degraded；controller-side diagnostics 还会在真实验证后把规则提升到 `active`。
-- 里程碑 2 仍然处于进行中，因为新的 combined remote-backup replay 还只是新鲜证据，不是长期保持的常态；路径覆盖虽然已经齐全，但仍需要继续把同一套 replay 与 acceptance gate 持续重放之后，里程碑状态才有资格继续提升。
+- 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性与稳态边界缺口都已闭环；剩余架构缺口已经变成证明编排，因为 `pnpm acceptance:verify` 仍然只停在 accepted one-host proof，而 remote-backup replay 还停留在独立命令里。
+- 里程碑 2 仍然处于进行中，因为仓库还没有把这两条证明链收敛成一个具备持续绿历史的规范 confidence routine；路径覆盖虽然已经齐全，但仍需要先把 routine 做实，里程碑状态才有资格继续提升。
 
 #### 可靠性推进规则
 - 里程碑 2 的推进必须建立在同一套 host/rule/policy 公共模型之上，而不是绕过里程碑 1 缺口。

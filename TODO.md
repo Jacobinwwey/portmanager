@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-17
-Version: v0.5.1-remote-backup-replay
+Version: v0.5.2-m2-confidence-plan
 
 ## English
 
@@ -51,7 +51,7 @@ Version: v0.5.1-remote-backup-replay
 - [x] Milestone 2 acceptance closure: expand live degraded/recovery/diagnostics-history UX on the same host/rule/policy model.
 - [x] Milestone 2 acceptance closure: deliver real GitHub backup on top of the now-explicit remote-backup guidance surfaces.
 - [x] Milestone 2 reliability slice: replay configured, failed, and local-only required remote-backup evidence on the same live agent-backed host/rule flow across API, CLI, Web, and agent proof.
-- [ ] Milestone 2 acceptance closure: repeat end-to-end reliability proof on the live agent-backed slice until Milestone 2 status can advance without qualification.
+- [ ] Milestone 2 acceptance closure: package `pnpm acceptance:verify` plus the remote-backup replay proof into one canonical confidence routine, collect that routine on the accepted live slice, and use repeat green history before advancing Milestone 2 wording.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -60,11 +60,13 @@ Version: v0.5.1-remote-backup-replay
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
-- [ ] Next lane: harden Milestone 2 reliability on the same live slice by keeping the combined remote-backup replay and acceptance gate green until confidence is routine.
+- [ ] Next lane: harden Milestone 2 confidence routine on the same live slice by replacing the current two-command proof story with one canonical routine and then keeping that routine green.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
 - [x] Land implementation plan: `docs/plans/2026-04-16-portmanager-mainline-reconciliation-plan.md`
+- [x] Land follow-up requirements doc: `docs/brainstorms/2026-04-17-portmanager-m2-confidence-routine-requirements.md`
+- [x] Land follow-up implementation plan: `docs/plans/2026-04-17-portmanager-m2-confidence-routine-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -115,7 +117,7 @@ Version: v0.5.1-remote-backup-replay
 - [x] 里程碑 2 验收闭环：继续在统一 host/rule/policy 模型上补强 live degraded/recovery/diagnostics-history UX。
 - [x] 里程碑 2 验收闭环：在已经显式化的远端备份提示表面之上，真正交付 GitHub backup。
 - [x] 里程碑 2 可靠性切片：在同一条 live agent-backed host/rule 流程上，围绕 configured、failed、local-only 三类 required remote-backup 证据重放 API、CLI、Web 与 agent proof。
-- [ ] 里程碑 2 验收闭环：持续在 live agent-backed 切片上重放端到端可靠性证明，直到 Milestone 2 状态可以无保留提升。
+- [ ] 里程碑 2 验收闭环：把 `pnpm acceptance:verify` 与 remote-backup replay proof 收敛成一个规范 confidence routine，在已验收的 live 切片上收集这条 routine 的持续绿历史，再决定 Milestone 2 文案何时可以无保留提升。
 
 ### 推荐推进顺序
 - [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并继续把这条 gate 在 `main` 上维持为绿，再把主动主线切到 Unit 1。
@@ -124,9 +126,11 @@ Version: v0.5.1-remote-backup-replay
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
-- [ ] 下一主线：继续在同一条 live 切片上加固 Milestone 2 可靠性，把 combined remote-backup replay 与 acceptance gate 持续保持为绿，直到可信度变成常态。
+- [ ] 下一主线：继续在同一条 live 切片上加固 Milestone 2 的 confidence routine，把当前双入口证明链收敛成一条规范 routine，再把它持续保持为绿直到可信度变成常态。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
 - [x] 落盘实现计划：`docs/plans/2026-04-16-portmanager-mainline-reconciliation-plan.md`
+- [x] 落盘后续需求文档：`docs/brainstorms/2026-04-17-portmanager-m2-confidence-routine-requirements.md`
+- [x] 落盘后续实现计划：`docs/plans/2026-04-17-portmanager-m2-confidence-routine-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

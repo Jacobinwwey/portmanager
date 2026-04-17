@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-17
-Version: v0.2.9-remote-backup-replay
+Version: v0.3.0-m2-confidence-plan
 
 ## English
 
@@ -49,6 +49,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 
 ### Verification boundary
 - The repository now has a repeatable mainline verification gate: `pnpm acceptance:verify`.
+- Current Milestone 2 confidence proof still spans two commands today: `pnpm acceptance:verify` and `pnpm milestone:verify:reliability-remote-backup-replay`.
 - The main branch CI mirror for that gate is `.github/workflows/mainline-acceptance.yml`.
 - Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
@@ -65,7 +66,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 slice shipped`: controller `GET /diagnostics` now filters by `state`, and Web host detail now groups degraded diagnostics history with recovery-ready successful evidence.
 - `Milestone 2 slice shipped`: controller backup bundles now upload through the GitHub Contents API when configured, and required-mode success/failure stays explicit across API, CLI, Web, and milestone proof.
 - `Milestone 2 slice shipped`: repeated remote-backup replay now exercises local-only, configured-success, and configured-failure required backups on the same live agent-backed host / rule flow across API, CLI, Web backup views, and agent runtime proof.
-- `Next lane`: Milestone 2 reliability hardening on the same live host / rule / policy slice by keeping the combined replay and acceptance gate green until the current wording no longer needs qualification.
+- `Next lane`: Milestone 2 confidence-routine hardening on the same live host / rule / policy slice by replacing the current two-command proof story with one canonical routine and then keeping that routine green long enough for the current wording to stop needing qualification.
 
 ## 中文
 
@@ -113,6 +114,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 
 ### 验证边界
 - 当前仓库已经具备可重复执行的主线验证 gate：`pnpm acceptance:verify`。
+- 当前 Milestone 2 的 confidence proof 仍然分散在两个命令里：`pnpm acceptance:verify` 与 `pnpm milestone:verify:reliability-remote-backup-replay`。
 - 该 gate 在主分支上的 CI 镜像为 `.github/workflows/mainline-acceptance.yml`。
 - Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
@@ -128,4 +130,4 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 切片已交付`：controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经把 degraded diagnostics history 与 recovery-ready 成功证据成组展示出来。
 - `Milestone 2 切片已交付`：当配置存在时，controller backup bundle 现在会通过 GitHub Contents API 上传，required-mode 成功/失败路径也已经在 API、CLI、Web 与 milestone proof 中保持显式一致。
 - `Milestone 2 切片已交付`：remote-backup replay 现在会在同一条 live agent-backed host / rule 流程上重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据对齐。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 可靠性加固：把 combined replay 与 acceptance gate 持续保持为绿，直到当前里程碑表述不再需要附带限定语。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-routine 加固：把当前双入口证明链收敛成一条规范 routine，并让它持续保持为绿，直到当前里程碑表述不再需要附带限定语。
