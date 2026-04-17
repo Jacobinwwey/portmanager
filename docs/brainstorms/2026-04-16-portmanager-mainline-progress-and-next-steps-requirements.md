@@ -7,6 +7,7 @@ topic: portmanager-mainline-progress-and-next-steps
 
 ## Problem Frame
 PortManager's docs-first baseline successfully froze contracts, architecture, and UI direction, and the current branch now proves a narrow operational slice around backups, rollback, diagnostics, operations, and event history.
+Unit 0 delivery discipline is now real on `main`: `pnpm acceptance:verify`, `.github/workflows/mainline-acceptance.yml`, and the latest GitHub Actions runs `24565361391` (`mainline-acceptance`) plus `24565361388` (`docs-pages`) both passed on `2026-04-17` for commit `63a1257`.
 The repository still presents broader V1 promises than the code currently fulfills, especially around host management, bridge-rule management, exposure-policy management, live web parity, and the controller-agent steady-state boundary.
 Mainline needs one durable truth source that compares the frozen requirements against verified code reality, updates the progress narrative, and locks the next implementation direction before more scope is added.
 
@@ -18,6 +19,7 @@ Mainline needs one durable truth source that compares the frozen requirements ag
 | CLI | Web, CLI, and API should observe the same host, rule, operation, and degraded model | `crates/portmanager-cli/src/main.rs` currently exposes `backups`, `diagnostics`, `events`, `health-checks`, `operation get`, `operations`, and `rollback-points`; it does not yet expose host, bridge-rule, or exposure-policy workflows. |
 | Web | Information architecture requires `Overview`, `Hosts`, `Bridge Rules`, `Operations`, `Backups`, and `Console` with diagnostics detail | `apps/web/src/main.ts` renders only `overview`, `host-detail`, and `operations` views from mock-state factories, with no controller fetch path and no dedicated `Hosts`, `Bridge Rules`, `Backups`, `Console`, or diagnostics-detail route. |
 | Agent boundary | Controller-agent steady state should be `HTTP over Tailscale` | `crates/portmanager-agent/src/main.rs` remains a file-backed CLI skeleton with `bootstrap`, `apply`, `collect`, `snapshot`, and `rollback`; it does not yet expose a long-lived HTTP service. |
+| Mainline delivery gate | Repeatable local and CI acceptance discipline should protect `main` before milestone wording moves | `pnpm acceptance:verify`, `.github/workflows/mainline-acceptance.yml`, and latest `main` runs `24565361391` / `24565361388` are green, so Unit 0 is achieved and now serves as standing branch discipline. |
 | Verification | Milestone 1 and early reliability work should be evidenced by tests | `tests/milestone/` and `tests/controller/` already prove backup, rollback, diagnostics, drift, recovery, event history, and operations slices, but they do not yet prove host/rule/policy parity or live web-controller integration. |
 
 ## Requirements
@@ -34,6 +36,7 @@ Mainline needs one durable truth source that compares the frozen requirements ag
 **Next-Direction Discipline**
 - R6. The next implementation direction must prioritize public-surface closure for `hosts`, `bridge-rules`, `exposure-policies`, live web parity, and controller-agent steady-state integration before Milestone 3 work.
 - R7. Reliability work already present on the branch must be preserved and described accurately, but it must not be used to justify skipping the missing interface-parity work.
+- R8. Unit 0 should now be treated as completed baseline discipline, and active implementation focus should move to Unit 1 controller surface parity rather than more gate-recovery work.
 
 ## Success Criteria
 - A new contributor can tell, from repo documents alone, which V1 promises are already implemented and which are still contractual only.
@@ -48,6 +51,7 @@ Mainline needs one durable truth source that compares the frozen requirements ag
 ## Key Decisions
 - Keep the contract surface frozen: missing endpoints and pages remain delivery obligations, not candidates for scope shrinkage.
 - Treat current state as "partial implementation with verified reliability primitives": this is more accurate than either "docs baseline only" or "Milestone 1 complete."
+- Treat Unit 0 as achieved but mandatory: the delivery gate stays in place, while active development moves to Unit 1 controller parity.
 - Sequence future work around interface parity before Milestone 3: broader distributed architecture work would compound drift if the current public surface is still incomplete.
 
 ## Dependencies / Assumptions

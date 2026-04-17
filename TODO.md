@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-17
-Version: v0.4.3-mainline-progress-sync
+Version: v0.4.4-unit1-focus
 
 ## English
 
@@ -32,7 +32,7 @@ Version: v0.4.3-mainline-progress-sync
 - [x] Milestone 2: filtered operation inventory with recovery-linked summaries across Web, CLI, and API.
 - [x] Milestone 2: selected-operation event timeline and filtered event history across Web, CLI, and API.
 - [x] Milestone 2: operation detail now carries direct selected-event replay path and linked recovery evidence across API and CLI.
-- [x] Delivery discipline: formalize a repeatable mainline acceptance gate with `pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml`.
+- [x] Delivery discipline: formalize and keep a repeatable mainline acceptance gate with `pnpm acceptance:verify` plus `.github/workflows/mainline-acceptance.yml`, now proved green on latest `main` runs `24565361391` and `24565361388`.
 
 ### Current acceptance gaps
 - [ ] Milestone 1 acceptance closure: add real controller `hosts` resources and readiness lifecycle, not only operation evidence and diagnostics primitives.
@@ -42,7 +42,7 @@ Version: v0.4.3-mainline-progress-sync
 - [ ] Milestone 2 acceptance closure: keep reliability work grounded in the same host/rule/policy model instead of advancing milestone status from partial branch-only evidence.
 
 ### Recommended execution order
-- [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`.
+- [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on latest `main` proof (`24565361391`, `24565361388`) while Unit 1 becomes the active lane.
 - [ ] Unit 1: implement controller `hosts`, `bridge-rules`, and `exposure-policies` as the shared runtime source of truth.
 - [ ] Unit 2: add CLI parity for host, rule, and policy inspection and core write paths on top of Unit 1.
 - [ ] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
@@ -83,7 +83,7 @@ Version: v0.4.3-mainline-progress-sync
 - [x] 里程碑 2：补全 operation 列表筛选与 recovery 证据摘要，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：补全选中 operation 的事件时间线与 event history 筛选，并在 Web、CLI、API 中统一暴露。
 - [x] 里程碑 2：让 operation detail 直接携带选中事件回放路径与 recovery 证据，并在 API、CLI 中统一暴露。
-- [x] 交付纪律：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复执行的主线验收 gate。
+- [x] 交付纪律：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化并持续保持可重复执行的主线验收 gate，最新 `main` runs `24565361391` 与 `24565361388` 已经转绿。
 
 ### 当前验收缺口
 - [ ] 里程碑 1 验收闭环：补上真实 controller `hosts` 资源与 readiness 生命周期，而不只是 operation 证据和 diagnostics 原语。
@@ -93,7 +93,7 @@ Version: v0.4.3-mainline-progress-sync
 - [ ] 里程碑 2 验收闭环：让可靠性工作持续建立在统一 host/rule/policy 模型上，而不是只凭分支局部证据提前升级里程碑状态。
 
 ### 推荐推进顺序
-- [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate。
+- [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并在最新 `main` 证明（`24565361391`、`24565361388`）转绿后，把主动主线切到 Unit 1。
 - [ ] Unit 1：先把 controller 的 `hosts`、`bridge-rules`、`exposure-policies` 做成统一运行态真源。
 - [ ] Unit 2：在 Unit 1 基础上补齐 CLI 对 host / rule / policy 的检查与核心写入路径。
 - [ ] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。

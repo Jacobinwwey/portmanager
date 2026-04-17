@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes what is already real, which gate protects mainline, what is still blocking acceptance, and what developers should advance next before milestone status moves again.',
-    zh: '这个页面现在直接暴露哪些能力已经真实存在、哪条 gate 正在保护主线、哪些缺口仍在阻塞验收，以及开发者在里程碑状态继续推进前应该先做什么。'
+    en: 'This page now exposes what is already real, which gate protects mainline, which gaps still block acceptance, and what developers should build next now that Unit 0 is green.',
+    zh: '这个页面现在直接暴露哪些能力已经真实存在、哪条 gate 正在保护主线、哪些缺口仍在阻塞验收，以及在 Unit 0 已转绿后开发者接下来该先做什么。'
   },
   buckets: [
     {
@@ -162,13 +162,13 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Docs-first baseline, contracts, and roadmap sequencing are locked.',
-          'Mainline acceptance discipline is now real through `pnpm acceptance:verify`, the `mainline-acceptance` workflow, and the 2026-04-17 Windows validation pass.',
+          'Unit 0 is now achieved: `pnpm acceptance:verify`, `mainline-acceptance` run `24565361391`, and `docs-pages` run `24565361388` all proved green on `main` for commit `63a1257` on 2026-04-17.',
           'Backup, rollback, diagnostics, drift, event history, and recovery evidence are already proved in controller, CLI, and milestone tests.',
           'Mainline documentation now distinguishes contractual surface from delivered surface.'
         ],
         zh: [
           'Docs-first 基线、契约和路线排序已经锁定。',
-          '主线验收纪律已经真实落地：`pnpm acceptance:verify`、`mainline-acceptance` workflow 与 2026-04-17 的 Windows 验证已经连成同一条 gate。',
+          'Unit 0 已经成立：`pnpm acceptance:verify`、`mainline-acceptance` run `24565361391` 与 `docs-pages` run `24565361388` 已在 2026-04-17 的 `main` / `63a1257` 上共同证明 gate 为绿。',
           'backup、rollback、diagnostics、drift、event history、recovery 证据已经在 controller、CLI、milestone 测试中被证明。',
           '主线文档现在已经明确区分契约表面与已交付表面。'
         ]
@@ -184,15 +184,15 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Milestone 1 acceptance closure is still blocked on real hosts, bridge rules, exposure policies, live web parity, and the agent steady-state service.',
-          'GitHub runner parity still needs Unit 0 stabilization because runs `24564534909` and `24565049655` exposed one-host teardown idempotence and Rust dependency drift beyond the pinned `1.86` floor.',
-          'Milestone 2 reliability acceptance still has to be replayed on that same live host/rule/policy model instead of the current partial slice.',
-          'Roadmap status sync is still required between root specs, docs-site detail pages, and the roadmap index each time acceptance evidence changes.'
+          'Controller runtime still exposes operations, events, health checks, diagnostics, backups, rollback points, and drift check, but not contract-backed hosts, bridge rules, or exposure policies.',
+          'CLI, Web, and agent still lag the contract surface: CLI has no host/rule/policy flows, Web still renders mock-only overview/host-detail/operations shells, and the agent is still a file-backed CLI skeleton.',
+          'Milestone 2 reliability acceptance still has to be replayed on that same live host/rule/policy model instead of the current partial slice.'
         ],
         zh: [
           '里程碑 1 验收闭环仍然卡在真实 hosts、bridge rules、exposure policies、live web 一致性与 agent 稳态服务上。',
-          'GitHub runner 一致性还需要继续做 Unit 0 稳定化，因为 runs `24564534909` 和 `24565049655` 暴露了 one-host teardown 幂等性问题，以及超出已锁定 `1.86` floor 的 Rust 依赖漂移。',
-          '里程碑 2 仍然要把可靠性验收重放到同一套 live host/rule/policy 模型上，而不是继续停留在当前部分切片。',
-          '每次验收证据变化后，路线状态仍然需要在 root specs、docs-site 详情页和 roadmap 首页之间继续同步。'
+          'controller 运行时目前仍只暴露 operations、events、health checks、diagnostics、backups、rollback points 与 drift check，还没有 contract-backed 的 hosts、bridge rules、exposure policies。',
+          'CLI、Web 与 agent 仍然落后于契约表面：CLI 还没有 host/rule/policy 工作流，Web 仍只渲染 mock-only 的 overview/host-detail/operations shell，agent 也仍是文件落盘式 CLI 骨架。',
+          '里程碑 2 仍然要把可靠性验收重放到同一套 live host/rule/policy 模型上，而不是继续停留在当前部分切片。'
         ]
       }
     },
@@ -205,16 +205,16 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Unit 0: keep `mainline-acceptance` green on GitHub runner parity by hardening one-host teardown and pinning Rust-compatible dependencies.',
-          'Unit 1: make controller host, bridge-rule, and exposure-policy resources real without regressing current evidence flows.',
-          'Unit 2 + Unit 3: mirror those resources into CLI commands and replace web mock routes with live views before advancing milestone status.',
-          'Unit 4 + Unit 5: move the agent to the locked HTTP-over-Tailscale steady-state boundary, rerun acceptance, and only then rewrite milestone language.'
+          'Unit 1: implement controller source-of-truth resources for hosts, bridge rules, and exposure policies.',
+          'Unit 2 + Unit 3: mirror those resources into CLI commands and replace Web mock routes with live controller views.',
+          'Unit 4: move the agent to the locked HTTP-over-Tailscale steady-state boundary without breaking artifact compatibility.',
+          'Unit 5: rerun acceptance, sync roadmap and product docs, and only then advance milestone wording; keep Unit 0 green as mandatory baseline while doing this.'
         ],
         zh: [
-          'Unit 0：先加固 one-host 验证 teardown，并锁住兼容 Rust 的依赖版本，在 GitHub runner 一致性下保持 `mainline-acceptance` 为绿。',
-          'Unit 1：先把 controller 的 host、bridge-rule、exposure-policy 资源做成真实表面，同时不回退现有证据链。',
-          'Unit 2 + Unit 3：在提升里程碑状态前，把这些表面同步镜像到 CLI 命令，并把 Web mock 路由切到 live 视图。',
-          'Unit 4 + Unit 5：把 agent 推进到锁定的 HTTP-over-Tailscale 稳态边界，重新跑验收，然后再重写里程碑文案。'
+          'Unit 1：先把 controller 的 hosts、bridge rules、exposure policies 资源做成真实真源。',
+          'Unit 2 + Unit 3：把这些资源同步到 CLI 命令，并把 Web mock 路由切到 live controller 视图。',
+          'Unit 4：在不破坏当前产物兼容性的前提下，把 agent 推进到锁定的 HTTP-over-Tailscale 稳态边界。',
+          'Unit 5：重新执行验收、同步 roadmap 与产品文档，然后再提升里程碑文案；在整个过程中继续把 Unit 0 维持为必须为绿的基线。'
         ]
       }
     }
@@ -256,43 +256,43 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Controller operations, backups, diagnostics, rollback points, and event replay surfaces are already real.',
         'CLI inspection flows for operations, backups, diagnostics, health checks, and rollback points are already real.',
         'Milestone verification already proves backup-before-mutation, diagnostics evidence, rollback evidence, and degraded-state history.',
-        'Mainline acceptance is now repeatable through `pnpm acceptance:verify` and the matching CI workflow, but still measures only a partial public surface.'
+        'Latest remote proof: `mainline-acceptance` run `24565361391` and `docs-pages` run `24565361388` both succeeded on `main` for commit `63a1257`, so Unit 0 is now achieved as standing branch discipline.'
       ],
       zh: [
         'controller 的 operations、backups、diagnostics、rollback points、event replay 表面已经真实存在。',
         'CLI 的 operations、backups、diagnostics、health checks、rollback points 检查流已经真实存在。',
         '里程碑验证已经证明变更前备份、诊断证据、回滚证据与 degraded 状态历史。',
-        '主线验收现在已经可以通过 `pnpm acceptance:verify` 与对应 CI workflow 重复执行，但它衡量的仍然只是部分公共表面。'
+        '最新远端证明显示：`mainline-acceptance` run `24565361391` 与 `docs-pages` run `24565361388` 已在 `main` 的 commit `63a1257` 上同时通过，因此 Unit 0 已经成为持续生效的分支纪律。'
       ]
     },
     blockingGaps: {
       en: [
-        'Real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources are still missing.',
-        'GitHub runner parity still needs one-host teardown hardening plus Rust-compatible dependency pins to keep `mainline-acceptance` green.',
-        'Web roadmap IA still relies on mock-only overview, host detail, and operations shells.',
+        'Real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources are still missing from controller runtime.',
+        'CLI still lacks host/rule/policy public commands and write paths.',
+        'Web roadmap IA still relies on mock-only overview, host detail, and operations shells rather than live controller routes.',
         'Agent steady-state service over HTTP over Tailscale is still missing.',
         'Milestone 1 wording still cannot advance until Unit 1 through Unit 4 close the public-surface gap.'
       ],
       zh: [
-        '真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源仍然缺失。',
-        'GitHub runner 一致性下还需要同时补上 one-host 幂等 teardown 和兼容 Rust 的依赖锁定，`mainline-acceptance` 才能持续保持绿色。',
-        'Web 的 roadmap 信息架构仍然依赖 mock-only 的 overview、host detail、operations shell。',
+        'controller 运行时中的真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源仍然缺失。',
+        'CLI 仍然缺少 host/rule/policy 的公共命令与写入路径。',
+        'Web 的 roadmap 信息架构仍然依赖 mock-only 的 overview、host detail、operations shell，而不是真实 controller 路由。',
         '基于 HTTP over Tailscale 的 agent 稳态服务仍然缺失。',
         '在 Unit 1 到 Unit 4 补齐公共表面缺口之前，里程碑 1 文案都还不能继续提升。'
       ]
     },
     developerFocus: {
       en: [
-        'Unit 0: harden the one-host verification teardown and pin Rust-compatible dependencies so GitHub runner parity keeps `mainline-acceptance` green.',
         'Unit 1: build controller source-of-truth resources for hosts, rules, and policies.',
-        'Unit 2 + Unit 3: mirror those resources into CLI and live web routes without losing current verification coverage.',
-        'Unit 4 + Unit 5: keep Milestone 1 proof green while the agent boundary hardens and docs are resynced.'
+        'Unit 2: mirror those resources into CLI inspection and write flows.',
+        'Unit 3: replace Web mocks with live routes and diagnostics detail.',
+        'Unit 4 + Unit 5: harden the agent boundary, rerun acceptance, resync docs, and keep Unit 0 green while parity closes.'
       ],
       zh: [
-        'Unit 0：先把 one-host 验证 teardown 加固成幂等，并锁住兼容 Rust 的依赖版本，让 GitHub runner 一致性下的 `mainline-acceptance` 持续为绿。',
         'Unit 1：先补齐 controller 中作为真源的 hosts、rules、policies 资源。',
-        'Unit 2 + Unit 3：在不丢失当前验证覆盖的前提下，把这些资源同步到 CLI 和 live Web 路由。',
-        'Unit 4 + Unit 5：在 agent 边界加固和文档重同步过程中，保持里程碑 1 验证持续为绿。'
+        'Unit 2：把这些资源同步到 CLI 的检查与写入流。',
+        'Unit 3：把 Web mock 替换成 live 路由与 diagnostics detail。',
+        'Unit 4 + Unit 5：继续加固 agent 边界、重跑验收、重同步文档，并在闭环过程中持续保持 Unit 0 为绿。'
       ]
     },
     dependencies: [],

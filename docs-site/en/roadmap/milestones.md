@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.4.5-mainline-gate-parity
+> Updated: 2026-04-17 | Version: v0.4.6-unit1-focus
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -52,11 +52,11 @@ Milestone 1 is only accepted when all of the following become true:
 - Verified now: backup-before-mutation, rollback evidence, diagnostics capture, drift-driven degraded state, filtered operation history, event replay, and controller/CLI inspection surfaces for operations, backups, diagnostics, health checks, and rollback points.
 - Acceptance evidence re-ran successfully on a Windows real machine on `2026-04-17`: `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `pnpm --dir docs-site --ignore-workspace run docs:build`, and `pnpm milestone:verify` all passed after closing Windows-specific validation blockers in contract generation, SQLite test cleanup, CLI transport classification, and mock-server socket handling.
 - Mainline acceptance is now formalized as a repeatable gate through `pnpm acceptance:verify` and the `mainline-acceptance` GitHub Actions workflow. This improves delivery rigor, but it does not change Milestone 1 acceptance status by itself.
-- `main` still needs Unit 0 gate stabilization on GitHub runner parity: workflow runs `24564534909` and `24565049655` exposed same-day blockers in one-host teardown idempotence and Rust dependency drift beyond the pinned `1.86` floor, so immediate work now is to keep `mainline-acceptance` green before milestone wording moves again.
+- Latest remote proof on `2026-04-17`: `mainline-acceptance` run `24565361391` and `docs-pages` run `24565361388` both succeeded on `main` for commit `63a1257`, so Unit 0 is now achieved and should be treated as standing branch discipline.
 - Still missing before acceptance: real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources, CLI parity for those resources, live web parity beyond mock shells, and the steady-state controller-agent `HTTP over Tailscale` service boundary.
 
 #### Current development sequence
-- `Unit 0`: keep `mainline-acceptance` green under GitHub-runner parity by hardening one-host teardown and pinning Rust-compatible dependencies before wider milestone work.
+- `Unit 0`: complete and mandatory. Keep the gate green while later units land, but do not treat gate work as the current milestone-closure objective.
 - `Unit 1`: make controller `hosts`, `bridge-rules`, and `exposure-policies` real before widening any milestone status claim.
 - `Unit 2`: extend CLI into those same resources so controller and CLI share one truthful public surface.
 - `Unit 3`: replace Web mock-only routes with controller-backed views and diagnostics detail.

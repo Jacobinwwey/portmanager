@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-17
-Version: v0.2.2-mainline-progress-sync
+Version: v0.2.3-unit1-focus
 
 ## English
 
@@ -50,6 +50,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 ### Verification boundary
 - The repository now has a repeatable mainline verification gate: `pnpm acceptance:verify`.
 - The main branch CI mirror for that gate is `.github/workflows/mainline-acceptance.yml`.
+- Latest remote proof on `2026-04-17`: `mainline-acceptance` run `24565361391` and `docs-pages` run `24565361388` both succeeded on `main` for commit `63a1257`, so Unit 0 is now achieved and should be treated as mandatory baseline discipline.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - This gate does **not** mean interface parity is complete. Missing `hosts`, `bridge-rules`, `exposure-policies`, live web parity, and the steady-state agent service remain delivery obligations.
 
@@ -107,6 +108,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 ### 验证边界
 - 当前仓库已经具备可重复执行的主线验证 gate：`pnpm acceptance:verify`。
 - 该 gate 在主分支上的 CI 镜像为 `.github/workflows/mainline-acceptance.yml`。
+- 最新远端证明发生在 `2026-04-17`：`mainline-acceptance` run `24565361391` 与 `docs-pages` run `24565361388` 已经在 `main` 的 commit `63a1257` 上同时通过，因此 Unit 0 现在已经成立，应被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 但它**并不**意味着接口一致性已经闭环。`hosts`、`bridge-rules`、`exposure-policies`、live web parity 与稳态 agent service 仍然是必须补齐的交付项。
 

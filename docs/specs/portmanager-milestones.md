@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-17
-Version: v0.4.5-mainline-gate-parity
+Version: v0.4.6-unit1-focus
 
 ## English
 
@@ -45,11 +45,11 @@ Milestone 1 is only accepted when all of the following become true:
 - Verified now: backup-before-mutation, rollback evidence, diagnostics capture, drift-driven degraded state, filtered operation history, event replay, and controller/CLI inspection surfaces for operations, backups, diagnostics, health checks, and rollback points.
 - Acceptance evidence re-ran successfully on a Windows real machine on `2026-04-17`: `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `pnpm --dir docs-site --ignore-workspace run docs:build`, and `pnpm milestone:verify` all passed after closing Windows-specific validation blockers in contract generation, SQLite test cleanup, CLI transport classification, and mock-server socket handling.
 - Mainline acceptance is now formalized as a repeatable gate through `pnpm acceptance:verify` and the `mainline-acceptance` GitHub Actions workflow. This improves delivery rigor, but it does not change Milestone 1 acceptance status by itself.
-- `main` still needs Unit 0 gate stabilization on GitHub runner parity: workflow runs `24564534909` and `24565049655` exposed same-day blockers in one-host teardown idempotence and Rust dependency drift beyond the pinned `1.86` floor, so immediate work now is to keep `mainline-acceptance` green before milestone wording moves again.
+- Latest remote proof on `2026-04-17`: `mainline-acceptance` run `24565361391` and `docs-pages` run `24565361388` both succeeded on `main` for commit `63a1257`, so Unit 0 is now achieved and should be treated as standing branch discipline.
 - Still missing before acceptance: real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources, CLI parity for those resources, live web parity beyond mock shells, and the steady-state controller-agent `HTTP over Tailscale` service boundary.
 
 #### Current development sequence
-- `Unit 0`: keep `mainline-acceptance` green under GitHub-runner parity by hardening one-host teardown and pinning Rust-compatible dependencies before wider milestone work.
+- `Unit 0`: complete and mandatory. Keep the gate green while later units land, but do not treat gate work as the current milestone-closure objective.
 - `Unit 1`: make controller `hosts`, `bridge-rules`, and `exposure-policies` real before widening any milestone status claim.
 - `Unit 2`: extend CLI into those same resources so controller and CLI share one truthful public surface.
 - `Unit 3`: replace Web mock-only routes with controller-backed views and diagnostics detail.
@@ -186,9 +186,11 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - 当前已验证：变更前备份、回滚证据、诊断抓取、drift 驱动 degraded 状态、筛选后的 operation 历史、事件回放，以及 controller/CLI 对 operations、backups、diagnostics、health checks、rollback points 的检查表面。
 - 已在 `2026-04-17` 于 Windows 真机重新跑通验收证据：`pnpm test`、`pnpm typecheck`、`cargo test --workspace`、`pnpm --dir docs-site --ignore-workspace run docs:build`、`pnpm milestone:verify` 全部通过；同时补齐了 Windows 侧契约生成、SQLite 测试清理、CLI transport 分类以及 mock server socket 处理的阻塞项。
 - 主线验收现在已经通过 `pnpm acceptance:verify` 与 `mainline-acceptance` GitHub Actions workflow 被固化为可重复执行的 gate。它提高了交付纪律，但并不会单独改变里程碑 1 的验收状态。
+- 最新远端证明发生在 `2026-04-17`：`mainline-acceptance` run `24565361391` 与 `docs-pages` run `24565361388` 已经在 `main` 的 commit `63a1257` 上同时通过，因此 Unit 0 已经成立，应被视为持续保持的分支纪律。
 - 验收前仍缺失：真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源，这些资源在 CLI 中的对等能力，超出 mock shell 的 live Web 一致性，以及稳态 controller-agent `HTTP over Tailscale` 服务边界。
 
 #### 当前推进顺序
+- `Unit 0`：已经完成并且必须保持；在后续单元推进时持续维持 gate 为绿，但不要再把 gate 工作当成当前里程碑闭环目标。
 - `Unit 1`：先把 controller 的 `hosts`、`bridge-rules`、`exposure-policies` 做成真实运行态表面，再谈里程碑状态升级。
 - `Unit 2`：把 CLI 扩到这些同名资源，让 controller 与 CLI 共享同一套可信公共表面。
 - `Unit 3`：把 Web 的 mock-only 路由切到 controller 实时视图，并补齐 diagnostics detail。
