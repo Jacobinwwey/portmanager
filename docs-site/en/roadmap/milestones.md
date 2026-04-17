@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.4.0-mainline-progress-sync
+> Updated: 2026-04-17 | Version: v0.4.1-windows-acceptance-sync
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -50,6 +50,7 @@ Milestone 1 is only accepted when all of the following become true:
 #### Current verified status
 - Progress is real, but acceptance is still open.
 - Verified now: backup-before-mutation, rollback evidence, diagnostics capture, drift-driven degraded state, filtered operation history, event replay, and controller/CLI inspection surfaces for operations, backups, diagnostics, health checks, and rollback points.
+- Acceptance evidence re-ran successfully on a Windows real machine on `2026-04-17`: `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `pnpm --dir docs-site run docs:build`, and `pnpm milestone:verify` all passed after closing Windows-specific validation blockers in contract generation, SQLite test cleanup, CLI transport classification, and mock-server socket handling.
 - Still missing before acceptance: real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources, CLI parity for those resources, live web parity beyond mock shells, and the steady-state controller-agent `HTTP over Tailscale` service boundary.
 
 #### What remains intentionally deferred
@@ -84,6 +85,7 @@ Milestone 2 is only accepted when all of the following become true:
 #### Current verified status
 - Reliability work has already started on this branch.
 - Verified now: backup-policy visibility, drift-driven degraded records, recovery-linked operation summaries, rollback inspection, and richer event history flows in controller and CLI tests.
+- Verified now from the Windows acceptance pass: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures, and the CLI test harness no longer flakes on Windows nonblocking accepted sockets.
 - Milestone 2 still remains in progress because Web surfaces are not yet live-data truthful and the missing host/rule/policy public surfaces still prevent full cross-interface reliability claims.
 
 #### What remains intentionally deferred

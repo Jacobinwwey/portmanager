@@ -52,6 +52,9 @@ impl MockHttpServer {
             while !shutdown_flag.load(Ordering::Relaxed) {
                 match listener.accept() {
                     Ok((mut stream, _)) => {
+                        stream
+                            .set_nonblocking(false)
+                            .expect("set accepted stream blocking");
                         let mut buffer = [0_u8; 4096];
                         let read = stream.read(&mut buffer).expect("read request");
                         if read == 0 {

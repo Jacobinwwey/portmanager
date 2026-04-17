@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-16 | Version：v0.4.0-mainline-progress-sync
+> Updated：2026-04-17 | Version：v0.4.1-windows-acceptance-sync
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -50,6 +50,7 @@ status: active
 #### 当前已验证状态
 - 进展是真实存在的，但验收仍未闭环。
 - 当前已验证：变更前备份、回滚证据、诊断抓取、drift 驱动 degraded 状态、筛选后的 operation 历史、事件回放，以及 controller/CLI 对 operations、backups、diagnostics、health checks、rollback points 的检查表面。
+- 已在 `2026-04-17` 于 Windows 真机重新跑通验收证据：`pnpm test`、`pnpm typecheck`、`cargo test --workspace`、`pnpm --dir docs-site run docs:build`、`pnpm milestone:verify` 全部通过；同时补齐了 Windows 侧契约生成、SQLite 测试清理、CLI transport 分类以及 mock server socket 处理的阻塞项。
 - 验收前仍缺失：真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源，这些资源在 CLI 中的对等能力，超出 mock shell 的 live Web 一致性，以及稳态 controller-agent `HTTP over Tailscale` 服务边界。
 
 #### 明确延后的内容
@@ -84,6 +85,7 @@ status: active
 #### 当前已验证状态
 - 可靠性工作已经在当前分支启动。
 - 当前已验证：backup policy 可见性、drift 驱动 degraded 记录、带 recovery 关联的 operation 摘要、rollback 检查能力，以及更丰富的 controller/CLI 事件历史流。
+- 来自 Windows 验收的新验证结论：即使上游断连在本机上表现为 `502`，CLI 仍将其明确归类为 transport 级故障，而不是 controller 业务错误；同时 CLI 测试桩不再因为 Windows 非阻塞 accepted socket 语义而偶发抖动。
 - 里程碑 2 仍然处于进行中，因为 Web 表面还不是真实 live-data truth，而缺失的 host/rule/policy 公共表面也让跨界面的完整可靠性声明还站不住。
 
 #### 明确延后的内容

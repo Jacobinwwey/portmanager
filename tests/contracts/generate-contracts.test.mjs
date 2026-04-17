@@ -2,13 +2,15 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { tmpdir } from 'node:os'
 
-const repoRoot = path.resolve(new URL('../../', import.meta.url).pathname)
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
+const nodeExecutable = process.execPath
 
 function runGenerator(args) {
-  return execFileSync('node', ['scripts/contracts/generate-contracts.mjs', ...args], {
+  return execFileSync(nodeExecutable, ['scripts/contracts/generate-contracts.mjs', ...args], {
     cwd: repoRoot,
     encoding: 'utf8'
   })

@@ -1,7 +1,7 @@
 # PortManager Milestones
 
-Updated: 2026-04-16
-Version: v0.4.0-mainline-progress-sync
+Updated: 2026-04-17
+Version: v0.4.1-windows-acceptance-sync
 
 ## English
 
@@ -43,6 +43,7 @@ Milestone 1 is only accepted when all of the following become true:
 #### Current verified status
 - Progress is real, but acceptance is still open.
 - Verified now: backup-before-mutation, rollback evidence, diagnostics capture, drift-driven degraded state, filtered operation history, event replay, and controller/CLI inspection surfaces for operations, backups, diagnostics, health checks, and rollback points.
+- Acceptance evidence re-ran successfully on a Windows real machine on `2026-04-17`: `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `pnpm --dir docs-site run docs:build`, and `pnpm milestone:verify` all passed after closing Windows-specific validation blockers in contract generation, SQLite test cleanup, CLI transport classification, and mock-server socket handling.
 - Still missing before acceptance: real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources, CLI parity for those resources, live web parity beyond mock shells, and the steady-state controller-agent `HTTP over Tailscale` service boundary.
 
 #### What remains intentionally deferred
@@ -77,6 +78,7 @@ Milestone 2 is only accepted when all of the following become true:
 #### Current verified status
 - Reliability work has already started on this branch.
 - Verified now: backup-policy visibility, drift-driven degraded records, recovery-linked operation summaries, rollback inspection, and richer event history flows in controller and CLI tests.
+- Verified now from the Windows acceptance pass: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures, and the CLI test harness no longer flakes on Windows nonblocking accepted sockets.
 - Milestone 2 still remains in progress because Web surfaces are not yet live-data truthful and the missing host/rule/policy public surfaces still prevent full cross-interface reliability claims.
 
 #### What remains intentionally deferred
@@ -167,6 +169,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 #### 当前已验证状态
 - 进展是真实存在的，但验收仍未闭环。
 - 当前已验证：变更前备份、回滚证据、诊断抓取、drift 驱动 degraded 状态、筛选后的 operation 历史、事件回放，以及 controller/CLI 对 operations、backups、diagnostics、health checks、rollback points 的检查表面。
+- 已在 `2026-04-17` 于 Windows 真机重新跑通验收证据：`pnpm test`、`pnpm typecheck`、`cargo test --workspace`、`pnpm --dir docs-site run docs:build`、`pnpm milestone:verify` 全部通过；同时补齐了 Windows 侧契约生成、SQLite 测试清理、CLI transport 分类以及 mock server socket 处理的阻塞项。
 - 验收前仍缺失：真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源，这些资源在 CLI 中的对等能力，超出 mock shell 的 live Web 一致性，以及稳态 controller-agent `HTTP over Tailscale` 服务边界。
 
 #### 明确延后的内容
@@ -201,6 +204,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 #### 当前已验证状态
 - 可靠性工作已经在当前分支启动。
 - 当前已验证：backup policy 可见性、drift 驱动 degraded 记录、带 recovery 关联的 operation 摘要、rollback 检查能力，以及更丰富的 controller/CLI 事件历史流。
+- 来自 Windows 验收的新验证结论：即使上游断连在本机上表现为 `502`，CLI 仍将其明确归类为 transport 级故障，而不是 controller 业务错误；同时 CLI 测试桩不再因为 Windows 非阻塞 accepted socket 语义而偶发抖动。
 - 里程碑 2 仍然处于进行中，因为 Web 表面还不是真实 live-data truth，而缺失的 host/rule/policy 公共表面也让跨界面的完整可靠性声明还站不住。
 
 #### 明确延后的内容

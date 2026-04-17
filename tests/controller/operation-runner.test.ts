@@ -20,11 +20,20 @@ function tempDbPath() {
   }
 }
 
+function cleanupTempDb(
+  directory: string,
+  store?: ReturnType<typeof createOperationStore>
+) {
+  store?.close()
+  rmSync(directory, { recursive: true, force: true })
+}
+
 test('operation store enqueues and lists queued operations from SQLite state', () => {
   const { directory, databasePath } = tempDbPath()
+  let store: ReturnType<typeof createOperationStore> | undefined
 
   try {
-    const store = createOperationStore({ databasePath })
+    store = createOperationStore({ databasePath })
     const accepted = store.enqueueOperation({
       id: 'op_bootstrap_001',
       type: 'bootstrap_host',
@@ -49,15 +58,16 @@ test('operation store enqueues and lists queued operations from SQLite state', (
       }
     ])
   } finally {
-    rmSync(directory, { recursive: true, force: true })
+    cleanupTempDb(directory, store)
   }
 })
 
 test('operation runner moves queued operation to succeeded and emits state transitions', async () => {
   const { directory, databasePath } = tempDbPath()
+  let store: ReturnType<typeof createOperationStore> | undefined
 
   try {
-    const store = createOperationStore({ databasePath })
+    store = createOperationStore({ databasePath })
     const eventBus = createControllerEventBus()
     const runner = createOperationRunner({ store, eventBus })
 
@@ -89,15 +99,16 @@ test('operation runner moves queued operation to succeeded and emits state trans
       'operation_state_changed:op_probe_001:succeeded'
     ])
   } finally {
-    rmSync(directory, { recursive: true, force: true })
+    cleanupTempDb(directory, store)
   }
 })
 
 test('operation runner marks failed operation and keeps error summary', async () => {
   const { directory, databasePath } = tempDbPath()
+  let store: ReturnType<typeof createOperationStore> | undefined
 
   try {
-    const store = createOperationStore({ databasePath })
+    store = createOperationStore({ databasePath })
     const eventBus = createControllerEventBus()
     const runner = createOperationRunner({ store, eventBus })
 
@@ -121,15 +132,16 @@ test('operation runner marks failed operation and keeps error summary', async ()
     assert.equal(detail?.finishedAt !== undefined, true)
     assert.equal(detail?.resultSummary, 'tcp unreachable')
   } finally {
-    rmSync(directory, { recursive: true, force: true })
+    cleanupTempDb(directory, store)
   }
 })
 
 test('controller server exposes queued operations over REST', async () => {
   const { directory, databasePath } = tempDbPath()
+  let store: ReturnType<typeof createOperationStore> | undefined
 
   try {
-    const store = createOperationStore({ databasePath })
+    store = createOperationStore({ databasePath })
     const eventBus = createControllerEventBus()
     const server = createControllerServer({ store, eventBus })
 
@@ -162,15 +174,16 @@ test('controller server exposes queued operations over REST', async () => {
       await server.close()
     }
   } finally {
-    rmSync(directory, { recursive: true, force: true })
+    cleanupTempDb(directory, store)
   }
 })
 
 test('controller server filters operations and keeps linked recovery evidence in summaries', async () => {
   const { directory, databasePath } = tempDbPath()
+  let store: ReturnType<typeof createOperationStore> | undefined
 
   try {
-    const store = createOperationStore({ databasePath })
+    store = createOperationStore({ databasePath })
     const eventBus = createControllerEventBus()
     const runner = createOperationRunner({ store, eventBus })
     const server = createControllerServer({ store, eventBus })
@@ -224,15 +237,16 @@ test('controller server filters operations and keeps linked recovery evidence in
       await server.close()
     }
   } finally {
-    rmSync(directory, { recursive: true, force: true })
+    cleanupTempDb(directory, store)
   }
 })
 
 test('controller server streams operation state transitions over SSE', async () => {
   const { directory, databasePath } = tempDbPath()
+  let store: ReturnType<typeof createOperationStore> | undefined
 
   try {
-    const store = createOperationStore({ databasePath })
+    store = createOperationStore({ databasePath })
     const eventBus = createControllerEventBus()
     const runner = createOperationRunner({ store, eventBus })
     const server = createControllerServer({ store, eventBus })
@@ -285,6 +299,6 @@ test('controller server streams operation state transitions over SSE', async () 
       await server.close()
     }
   } finally {
-    rmSync(directory, { recursive: true, force: true })
+    cleanupTempDb(directory, store)
   }
 })

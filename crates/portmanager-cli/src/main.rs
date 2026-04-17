@@ -745,14 +745,7 @@ async fn fetch_operation(
     }
 
     if !status.is_success() {
-        return Err(JsonErrorOutput {
-            error: "controller_error",
-            message: format!("controller returned unexpected status {}", status.as_u16()),
-            operation_id: Some(operation_id.to_string()),
-            last_state: None,
-            timeout_ms: None,
-            status: Some(status.as_u16()),
-        });
+        return Err(unexpected_status_error(status, Some(operation_id)));
     }
 
     response.json::<Value>().await.map_err(|error| JsonErrorOutput {
@@ -801,14 +794,7 @@ async fn fetch_events(
 
     let status = response.status();
     if !status.is_success() {
-        return Err(JsonErrorOutput {
-            error: "controller_error",
-            message: format!("controller returned unexpected status {}", status.as_u16()),
-            operation_id: None,
-            last_state: None,
-            timeout_ms: None,
-            status: Some(status.as_u16()),
-        });
+        return Err(unexpected_status_error(status, None));
     }
 
     response.json::<Value>().await.map_err(|error| JsonErrorOutput {
@@ -852,14 +838,7 @@ async fn fetch_health_checks(
 
     let status = response.status();
     if !status.is_success() {
-        return Err(JsonErrorOutput {
-            error: "controller_error",
-            message: format!("controller returned unexpected status {}", status.as_u16()),
-            operation_id: None,
-            last_state: None,
-            timeout_ms: None,
-            status: Some(status.as_u16()),
-        });
+        return Err(unexpected_status_error(status, None));
     }
 
     response.json::<Value>().await.map_err(|error| JsonErrorOutput {
@@ -903,14 +882,7 @@ async fn fetch_backups(
 
     let status = response.status();
     if !status.is_success() {
-        return Err(JsonErrorOutput {
-            error: "controller_error",
-            message: format!("controller returned unexpected status {}", status.as_u16()),
-            operation_id: None,
-            last_state: None,
-            timeout_ms: None,
-            status: Some(status.as_u16()),
-        });
+        return Err(unexpected_status_error(status, None));
     }
 
     response.json::<Value>().await.map_err(|error| JsonErrorOutput {
@@ -954,14 +926,7 @@ async fn fetch_diagnostics(
 
     let status = response.status();
     if !status.is_success() {
-        return Err(JsonErrorOutput {
-            error: "controller_error",
-            message: format!("controller returned unexpected status {}", status.as_u16()),
-            operation_id: None,
-            last_state: None,
-            timeout_ms: None,
-            status: Some(status.as_u16()),
-        });
+        return Err(unexpected_status_error(status, None));
     }
 
     response.json::<Value>().await.map_err(|error| JsonErrorOutput {
@@ -1013,14 +978,7 @@ async fn fetch_operations(
 
     let status = response.status();
     if !status.is_success() {
-        return Err(JsonErrorOutput {
-            error: "controller_error",
-            message: format!("controller returned unexpected status {}", status.as_u16()),
-            operation_id: None,
-            last_state: None,
-            timeout_ms: None,
-            status: Some(status.as_u16()),
-        });
+        return Err(unexpected_status_error(status, None));
     }
 
     response.json::<Value>().await.map_err(|error| JsonErrorOutput {
@@ -1064,14 +1022,7 @@ async fn fetch_rollback_points(
 
     let status = response.status();
     if !status.is_success() {
-        return Err(JsonErrorOutput {
-            error: "controller_error",
-            message: format!("controller returned unexpected status {}", status.as_u16()),
-            operation_id: None,
-            last_state: None,
-            timeout_ms: None,
-            status: Some(status.as_u16()),
-        });
+        return Err(unexpected_status_error(status, None));
     }
 
     response.json::<Value>().await.map_err(|error| JsonErrorOutput {
@@ -1117,14 +1068,7 @@ async fn apply_rollback_point(
     }
 
     if !status.is_success() {
-        return Err(JsonErrorOutput {
-            error: "controller_error",
-            message: format!("controller returned unexpected status {}", status.as_u16()),
-            operation_id: None,
-            last_state: None,
-            timeout_ms: None,
-            status: Some(status.as_u16()),
-        });
+        return Err(unexpected_status_error(status, None));
     }
 
     response.json::<Value>().await.map_err(|error| JsonErrorOutput {
@@ -1168,5 +1112,36 @@ fn json_or_text_error_flag(
             body: text_error,
             exit_code: ExitCode::from(1),
         }
+    }
+}
+
+fn is_transport_status(status: StatusCode) -> bool {
+    matches!(
+        status,
+        StatusCode::BAD_GATEWAY | StatusCode::SERVICE_UNAVAILABLE | StatusCode::GATEWAY_TIMEOUT
+    )
+}
+
+fn unexpected_status_error(status: StatusCode, operation_id: Option<&str>) -> JsonErrorOutput {
+    let is_transport = is_transport_status(status);
+
+    JsonErrorOutput {
+        error: if is_transport {
+            "transport"
+        } else {
+            "controller_error"
+        },
+        message: if is_transport {
+            format!(
+                "controller transport failed with upstream status {}",
+                status.as_u16()
+            )
+        } else {
+            format!("controller returned unexpected status {}", status.as_u16())
+        },
+        operation_id: operation_id.map(str::to_string),
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
     }
 }
