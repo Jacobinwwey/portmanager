@@ -982,8 +982,13 @@ export interface components {
             recentRules: components["schemas"]["BridgeRule"][];
         };
         HostSummary: {
+            /** Format: date-time */
+            agentHeartbeatAt?: string;
+            /** @enum {string} */
+            agentHeartbeatState: "unknown" | "live" | "stale" | "unreachable";
             /** @enum {string} */
             agentState: "unknown" | "ready" | "degraded" | "failed" | "unreachable";
+            agentVersion?: string;
             id: string;
             /** Format: date-time */
             lastBackupAt?: string;

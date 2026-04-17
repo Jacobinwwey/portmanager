@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-17 | Version：v0.4.7-unit5-closure
+> Updated：2026-04-17 | Version：v0.4.8-heartbeat-semantics
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -64,7 +64,8 @@ status: active
 - `Unit 3`：已完成。Web 现在已经在 overview、host detail、hosts、bridge rules、operations、backups、console 中渲染 controller-backed 视图与 diagnostics detail。
 - `Unit 4`：已完成。agent 现在已经在不破坏当前产物兼容性的前提下，接入最小 `HTTP over Tailscale` 稳态服务边界。
 - `Unit 5`：已完成。`pnpm acceptance:verify` 已重放通过，roadmap 与产品文档已同步，里程碑 1 文案只在证明链保持为绿之后才被提升。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 可靠性加固。
+- `Heartbeat/version 切片`：已完成。agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在共享 `agentVersion` 以及 `live` / `stale` / `unreachable` heartbeat 语义。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 可靠性加固，重点转到 degraded/recovery/diagnostics-history UX、重复证明，以及 GitHub backup 真正交付。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
@@ -99,8 +100,9 @@ status: active
 - 可靠性工作已经在当前分支启动。
 - 当前已验证：backup policy 可见性、drift 驱动 degraded 记录、带 recovery 关联的 operation 摘要、rollback 检查能力，以及更丰富的 controller/CLI 事件历史流。
 - 当前已验证：远端备份提示现在已经在 Web、CLI、API 与 proof 输出中显式可见；backup 摘要不再只暴露原始 `not_configured`，而是会同时给出远端目标、配置状态、状态摘要与操作者动作。
+- 当前已验证：agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会在同一条 live 切片上统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。
 - 已被接受的 Milestone 1 切片进一步证明：即使上游断连在本机上表现为 `502`，CLI 仍将其明确归类为 transport 级故障，而不是 controller 业务错误；live unreachable-agent 路径现在也会显式把 host / rule 置为 degraded；controller-side diagnostics 还会在真实验证后把规则提升到 `active`。
-- 里程碑 2 仍然处于进行中，因为即使远端备份的配置/动作提示现在已经显式暴露，proof 环境中未配置 GitHub backup 时 required-mode 仍会降级；此外更广的 degraded/recovery UX 仍需要 live 打磨，而且同一条 live 切片上的可靠性重复证明还不够深。
+- 里程碑 2 仍然处于进行中，因为即使远端备份的配置/动作提示现在已经显式暴露，proof 环境中未配置 GitHub backup 时 required-mode 仍会降级；此外更广的 degraded/recovery/diagnostics-history UX 仍需要 live 打磨，而且同一条 live 切片上的可靠性重复证明还不够深。
 
 #### 可靠性推进规则
 - 里程碑 2 的推进必须建立在同一套 host/rule/policy 公共模型之上，而不是绕过里程碑 1 缺口。

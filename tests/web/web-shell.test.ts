@@ -78,6 +78,14 @@ test('host detail shell surfaces backup policy modes and remote backup status', 
   assert.match(html, /configure github backup/i)
 })
 
+test('host detail shell surfaces agent heartbeat and version semantics', () => {
+  const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
+
+  assert.match(html, /agent heartbeat/i)
+  assert.match(html, /live/i)
+  assert.match(html, /0\.1\.0/i)
+})
+
 test('host detail shell surfaces operation summaries and linked recovery evidence', () => {
   const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
 

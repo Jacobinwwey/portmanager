@@ -266,9 +266,12 @@ export function createControllerServer(options: {
 
     try {
       const runtimeState = await agentClient.collectRuntimeState(baseUrl)
+      const heartbeatAt = new Date().toISOString()
       store.updateHostRuntime(input.hostId, {
         lifecycleState: hostLifecycleFromAgentState(runtimeState.agentState),
-        agentState: runtimeState.agentState
+        agentState: runtimeState.agentState,
+        agentVersion: runtimeState.agentVersion,
+        agentHeartbeatAt: heartbeatAt
       })
 
       for (const rule of store.listBridgeRules({ hostId: input.hostId })) {

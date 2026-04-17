@@ -299,6 +299,9 @@ fn hosts_list_json_reads_controller_host_inventory() {
                         "name": "Alpha Relay",
                         "lifecycleState": "ready",
                         "agentState": "ready",
+                        "agentVersion": "0.1.0",
+                        "agentHeartbeatAt": "2026-04-17T13:28:00.000Z",
+                        "agentHeartbeatState": "live",
                         "tailscaleAddress": "100.64.0.10"
                     }
                 ]
@@ -313,6 +316,8 @@ fn hosts_list_json_reads_controller_host_inventory() {
     assert_eq!(parsed["items"][0]["id"], "host_alpha");
     assert_eq!(parsed["items"][0]["name"], "Alpha Relay");
     assert_eq!(parsed["items"][0]["lifecycleState"], "ready");
+    assert_eq!(parsed["items"][0]["agentHeartbeatState"], "live");
+    assert_eq!(parsed["items"][0]["agentVersion"], "0.1.0");
 }
 
 #[test]
@@ -328,6 +333,9 @@ fn hosts_get_text_surfaces_detail_context() {
                 "labels": ["edge", "prod"],
                 "lifecycleState": "ready",
                 "agentState": "ready",
+                "agentVersion": "0.1.0",
+                "agentHeartbeatAt": "2026-04-17T13:28:00.000Z",
+                "agentHeartbeatState": "live",
                 "tailscaleAddress": "100.64.0.10",
                 "sshPort": 22,
                 "effectivePolicy": {
@@ -363,6 +371,8 @@ fn hosts_get_text_surfaces_detail_context() {
     assert!(stdout.contains("required"));
     assert!(stdout.contains("HTTPS Relay"));
     assert!(stdout.contains("bootstrap_host"));
+    assert!(stdout.contains("0.1.0"));
+    assert!(stdout.contains("live"));
 }
 
 #[test]

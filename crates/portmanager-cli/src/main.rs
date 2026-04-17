@@ -1441,17 +1441,24 @@ fn format_accepted_operation_text(accepted: &Value) -> String {
 }
 
 fn format_host_summary_text(host: &Value) -> String {
+    let heartbeat_state = host["agentHeartbeatState"].as_str().unwrap_or("unknown");
+    let agent_version = host["agentVersion"].as_str().unwrap_or("unknown");
     format!(
-        "{} {} {} {} {}",
+        "{} {} {} {} {} {} {}",
         host["id"].as_str().unwrap_or("unknown"),
         host["lifecycleState"].as_str().unwrap_or("unknown"),
         host["agentState"].as_str().unwrap_or("unknown"),
+        heartbeat_state,
+        agent_version,
         host["name"].as_str().unwrap_or("unknown"),
         host["tailscaleAddress"].as_str().unwrap_or("n/a"),
     )
 }
 
 fn format_host_detail_text(host: &Value, default_host_id: &str) -> String {
+    let agent_version = host["agentVersion"].as_str().unwrap_or("unknown");
+    let heartbeat_state = host["agentHeartbeatState"].as_str().unwrap_or("unknown");
+    let heartbeat_at = host["agentHeartbeatAt"].as_str().unwrap_or("n/a");
     let labels = join_scalar_values(host["labels"].as_array());
     let recent_rules = host["recentRules"]
         .as_array()
@@ -1480,11 +1487,14 @@ fn format_host_detail_text(host: &Value, default_host_id: &str) -> String {
         .unwrap_or_else(|| "none".to_string());
 
     format!(
-        "{} {} {} {}\nlabels {}\npolicy allowed={} excluded={} mirror={} conflict={} backup={}\nrules {}\noperations {}",
+        "{} {} {} {}\nheartbeat {} version {} at {}\nlabels {}\npolicy allowed={} excluded={} mirror={} conflict={} backup={}\nrules {}\noperations {}",
         host["id"].as_str().unwrap_or(default_host_id),
         host["name"].as_str().unwrap_or("unknown"),
         host["lifecycleState"].as_str().unwrap_or("unknown"),
         host["agentState"].as_str().unwrap_or("unknown"),
+        heartbeat_state,
+        agent_version,
+        heartbeat_at,
         labels,
         join_scalar_values(host["effectivePolicy"]["allowedSources"].as_array()),
         join_scalar_values(host["effectivePolicy"]["excludedPorts"].as_array()),

@@ -520,7 +520,7 @@ components:
           enum: [queued, running]
     HostSummary:
       type: object
-      required: [id, name, lifecycleState, tailscaleAddress, agentState, updatedAt]
+      required: [id, name, lifecycleState, tailscaleAddress, agentState, agentHeartbeatState, updatedAt]
       properties:
         id:
           type: string
@@ -534,6 +534,14 @@ components:
         agentState:
           type: string
           enum: [unknown, ready, degraded, failed, unreachable]
+        agentVersion:
+          type: string
+        agentHeartbeatAt:
+          type: string
+          format: date-time
+        agentHeartbeatState:
+          type: string
+          enum: [unknown, live, stale, unreachable]
         lastBackupAt:
           type: string
           format: date-time

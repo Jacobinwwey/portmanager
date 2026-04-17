@@ -328,6 +328,14 @@ fn serve_exposes_collect_apply_snapshot_and_rollback_over_http() {
     let mut child = spawn_agent_service(&config_dir, &state_dir, port);
     let base_url = format!("http://127.0.0.1:{port}");
 
+    let health: Value = ureq::get(&format!("{base_url}/health"))
+        .call()
+        .expect("health response")
+        .into_json()
+        .expect("health json");
+    assert_eq!(health["status"], "ok");
+    assert_eq!(health["agentVersion"], "0.1.0");
+
     let runtime_state: Value = ureq::get(&format!("{base_url}/runtime-state"))
         .call()
         .expect("runtime-state response")
@@ -335,6 +343,7 @@ fn serve_exposes_collect_apply_snapshot_and_rollback_over_http() {
         .expect("runtime-state json");
     assert_eq!(runtime_state["hostId"], "host_alpha");
     assert_eq!(runtime_state["agentState"], "ready");
+    assert_eq!(runtime_state["agentVersion"], "0.1.0");
 
     let apply_result: Value = ureq::post(&format!("{base_url}/apply"))
         .send_json(json!({
@@ -372,6 +381,7 @@ fn serve_exposes_collect_apply_snapshot_and_rollback_over_http() {
         .expect("runtime-state after apply")
         .into_json()
         .expect("runtime-state after apply json");
+    assert_eq!(updated_runtime_state["agentVersion"], "0.1.0");
     assert_eq!(updated_runtime_state["appliedRules"][0]["id"], "rule_http_demo");
     assert_eq!(updated_runtime_state["appliedRules"][0]["status"], "applied_unverified");
 

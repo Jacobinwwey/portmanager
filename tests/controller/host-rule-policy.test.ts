@@ -85,6 +85,7 @@ test('controller server exposes host, rule, and policy resources through real de
       assert.equal(hostsPayload.items[0]?.lifecycleState, 'draft')
       assert.equal(hostsPayload.items[0]?.tailscaleAddress, '100.64.0.10')
       assert.equal(hostsPayload.items[0]?.agentState, 'unknown')
+      assert.equal(hostsPayload.items[0]?.agentHeartbeatState, 'unknown')
 
       const hostId = String(hostsPayload.items[0]?.id)
 
@@ -145,6 +146,7 @@ test('controller server exposes host, rule, and policy resources through real de
       }
 
       assert.deepEqual(hostDetail.labels, ['edge', 'prod'])
+      assert.equal(hostDetail.agentHeartbeatState, 'unknown')
       assert.equal(hostDetail.effectivePolicy.backupPolicy, 'required')
       assert.deepEqual(hostDetail.effectivePolicy.allowedSources, ['tailscale', 'admin'])
       assert.equal(hostDetail.recentRules.length, 1)
@@ -253,6 +255,62 @@ test('controller server probes hosts and marks bootstrap degraded when no live a
           ),
         true
       )
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('controller server derives stale heartbeat when last live contact ages out', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, artifactRoot })
+    const listening = await server.listen(0)
+
+    try {
+      const createHostResponse = await fetch(`${listening.baseUrl}/hosts`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: 'Stale Relay',
+          ssh: {
+            host: '100.64.0.12',
+            port: 22
+          }
+        })
+      })
+
+      const createHostAccepted = (await createHostResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, createHostAccepted.operationId)
+
+      const hostsResponse = await fetch(`${listening.baseUrl}/hosts`)
+      const hostsPayload = (await hostsResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+      const hostId = String(hostsPayload.items[0]?.id)
+
+      store.updateHostRuntime(hostId, {
+        lifecycleState: 'ready',
+        agentState: 'ready',
+        agentHeartbeatAt: '2026-04-01T00:00:00.000Z',
+        agentVersion: '0.1.0'
+      })
+
+      const staleResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}`)
+      assert.equal(staleResponse.status, 200)
+      const staleHost = (await staleResponse.json()) as Record<string, unknown>
+
+      assert.equal(staleHost.agentHeartbeatState, 'stale')
+      assert.equal(staleHost.agentVersion, '0.1.0')
+      assert.equal(staleHost.agentHeartbeatAt, '2026-04-01T00:00:00.000Z')
     } finally {
       await server.close()
       store.close()

@@ -120,6 +120,8 @@ export interface UpdateBridgeRuleInput {
 export interface UpdateHostRuntimeInput {
   lifecycleState?: HostSummary['lifecycleState']
   agentState?: HostSummary['agentState']
+  agentVersion?: string
+  agentHeartbeatAt?: string
   tailscaleAddress?: string
   lastBackupAt?: string
   lastDiagnosticsAt?: string
@@ -210,6 +212,8 @@ interface HostRow {
   lifecycle_state: HostSummary['lifecycleState']
   tailscale_address: string
   agent_state: HostSummary['agentState']
+  agent_version: string | null
+  last_heartbeat_at: string | null
   last_backup_at: string | null
   last_diagnostics_at: string | null
   updated_at: string
@@ -246,6 +250,8 @@ interface RollbackPointRow {
 function nowIso() {
   return new Date().toISOString()
 }
+
+const HEARTBEAT_STALE_MS = 5 * 60 * 1000
 
 function parseNumberArray(serialized: string | null) {
   if (!serialized) {
@@ -392,6 +398,23 @@ function rowToHealthCheck(row: HealthCheckRow): HealthCheck {
   }
 }
 
+function heartbeatStateFromRow(row: HostRow): NonNullable<HostSummary['agentHeartbeatState']> {
+  if (row.agent_state === 'unreachable') {
+    return 'unreachable'
+  }
+
+  if (!row.last_heartbeat_at) {
+    return 'unknown'
+  }
+
+  const heartbeatAt = Date.parse(row.last_heartbeat_at)
+  if (Number.isNaN(heartbeatAt)) {
+    return 'unknown'
+  }
+
+  return Date.now() - heartbeatAt > HEARTBEAT_STALE_MS ? 'stale' : 'live'
+}
+
 function rowToHostSummary(row: HostRow): HostSummary {
   return {
     id: row.id,
@@ -399,6 +422,9 @@ function rowToHostSummary(row: HostRow): HostSummary {
     lifecycleState: row.lifecycle_state,
     tailscaleAddress: row.tailscale_address,
     agentState: row.agent_state,
+    agentHeartbeatState: heartbeatStateFromRow(row),
+    ...(row.agent_version ? { agentVersion: row.agent_version } : {}),
+    ...(row.last_heartbeat_at ? { agentHeartbeatAt: row.last_heartbeat_at } : {}),
     ...(row.last_backup_at ? { lastBackupAt: row.last_backup_at } : {}),
     ...(row.last_diagnostics_at ? { lastDiagnosticsAt: row.last_diagnostics_at } : {}),
     updatedAt: row.updated_at
@@ -510,6 +536,8 @@ export function createOperationStore(options: { databasePath: string }): Operati
       lifecycle_state TEXT NOT NULL,
       tailscale_address TEXT NOT NULL,
       agent_state TEXT NOT NULL,
+      agent_version TEXT,
+      last_heartbeat_at TEXT,
       last_backup_at TEXT,
       last_diagnostics_at TEXT,
       updated_at TEXT NOT NULL,
@@ -545,6 +573,12 @@ export function createOperationStore(options: { databasePath: string }): Operati
 
   try {
     database.exec(`ALTER TABLE backups ADD COLUMN backup_mode TEXT`)
+  } catch {}
+  try {
+    database.exec(`ALTER TABLE hosts ADD COLUMN agent_version TEXT`)
+  } catch {}
+  try {
+    database.exec(`ALTER TABLE hosts ADD COLUMN last_heartbeat_at TEXT`)
   } catch {}
 
   const insertOperation = database.prepare(`
@@ -761,13 +795,15 @@ export function createOperationStore(options: { databasePath: string }): Operati
       lifecycle_state,
       tailscale_address,
       agent_state,
+      agent_version,
+      last_heartbeat_at,
       last_backup_at,
       last_diagnostics_at,
       updated_at,
       labels_json,
       ssh_host,
       ssh_port
-    ) VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, ?, ?, ?)
   `)
 
   const getHostQuery = database.prepare(`
@@ -777,6 +813,8 @@ export function createOperationStore(options: { databasePath: string }): Operati
       lifecycle_state,
       tailscale_address,
       agent_state,
+      agent_version,
+      last_heartbeat_at,
       last_backup_at,
       last_diagnostics_at,
       updated_at,
@@ -794,6 +832,8 @@ export function createOperationStore(options: { databasePath: string }): Operati
       lifecycle_state,
       tailscale_address,
       agent_state,
+      agent_version,
+      last_heartbeat_at,
       last_backup_at,
       last_diagnostics_at,
       updated_at,
@@ -809,6 +849,8 @@ export function createOperationStore(options: { databasePath: string }): Operati
     SET lifecycle_state = ?,
         tailscale_address = ?,
         agent_state = ?,
+        agent_version = ?,
+        last_heartbeat_at = ?,
         last_backup_at = ?,
         last_diagnostics_at = ?,
         updated_at = ?,
@@ -1361,6 +1403,8 @@ export function createOperationStore(options: { databasePath: string }): Operati
         input.lifecycleState ?? current.lifecycle_state,
         input.tailscaleAddress ?? current.tailscale_address,
         input.agentState ?? current.agent_state,
+        input.agentVersion ?? current.agent_version,
+        input.agentHeartbeatAt ?? current.last_heartbeat_at,
         input.lastBackupAt ?? current.last_backup_at,
         input.lastDiagnosticsAt ?? current.last_diagnostics_at,
         updatedAt,

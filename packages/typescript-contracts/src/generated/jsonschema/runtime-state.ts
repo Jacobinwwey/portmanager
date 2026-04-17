@@ -9,6 +9,7 @@ export interface RuntimeState {
   schemaVersion: string;
   hostId: string;
   agentState: "ready" | "degraded" | "failed" | "unreachable";
+  agentVersion: string;
   effectiveStateHash: string;
   health?: {
     summary: string;

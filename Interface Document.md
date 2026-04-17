@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-17
-Version: v0.2.5-unit5-closure
+Version: v0.2.6-heartbeat-semantics
 
 ## English
 
@@ -61,7 +61,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Unit 3`: complete. Web now renders controller-backed routes and diagnostics detail.
 - `Unit 4`: complete. Controller and agent now communicate through the locked `HTTP over Tailscale` steady-state boundary without breaking current evidence artifacts.
 - `Unit 5`: complete. Acceptance was replayed and milestone language updated only after the proof stayed green.
-- `Next lane`: Milestone 2 reliability hardening on the same live host / rule / policy slice.
+- `Milestone 2 slice shipped`: agent `/health` + `/runtime-state`, controller host summary/detail, CLI host output, and Web host detail now share `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.
+- `Next lane`: Milestone 2 reliability hardening on the same live host / rule / policy slice with degraded/recovery/diagnostics-history UX, repeated proof, and real GitHub backup delivery.
 
 ## 中文
 

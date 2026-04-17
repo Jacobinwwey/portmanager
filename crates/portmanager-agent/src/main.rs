@@ -14,6 +14,7 @@ use time::OffsetDateTime;
 use tiny_http::{Header, Method, Request, Response, Server, StatusCode};
 
 const SCHEMA_VERSION: &str = "0.1.0";
+const AGENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Parser)]
 #[command(name = "portmanager-agent")]
@@ -186,6 +187,8 @@ struct RuntimeState {
     schema_version: String,
     host_id: String,
     agent_state: String,
+    #[serde(default = "agent_version_string")]
+    agent_version: String,
     effective_state_hash: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     health: Option<HealthState>,
@@ -323,6 +326,7 @@ struct RollbackHttpRequest {
 struct HealthOutput {
     schema_version: &'static str,
     status: &'static str,
+    agent_version: &'static str,
 }
 
 fn main() -> ExitCode {
@@ -397,6 +401,7 @@ fn run_bootstrap(args: &BootstrapArgs) -> Result<OperationResult, AgentError> {
         schema_version: SCHEMA_VERSION.to_string(),
         host_id: args.host_id.clone(),
         agent_state: "ready".to_string(),
+        agent_version: AGENT_VERSION.to_string(),
         effective_state_hash: compute_effective_state_hash(&args.host_id, &[]),
         health: Some(HealthState {
             summary: "bootstrap completed".to_string(),
@@ -653,6 +658,7 @@ fn handle_http_request(mut request: Request, args: &ServeArgs) -> Result<(), Age
             &HealthOutput {
                 schema_version: SCHEMA_VERSION,
                 status: "ok",
+                agent_version: AGENT_VERSION,
             },
         ),
         (&Method::Get, "/runtime-state") => match run_collect(&CollectArgs {
@@ -792,6 +798,10 @@ fn read_bytes(path: &Path) -> Result<Vec<u8>, AgentError> {
 fn now_iso() -> Result<String, AgentError> {
     let now = OffsetDateTime::from(SystemTime::now());
     Ok(now.format(&Rfc3339)?)
+}
+
+fn agent_version_string() -> String {
+    AGENT_VERSION.to_string()
 }
 
 fn compute_effective_state_hash(host_id: &str, applied_rules: &[AppliedRule]) -> String {

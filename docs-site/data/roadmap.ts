@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the reliability gaps that still belong to Milestone 2, and the next developer lane on top of the live agent-backed flow.',
-    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、仍然属于 Milestone 2 的可靠性缺口，以及建立在 live agent 切片之上的开发下一主线。'
+    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version reliability slice, and the remaining Milestone 2 work on top of the live agent-backed flow.',
+    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version 可靠性切片，以及建立在 live agent 切片之上的剩余 Milestone 2 工作。'
   },
   buckets: [
     {
@@ -165,6 +165,7 @@ export const roadmapDeveloperProgress = {
           'Units 0 through 5 are now complete: controller, CLI, web, live agent boundary, acceptance replay, and docs sync now tell one mainline story.',
           '`pnpm acceptance:verify` passes on 2026-04-17 after the Unit 4 agent-service delivery and Unit 5 docs sync.',
           'Milestone proof now shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.',
+          'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
           'Roadmap page, milestone docs, product spec, and root progress docs now reflect the same truth.'
         ],
         zh: [
@@ -172,6 +173,7 @@ export const roadmapDeveloperProgress = {
           'Unit 0 到 Unit 5 现在都已完成：controller、CLI、web、live agent 边界、验收重放与文档同步已经讲同一条主线故事。',
           '`pnpm acceptance:verify` 已在 2026-04-17 的 Unit 4 agent-service 交付与 Unit 5 文档同步之后重新转绿。',
           'milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup/rollback 证据保持不变。',
+          'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
           'roadmap 页面、里程碑文档、产品规格与 root progress docs 现在已经反映同一套真实状态。'
         ]
       }
@@ -187,13 +189,13 @@ export const roadmapDeveloperProgress = {
         en: [
           'Milestone 2 reliability hardening is now the active lane, not Milestone 1 parity recovery.',
           'Required-mode remote backup still degrades when GitHub backup is not configured in the proof environment, but Web, CLI, API, and proof output now publish explicit setup/status/action guidance for that path.',
-          'Raw agent runtime still reports `applied_unverified` until controller diagnostics promote the controller-side rule lifecycle to `active`; this shipped semantic split now needs clearer heartbeat/version and health-language polish.',
+          'Raw agent runtime still reports `applied_unverified` until controller diagnostics promote the controller-side rule lifecycle to `active`; heartbeat/version semantics are now shipped, but broader degraded/recovery/diagnostics-history parity still needs more live polish.',
           'Broader reliability replay on the same live agent-backed slice still needs more repeated proof across Web, CLI, API, and agent.'
         ],
         zh: [
           '当前主线已经转到 Milestone 2 可靠性加固，而不再是 Milestone 1 一致性补洞。',
           '当 proof 环境没有配置 GitHub backup 时，required-mode remote backup 仍会降级，但 Web、CLI、API 与 proof 输出现在已经会为这条路径显式给出配置/状态/动作提示。',
-          '原始 agent runtime 在 controller diagnostics 提升 controller 侧 rule lifecycle 到 `active` 之前仍会保持 `applied_unverified`；这条已交付语义现在还需要更清楚的 heartbeat/version 与健康状态文案。',
+          '原始 agent runtime 在 controller diagnostics 提升 controller 侧 rule lifecycle 到 `active` 之前仍会保持 `applied_unverified`；heartbeat/version 语义已经交付，但更广的 degraded/recovery/diagnostics-history 一致性仍需要继续打磨。',
           '同一条 live agent-backed 切片上的可靠性重放仍需要在 Web、CLI、API 与 agent 之间继续增加重复证明。'
         ]
       }
@@ -208,13 +210,13 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Keep Unit 0 green while Milestone 2 work lands.',
-          'Build richer live reliability views for degraded/recovery history, diagnostics history, and agent heartbeat/version on the same host/rule/policy model now that remote-backup guidance is explicit.',
+          'Build richer live reliability views for degraded/recovery history and diagnostics history on the same host/rule/policy model now that remote-backup guidance and heartbeat/version semantics are explicit.',
           'Replay reliability acceptance on the live agent-backed slice instead of reintroducing local-only shortcuts.',
           'Keep Toward C deferred until Milestone 2 evidence becomes trustworthy.'
         ],
         zh: [
           '继续把 Unit 0 保持为绿，再让 Milestone 2 工作落地。',
-          '在远端备份提示已经显式化之后，继续在同一套 host/rule/policy 模型上补强 degraded/recovery 历史、diagnostics 历史，以及 agent heartbeat/version 的 live 可靠性界面。',
+          '在远端备份提示与 heartbeat/version 语义都已经显式化之后，继续在同一套 host/rule/policy 模型上补强 degraded/recovery 历史与 diagnostics 历史的 live 可靠性界面。',
           '把可靠性验收继续重放在 live agent-backed 切片上，而不是重新引入本地捷径。',
           '在 Milestone 2 证据真正可信之前，继续把 Toward C 保持为延后方向。'
         ]
@@ -278,12 +280,12 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     blockingGaps: {
       en: [
         'No blocking gap remains for the locked Milestone 1 public-surface slice.',
-        'Remaining unfinished work now belongs to Milestone 2: broader degraded/recovery UX, repeated live reliability replay, clearer controller-agent health semantics, and eventual GitHub backup delivery on top of the new guidance surfaces.',
+        'Remaining unfinished work now belongs to Milestone 2: broader degraded/recovery/diagnostics-history UX, repeated live reliability replay, and eventual GitHub backup delivery on top of the new guidance surfaces.',
         'Raw agent runtime intentionally remains `applied_unverified` until controller diagnostics promote the controller-side rule lifecycle to `active`; this is shipped verification sequencing, not a Milestone 1 blocker.'
       ],
       zh: [
         '锁定的 Milestone 1 公共表面切片已经没有阻塞缺口。',
-        '剩余未完成工作现在都属于 Milestone 2：更广的 degraded/recovery UX、live 可靠性重复证明、更清楚的 controller-agent 健康语义，以及建立在新提示表面之上的 GitHub backup 真正交付。',
+        '剩余未完成工作现在都属于 Milestone 2：更广的 degraded/recovery/diagnostics-history UX、live 可靠性重复证明，以及建立在新提示表面之上的 GitHub backup 真正交付。',
         '原始 agent runtime 会在 controller diagnostics 把 controller 侧 rule lifecycle 提升到 `active` 之前保持 `applied_unverified`；这是已交付的验证顺序，而不是 Milestone 1 阻塞项。'
       ]
     },
@@ -291,12 +293,12 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       en: [
         'Treat Milestone 1 as closed and protect it with the mainline gate.',
         'Use the accepted live agent-backed slice as the only base for Milestone 2 reliability work.',
-        'Keep controller-side diagnostics as the rule-activation authority while clarifying agent heartbeat/version and health language.'
+        'Keep controller-side diagnostics as the rule-activation authority while preserving the shipped heartbeat/version semantics across agent, API, CLI, and Web.'
       ],
       zh: [
         '把 Milestone 1 当作已闭环状态，并继续用主线 gate 保护它。',
         '把已经验收的 live agent-backed 切片作为 Milestone 2 可靠性工作的唯一底座。',
-        '继续让 controller-side diagnostics 承担规则激活权威，同时补强 agent heartbeat/version 与健康状态文案。'
+        '继续让 controller-side diagnostics 承担规则激活权威，同时把已经交付的 heartbeat/version 语义稳定保持在 agent、API、CLI 与 Web 之间。'
       ]
     },
     dependencies: [],
@@ -335,6 +337,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       en: [
         'Backup policy modes already behave differently and expose remote-backup status evidence.',
         'Remote-backup setup, status, and operator action are now explicit across API, CLI, web, and proof output instead of being buried behind raw enum state.',
+        'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
         'Drift detection already records explicit degraded state and recovery-linked summaries.',
         'Event history, operation detail replay paths, and rollback inspection are already richer than the original skeleton.',
         'Live agent-backed behavior now participates in degraded handling, rule verification, and controller-side activation semantics.',
@@ -343,6 +346,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       zh: [
         'backup policy 模式已经具备真实行为差异，并暴露远端备份状态证据。',
         '远端备份的配置、状态与操作者动作现在已经在 API、CLI、Web 与 proof 输出中显式可见，不再只是埋在原始枚举状态后面。',
+        'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
         'drift detection 已经记录显式 degraded 状态与 recovery 关联摘要。',
         'event history、operation detail replay path、rollback inspection 已经比最初骨架更完整。',
         'live agent-backed 行为现在也已经进入 degraded 处理、规则验证与 controller-side 激活语义。',
@@ -352,24 +356,24 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     blockingGaps: {
       en: [
         'Required-mode remote backup still degrades when GitHub backup is absent in the proof environment even though setup/action guidance is now explicit.',
-        'Broader reliability UX for degraded history, recovery guidance, and agent heartbeat/version still needs stronger live parity.',
+        'Broader reliability UX for degraded history, recovery guidance, and diagnostics history still needs stronger live parity.',
         'Milestone 2 acceptance still needs repeated end-to-end replay on the same live agent-backed slice before status can advance.'
       ],
       zh: [
         '即使远端备份的配置/动作提示现在已经显式可见，当 proof 环境缺少 GitHub backup 配置时，required-mode remote backup 仍会降级。',
-        'degraded 历史、恢复指引，以及 agent heartbeat/version 的更广可靠性 UX 仍需要更强的 live 一致性。',
+        'degraded 历史、恢复指引，以及 diagnostics 历史的更广可靠性 UX 仍需要更强的 live 一致性。',
         '在同一条 live agent-backed 切片上，Milestone 2 的验收仍需要更多端到端重复重放后，状态才有资格继续提升。'
       ]
     },
     developerFocus: {
       en: [
         'Build Milestone 2 on the completed Unit 0 through Unit 5 lane instead of reopening Milestone 1 parity work.',
-        'Deepen live reliability surfaces and proofs across degraded recovery, diagnostics history, agent health semantics, and eventual GitHub backup delivery.',
+        'Deepen live reliability surfaces and proofs across degraded recovery, diagnostics history, repeated proof, and eventual GitHub backup delivery.',
         'Keep one evidence model and one acceptance gate across controller, CLI, web, and agent.'
       ],
       zh: [
         '把 Milestone 2 建立在已经完成的 Unit 0 到 Unit 5 主线之上，而不是重新打开 Milestone 1 的表面补洞。',
-        '继续在 degraded 恢复、diagnostics 历史、agent 健康语义，以及后续 GitHub backup 真正交付上加深 live 可靠性界面与证明。',
+        '继续在 degraded 恢复、diagnostics 历史、重复证明，以及后续 GitHub backup 真正交付上加深 live 可靠性界面与证明。',
         '继续让 controller、CLI、web、agent 共用同一套证据模型与同一条验收 gate。'
       ]
     },

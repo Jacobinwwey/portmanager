@@ -247,6 +247,9 @@ test('controller bootstrap reaches live agent and syncs desired state over HTTP'
       const hostDetail = (await hostDetailResponse.json()) as Record<string, unknown>
       assert.equal(hostDetail.lifecycleState, 'ready')
       assert.equal(hostDetail.agentState, 'ready')
+      assert.equal(hostDetail.agentVersion, '0.1.0')
+      assert.equal(hostDetail.agentHeartbeatState, 'live')
+      assert.match(String(hostDetail.agentHeartbeatAt), /T/)
       assert.equal(
         Array.isArray(hostDetail.recentRules) &&
           (hostDetail.recentRules as Array<Record<string, unknown>>)[0]?.lifecycleState,
@@ -353,6 +356,7 @@ test('controller marks host degraded when steady-state agent is unreachable duri
       const hostDetail = (await hostDetailResponse.json()) as Record<string, unknown>
       assert.equal(hostDetail.lifecycleState, 'degraded')
       assert.equal(hostDetail.agentState, 'unreachable')
+      assert.equal(hostDetail.agentHeartbeatState, 'unreachable')
     } finally {
       await server.close()
       store.close()

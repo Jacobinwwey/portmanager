@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-17
-Version: v0.4.6-unit5-closure
+Version: v0.4.8-heartbeat-semantics
 
 ## English
 
@@ -47,7 +47,9 @@ Version: v0.4.6-unit5-closure
 - [x] Milestone 1 acceptance closure: evolve the agent from file-backed CLI skeleton to the locked `HTTP over Tailscale` steady-state service boundary.
 - [x] Milestone 1 acceptance closure: rerun acceptance, sync roadmap and product docs, and move milestone wording only after the proof is green.
 - [x] Milestone 2 acceptance closure: expose remote-backup setup and status more clearly across Web, CLI, API, and proof output so required-mode degradation is actionable.
-- [ ] Milestone 2 acceptance closure: expand live degraded/recovery/diagnostics-history UX plus agent heartbeat/version semantics on the same host/rule/policy model.
+- [x] Milestone 2 acceptance closure: land agent heartbeat/version semantics across agent `/health` + `/runtime-state`, controller host surfaces, CLI host output, Web host detail, and roadmap/progress docs.
+- [ ] Milestone 2 acceptance closure: expand live degraded/recovery/diagnostics-history UX on the same host/rule/policy model.
+- [ ] Milestone 2 acceptance closure: deliver real GitHub backup on top of the now-explicit remote-backup guidance surfaces.
 - [ ] Milestone 2 acceptance closure: repeat end-to-end reliability proof on the live agent-backed slice until Milestone 2 status can advance without qualification.
 
 ### Recommended execution order
@@ -57,7 +59,7 @@ Version: v0.4.6-unit5-closure
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
-- [ ] Next lane: harden Milestone 2 reliability on the same live slice with degraded/recovery/diagnostics-history UX, heartbeat/version semantics, repeated proof, and real GitHub backup delivery.
+- [ ] Next lane: harden Milestone 2 reliability on the same live slice with degraded/recovery/diagnostics-history UX, repeated proof, and real GitHub backup delivery.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -108,7 +110,9 @@ Version: v0.4.6-unit5-closure
 - [x] 里程碑 1 验收闭环：把 agent 从文件落盘式 CLI 骨架推进到锁定的 `HTTP over Tailscale` 稳态服务边界。
 - [x] 里程碑 1 验收闭环：重新执行验收、同步 roadmap 与产品文档，并且只在证明链转绿后提升里程碑文案。
 - [x] 里程碑 2 验收闭环：在 Web、CLI、API 与证明输出中更清楚地暴露远端备份配置与状态，让 required-mode 降级真正可操作。
-- [ ] 里程碑 2 验收闭环：继续在统一 host/rule/policy 模型上补强 live degraded/recovery/diagnostics-history UX 与 agent heartbeat/version 语义。
+- [x] 里程碑 2 验收闭环：补上 agent heartbeat/version 语义，并同步到 agent `/health` + `/runtime-state`、controller host 表面、CLI host 输出、Web host detail 与 roadmap/progress 文档。
+- [ ] 里程碑 2 验收闭环：继续在统一 host/rule/policy 模型上补强 live degraded/recovery/diagnostics-history UX。
+- [ ] 里程碑 2 验收闭环：在已经显式化的远端备份提示表面之上，真正交付 GitHub backup。
 - [ ] 里程碑 2 验收闭环：持续在 live agent-backed 切片上重放端到端可靠性证明，直到 Milestone 2 状态可以无保留提升。
 
 ### 推荐推进顺序
@@ -118,7 +122,7 @@ Version: v0.4.6-unit5-closure
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
-- [ ] 下一主线：继续在同一条 live 切片上加固 Milestone 2 可靠性，重点放在 degraded/recovery/diagnostics-history UX、heartbeat/version 语义、重复证明，以及 GitHub backup 真正交付。
+- [ ] 下一主线：继续在同一条 live 切片上加固 Milestone 2 可靠性，重点放在 degraded/recovery/diagnostics-history UX、重复证明，以及 GitHub backup 真正交付。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`

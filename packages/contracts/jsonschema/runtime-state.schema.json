@@ -3,7 +3,7 @@
   "$id": "https://portmanager.dev/schemas/runtime-state.schema.json",
   "title": "RuntimeState",
   "type": "object",
-  "required": ["schemaVersion", "hostId", "agentState", "effectiveStateHash", "updatedAt", "appliedRules"],
+  "required": ["schemaVersion", "hostId", "agentState", "agentVersion", "effectiveStateHash", "updatedAt", "appliedRules"],
   "properties": {
     "schemaVersion": { "type": "string" },
     "hostId": { "type": "string" },
@@ -11,6 +11,7 @@
       "type": "string",
       "enum": ["ready", "degraded", "failed", "unreachable"]
     },
+    "agentVersion": { "type": "string" },
     "effectiveStateHash": { "type": "string" },
     "health": {
       "type": "object",

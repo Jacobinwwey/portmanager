@@ -84,6 +84,7 @@ export function createLocalBackupPrimitive(options: {
         schemaVersion: SCHEMA_VERSION,
         hostId: input.hostId,
         agentState: 'ready',
+        agentVersion: SCHEMA_VERSION,
         effectiveStateHash: sha256(`${input.hostId}:${input.operationId}`),
         updatedAt: createdAt,
         appliedRules: [],

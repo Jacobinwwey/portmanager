@@ -621,6 +621,7 @@ body {
 }
 
 .pm-status-ready,
+.pm-status-live,
 .pm-tone-success { color: var(--pm-ok); background: rgba(15, 109, 88, 0.12); }
 .pm-status-bootstrapping,
 .pm-status-running,
@@ -628,6 +629,7 @@ body {
 .pm-status-degraded,
 .pm-status-applying,
 .pm-status-applied_unverified,
+.pm-status-stale,
 .pm-tone-warn { color: var(--pm-warn); background: rgba(157, 93, 19, 0.14); }
 .pm-status-failed,
 .pm-status-unreachable,
@@ -776,6 +778,9 @@ export function createMockHostDetailState(): HostDetailState {
     name: 'alpha-gateway',
     lifecycleState: 'ready',
     agentState: 'ready',
+    agentVersion: '0.1.0',
+    agentHeartbeatAt: '2026-04-16T18:01:00.000Z',
+    agentHeartbeatState: 'live',
     tailscaleAddress: '100.64.0.10',
     updatedAt: '2026-04-16T18:02:00.000Z',
     lastBackupAt: '2026-04-16T17:45:00.000Z',
@@ -1025,6 +1030,7 @@ export function createMockOverviewState(): OverviewState {
     name: 'bravo-lab',
     lifecycleState: 'bootstrapping',
     agentState: 'unknown',
+    agentHeartbeatState: 'unknown',
     tailscaleAddress: '100.64.0.27',
     updatedAt: '2026-04-16T17:58:00.000Z',
     lastBackupAt: '2026-04-16T16:30:00.000Z'
@@ -1035,6 +1041,9 @@ export function createMockOverviewState(): OverviewState {
     name: 'charlie-staging',
     lifecycleState: 'degraded',
     agentState: 'degraded',
+    agentVersion: '0.1.0',
+    agentHeartbeatAt: '2026-04-16T17:20:00.000Z',
+    agentHeartbeatState: 'stale',
     tailscaleAddress: '100.64.0.38',
     updatedAt: '2026-04-16T17:51:00.000Z',
     lastBackupAt: '2026-04-16T16:14:00.000Z',
@@ -1631,9 +1640,9 @@ export function HostDetailPage(props: { state: HostDetailState }) {
         tone: toneFromState(state.host.agentState)
       },
       {
-        label: 'Active Rules',
-        value: String(state.host.recentRules.length),
-        tone: 'info'
+        label: 'Agent Heartbeat',
+        value: state.host.agentHeartbeatState,
+        tone: toneFromState(state.host.agentHeartbeatState)
       },
       {
         label: 'Last Backup',
@@ -2277,6 +2286,9 @@ function HostDetailMain(props: { state: HostDetailState }) {
         kvRow('Host Name', props.state.host.name),
         kvRow('Lifecycle', h(StatusBadge, { state: props.state.host.lifecycleState })),
         kvRow('Agent State', h(StatusBadge, { state: props.state.host.agentState })),
+        kvRow('Agent Heartbeat', h(StatusBadge, { state: props.state.host.agentHeartbeatState })),
+        kvRow('Agent Version', props.state.host.agentVersion ?? 'unknown'),
+        kvRow('Heartbeat At', shortTime(props.state.host.agentHeartbeatAt)),
         kvRow('Labels', (props.state.host.labels ?? []).join(', ')),
         kvRow('Updated', shortTime(props.state.host.updatedAt))
       ])
@@ -3105,8 +3117,15 @@ function toneFromState(state: string): Tone {
     return 'success'
   }
   if (
+    state === 'live' ||
+    state === 'unknown'
+  ) {
+    return state === 'live' ? 'success' : 'info'
+  }
+  if (
     state === 'degraded' ||
     state === 'failed' ||
+    state === 'stale' ||
     state === 'unreachable' ||
     state === 'bootstrapping' ||
     state === 'applied_unverified'
