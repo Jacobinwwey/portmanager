@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes what is already real, what is still blocking acceptance, and what developers should advance next before milestone status moves again.',
-    zh: '这个页面现在直接暴露哪些能力已经真实存在、哪些缺口仍在阻塞验收、以及开发者在里程碑状态继续推进前应该先做什么。'
+    en: 'This page now exposes what is already real, which gate protects mainline, what is still blocking acceptance, and what developers should advance next before milestone status moves again.',
+    zh: '这个页面现在直接暴露哪些能力已经真实存在、哪条 gate 正在保护主线、哪些缺口仍在阻塞验收，以及开发者在里程碑状态继续推进前应该先做什么。'
   },
   buckets: [
     {
@@ -162,11 +162,13 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Docs-first baseline, contracts, and roadmap sequencing are locked.',
+          'Mainline acceptance discipline is now real through `pnpm acceptance:verify`, the `mainline-acceptance` workflow, and the 2026-04-17 Windows validation pass.',
           'Backup, rollback, diagnostics, drift, event history, and recovery evidence are already proved in controller, CLI, and milestone tests.',
           'Mainline documentation now distinguishes contractual surface from delivered surface.'
         ],
         zh: [
           'Docs-first 基线、契约和路线排序已经锁定。',
+          '主线验收纪律已经真实落地：`pnpm acceptance:verify`、`mainline-acceptance` workflow 与 2026-04-17 的 Windows 验证已经连成同一条 gate。',
           'backup、rollback、diagnostics、drift、event history、recovery 证据已经在 controller、CLI、milestone 测试中被证明。',
           '主线文档现在已经明确区分契约表面与已交付表面。'
         ]
@@ -181,14 +183,14 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Milestone 1 acceptance closure on real hosts, bridge rules, exposure policies, live web parity, and agent steady-state service.',
-          'Milestone 2 reliability acceptance on the same live cross-surface model instead of branch-only evidence.',
-          'Roadmap status sync between root specs, docs-site detail pages, and roadmap index.'
+          'Milestone 1 acceptance closure is still blocked on real hosts, bridge rules, exposure policies, live web parity, and the agent steady-state service.',
+          'Milestone 2 reliability acceptance still has to be replayed on that same live host/rule/policy model instead of the current partial slice.',
+          'Roadmap status sync is still required between root specs, docs-site detail pages, and the roadmap index each time acceptance evidence changes.'
         ],
         zh: [
-          '里程碑 1 正在补齐真实 hosts、bridge rules、exposure policies、live web 一致性与 agent 稳态服务。',
-          '里程碑 2 正在把可靠性验收建立在同一套 live 跨界面模型上，而不是只靠分支局部证据。',
-          '路线状态正在 root specs、docs-site 详情页和 roadmap 首页之间保持同步。'
+          '里程碑 1 验收闭环仍然卡在真实 hosts、bridge rules、exposure policies、live web 一致性与 agent 稳态服务上。',
+          '里程碑 2 仍然要把可靠性验收重放到同一套 live host/rule/policy 模型上，而不是继续停留在当前部分切片。',
+          '每次验收证据变化后，路线状态仍然需要在 root specs、docs-site 详情页和 roadmap 首页之间继续同步。'
         ]
       }
     },
@@ -201,14 +203,14 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Make controller host, bridge-rule, and exposure-policy resources real.',
-          'Mirror those resources into CLI commands and live web views before advancing milestone status.',
-          'Move the agent from file-backed CLI skeleton to the locked HTTP-over-Tailscale steady-state boundary without breaking evidence artifacts.'
+          'Unit 1: make controller host, bridge-rule, and exposure-policy resources real without regressing current evidence flows.',
+          'Unit 2 + Unit 3: mirror those resources into CLI commands and replace web mock routes with live views before advancing milestone status.',
+          'Unit 4 + Unit 5: move the agent to the locked HTTP-over-Tailscale steady-state boundary, rerun acceptance, and only then rewrite milestone language.'
         ],
         zh: [
-          '先把 controller 的 host、bridge-rule、exposure-policy 资源做成真实表面。',
-          '在提升里程碑状态前，把这些表面同步镜像到 CLI 命令和 live Web 视图。',
-          '在不破坏证据产物的前提下，把 agent 从文件式 CLI 骨架推进到锁定的 HTTP-over-Tailscale 稳态边界。'
+          'Unit 1：先把 controller 的 host、bridge-rule、exposure-policy 资源做成真实表面，同时不回退现有证据链。',
+          'Unit 2 + Unit 3：在提升里程碑状态前，把这些表面同步镜像到 CLI 命令，并把 Web mock 路由切到 live 视图。',
+          'Unit 4 + Unit 5：把 agent 推进到锁定的 HTTP-over-Tailscale 稳态边界，重新跑验收，然后再重写里程碑文案。'
         ]
       }
     }
@@ -249,36 +251,40 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       en: [
         'Controller operations, backups, diagnostics, rollback points, and event replay surfaces are already real.',
         'CLI inspection flows for operations, backups, diagnostics, health checks, and rollback points are already real.',
-        'Milestone verification already proves backup-before-mutation, diagnostics evidence, rollback evidence, and degraded-state history.'
+        'Milestone verification already proves backup-before-mutation, diagnostics evidence, rollback evidence, and degraded-state history.',
+        'Mainline acceptance is now repeatable through `pnpm acceptance:verify` and the matching CI workflow, but still measures only a partial public surface.'
       ],
       zh: [
         'controller 的 operations、backups、diagnostics、rollback points、event replay 表面已经真实存在。',
         'CLI 的 operations、backups、diagnostics、health checks、rollback points 检查流已经真实存在。',
-        '里程碑验证已经证明变更前备份、诊断证据、回滚证据与 degraded 状态历史。'
+        '里程碑验证已经证明变更前备份、诊断证据、回滚证据与 degraded 状态历史。',
+        '主线验收现在已经可以通过 `pnpm acceptance:verify` 与对应 CI workflow 重复执行，但它衡量的仍然只是部分公共表面。'
       ]
     },
     blockingGaps: {
       en: [
         'Real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources are still missing.',
         'Web roadmap IA still relies on mock-only overview, host detail, and operations shells.',
-        'Agent steady-state service over HTTP over Tailscale is still missing.'
+        'Agent steady-state service over HTTP over Tailscale is still missing.',
+        'Milestone 1 wording still cannot advance until Unit 1 through Unit 4 close the public-surface gap.'
       ],
       zh: [
         '真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源仍然缺失。',
         'Web 的 roadmap 信息架构仍然依赖 mock-only 的 overview、host detail、operations shell。',
-        '基于 HTTP over Tailscale 的 agent 稳态服务仍然缺失。'
+        '基于 HTTP over Tailscale 的 agent 稳态服务仍然缺失。',
+        '在 Unit 1 到 Unit 4 补齐公共表面缺口之前，里程碑 1 文案都还不能继续提升。'
       ]
     },
     developerFocus: {
       en: [
-        'Build controller source-of-truth resources for hosts, rules, and policies.',
-        'Mirror those resources into CLI and live web routes without losing current verification coverage.',
-        'Keep Milestone 1 proof green while removing mock-only page behavior.'
+        'Unit 1: build controller source-of-truth resources for hosts, rules, and policies.',
+        'Unit 2 + Unit 3: mirror those resources into CLI and live web routes without losing current verification coverage.',
+        'Unit 4 + Unit 5: keep Milestone 1 proof green while the agent boundary hardens and docs are resynced.'
       ],
       zh: [
-        '先补齐 controller 中作为真源的 hosts、rules、policies 资源。',
-        '在不丢失当前验证覆盖的前提下，把这些资源同步到 CLI 和 live Web 路由。',
-        '在移除 mock-only 页面行为时，保持里程碑 1 验证持续为绿。'
+        'Unit 1：先补齐 controller 中作为真源的 hosts、rules、policies 资源。',
+        'Unit 2 + Unit 3：在不丢失当前验证覆盖的前提下，把这些资源同步到 CLI 和 live Web 路由。',
+        'Unit 4 + Unit 5：在 agent 边界加固和文档重同步过程中，保持里程碑 1 验证持续为绿。'
       ]
     },
     dependencies: [],
@@ -317,12 +323,14 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       en: [
         'Backup policy modes already behave differently and expose remote-backup status evidence.',
         'Drift detection already records explicit degraded state and recovery-linked summaries.',
-        'Event history, operation detail replay paths, and rollback inspection are already richer than the original skeleton.'
+        'Event history, operation detail replay paths, and rollback inspection are already richer than the original skeleton.',
+        'The mainline acceptance gate now protects this reliability slice from docs, contract, and test drift while Milestone 1 parity work continues.'
       ],
       zh: [
         'backup policy 模式已经具备真实行为差异，并暴露远端备份状态证据。',
         'drift detection 已经记录显式 degraded 状态与 recovery 关联摘要。',
-        'event history、operation detail replay path、rollback inspection 已经比最初骨架更完整。'
+        'event history、operation detail replay path、rollback inspection 已经比最初骨架更完整。',
+        '在里程碑 1 一致性工作继续推进时，主线验收 gate 也开始保护这条可靠性切片，避免文档、契约和测试发生漂移。'
       ]
     },
     blockingGaps: {
@@ -339,14 +347,14 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     developerFocus: {
       en: [
-        'Finish Milestone 1 public-surface parity first, then harden reliability UX on real surfaces.',
-        'Keep one evidence model across controller, CLI, and web instead of growing separate reliability stories.',
-        'Use the same contracts and replay links for degraded state, backup policy, diagnostics, and rollback evidence.'
+        'Keep Milestone 2 behind the Unit 1 through Unit 4 closure path instead of promoting it from partial evidence.',
+        'Harden reliability UX only on the same live host/rule/policy surfaces that replace current mocks.',
+        'Keep one evidence model and one acceptance gate across controller, CLI, web, and agent instead of growing parallel reliability stories.'
       ],
       zh: [
-        '先完成里程碑 1 公共表面一致性，再把可靠性 UX 加固到真实表面上。',
-        '保持 controller、CLI、web 共享同一套证据模型，而不是长出三套不同的可靠性叙事。',
-        '让 degraded 状态、backup policy、diagnostics、rollback 证据继续共用同一套契约与 replay 链路。'
+        '把里程碑 2 保持在 Unit 1 到 Unit 4 的闭环路径之后，而不是靠部分证据提前升级。',
+        '只在替换掉当前 mock 的同一套 live host/rule/policy 表面上继续加固可靠性 UX。',
+        '让 controller、CLI、web、agent 继续共用同一套证据模型与验收 gate，而不是分裂出多套可靠性叙事。'
       ]
     },
     dependencies: ['m1'],

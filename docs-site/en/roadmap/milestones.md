@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.4.2-mainline-acceptance-gate
+> Updated: 2026-04-17 | Version: v0.4.3-mainline-progress-sync
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -50,9 +50,16 @@ Milestone 1 is only accepted when all of the following become true:
 #### Current verified status
 - Progress is real, but acceptance is still open.
 - Verified now: backup-before-mutation, rollback evidence, diagnostics capture, drift-driven degraded state, filtered operation history, event replay, and controller/CLI inspection surfaces for operations, backups, diagnostics, health checks, and rollback points.
-- Acceptance evidence re-ran successfully on a Windows real machine on `2026-04-17`: `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `pnpm --dir docs-site run docs:build`, and `pnpm milestone:verify` all passed after closing Windows-specific validation blockers in contract generation, SQLite test cleanup, CLI transport classification, and mock-server socket handling.
+- Acceptance evidence re-ran successfully on a Windows real machine on `2026-04-17`: `pnpm test`, `pnpm typecheck`, `cargo test --workspace`, `pnpm --dir docs-site --ignore-workspace run docs:build`, and `pnpm milestone:verify` all passed after closing Windows-specific validation blockers in contract generation, SQLite test cleanup, CLI transport classification, and mock-server socket handling.
 - Mainline acceptance is now formalized as a repeatable gate through `pnpm acceptance:verify` and the `mainline-acceptance` GitHub Actions workflow. This improves delivery rigor, but it does not change Milestone 1 acceptance status by itself.
 - Still missing before acceptance: real `/hosts`, `/bridge-rules`, and `/exposure-policies` resources, CLI parity for those resources, live web parity beyond mock shells, and the steady-state controller-agent `HTTP over Tailscale` service boundary.
+
+#### Current development sequence
+- `Unit 1`: make controller `hosts`, `bridge-rules`, and `exposure-policies` real before widening any milestone status claim.
+- `Unit 2`: extend CLI into those same resources so controller and CLI share one truthful public surface.
+- `Unit 3`: replace Web mock-only routes with controller-backed views and diagnostics detail.
+- `Unit 4`: move the agent toward the minimum `HTTP over Tailscale` steady-state service boundary without breaking current artifact compatibility.
+- `Unit 5`: rerun `pnpm acceptance:verify`, sync roadmap and product docs, and only then reassess Milestone 1 wording.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -88,6 +95,11 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: backup-policy visibility, drift-driven degraded records, recovery-linked operation summaries, rollback inspection, and richer event history flows in controller and CLI tests.
 - Verified now from the Windows acceptance pass: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures, and the CLI test harness no longer flakes on Windows nonblocking accepted sockets.
 - Milestone 2 still remains in progress because Web surfaces are not yet live-data truthful and the missing host/rule/policy public surfaces still prevent full cross-interface reliability claims.
+
+#### Reliability sequencing rule
+- Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.
+- The Unit 0 acceptance gate stays mandatory, but it is still not a substitute for Unit 1 through Unit 4 parity work.
+- Reliability status can move only after live Web, CLI, API, and agent evidence all tell the same story.
 
 #### What remains intentionally deferred
 - full broad-platform support

@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-17 | Version：v0.4.2-mainline-acceptance-gate
+> Updated：2026-04-17 | Version：v0.4.3-mainline-progress-sync
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -50,9 +50,16 @@ status: active
 #### 当前已验证状态
 - 进展是真实存在的，但验收仍未闭环。
 - 当前已验证：变更前备份、回滚证据、诊断抓取、drift 驱动 degraded 状态、筛选后的 operation 历史、事件回放，以及 controller/CLI 对 operations、backups、diagnostics、health checks、rollback points 的检查表面。
-- 已在 `2026-04-17` 于 Windows 真机重新跑通验收证据：`pnpm test`、`pnpm typecheck`、`cargo test --workspace`、`pnpm --dir docs-site run docs:build`、`pnpm milestone:verify` 全部通过；同时补齐了 Windows 侧契约生成、SQLite 测试清理、CLI transport 分类以及 mock server socket 处理的阻塞项。
+- 已在 `2026-04-17` 于 Windows 真机重新跑通验收证据：`pnpm test`、`pnpm typecheck`、`cargo test --workspace`、`pnpm --dir docs-site --ignore-workspace run docs:build`、`pnpm milestone:verify` 全部通过；同时补齐了 Windows 侧契约生成、SQLite 测试清理、CLI transport 分类以及 mock server socket 处理的阻塞项。
 - 主线验收现在已经通过 `pnpm acceptance:verify` 与 `mainline-acceptance` GitHub Actions workflow 被固化为可重复执行的 gate。它提高了交付纪律，但并不会单独改变里程碑 1 的验收状态。
 - 验收前仍缺失：真实 `/hosts`、`/bridge-rules`、`/exposure-policies` 资源，这些资源在 CLI 中的对等能力，超出 mock shell 的 live Web 一致性，以及稳态 controller-agent `HTTP over Tailscale` 服务边界。
+
+#### 当前推进顺序
+- `Unit 1`：先把 controller 的 `hosts`、`bridge-rules`、`exposure-policies` 做成真实运行态表面，再谈里程碑状态升级。
+- `Unit 2`：把 CLI 扩到这些同名资源，让 controller 与 CLI 共享同一套可信公共表面。
+- `Unit 3`：把 Web 的 mock-only 路由切到 controller 实时视图，并补齐 diagnostics detail。
+- `Unit 4`：在不破坏当前产物兼容性的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
+- `Unit 5`：重新执行 `pnpm acceptance:verify`，同步 roadmap 与产品文档，然后再重写里程碑 1 表述。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
@@ -88,6 +95,11 @@ status: active
 - 当前已验证：backup policy 可见性、drift 驱动 degraded 记录、带 recovery 关联的 operation 摘要、rollback 检查能力，以及更丰富的 controller/CLI 事件历史流。
 - 来自 Windows 验收的新验证结论：即使上游断连在本机上表现为 `502`，CLI 仍将其明确归类为 transport 级故障，而不是 controller 业务错误；同时 CLI 测试桩不再因为 Windows 非阻塞 accepted socket 语义而偶发抖动。
 - 里程碑 2 仍然处于进行中，因为 Web 表面还不是真实 live-data truth，而缺失的 host/rule/policy 公共表面也让跨界面的完整可靠性声明还站不住。
+
+#### 可靠性推进规则
+- 里程碑 2 的推进必须建立在同一套 host/rule/policy 公共模型之上，而不是绕过里程碑 1 缺口。
+- Unit 0 验收 gate 仍然必须保持，但它依旧不能替代 Unit 1 到 Unit 4 的一致性工作。
+- 只有当 live Web、CLI、API 与 agent 证据开始讲同一个故事时，可靠性状态才有资格继续提升。
 
 #### 明确延后的内容
 - 完整的广平台支持

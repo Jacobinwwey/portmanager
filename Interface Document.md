@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-17
-Version: v0.2.1-mainline-acceptance-sync
+Version: v0.2.2-mainline-progress-sync
 
 ## English
 
@@ -53,6 +53,13 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - This gate does **not** mean interface parity is complete. Missing `hosts`, `bridge-rules`, `exposure-policies`, live web parity, and the steady-state agent service remain delivery obligations.
 
+### Recommended parity-closure order
+- `Unit 1`: land controller `hosts`, `bridge-rules`, and `exposure-policies` as real source-of-truth resources first.
+- `Unit 2`: extend CLI commands to inspect and mutate those same resources with the existing `--json` and wait-aware conventions.
+- `Unit 3`: replace Web mock-only views with controller-backed routes and diagnostics detail.
+- `Unit 4`: connect controller and agent through the locked `HTTP over Tailscale` steady-state boundary without breaking current evidence artifacts.
+- `Unit 5`: rerun acceptance and update milestone language only after the parity gaps above are closed.
+
 ## 中文
 
 本文档汇总 PortManager V1 的公共接口边界。
@@ -102,3 +109,10 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - 该 gate 在主分支上的 CI 镜像为 `.github/workflows/mainline-acceptance.yml`。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 但它**并不**意味着接口一致性已经闭环。`hosts`、`bridge-rules`、`exposure-policies`、live web parity 与稳态 agent service 仍然是必须补齐的交付项。
+
+### 推荐闭环顺序
+- `Unit 1`：先补齐 controller 的 `hosts`、`bridge-rules`、`exposure-policies` 真源资源。
+- `Unit 2`：再把 CLI 扩到这些同名资源，并继续沿用现有 `--json` 与等待轮询约定。
+- `Unit 3`：把 Web 从 mock-only 视图切到 controller 实时路由，并补齐 diagnostics detail。
+- `Unit 4`：在不破坏现有证据产物的前提下，通过锁定的 `HTTP over Tailscale` 稳态边界接通 controller 与 agent。
+- `Unit 5`：只有在以上一致性缺口补齐后，才重新跑验收并更新里程碑状态表述。
