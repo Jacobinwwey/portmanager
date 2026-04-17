@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs'
+import { EOL } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { contentMap, publishableRoots } from '../../docs-site/content-map.js'
@@ -25,6 +26,10 @@ const localeConfig = {
 
 function normalize(filePath) {
   return filePath.split(path.sep).join('/')
+}
+
+function platformLineEndings(source) {
+  return source.replace(/\r\n/gu, '\n').replace(/\n/gu, EOL)
 }
 
 async function listMarkdownFiles(root) {
@@ -139,7 +144,9 @@ async function generate() {
       const body = extractSection(documentText, locale)
       const destination = path.join(docsSiteRoot, locale, `${entry.route}.md`)
       await fs.mkdir(path.dirname(destination), { recursive: true })
-      const output = `${frontmatterFor(entry, locale)}${metaBlock(entry, locale, preamble)}${body}\n`
+      const output = platformLineEndings(
+        `${frontmatterFor(entry, locale)}${metaBlock(entry, locale, preamble)}${body}\n`
+      )
       await fs.writeFile(destination, output, 'utf8')
     }
   }

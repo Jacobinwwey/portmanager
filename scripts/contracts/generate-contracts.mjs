@@ -1,7 +1,7 @@
 import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { compileFromFile } from 'json-schema-to-typescript'
 import path from 'node:path'
-import { tmpdir } from 'node:os'
+import { EOL, tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
 
@@ -98,6 +98,18 @@ function refToName(ref, expectedSection) {
 
 function linesToBlock(lines) {
   return lines.join('\n')
+}
+
+function normalizeLineEndings(source) {
+  return source.replace(/\r\n/gu, '\n')
+}
+
+function platformLineEndings(source) {
+  return normalizeLineEndings(source).replace(/\n/gu, EOL)
+}
+
+function writeGeneratedText(targetPath, contents) {
+  writeFileSync(targetPath, platformLineEndings(contents), 'utf8')
 }
 
 function prefixedLines(prefix, source) {
@@ -477,13 +489,13 @@ async function generateInto(targetDir) {
   mkdirSync(path.join(targetDir, 'generated', 'jsonschema'), { recursive: true })
   const schemas = schemaDefinitions()
 
-  writeFileSync(path.join(targetDir, 'generated', 'openapi.ts'), generateOpenapiTypes(), 'utf8')
+  writeGeneratedText(path.join(targetDir, 'generated', 'openapi.ts'), generateOpenapiTypes())
 
   for (const schema of schemas) {
     const source = path.join(contractsRoot, 'jsonschema', schema.fileName)
     const output = path.join(targetDir, 'generated', 'jsonschema', `${schema.outputName}.ts`)
     const generated = await compileFromFile(source)
-    writeFileSync(output, generated, 'utf8')
+    writeGeneratedText(output, generated)
   }
 
   const indexLines = [
@@ -494,7 +506,7 @@ async function generateInto(targetDir) {
     ),
     ''
   ]
-  writeFileSync(path.join(targetDir, 'index.ts'), indexLines.join('\n'), 'utf8')
+  writeGeneratedText(path.join(targetDir, 'index.ts'), indexLines.join('\n'))
 }
 
 function fileMap(rootDir) {
@@ -537,7 +549,7 @@ function compareOutputs(expectedDir, actualDir) {
       continue
     }
 
-    if (expectedFiles.get(relativePath) !== actualFiles.get(relativePath)) {
+    if (normalizeLineEndings(expectedFiles.get(relativePath)) !== normalizeLineEndings(actualFiles.get(relativePath))) {
       mismatches.push(`Changed generated file: ${relativePath}`)
     }
   }
@@ -566,7 +578,7 @@ async function main() {
     for (const [relativePath, contents] of fileMap(tempDir)) {
       const destination = path.join(options.targetDir, relativePath)
       mkdirSync(path.dirname(destination), { recursive: true })
-      writeFileSync(destination, contents, 'utf8')
+      writeGeneratedText(destination, contents)
     }
 
     process.stdout.write(`Generated contract outputs into ${options.targetDir}\n`)

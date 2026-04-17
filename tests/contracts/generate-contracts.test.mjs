@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { tmpdir } from 'node:os'
@@ -14,6 +14,27 @@ function runGenerator(args) {
     cwd: repoRoot,
     encoding: 'utf8'
   })
+}
+
+function walkFiles(rootDir) {
+  const files = []
+
+  function walk(currentDir) {
+    for (const entry of readdirSync(currentDir, { withFileTypes: true })) {
+      const absolutePath = path.join(currentDir, entry.name)
+      if (entry.isDirectory()) {
+        walk(absolutePath)
+      } else if (entry.isFile()) {
+        files.push(absolutePath)
+      }
+    }
+  }
+
+  if (statSync(rootDir).isDirectory()) {
+    walk(rootDir)
+  }
+
+  return files
 }
 
 test('contracts generator emits openapi and json schema types into target tree', () => {
@@ -53,6 +74,25 @@ test('contracts generator check mode fails when committed outputs drift', () => 
       },
       /Contract generation drift detected/u
     )
+  } finally {
+    rmSync(outDir, { recursive: true, force: true })
+  }
+})
+
+test('contracts generator check mode tolerates CRLF-only output differences', () => {
+  const outDir = mkdtempSync(path.join(tmpdir(), 'portmanager-contracts-eol-'))
+
+  try {
+    runGenerator(['--out-dir', outDir])
+
+    for (const filePath of walkFiles(outDir)) {
+      const contents = readFileSync(filePath, 'utf8')
+      writeFileSync(filePath, contents.replace(/\r?\n/gu, '\r\n'), 'utf8')
+    }
+
+    assert.doesNotThrow(() => {
+      runGenerator(['--check', '--target-dir', outDir])
+    })
   } finally {
     rmSync(outDir, { recursive: true, force: true })
   }
