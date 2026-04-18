@@ -51,8 +51,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - The repository now has a repeatable mainline verification gate: `pnpm acceptance:verify`.
 - The repository now also has one canonical Milestone 2 confidence routine: `pnpm milestone:verify:confidence`.
 - The main branch CI mirror for that gate is `.github/workflows/mainline-acceptance.yml`.
-- That workflow keeps `pnpm acceptance:verify` on the standing PR path and runs `pnpm milestone:verify:confidence` on `push main` plus `workflow_dispatch`.
-- The confidence routine now writes `.portmanager/reports/milestone-confidence-report.json`, and the confidence job uploads that same report as a CI artifact for developer inspection.
+- That workflow keeps `pnpm acceptance:verify` on the standing PR path and runs `pnpm milestone:verify:confidence` on `push main`, `workflow_dispatch`, and the daily scheduled history run.
+- The confidence routine now writes `.portmanager/reports/milestone-confidence-report.json` with CI traceability fields for `eventName`, `ref`, `sha`, `runId`, `runAttempt`, and `workflow`, and the confidence job uploads that same report as a CI artifact for developer inspection.
 - Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - Fresh local proof on `2026-04-17`: `pnpm acceptance:verify` passes after the Unit 4 agent-service delivery and Unit 5 docs sync.
@@ -68,8 +68,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 slice shipped`: controller `GET /diagnostics` now filters by `state`, and Web host detail now groups degraded diagnostics history with recovery-ready successful evidence.
 - `Milestone 2 slice shipped`: controller backup bundles now upload through the GitHub Contents API when configured, and required-mode success/failure stays explicit across API, CLI, Web, and milestone proof.
 - `Milestone 2 slice shipped`: repeated remote-backup replay now exercises local-only, configured-success, and configured-failure required backups on the same live agent-backed host / rule flow across API, CLI, Web backup views, and agent runtime proof.
-- `Milestone 2 slice shipped`: `pnpm milestone:verify:confidence` now composes the standing acceptance gate with the remote-backup replay proof, and the mainline workflow now collects that heavier routine on `push main` and `workflow_dispatch`.
-- `Milestone 2 slice shipped`: the canonical confidence routine now emits a durable JSON report at `.portmanager/reports/milestone-confidence-report.json`, and CI uploads that report for developers so green-history review stops depending on raw job logs alone.
+- `Milestone 2 slice shipped`: `pnpm milestone:verify:confidence` now composes the standing acceptance gate with the remote-backup replay proof, and the mainline workflow now collects that heavier routine on `push main`, `workflow_dispatch`, and the daily scheduled history path.
+- `Milestone 2 slice shipped`: the canonical confidence routine now emits a durable JSON report at `.portmanager/reports/milestone-confidence-report.json` with CI traceability metadata, and CI uploads that report for developers so green-history review stops depending on raw job logs alone.
 - `Next lane`: Milestone 2 confidence-routine maintenance on the same live host / rule / policy slice by keeping the canonical routine green long enough for the current wording to stop needing qualification.
 
 ## 中文
@@ -120,8 +120,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - 当前仓库已经具备可重复执行的主线验证 gate：`pnpm acceptance:verify`。
 - 当前仓库也已经具备一条规范的 Milestone 2 confidence routine：`pnpm milestone:verify:confidence`。
 - 该 gate 在主分支上的 CI 镜像为 `.github/workflows/mainline-acceptance.yml`。
-- 这条 workflow 会继续把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main` 与 `workflow_dispatch` 上运行 `pnpm milestone:verify:confidence`。
-- 这条 confidence routine 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`，而 confidence job 也会把同一份报告上传成 CI artifact 供开发者核对。
+- 这条 workflow 会继续把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上运行 `pnpm milestone:verify:confidence`。
+- 这条 confidence routine 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`，并附带 `eventName`、`ref`、`sha`、`runId`、`runAttempt`、`workflow` 等 CI traceability 字段；confidence job 也会把同一份报告上传成 CI artifact 供开发者核对。
 - Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 本地最新证明也发生在 `2026-04-17`：Unit 4 agent-service 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新通过。
@@ -136,6 +136,6 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 切片已交付`：controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经把 degraded diagnostics history 与 recovery-ready 成功证据成组展示出来。
 - `Milestone 2 切片已交付`：当配置存在时，controller backup bundle 现在会通过 GitHub Contents API 上传，required-mode 成功/失败路径也已经在 API、CLI、Web 与 milestone proof 中保持显式一致。
 - `Milestone 2 切片已交付`：remote-backup replay 现在会在同一条 live agent-backed host / rule 流程上重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据对齐。
-- `Milestone 2 切片已交付`：`pnpm milestone:verify:confidence` 现在已经把既有 acceptance gate 与 remote-backup replay proof 收敛成一条规范 routine，主线 workflow 也会在 `push main` 与 `workflow_dispatch` 上收集这条更重的证明。
-- `Milestone 2 切片已交付`：规范 confidence routine 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`，CI 也会上传同一份报告，让开发者核对持续转绿历史时不再只依赖原始 job 日志。
+- `Milestone 2 切片已交付`：`pnpm milestone:verify:confidence` 现在已经把既有 acceptance gate 与 remote-backup replay proof 收敛成一条规范 routine，主线 workflow 也会在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上收集这条更重的证明。
+- `Milestone 2 切片已交付`：规范 confidence routine 现在还会写出带 CI traceability 元数据的 `.portmanager/reports/milestone-confidence-report.json`，CI 也会上传同一份报告，让开发者核对持续转绿历史时不再只依赖原始 job 日志。
 - `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-routine 维护：让规范 routine 持续保持为绿，直到当前里程碑表述不再需要附带限定语。

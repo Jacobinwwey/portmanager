@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const repoRoot = path.resolve(__dirname, '..', '..')
+const CONFIDENCE_REPORT_VERSION = '0.2.0'
 
 function createStep(name, args) {
   return {
@@ -80,7 +81,26 @@ function formatDuration(startedAt) {
   return `${seconds}s`
 }
 
-function writeVerificationReport({ reportPath, successLabel, startedAt, completedAt, result, stepReports }) {
+function buildVerificationContext(environment) {
+  return {
+    eventName: environment.GITHUB_EVENT_NAME ?? null,
+    ref: environment.GITHUB_REF ?? null,
+    sha: environment.GITHUB_SHA ?? null,
+    runId: environment.GITHUB_RUN_ID ?? null,
+    runAttempt: environment.GITHUB_RUN_ATTEMPT ?? null,
+    workflow: environment.GITHUB_WORKFLOW ?? null
+  }
+}
+
+function writeVerificationReport({
+  reportPath,
+  successLabel,
+  startedAt,
+  completedAt,
+  result,
+  stepReports,
+  env
+}) {
   if (!reportPath) {
     return
   }
@@ -90,12 +110,14 @@ function writeVerificationReport({ reportPath, successLabel, startedAt, complete
     reportPath,
     JSON.stringify(
       {
+        reportVersion: CONFIDENCE_REPORT_VERSION,
         label: successLabel,
         ok: result.ok,
         status: result.status,
         startedAt: new Date(startedAt).toISOString(),
         completedAt: new Date(completedAt).toISOString(),
         totalDurationSeconds: secondsFromMilliseconds(completedAt - startedAt),
+        context: buildVerificationContext(env),
         failedStepName: result.failedStep?.name ?? null,
         steps: stepReports
       },
@@ -158,7 +180,8 @@ export function runVerificationSteps({
         startedAt,
         completedAt: Date.now(),
         result: failureResult,
-        stepReports
+        stepReports,
+        env
       })
       return failureResult
     }
@@ -182,7 +205,8 @@ export function runVerificationSteps({
         startedAt,
         completedAt: Date.now(),
         result: failureResult,
-        stepReports
+        stepReports,
+        env
       })
       return failureResult
     }
@@ -207,7 +231,8 @@ export function runVerificationSteps({
     startedAt,
     completedAt: Date.now(),
     result: successResult,
-    stepReports
+    stepReports,
+    env
   })
   return successResult
 }

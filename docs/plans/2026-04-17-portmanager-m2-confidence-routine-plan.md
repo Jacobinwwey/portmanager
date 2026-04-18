@@ -17,7 +17,7 @@ Its job is not to reopen Milestone 1 parity or invent a new runtime architecture
 Its job is to turn the already-shipped Milestone 2 evidence into one canonical confidence routine, wire that routine into mainline evidence collection, and keep docs aligned with the new narrower gap.
 
 Status note: Units 6 through 8 are now completed in `main`.
-Current remaining lane has narrowed further to confidence-history accumulation on top of the shipped routine, including durable report artifacts for developers and CI review.
+Current remaining lane has narrowed further to confidence-history accumulation on top of the shipped routine, including durable report artifacts with CI traceability metadata plus `push main` / `workflow_dispatch` / daily schedule evidence collection for developers and CI review.
 
 ## Problem Frame
 PortManager now has an accepted live host / rule / policy slice plus real Milestone 2 reliability follow-through work on the same model.
@@ -57,7 +57,7 @@ That split is manageable for a repo owner who already knows the story, but it is
 - Introduce one explicit Milestone 2 confidence routine instead of relying on contributors to remember two separate commands.
 - Keep `pnpm acceptance:verify` as the Unit 0 branch-discipline gate; the new routine should compose that gate rather than silently redefine it.
 - Prefer reusing the existing step-runner structure in `scripts/acceptance/verify.mjs` so proof orchestration logic does not fork.
-- Collect the heavier confidence routine on `main` and manual promotion paths first; keep the default PR gate scoped to the standing acceptance discipline unless implementation evidence shows the extra replay cost is negligible enough to broaden later.
+- Collect the heavier confidence routine on `main`, manual runs, and the daily schedule history path first; keep the default PR gate scoped to the standing acceptance discipline unless implementation evidence shows the extra replay cost is negligible enough to broaden later.
 
 ## Open Questions
 
@@ -66,9 +66,9 @@ That split is manageable for a repo owner who already knows the story, but it is
 - Should the repo keep Milestone 1 and Milestone 2 semantics distinct? Yes. The new routine should clarify that distinction, not erase it.
 - Should the next plan extend existing proof scripts rather than replace them? Yes. Composition is lower risk than reinvention.
 
-### Deferred to Implementation
-- Final command naming: `confidence:verify`, `milestone:verify:confidence`, or an equivalent alias.
-- Whether CI should run the heavier routine on `push main`, `workflow_dispatch`, `schedule`, or some combination once the implementation is in place.
+### Resolved During Implementation
+- Final command naming settled as `milestone:verify:confidence`.
+- CI now runs the heavier routine on `push main`, `workflow_dispatch`, and the daily `schedule` path while PRs keep the lighter acceptance gate.
 
 ## High-Level Technical Design
 
@@ -133,7 +133,7 @@ flowchart TD
 
 **Approach:**
 - Keep the current acceptance job as the standing branch-discipline baseline.
-- Add a clearly named confidence path for `main`, `workflow_dispatch`, or another intentionally chosen trigger so green history can accumulate without confusing PR validation with milestone promotion.
+- Add a clearly named confidence path for `main`, `workflow_dispatch`, and the daily `schedule` trigger so green history can accumulate without confusing PR validation with milestone promotion.
 - Make trigger scope explicit in docs so contributors know when each routine should be used.
 
 **Patterns to follow:**

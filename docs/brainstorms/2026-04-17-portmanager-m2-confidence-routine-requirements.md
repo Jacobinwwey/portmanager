@@ -77,9 +77,9 @@ Because Milestone 2 wording currently depends on both proofs rather than either 
 ### Resolve Before Planning
 - None.
 
-### Deferred to Planning
-- [Affects R3][Technical] Should the canonical confidence routine wrap `acceptance:verify`, extend `scripts/acceptance/verify.mjs` with an opt-in replay step, or live as a sibling command that composes both?
-- [Affects R4][Technical] Should CI run the full confidence routine on every PR, only on `main`, or through a dedicated manual / scheduled path while the green-history requirement is still being earned?
+### Resolved in Delivered Slice
+- [Affects R3][Technical] The canonical confidence routine now ships as sibling command `pnpm milestone:verify:confidence`, reusing the shared step runner while composing the standing acceptance gate with the replay proof.
+- [Affects R4][Technical] CI now keeps the lighter gate on PRs and runs the full confidence routine on `push main`, `workflow_dispatch`, and the daily scheduled history path while green history is being earned.
 
 ## Next Steps
 - Move to `docs/plans/2026-04-17-portmanager-m2-confidence-routine-plan.md` for the concrete implementation sequence.

@@ -161,6 +161,53 @@ test('confidence routine writes failure report with skipped trailing steps', () 
   }
 })
 
+test('confidence routine writes CI context metadata into report', () => {
+  const reportDirectory = mkdtempSync(path.join(tmpdir(), 'portmanager-confidence-report-'))
+  const reportPath = path.join(reportDirectory, 'milestone-confidence-report.json')
+
+  try {
+    runVerificationSteps({
+      steps: getConfidenceVerificationSteps(),
+      reportPath,
+      env: {
+        GITHUB_EVENT_NAME: 'schedule',
+        GITHUB_REF: 'refs/heads/main',
+        GITHUB_SHA: 'abc123def456',
+        GITHUB_RUN_ID: '55',
+        GITHUB_RUN_ATTEMPT: '3',
+        GITHUB_WORKFLOW: 'mainline-acceptance'
+      },
+      spawnSyncImpl() {
+        return { status: 0, signal: null }
+      },
+      stdout: createWritableBuffer(),
+      stderr: createWritableBuffer()
+    })
+
+    const report = JSON.parse(readFileSync(reportPath, 'utf8')) as {
+      reportVersion: string
+      context: {
+        eventName: string | null
+        ref: string | null
+        sha: string | null
+        runId: string | null
+        runAttempt: string | null
+        workflow: string | null
+      }
+    }
+
+    assert.equal(report.reportVersion, '0.2.0')
+    assert.equal(report.context.eventName, 'schedule')
+    assert.equal(report.context.ref, 'refs/heads/main')
+    assert.equal(report.context.sha, 'abc123def456')
+    assert.equal(report.context.runId, '55')
+    assert.equal(report.context.runAttempt, '3')
+    assert.equal(report.context.workflow, 'mainline-acceptance')
+  } finally {
+    rmSync(reportDirectory, { recursive: true, force: true })
+  }
+})
+
 function createWritableBuffer() {
   return {
     chunks: [] as string[],
