@@ -1,7 +1,7 @@
 # PortManager
 
-Updated: 2026-04-17
-Version: v0.5.9-m2-confidence-progress-page
+Updated: 2026-04-18
+Version: v0.5.10-real-machine-acceptance-sync
 
 ## English
 
@@ -61,6 +61,8 @@ Version: v0.5.9-m2-confidence-progress-page
 - [x] Milestone 2 acceptance closure: land `pnpm milestone:sync:confidence-history` so developers can import completed `mainline-acceptance` bundle history into local readiness review with authenticated `gh`, deduped entries, and the same shared readiness math.
 - [x] Milestone 2 acceptance closure: keep synced/local `.portmanager/reports/milestone-confidence-summary.md` truthful for developer review by surfacing `Latest Qualified Run` and visibility-only noise counts beside the latest visible run.
 - [x] Milestone 2 acceptance closure: publish the synced confidence snapshot as first-class docs-site developer progress pages at `/en/roadmap/development-progress` and `/zh/roadmap/development-progress`, and surface the same live counters on roadmap home.
+- [x] Real-machine acceptance: replay `pnpm acceptance:verify` and `pnpm milestone:verify:confidence` on Windows against the latest `main`, then sync completed mainline confidence history locally with authenticated `gh` for developer review.
+- [x] Acceptance hardening: align development-progress docs validation with the committed generated confidence fallback so a fresh machine does not fail on missing ignored `.portmanager` history.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -144,6 +146,8 @@ Version: v0.5.9-m2-confidence-progress-page
 - [x] 里程碑 2 验收闭环：落盘 `pnpm milestone:sync:confidence-history`，让开发者能通过已认证 `gh` 把 completed `mainline-acceptance` bundle history 导回本地 readiness review，并沿用同一套去重与 readiness 计算逻辑。
 - [x] 里程碑 2 验收闭环：让同步后与本地的 `.portmanager/reports/milestone-confidence-summary.md` 在开发者复核时保持真实，通过 `Latest Qualified Run` 与 visibility-only 噪声计数避免本地 rerun 掩盖主线证据。
 - [x] 里程碑 2 验收闭环：把同步后的 confidence snapshot 作为 docs-site 一级开发者进度页面公开到 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，并在 roadmap 首页直接显示同一份 live 计数。
+- [x] 真机验收：在 Windows 真机上对最新 `main` 重放 `pnpm acceptance:verify` 与 `pnpm milestone:verify:confidence`，并通过已认证 `gh` 把 completed mainline confidence history 同步回本地供开发者复核。
+- [x] 验收加固：让 development-progress docs 校验与已提交的 generated confidence fallback 对齐，避免全新机器在缺失被忽略的 `.portmanager` 历史时误报失败。
 
 ### 推荐推进顺序
 - [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并继续把这条 gate 在 `main` 上维持为绿，再把主动主线切到 Unit 1。

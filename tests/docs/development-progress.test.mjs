@@ -21,7 +21,6 @@ test('roadmap publishes a development-progress page backed by live milestone con
   const enPage = readFileSync(enPagePath, 'utf8')
   const zhPage = readFileSync(zhPagePath, 'utf8')
   const docsConfig = readFileSync(docsConfigPath, 'utf8')
-  const confidenceHistory = JSON.parse(readFileSync(confidenceHistoryPath, 'utf8'))
 
   assert.match(enPage, /<MilestoneConfidencePage locale="en" \/>/)
   assert.match(zhPage, /<MilestoneConfidencePage locale="zh" \/>/)
@@ -29,15 +28,28 @@ test('roadmap publishes a development-progress page backed by live milestone con
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
 
-  assert.equal(milestoneConfidenceProgress.updatedAt, confidenceHistory.updatedAt)
-  assert.equal(milestoneConfidenceProgress.readiness.status, confidenceHistory.readiness.status)
-  assert.equal(milestoneConfidenceProgress.readiness.qualifiedRuns, confidenceHistory.readiness.qualifiedRuns)
   assert.equal(
-    milestoneConfidenceProgress.latestQualifiedRun?.context?.runId ?? null,
-    confidenceHistory.latestQualifiedRun?.context?.runId ?? null
+    milestoneConfidenceProgress.sourceFiles.historyPath,
+    '.portmanager/reports/milestone-confidence-history.json'
   )
-  assert.equal(
-    milestoneConfidenceProgress.visibility.localVisibilityOnlyRuns,
-    confidenceHistory.visibility.localVisibilityOnlyRuns
-  )
+  assert.equal(typeof milestoneConfidenceProgress.updatedAt, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.readiness.status, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.readiness.qualifiedRuns, 'number')
+  assert.equal(typeof milestoneConfidenceProgress.visibility.localVisibilityOnlyRuns, 'number')
+
+  if (existsSync(confidenceHistoryPath)) {
+    const confidenceHistory = JSON.parse(readFileSync(confidenceHistoryPath, 'utf8'))
+
+    assert.equal(milestoneConfidenceProgress.updatedAt, confidenceHistory.updatedAt)
+    assert.equal(milestoneConfidenceProgress.readiness.status, confidenceHistory.readiness.status)
+    assert.equal(milestoneConfidenceProgress.readiness.qualifiedRuns, confidenceHistory.readiness.qualifiedRuns)
+    assert.equal(
+      milestoneConfidenceProgress.latestQualifiedRun?.context?.runId ?? null,
+      confidenceHistory.latestQualifiedRun?.context?.runId ?? null
+    )
+    assert.equal(
+      milestoneConfidenceProgress.visibility.localVisibilityOnlyRuns,
+      confidenceHistory.visibility.localVisibilityOnlyRuns
+    )
+  }
 })

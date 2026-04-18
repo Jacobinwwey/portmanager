@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-17 | Version：v0.5.9-m2-confidence-progress-page
+> Updated：2026-04-18 | Version：v0.5.10-real-machine-acceptance-sync
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -55,6 +55,7 @@ status: active
 - Unit 3 当前已验证：Web 已经在锁定的信息架构上渲染 live controller-backed 的 overview、host detail、hosts、bridge rules、operations、backups、console 与 diagnostics detail。
 - Unit 4 当前已验证：agent 已经提供稳态 controller-agent `HTTP over Tailscale` 服务边界，controller 会通过这条边界推送 desired state，并在 agent 不可达时显式把 host / rule 置为 degraded。
 - `2026-04-17` 的最新验收证据已经成立：Unit 4 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新转绿；其中内嵌的 milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup / rollback 证据保持不变。
+- `2026-04-18` 的 Windows 真机验收也已经成立：最新 `main` 上的 `pnpm acceptance:verify` 再次通过，而且 development-progress docs 校验现在已经在本地 `.portmanager` 历史缺失时尊重已提交的 generated confidence fallback，使全新机器的 gate 行为与 docs 发布契约保持一致。
 - controller 侧规则真相会在 diagnostics 之后进入 `active`，而原始 agent runtime 在验证完成前仍保持 `applied_unverified`。这已经是有意保留的已交付语义，不再是里程碑 1 缺口。
 
 #### 当前推进顺序
@@ -116,6 +117,7 @@ status: active
 - 当前已验证：持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按照 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计推进进度，并把同一份 summary 直接发布到 workflow 页面给开发者查看。
 - 当前已验证：`pnpm milestone:sync:confidence-history` 现在允许开发者通过已认证 `gh` 把这些已完成 workflow bundle 导回本地 readiness review，并按稳定 history entry id 去重。
 - 当前已验证：docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 readiness 快照，方便开发者公开复核。
+- `2026-04-18` 的真机开发者复核证据也已经成立：`pnpm milestone:verify:confidence` 已在 Windows 真机通过，`pnpm milestone:sync:confidence-history -- --limit 20` 也已通过已认证 `gh` 成功导入 1 次 qualified `mainline-acceptance` 运行；同步后的 summary 现在真实显示 readiness 仍为 `building-history`，进度为 `1/7` qualified runs 与 `1/3` qualified consecutive passes。
 - 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架或继续修复 summary 复核语义，而是持续积累 qualified 绿历史，并根据同步后的证据与人工复核来决定文案是否继续收窄。
 - 里程碑 2 仍然处于进行中，直到同步后的 readiness 证据与人工复核共同支持更收敛的可靠性文案。
 

@@ -1,7 +1,7 @@
 # Interface Document
 
-Updated: 2026-04-17
-Version: v0.3.7-m2-confidence-progress-page
+Updated: 2026-04-18
+Version: v0.3.8-real-machine-acceptance-sync
 
 ## English
 
@@ -60,7 +60,10 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - Fresh local proof on `2026-04-17`: `pnpm acceptance:verify` passes after the Unit 4 agent-service delivery and Unit 5 docs sync.
+- Fresh Windows real-machine proof on `2026-04-18`: `pnpm acceptance:verify` and `pnpm milestone:verify:confidence` both passed on the latest `main`, and `pnpm milestone:sync:confidence-history -- --limit 20` successfully imported one qualified `mainline-acceptance` run into local review.
+- Fresh verification hardening on `2026-04-18`: development-progress docs validation now matches `scripts/docs/extract-locales.mjs` by accepting the committed generated confidence snapshot when `.portmanager` history is absent, so a fresh machine no longer fails the standing gate on an ignored local-only file.
 - The confidence routine extends that baseline with the remote-backup replay proof on the same accepted live slice. It does **not** mean Milestone 2 reliability hardening is complete yet; repeated green history is still required.
+- Current readiness truth after that sync remains `building-history` with `1/7` qualified runs and `1/3` qualified consecutive passes, so Milestone 2 promotion language must remain conservative.
 
 ### Current delivery status
 - `Unit 1`: complete. Controller `hosts`, `bridge-rules`, and `exposure-policies` now exist as real source-of-truth resources.
@@ -137,7 +140,10 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 本地最新证明也发生在 `2026-04-17`：Unit 4 agent-service 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新通过。
+- `2026-04-18` 的 Windows 真机证明也已经成立：最新 `main` 上的 `pnpm acceptance:verify` 与 `pnpm milestone:verify:confidence` 均已通过，`pnpm milestone:sync:confidence-history -- --limit 20` 也已成功把 1 次 qualified `mainline-acceptance` 运行导入本地复核。
+- `2026-04-18` 的验证加固也已经完成：development-progress docs 校验现在已经与 `scripts/docs/extract-locales.mjs` 的发布契约保持一致，在 `.portmanager` 历史缺失时会接受已提交的 generated confidence snapshot，因此一台全新的机器不再因为一个被忽略的本地文件而误报 gate 失败。
 - 这条 confidence routine 会在同一条已验收 live 切片上继续叠加 remote-backup replay proof，但它**并不**意味着 Milestone 2 可靠性加固已经完成；仍然需要持续为绿的历史。
+- 同步后的当前 readiness 真相仍然是 `building-history`，进度为 `1/7` qualified runs 与 `1/3` qualified consecutive passes，因此 Milestone 2 的提升文案仍需保持克制。
 
 ### 当前交付状态
 - `Unit 1`：已完成。controller 的 `hosts`、`bridge-rules`、`exposure-policies` 真源资源已经落地。

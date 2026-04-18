@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.5.9-m2-confidence-progress-page
+> Updated: 2026-04-18 | Version: v0.5.10-real-machine-acceptance-sync
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -55,6 +55,7 @@ Milestone 1 is only accepted when all of the following become true:
 - Verified now from Unit 3: Web renders live controller-backed overview, host detail, hosts, bridge rules, backups, console, and diagnostics detail across the locked information architecture.
 - Verified now from Unit 4: the agent now exposes the steady-state controller-agent `HTTP over Tailscale` service boundary, controller pushes desired state across that boundary, and unreachable agents degrade affected hosts and rules explicitly.
 - Fresh acceptance evidence on `2026-04-17`: `pnpm acceptance:verify` now passes after Unit 4 delivery and Unit 5 docs sync; the embedded milestone proof shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.
+- Fresh Windows real-machine acceptance on `2026-04-18`: `pnpm acceptance:verify` passed again on the latest `main`, and development-progress docs validation now honors the committed generated confidence fallback when local `.portmanager` history is absent, matching the docs publication contract on a fresh machine.
 - Controller-side rule truth intentionally becomes `active` only after diagnostics while raw agent runtime remains `applied_unverified` until verification. That separation is now shipped behavior, not a Milestone 1 gap.
 
 #### Current development sequence
@@ -118,6 +119,7 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: `pnpm milestone:sync:confidence-history` now lets developers import those completed GitHub Actions bundles back into local readiness review with authenticated `gh`, deduped entries, and the same shared readiness summary.
 - Verified now: the synced/local summary now persists `latestQualifiedRun`, shows a visibility breakdown for qualified mainline versus visibility-only noise, and keeps the latest mainline evidence readable even when newer local runs exist.
 - Verified now: the docs site now publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress` from generated milestone confidence data, and roadmap home previews the same readiness snapshot for public developer review.
+- Fresh real-machine developer-review proof on `2026-04-18`: `pnpm milestone:verify:confidence` passed on Windows, `pnpm milestone:sync:confidence-history -- --limit 20` imported one qualified `mainline-acceptance` run through authenticated `gh`, and the synced summary now truthfully reports `building-history` with `1/7` qualified runs and `1/3` qualified consecutive passes.
 - Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now sustained qualified green history and milestone-language review rather than invention of more reporting surfaces or review-signal repair.
 - Milestone 2 still remains in progress until the qualified history stays green long enough for the synced readiness evidence and human review to justify narrower reliability language.
 
