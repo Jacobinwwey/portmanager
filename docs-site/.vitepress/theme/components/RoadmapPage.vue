@@ -154,6 +154,65 @@
     </section>
 
     <section class="pm-docs-grid">
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.liveConfidenceLabel }}</span>
+            <h3>{{ copy.liveConfidenceTitle }}</h3>
+          </div>
+          <span class="pm-badge" :class="confidenceReadinessTone">{{ confidenceReadinessLabel }}</span>
+        </div>
+        <p>{{ copy.liveConfidenceBody }}</p>
+
+        <div class="pm-docs-grid three pm-progress-grid">
+          <section class="pm-progress-card">
+            <div class="pm-progress-header">
+              <h4>{{ copy.liveConfidenceReadiness }}</h4>
+              <span class="pm-badge" :class="confidenceReadinessTone">{{ confidenceReadinessLabel }}</span>
+            </div>
+            <ul class="pm-progress-list">
+              <li>{{ copy.liveQualifiedRuns }} {{ confidenceProgress.readiness.qualifiedRuns }}/{{ confidenceProgress.readiness.minimumQualifiedRuns }}</li>
+              <li>
+                {{ copy.liveQualifiedPasses }}
+                {{ confidenceProgress.readiness.qualifiedConsecutivePasses }}/{{ confidenceProgress.readiness.minimumConsecutivePasses }}
+              </li>
+              <li>{{ copy.liveUpdatedAt }} {{ confidenceUpdatedAt }}</li>
+            </ul>
+          </section>
+
+          <section class="pm-progress-card">
+            <div class="pm-progress-header">
+              <h4>{{ copy.liveConfidenceLatest }}</h4>
+              <span class="pm-badge safe">{{ copy.liveConfidenceEvidence }}</span>
+            </div>
+            <ul class="pm-progress-list">
+              <li>{{ copy.liveLatestQualifiedRun }} {{ confidenceLatestQualifiedRun }}</li>
+              <li>{{ copy.liveLatestQualifiedSha }} <code>{{ confidenceLatestQualifiedSha }}</code></li>
+              <li>{{ copy.liveLatestVisibleRun }} {{ confidenceLatestVisibleRun }}</li>
+            </ul>
+          </section>
+
+          <section class="pm-progress-card">
+            <div class="pm-progress-header">
+              <h4>{{ copy.liveConfidenceNoise }}</h4>
+              <span class="pm-badge next">{{ copy.liveConfidenceReview }}</span>
+            </div>
+            <ul class="pm-progress-list">
+              <li>{{ copy.liveQualifiedMainlineRuns }} {{ confidenceProgress.visibility.qualifiedRuns }}</li>
+              <li>{{ copy.liveLocalVisibilityRuns }} {{ confidenceProgress.visibility.localVisibilityOnlyRuns }}</li>
+              <li>{{ copy.liveRemoteNoiseRuns }} {{ confidenceProgress.visibility.nonQualifiedRemoteRuns }}</li>
+            </ul>
+          </section>
+        </div>
+
+        <div class="pm-doc-links">
+          <VPLink class="pm-doc-link" :href="`/${props.locale}/roadmap/development-progress`">{{ copy.liveConfidenceLink }}</VPLink>
+          <VPLink class="pm-doc-link" :href="docMeta(locale, 'milestones').link">{{ copy.liveConfidenceMilestonesLink }}</VPLink>
+        </div>
+      </article>
+    </section>
+
+    <section class="pm-docs-grid">
       <article v-for="milestone in milestones" :key="milestone.id" class="pm-roadmap-card">
         <div class="pm-roadmap-header">
           <div>
@@ -241,6 +300,7 @@
 import { computed } from 'vue'
 import { VPLink } from 'vitepress/theme'
 import { roadmapDeveloperProgress as developerProgress, roadmapMilestones, roadmapPrinciples as principles, roadmapProgression as progression, roadmapTracks as tracks, schemeCProfile as schemeC } from '../../../data/roadmap'
+import { milestoneConfidenceProgress as confidenceProgress } from '../../../data/milestone-confidence-progress'
 import { docMeta, type LocaleCode } from '../../../data/docs'
 
 const props = defineProps<{ locale: LocaleCode }>()
@@ -265,6 +325,25 @@ const copy = computed(() => props.locale === 'zh'
       progressionTitle: '递进状态定义',
       schemeCLabel: 'Scheme C',
       developerProgressLabel: 'Developer Progress',
+      liveConfidenceLabel: 'Live Confidence',
+      liveConfidenceTitle: '当前公开进度',
+      liveConfidenceBody: 'Roadmap 首页现在直接显示同步后的 confidence-ready 进度快照，开发者无需离开页面就能看到最新 qualified 主线证据、最新可见 run 与 visibility-only 噪声拆分。',
+      liveConfidenceReadiness: 'Readiness',
+      liveQualifiedRuns: 'Qualified runs：',
+      liveQualifiedPasses: 'Qualified consecutive passes：',
+      liveUpdatedAt: 'Updated：',
+      liveConfidenceLatest: 'Latest Evidence',
+      liveConfidenceEvidence: 'Mainline evidence',
+      liveLatestQualifiedRun: 'Latest qualified run：',
+      liveLatestQualifiedSha: 'Latest qualified SHA：',
+      liveLatestVisibleRun: 'Latest visible run：',
+      liveConfidenceNoise: 'Visibility Breakdown',
+      liveConfidenceReview: 'Review signal',
+      liveQualifiedMainlineRuns: 'Qualified mainline runs：',
+      liveLocalVisibilityRuns: 'Local visibility-only runs：',
+      liveRemoteNoiseRuns: 'Non-qualified remote runs：',
+      liveConfidenceLink: '打开开发进度页',
+      liveConfidenceMilestonesLink: '查看里程碑明细',
       decisionLabel: '判定与取舍',
       advantagesLabel: '优势',
       costsLabel: '成本 / 风险',
@@ -296,6 +375,25 @@ const copy = computed(() => props.locale === 'zh'
       progressionTitle: 'Progression-state definitions',
       schemeCLabel: 'Scheme C',
       developerProgressLabel: 'Developer Progress',
+      liveConfidenceLabel: 'Live Confidence',
+      liveConfidenceTitle: 'Current published progress',
+      liveConfidenceBody: 'The roadmap home page now exposes the synced confidence-readiness snapshot directly, so developers can see the latest qualified mainline evidence, latest visible run, and visibility-only noise split without leaving this page.',
+      liveConfidenceReadiness: 'Readiness',
+      liveQualifiedRuns: 'Qualified runs:',
+      liveQualifiedPasses: 'Qualified consecutive passes:',
+      liveUpdatedAt: 'Updated:',
+      liveConfidenceLatest: 'Latest Evidence',
+      liveConfidenceEvidence: 'Mainline evidence',
+      liveLatestQualifiedRun: 'Latest qualified run:',
+      liveLatestQualifiedSha: 'Latest qualified SHA:',
+      liveLatestVisibleRun: 'Latest visible run:',
+      liveConfidenceNoise: 'Visibility Breakdown',
+      liveConfidenceReview: 'Review signal',
+      liveQualifiedMainlineRuns: 'Qualified mainline runs:',
+      liveLocalVisibilityRuns: 'Local visibility-only runs:',
+      liveRemoteNoiseRuns: 'Non-qualified remote runs:',
+      liveConfidenceLink: 'Open Development Progress',
+      liveConfidenceMilestonesLink: 'Open Milestones Detail',
       decisionLabel: 'Decision and trade-off',
       advantagesLabel: 'Advantages',
       costsLabel: 'Costs / Risks',
@@ -335,10 +433,41 @@ const lanes = computed(() => {
   }))
 })
 
+const confidenceReadinessTone = computed(() => {
+  if (confidenceProgress.readiness.status === 'promotion-ready') return 'safe'
+  if (confidenceProgress.readiness.status === 'building-history') return 'next'
+  return 'planned'
+})
+
+const confidenceReadinessLabel = computed(() => {
+  if (confidenceProgress.readiness.status === 'promotion-ready') return 'promotion-ready'
+  if (confidenceProgress.readiness.status === 'building-history') return 'building-history'
+  return 'local-only'
+})
+
+const confidenceUpdatedAt = computed(() => formatTimestamp(confidenceProgress.updatedAt))
+const confidenceLatestQualifiedRun = computed(() => formatRun(confidenceProgress.latestQualifiedRun))
+const confidenceLatestQualifiedSha = computed(() => formatSha(confidenceProgress.latestQualifiedRun))
+const confidenceLatestVisibleRun = computed(() => formatRun(confidenceProgress.latestRun))
+
 function stageLabel(stage: string) {
   if (stage === 'now') return 'Now'
   if (stage === 'next') return 'Next'
   return 'Later'
+}
+
+function formatTimestamp(value: string | null) {
+  if (!value) return props.locale === 'zh' ? 'unknown' : 'unknown'
+  return value.replace('T', ' ').replace(/\.?\d{0,3}Z$/, ' UTC')
+}
+
+function formatRun(run: (typeof confidenceProgress.latestRun)) {
+  if (!run?.context.runId) return props.locale === 'zh' ? 'local' : 'local'
+  return `${run.context.runId}/${run.context.runAttempt ?? '1'}`
+}
+
+function formatSha(run: (typeof confidenceProgress.latestRun)) {
+  return run?.context.sha ? run.context.sha.slice(0, 12) : 'local'
 }
 
 function badgeTone(stage: string) {

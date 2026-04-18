@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-v1-product-spec.md`
 > Audience: `shared` | Section: `overview` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.4.9-m2-confidence-review-signal
+> Updated: 2026-04-17 | Version: v0.4.10-m2-confidence-progress-page
 ### Summary
 PortManager V1 is a control plane for exposing selected remote localhost services over Tailscale without treating ad-hoc shell commands as the operating model.
 The product goal is not only exposure, but safe exposure: desired state, operations history, diagnostics visibility, backup-before-mutation, and explicit rollback points.
@@ -91,5 +91,6 @@ A V1 implementation will be considered valid only if all of the following become
 - Fresh Milestone 2 confidence-readiness slice on `2026-04-17`: the persisted history now classifies `local-only`, `building-history`, and `promotion-ready`, marks whether each run qualifies for readiness advancement, uses `7` qualified runs plus `3` consecutive qualified passes as the shared threshold, and publishes the same summary into the GitHub Actions job summary for developers.
 - Fresh Milestone 2 confidence-history sync slice on `2026-04-17`: `pnpm milestone:sync:confidence-history` now imports completed `mainline-acceptance` bundle artifacts from GitHub Actions back into local `.portmanager/reports/` files through authenticated `gh`, dedupes repeated imports by stable entry id, and gives developers a repo-native readiness review path that matches CI summary math.
 - Fresh Milestone 2 confidence-review-signal slice on `2026-04-17`: the persisted snapshot now carries `latestQualifiedRun` plus visibility breakdown metadata for qualified mainline runs, local visibility-only runs, and non-qualified remote runs, and the summary now renders that split so newer local verification noise does not hide the actual latest mainline evidence.
+- Fresh Milestone 2 confidence-progress-page slice on `2026-04-17`: the docs site now generates milestone confidence progress data, publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress`, and previews the same latest-qualified snapshot on roadmap home.
 - Deep compare against the completed `2026-04-16` reconciliation docs now shows that the old parity and proof-orchestration gaps are closed; the remaining technical gap is now sustained qualified green history and the milestone-language review that follows from that evidence rather than more reporting scaffolding or review-signal fixes.
-- Current product conclusion: the first trusted public control-plane slice is now real and accepted; Milestone 2 confidence-readiness maintenance now means syncing completed mainline evidence into local review, reading the summary's latest-qualified signal, keeping qualified history green, and tightening milestone language only when the evidence holds.
+- Current product conclusion: the first trusted public control-plane slice is now real and accepted; Milestone 2 confidence-readiness maintenance now means syncing completed mainline evidence into local review, reading the summary's latest-qualified signal plus the public development-progress page, keeping qualified history green, and tightening milestone language only when the evidence holds.

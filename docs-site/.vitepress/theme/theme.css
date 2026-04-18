@@ -320,6 +320,45 @@ body {
   letter-spacing: -0.03em;
 }
 
+.pm-confidence-shell {
+  margin-top: 1rem;
+}
+
+.pm-confidence-hero {
+  gap: 0.75rem;
+}
+
+.pm-confidence-table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.pm-confidence-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+}
+
+.pm-confidence-table th,
+.pm-confidence-table td {
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid var(--pm-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pm-confidence-table th {
+  color: var(--pm-ink);
+  font-size: 0.84rem;
+  font-weight: 700;
+  background: rgba(241, 246, 251, 0.8);
+}
+
+.pm-confidence-table td {
+  color: var(--pm-muted);
+  font-size: 0.94rem;
+}
+
 .pm-roadmap-lanes {
   display: grid;
   gap: 1rem;

@@ -1,0 +1,386 @@
+<template>
+  <section class="pm-roadmap-shell pm-confidence-shell">
+    <article class="pm-callout-card pm-roadmap-hero pm-confidence-hero">
+      <span class="pm-kicker">{{ copy.kicker }}</span>
+      <h1>{{ copy.title }}</h1>
+      <p>{{ copy.lede }}</p>
+      <div class="pm-doc-links">
+        <span class="pm-pill" :class="readinessTone">{{ readinessStatusLabel }}</span>
+        <span class="pm-pill now">{{ qualifiedRunsLabel }}</span>
+        <span class="pm-pill next">{{ consecutivePassesLabel }}</span>
+      </div>
+      <div class="pm-doc-links">
+        <VPLink class="pm-doc-link" :href="`/${props.locale}/roadmap/`">{{ copy.roadmapHome }}</VPLink>
+        <VPLink class="pm-doc-link" :href="docMeta(props.locale, 'milestones').link">{{ copy.milestonesDetail }}</VPLink>
+      </div>
+    </article>
+
+    <div class="pm-docs-grid three pm-progress-grid">
+      <section class="pm-progress-card">
+        <div class="pm-progress-header">
+          <h3>{{ copy.readinessCard }}</h3>
+          <span class="pm-badge" :class="readinessTone">{{ readinessStatusLabel }}</span>
+        </div>
+        <ul class="pm-progress-list">
+          <li>{{ copy.updatedAt }} {{ formatTimestamp(progress.updatedAt) }}</li>
+          <li>{{ copy.qualifiedRuns }} {{ progress.readiness.qualifiedRuns }}/{{ progress.readiness.minimumQualifiedRuns }}</li>
+          <li>
+            {{ copy.qualifiedConsecutivePasses }}
+            {{ progress.readiness.qualifiedConsecutivePasses }}/{{ progress.readiness.minimumConsecutivePasses }}
+          </li>
+          <li>{{ copy.remainingQualifiedRuns }} {{ progress.readiness.remainingQualifiedRuns }}</li>
+          <li>{{ copy.remainingQualifiedPasses }} {{ progress.readiness.remainingConsecutivePasses }}</li>
+        </ul>
+      </section>
+
+      <section class="pm-progress-card">
+        <div class="pm-progress-header">
+          <h3>{{ copy.visibilityCard }}</h3>
+          <span class="pm-badge safe">{{ copy.reviewSignal }}</span>
+        </div>
+        <ul class="pm-progress-list">
+          <li>{{ copy.qualifiedMainlineRuns }} {{ progress.visibility.qualifiedRuns }}</li>
+          <li>{{ copy.visibilityOnlyRuns }} {{ progress.visibility.visibilityOnlyRuns }}</li>
+          <li>{{ copy.localVisibilityOnlyRuns }} {{ progress.visibility.localVisibilityOnlyRuns }}</li>
+          <li>{{ copy.nonQualifiedRemoteRuns }} {{ progress.visibility.nonQualifiedRemoteRuns }}</li>
+        </ul>
+      </section>
+
+      <section class="pm-progress-card">
+        <div class="pm-progress-header">
+          <h3>{{ copy.verificationCard }}</h3>
+          <span class="pm-badge safe">{{ copy.currentSnapshot }}</span>
+        </div>
+        <ul class="pm-progress-list">
+          <li>{{ copy.trackedRuns }} {{ progress.trackedRuns }}</li>
+          <li>{{ copy.passingRuns }} {{ progress.passedRuns }}</li>
+          <li>{{ copy.failingRuns }} {{ progress.failedRuns }}</li>
+          <li>{{ copy.consecutivePassingRuns }} {{ progress.consecutivePasses }}</li>
+          <li>{{ copy.qualifiedScope }} <code>{{ qualifiedScopeLabel }}</code></li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="pm-docs-grid two">
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.latestRunKicker }}</span>
+            <h3>{{ copy.latestRunTitle }}</h3>
+          </div>
+          <span class="pm-badge" :class="runTone(progress.latestRun)">{{ outcomeLabel(progress.latestRun?.outcome) }}</span>
+        </div>
+        <template v-if="progress.latestRun">
+          <ul class="pm-progress-list">
+            <li>{{ copy.outcome }} {{ outcomeLabel(progress.latestRun.outcome) }}</li>
+            <li>{{ copy.qualifiedForReadiness }} {{ yesNo(progress.latestRun.qualifiedForReadiness) }}</li>
+            <li>{{ copy.event }} {{ eventLabel(progress.latestRun) }}</li>
+            <li>{{ copy.run }} {{ runLabel(progress.latestRun) }}</li>
+            <li>{{ copy.sha }} <code>{{ shaLabel(progress.latestRun) }}</code></li>
+            <li>{{ copy.workflow }} {{ workflowLabel(progress.latestRun) }}</li>
+            <li>{{ copy.completed }} {{ formatTimestamp(progress.latestRun.completedAt) }}</li>
+            <li>{{ copy.failedStep }} {{ failedStepLabel(progress.latestRun.failedStepName) }}</li>
+          </ul>
+        </template>
+      </article>
+
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.latestQualifiedKicker }}</span>
+            <h3>{{ copy.latestQualifiedTitle }}</h3>
+          </div>
+          <span class="pm-badge" :class="runTone(progress.latestQualifiedRun)">{{ outcomeLabel(progress.latestQualifiedRun?.outcome) }}</span>
+        </div>
+        <template v-if="progress.latestQualifiedRun">
+          <ul class="pm-progress-list">
+            <li>{{ copy.outcome }} {{ outcomeLabel(progress.latestQualifiedRun.outcome) }}</li>
+            <li>{{ copy.event }} {{ eventLabel(progress.latestQualifiedRun) }}</li>
+            <li>{{ copy.run }} {{ runLabel(progress.latestQualifiedRun) }}</li>
+            <li>{{ copy.sha }} <code>{{ shaLabel(progress.latestQualifiedRun) }}</code></li>
+            <li>{{ copy.workflow }} {{ workflowLabel(progress.latestQualifiedRun) }}</li>
+            <li>{{ copy.completed }} {{ formatTimestamp(progress.latestQualifiedRun.completedAt) }}</li>
+            <li>{{ copy.failedStep }} {{ failedStepLabel(progress.latestQualifiedRun.failedStepName) }}</li>
+          </ul>
+        </template>
+        <p v-else class="pm-doc-note">{{ copy.noQualifiedRun }}</p>
+      </article>
+    </div>
+
+    <article class="pm-callout-card">
+      <div class="pm-card-header">
+        <div>
+          <span class="pm-kicker">{{ copy.recentRunsKicker }}</span>
+          <h3>{{ copy.recentRunsTitle }}</h3>
+        </div>
+      </div>
+      <div class="pm-confidence-table-wrap">
+        <table class="pm-confidence-table">
+          <thead>
+            <tr>
+              <th>{{ copy.completed }}</th>
+              <th>{{ copy.outcome }}</th>
+              <th>{{ copy.qualified }}</th>
+              <th>{{ copy.event }}</th>
+              <th>{{ copy.run }}</th>
+              <th>{{ copy.sha }}</th>
+              <th>{{ copy.failedStep }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="run in progress.recentRuns" :key="run.id">
+              <td>{{ formatTimestamp(run.completedAt) }}</td>
+              <td>{{ outcomeLabel(run.outcome) }}</td>
+              <td>{{ yesNo(run.qualifiedForReadiness) }}</td>
+              <td>{{ eventLabel(run) }}</td>
+              <td>{{ runLabel(run) }}</td>
+              <td><code>{{ shaLabel(run) }}</code></td>
+              <td>{{ failedStepLabel(run.failedStepName) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <div class="pm-docs-grid two">
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.reviewChecklistKicker }}</span>
+            <h3>{{ copy.reviewChecklistTitle }}</h3>
+          </div>
+        </div>
+        <ul class="pm-progress-list">
+          <li v-for="item in reviewChecklist" :key="item">{{ item }}</li>
+        </ul>
+      </article>
+
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.sourceFilesKicker }}</span>
+            <h3>{{ copy.sourceFilesTitle }}</h3>
+          </div>
+        </div>
+        <ul class="pm-progress-list">
+          <li><code>{{ progress.sourceFiles.summaryPath }}</code></li>
+          <li><code>{{ progress.sourceFiles.historyPath }}</code></li>
+          <li><code>{{ progress.sourceFiles.reportPath }}</code></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import { VPLink } from 'vitepress/theme'
+
+import { milestoneConfidenceProgress as progress } from '../../../data/milestone-confidence-progress'
+import { docMeta, type LocaleCode } from '../../../data/docs'
+
+type ProgressRun = (typeof progress.latestRun)
+
+const props = defineProps<{ locale: LocaleCode }>()
+
+const copy = computed(() => props.locale === 'zh'
+  ? {
+      kicker: 'Developer Progress',
+      title: '把真实 confidence 历史直接公开给开发者复核。',
+      lede: '这个页面直接发布当前同步后的 milestone confidence 进度，避免开发者只看 roadmap 叙述却看不到最新 qualified 主线证据、visibility-only 噪声拆分和 readiness 推进刻度。',
+      roadmapHome: '返回 Roadmap',
+      milestonesDetail: '查看里程碑明细',
+      readinessCard: 'Readiness',
+      visibilityCard: 'Visibility Breakdown',
+      verificationCard: 'Current Snapshot',
+      reviewSignal: 'Review Signal',
+      currentSnapshot: 'Current Snapshot',
+      latestRunKicker: 'Latest Run',
+      latestRunTitle: '最新可见运行',
+      latestQualifiedKicker: 'Latest Qualified Run',
+      latestQualifiedTitle: '最新 qualified 主线运行',
+      recentRunsKicker: 'Recent Runs',
+      recentRunsTitle: '最近运行',
+      reviewChecklistKicker: 'Developer Review',
+      reviewChecklistTitle: '开发者复核动作',
+      sourceFilesKicker: 'Source Files',
+      sourceFilesTitle: '当前公开页面数据来源',
+      updatedAt: '更新于：',
+      qualifiedRuns: 'Qualified runs：',
+      qualifiedConsecutivePasses: 'Qualified consecutive passes：',
+      remainingQualifiedRuns: '剩余 qualified runs：',
+      remainingQualifiedPasses: '剩余 qualified 连续 pass：',
+      qualifiedMainlineRuns: 'Qualified mainline runs：',
+      visibilityOnlyRuns: 'Visibility-only runs：',
+      localVisibilityOnlyRuns: '本地 visibility-only runs：',
+      nonQualifiedRemoteRuns: '非 qualified 远端 runs：',
+      trackedRuns: 'Tracked runs：',
+      passingRuns: 'Passing runs：',
+      failingRuns: 'Failing runs：',
+      consecutivePassingRuns: '连续通过：',
+      qualifiedScope: 'Qualified scope：',
+      outcome: 'Outcome：',
+      qualifiedForReadiness: 'Qualified for readiness：',
+      qualified: 'Qualified',
+      event: 'Event',
+      run: 'Run',
+      sha: 'SHA',
+      workflow: 'Workflow：',
+      completed: 'Completed',
+      failedStep: 'Failed step',
+      noQualifiedRun: '当前还没有 qualified 主线运行可公开显示。',
+      none: 'none',
+      yes: 'yes',
+      no: 'no',
+      local: 'local',
+      passed: 'passed',
+      failed: 'failed',
+      unknown: 'unknown',
+      statusLocalOnly: 'local-only',
+      statusBuildingHistory: 'building-history',
+      statusPromotionReady: 'promotion-ready'
+    }
+  : {
+      kicker: 'Developer Progress',
+      title: 'Publish real confidence history for developer review.',
+      lede: 'This page exposes the synced milestone confidence progress directly, so developers do not have to rely on roadmap prose while the latest qualified mainline evidence, visibility-only noise split, and readiness counters keep moving.',
+      roadmapHome: 'Back to Roadmap',
+      milestonesDetail: 'Open Milestones Detail',
+      readinessCard: 'Readiness',
+      visibilityCard: 'Visibility Breakdown',
+      verificationCard: 'Current Snapshot',
+      reviewSignal: 'Review Signal',
+      currentSnapshot: 'Current Snapshot',
+      latestRunKicker: 'Latest Run',
+      latestRunTitle: 'Latest visible run',
+      latestQualifiedKicker: 'Latest Qualified Run',
+      latestQualifiedTitle: 'Latest qualified mainline run',
+      recentRunsKicker: 'Recent Runs',
+      recentRunsTitle: 'Recent runs',
+      reviewChecklistKicker: 'Developer Review',
+      reviewChecklistTitle: 'Developer review actions',
+      sourceFilesKicker: 'Source Files',
+      sourceFilesTitle: 'Current public page inputs',
+      updatedAt: 'Updated:',
+      qualifiedRuns: 'Qualified runs:',
+      qualifiedConsecutivePasses: 'Qualified consecutive passes:',
+      remainingQualifiedRuns: 'Remaining qualified runs:',
+      remainingQualifiedPasses: 'Remaining qualified pass streak:',
+      qualifiedMainlineRuns: 'Qualified mainline runs:',
+      visibilityOnlyRuns: 'Visibility-only runs:',
+      localVisibilityOnlyRuns: 'Local visibility-only runs:',
+      nonQualifiedRemoteRuns: 'Non-qualified remote runs:',
+      trackedRuns: 'Tracked runs:',
+      passingRuns: 'Passing runs:',
+      failingRuns: 'Failing runs:',
+      consecutivePassingRuns: 'Consecutive passing runs:',
+      qualifiedScope: 'Qualified scope:',
+      outcome: 'Outcome:',
+      qualifiedForReadiness: 'Qualified for readiness:',
+      qualified: 'Qualified',
+      event: 'Event',
+      run: 'Run',
+      sha: 'SHA',
+      workflow: 'Workflow:',
+      completed: 'Completed',
+      failedStep: 'Failed step',
+      noQualifiedRun: 'No qualified mainline run is available yet.',
+      none: 'none',
+      yes: 'yes',
+      no: 'no',
+      local: 'local',
+      passed: 'passed',
+      failed: 'failed',
+      unknown: 'unknown',
+      statusLocalOnly: 'local-only',
+      statusBuildingHistory: 'building-history',
+      statusPromotionReady: 'promotion-ready'
+    }
+)
+
+const readinessTone = computed(() => {
+  if (progress.readiness.status === 'promotion-ready') return 'safe'
+  if (progress.readiness.status === 'building-history') return 'next'
+  return 'planned'
+})
+
+const readinessStatusLabel = computed(() => {
+  if (progress.readiness.status === 'promotion-ready') return copy.value.statusPromotionReady
+  if (progress.readiness.status === 'building-history') return copy.value.statusBuildingHistory
+  return copy.value.statusLocalOnly
+})
+
+const qualifiedRunsLabel = computed(
+  () => `${copy.value.qualifiedRuns} ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}`
+)
+
+const consecutivePassesLabel = computed(
+  () => `${copy.value.qualifiedConsecutivePasses} ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}`
+)
+
+const qualifiedScopeLabel = computed(
+  () => `${progress.readiness.qualifiedEvents.join(', ')} on ${progress.readiness.requiredRef}`
+)
+
+const reviewChecklist = computed(() => props.locale === 'zh'
+  ? [
+      '先在 GitHub Actions 查看 `mainline-acceptance` job summary，再回到这个页面核对相同计数。',
+      '在本地主线执行 `pnpm milestone:sync:confidence-history -- --limit 20`，把 completed mainline bundle 导回 `.portmanager/reports/`。',
+      '优先读取 `Latest Qualified Run` 和 visibility breakdown，再决定里程碑文案是否允许继续收窄。',
+      '继续保持 `pnpm milestone:verify:confidence` 与 `pnpm acceptance:verify` 为绿，直到 readiness 真正达到 `promotion-ready`。'
+    ]
+  : [
+      'Read the GitHub Actions `mainline-acceptance` job summary first, then confirm the same counters on this page.',
+      'Run `pnpm milestone:sync:confidence-history -- --limit 20` on local main to pull completed mainline bundles back into `.portmanager/reports/`.',
+      'Use `Latest Qualified Run` plus the visibility breakdown before deciding whether milestone wording can narrow further.',
+      'Keep both `pnpm milestone:verify:confidence` and `pnpm acceptance:verify` green until readiness truly reaches `promotion-ready`.'
+    ]
+)
+
+function formatTimestamp(value: string | null) {
+  if (!value) {
+    return copy.value.unknown
+  }
+
+  return value.replace('T', ' ').replace(/\.?\d{0,3}Z$/, ' UTC')
+}
+
+function yesNo(value: boolean) {
+  return value ? copy.value.yes : copy.value.no
+}
+
+function outcomeLabel(value?: string | null) {
+  if (value === 'passed') return copy.value.passed
+  if (value === 'failed') return copy.value.failed
+  return copy.value.unknown
+}
+
+function runTone(run: ProgressRun) {
+  if (!run) return 'planned'
+  return run.outcome === 'passed' ? 'safe' : 'next'
+}
+
+function eventLabel(run: NonNullable<ProgressRun>) {
+  return run.context.eventName ?? copy.value.local
+}
+
+function runLabel(run: NonNullable<ProgressRun>) {
+  if (!run.context.runId) {
+    return copy.value.local
+  }
+
+  return `${run.context.runId}/${run.context.runAttempt ?? '1'}`
+}
+
+function shaLabel(run: NonNullable<ProgressRun>) {
+  return run.context.sha ? run.context.sha.slice(0, 12) : copy.value.local
+}
+
+function workflowLabel(run: NonNullable<ProgressRun>) {
+  return run.context.workflow ?? copy.value.local
+}
+
+function failedStepLabel(value: string | null) {
+  return value ?? copy.value.none
+}
+</script>

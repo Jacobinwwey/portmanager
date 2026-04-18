@@ -136,6 +136,7 @@ function sidebar(locale: LocaleCode) {
         text: 'Roadmap',
         items: [
           { text: isZh ? 'Roadmap 首页' : 'Roadmap Home', link: `/${locale}/roadmap/` },
+          { text: isZh ? '开发进度' : 'Development Progress', link: `/${locale}/roadmap/development-progress` },
           { text: isZh ? '里程碑明细' : 'Milestones Detail', link: doc(locale, 'milestones') },
           { text: isZh ? 'Toward C 策略' : 'Toward C Strategy', link: doc(locale, 'toward-c-strategy') }
         ]
