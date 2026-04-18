@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-17
-Version: v0.3.3-m2-confidence-history-bundle
+Version: v0.3.4-m2-confidence-readiness
 
 ## English
 
@@ -52,7 +52,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - The repository now also has one canonical Milestone 2 confidence routine: `pnpm milestone:verify:confidence`.
 - The main branch CI mirror for that gate is `.github/workflows/mainline-acceptance.yml`.
 - That workflow keeps `pnpm acceptance:verify` on the standing PR path and runs `pnpm milestone:verify:confidence` on `push main`, `workflow_dispatch`, and the daily scheduled history run.
-- The confidence routine now writes `.portmanager/reports/milestone-confidence-report.json`, `.portmanager/reports/milestone-confidence-history.json`, and `.portmanager/reports/milestone-confidence-summary.md` with CI traceability fields for `eventName`, `ref`, `sha`, `runId`, `runAttempt`, and `workflow`; the confidence job restores and saves the history bundle across runs and uploads that bundle as a CI artifact for developer inspection.
+- The confidence routine now writes `.portmanager/reports/milestone-confidence-report.json`, `.portmanager/reports/milestone-confidence-history.json`, and `.portmanager/reports/milestone-confidence-summary.md` with CI traceability fields for `eventName`, `ref`, `sha`, `runId`, `runAttempt`, and `workflow`; the confidence job restores and saves the history bundle across runs, uploads that bundle as a CI artifact for developer inspection, and publishes the same markdown summary directly in the GitHub Actions job summary.
+- The confidence history now distinguishes qualified Milestone 2 promotion evidence from local visibility-only runs and classifies readiness as `local-only`, `building-history`, or `promotion-ready` against one explicit rule: `7` qualified runs plus `3` consecutive qualified passes from `push`, `workflow_dispatch`, or `schedule` on `refs/heads/main`.
 - Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - Fresh local proof on `2026-04-17`: `pnpm acceptance:verify` passes after the Unit 4 agent-service delivery and Unit 5 docs sync.
@@ -70,7 +71,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 slice shipped`: repeated remote-backup replay now exercises local-only, configured-success, and configured-failure required backups on the same live agent-backed host / rule flow across API, CLI, Web backup views, and agent runtime proof.
 - `Milestone 2 slice shipped`: `pnpm milestone:verify:confidence` now composes the standing acceptance gate with the remote-backup replay proof, and the mainline workflow now collects that heavier routine on `push main`, `workflow_dispatch`, and the daily scheduled history path.
 - `Milestone 2 slice shipped`: the canonical confidence routine now emits a durable JSON report at `.portmanager/reports/milestone-confidence-report.json`, appends `.portmanager/reports/milestone-confidence-history.json`, renders `.portmanager/reports/milestone-confidence-summary.md`, and CI restores/saves that history bundle across runs so green-history review stops depending on raw job logs alone.
-- `Next lane`: Milestone 2 confidence-routine maintenance on the same live host / rule / policy slice by keeping the persisted history bundle green long enough for the current wording to stop needing qualification.
+- `Milestone 2 slice shipped`: the persisted confidence history now classifies `local-only`, `building-history`, and `promotion-ready`, marks whether each run qualifies for readiness advancement, and GitHub Actions publishes the same summary directly in the workflow run page.
+- `Next lane`: Milestone 2 confidence-readiness maintenance on the same live host / rule / policy slice by keeping qualified history green until the summary reaches `promotion-ready`.
 
 ## 中文
 
@@ -121,7 +123,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - 当前仓库也已经具备一条规范的 Milestone 2 confidence routine：`pnpm milestone:verify:confidence`。
 - 该 gate 在主分支上的 CI 镜像为 `.github/workflows/mainline-acceptance.yml`。
 - 这条 workflow 会继续把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上运行 `pnpm milestone:verify:confidence`。
-- 这条 confidence routine 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`、`.portmanager/reports/milestone-confidence-history.json` 与 `.portmanager/reports/milestone-confidence-summary.md`，并附带 `eventName`、`ref`、`sha`、`runId`、`runAttempt`、`workflow` 等 CI traceability 字段；confidence job 还会在各次运行之间恢复并保存这组 history bundle，再把 bundle 上传成 CI artifact 供开发者核对。
+- 这条 confidence routine 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`、`.portmanager/reports/milestone-confidence-history.json` 与 `.portmanager/reports/milestone-confidence-summary.md`，并附带 `eventName`、`ref`、`sha`、`runId`、`runAttempt`、`workflow` 等 CI traceability 字段；confidence job 还会在各次运行之间恢复并保存这组 history bundle、上传成 CI artifact，并把同一份 markdown summary 直接发布到 GitHub Actions job summary 供开发者核对。
+- 这组 confidence history 现在还会把真正属于 Milestone 2 readiness 推进的 qualified run 与本地可见性 run 区分开，并按照 `local-only`、`building-history`、`promotion-ready` 三种状态汇总 readiness；统一阈值为 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass。
 - Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 本地最新证明也发生在 `2026-04-17`：Unit 4 agent-service 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新通过。
@@ -138,4 +141,5 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 切片已交付`：remote-backup replay 现在会在同一条 live agent-backed host / rule 流程上重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据对齐。
 - `Milestone 2 切片已交付`：`pnpm milestone:verify:confidence` 现在已经把既有 acceptance gate 与 remote-backup replay proof 收敛成一条规范 routine，主线 workflow 也会在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上收集这条更重的证明。
 - `Milestone 2 切片已交付`：规范 confidence routine 现在还会写出带 CI traceability 元数据的 `.portmanager/reports/milestone-confidence-report.json`、`.portmanager/reports/milestone-confidence-history.json` 与 `.portmanager/reports/milestone-confidence-summary.md`，CI 也会在各次运行之间恢复并保存这组 bundle，再上传同一份 bundle，让开发者核对持续转绿历史时不再只依赖原始 job 日志。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-routine 维护：history bundle 已持久化，接下来要让这条历史真正持续为绿，直到当前里程碑表述不再需要附带限定语。
+- `Milestone 2 切片已交付`：持久 confidence history 现在会把 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态直接写进 summary，标记当前 run 是否属于 readiness 推进资格范围，并把同一份 summary 发布到 GitHub Actions workflow 页面。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 维护：把 qualified history 持续转绿，直到 summary 进入 `promotion-ready`。

@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.5.5-m2-confidence-history-bundle
+> Updated: 2026-04-17 | Version: v0.5.6-m2-confidence-readiness
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -69,7 +69,8 @@ Milestone 1 is only accepted when all of the following become true:
 - `GitHub-backup slice`: complete. Controller backup bundles now upload through the GitHub Contents API when configured, and required-mode success/failure paths stay explicit across API, CLI, Web, and dedicated reliability proof.
 - `Remote-backup replay slice`: complete. `scripts/milestone/verify-reliability-remote-backup-replay.ts` now replays local-only, configured-success, and configured-failure required backups on the same live agent-backed host / rule flow, and the evidence stays aligned across API, CLI, Web backup views, and agent runtime.
 - `Confidence-history bundle slice`: complete. `pnpm milestone:verify:confidence` now writes `.portmanager/reports/milestone-confidence-report.json`, appends `.portmanager/reports/milestone-confidence-history.json`, renders `.portmanager/reports/milestone-confidence-summary.md`, and CI restores/saves that bundle across runs before uploading `milestone-confidence-bundle-*` for direct inspection.
-- `Next lane`: Milestone 2 confidence-routine maintenance on the same live host / rule / policy slice by keeping that routine and report history green long enough for simpler wording.
+- `Confidence-readiness slice`: complete. Persisted history now classifies `local-only`, `building-history`, and `promotion-ready`, tracks qualified readiness runs, and publishes the same summary in the GitHub Actions run page.
+- `Next lane`: Milestone 2 confidence-readiness maintenance on the same live host / rule / policy slice by keeping qualified history green until the summary reaches `promotion-ready`.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -110,8 +111,9 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now from the accepted Milestone 1 slice: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures; live unreachable-agent paths now degrade hosts and rules explicitly; controller-side diagnostics promote rules to `active` after real verification.
 - Verified now: `pnpm milestone:verify:confidence` now composes the standing `pnpm acceptance:verify` gate with the remote-backup replay proof, and `.github/workflows/mainline-acceptance.yml` now collects that heavier routine on `push main`, `workflow_dispatch`, and the daily scheduled history run.
 - Verified now: the canonical routine now writes `.portmanager/reports/milestone-confidence-report.json`, `.portmanager/reports/milestone-confidence-history.json`, and `.portmanager/reports/milestone-confidence-summary.md` with CI traceability fields for `eventName`, `ref`, `sha`, `runId`, `runAttempt`, and `workflow`, and the confidence workflow restores/saves that bundle before uploading it for developer review.
-- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now sustained empirical confidence accumulation, because the canonical routine and persisted history bundle now exist and still need repeated green history.
-- Milestone 2 still remains in progress because the branch now needs repeat green confidence history, not discovery of another missing replay state, before reliability language can advance again.
+- Verified now: the persisted confidence history now classifies `local-only`, `building-history`, and `promotion-ready`, measures progress against `7` qualified runs plus `3` consecutive qualified passes from `push`, `workflow_dispatch`, and `schedule` on `refs/heads/main`, and publishes the same summary in the workflow run page for developers.
+- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now earning the explicit readiness threshold rather than inventing more reporting surfaces.
+- Milestone 2 still remains in progress because the branch now needs the readiness summary to reach `promotion-ready`, not discovery of another missing replay state, before reliability language can advance again.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.

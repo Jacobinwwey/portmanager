@@ -104,6 +104,10 @@ jobs:
         continue-on-error: true
         run: pnpm milestone:verify:confidence
 
+      - name: Publish milestone confidence summary
+        if: always() && hashFiles('.portmanager/reports/milestone-confidence-summary.md') != ''
+        run: cat .portmanager/reports/milestone-confidence-summary.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload milestone confidence bundle
         if: always()
         uses: actions/upload-artifact@v4

@@ -7,8 +7,13 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const repoRoot = path.resolve(__dirname, '..', '..')
 const CONFIDENCE_REPORT_VERSION = '0.2.0'
-const CONFIDENCE_HISTORY_VERSION = '0.1.0'
+const CONFIDENCE_HISTORY_VERSION = '0.2.0'
+const CONFIDENCE_READINESS_VERSION = '0.1.0'
 const DEFAULT_HISTORY_LIMIT = 30
+const READINESS_REQUIRED_REF = 'refs/heads/main'
+const READINESS_QUALIFIED_EVENTS = ['push', 'workflow_dispatch', 'schedule']
+const READINESS_MINIMUM_QUALIFIED_RUNS = 7
+const READINESS_MINIMUM_CONSECUTIVE_PASSES = 3
 
 function createStep(name, args) {
   return {
@@ -94,6 +99,17 @@ function buildVerificationContext(environment) {
   }
 }
 
+function isQualifiedReadinessContext(context) {
+  return (
+    context.ref === READINESS_REQUIRED_REF &&
+    READINESS_QUALIFIED_EVENTS.includes(context.eventName ?? '')
+  )
+}
+
+function isQualifiedReadinessEntry(entry) {
+  return entry.qualifiedForReadiness || isQualifiedReadinessContext(entry.context ?? {})
+}
+
 function buildVerificationReport({
   successLabel,
   startedAt,
@@ -102,6 +118,8 @@ function buildVerificationReport({
   stepReports,
   env
 }) {
+  const context = buildVerificationContext(env)
+
   return {
     reportVersion: CONFIDENCE_REPORT_VERSION,
     label: successLabel,
@@ -110,7 +128,8 @@ function buildVerificationReport({
     startedAt: new Date(startedAt).toISOString(),
     completedAt: new Date(completedAt).toISOString(),
     totalDurationSeconds: secondsFromMilliseconds(completedAt - startedAt),
-    context: buildVerificationContext(env),
+    context,
+    qualifiedForReadiness: isQualifiedReadinessContext(context),
     failedStepName: result.failedStep?.name ?? null,
     steps: stepReports
   }
@@ -190,6 +209,7 @@ function buildHistoryEntry(report) {
     failedStepCount,
     skippedStepCount,
     stepCount: report.steps.length,
+    qualifiedForReadiness: report.qualifiedForReadiness ?? isQualifiedReadinessContext(report.context),
     context: report.context
   }
 }
@@ -208,6 +228,63 @@ function countConsecutivePasses(entries) {
   return total
 }
 
+function countQualifiedConsecutivePasses(entries) {
+  let total = 0
+
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index]
+
+    if (!isQualifiedReadinessEntry(entry)) {
+      continue
+    }
+
+    if (!entry.ok) {
+      break
+    }
+
+    total += 1
+  }
+
+  return total
+}
+
+function buildReadinessSnapshot(entries) {
+  const qualifiedEntries = entries.filter((entry) => isQualifiedReadinessEntry(entry))
+  const qualifiedRuns = qualifiedEntries.length
+  const qualifiedPasses = qualifiedEntries.filter((entry) => entry.ok).length
+  const qualifiedFailures = qualifiedRuns - qualifiedPasses
+  const qualifiedConsecutivePasses = countQualifiedConsecutivePasses(entries)
+  const remainingQualifiedRuns = Math.max(
+    READINESS_MINIMUM_QUALIFIED_RUNS - qualifiedRuns,
+    0
+  )
+  const remainingConsecutivePasses = Math.max(
+    READINESS_MINIMUM_CONSECUTIVE_PASSES - qualifiedConsecutivePasses,
+    0
+  )
+  const status =
+    qualifiedRuns === 0
+      ? 'local-only'
+      : remainingQualifiedRuns === 0 && remainingConsecutivePasses === 0
+        ? 'promotion-ready'
+        : 'building-history'
+
+  return {
+    readinessVersion: CONFIDENCE_READINESS_VERSION,
+    status,
+    requiredRef: READINESS_REQUIRED_REF,
+    qualifiedEvents: READINESS_QUALIFIED_EVENTS,
+    minimumQualifiedRuns: READINESS_MINIMUM_QUALIFIED_RUNS,
+    minimumConsecutivePasses: READINESS_MINIMUM_CONSECUTIVE_PASSES,
+    qualifiedRuns,
+    qualifiedPasses,
+    qualifiedFailures,
+    qualifiedConsecutivePasses,
+    remainingQualifiedRuns,
+    remainingConsecutivePasses
+  }
+}
+
 function buildHistorySnapshot({ report, historyPath, historyLimit }) {
   const previousEntries = readHistoryEntries(historyPath)
   const entries = [...previousEntries, buildHistoryEntry(report)].slice(-historyLimit)
@@ -224,6 +301,7 @@ function buildHistorySnapshot({ report, historyPath, historyLimit }) {
     failedRuns,
     consecutivePasses: countConsecutivePasses(entries),
     latestRun: entries.at(-1) ?? null,
+    readiness: buildReadinessSnapshot(entries),
     entries
   }
 }
@@ -246,6 +324,7 @@ function summarizeSha(entry) {
 
 function renderHistorySummary(snapshot) {
   const latestRun = snapshot.latestRun
+  const readiness = snapshot.readiness
   const lines = [
     '# Milestone Confidence History',
     '',
@@ -256,10 +335,40 @@ function renderHistorySummary(snapshot) {
     `Consecutive passing runs: ${snapshot.consecutivePasses}`
   ]
 
+  lines.push('')
+  lines.push('## Promotion Readiness')
+  lines.push(`- Status: ${readiness.status}`)
+  lines.push(
+    `- Qualified scope: ${readiness.qualifiedEvents.join(', ')} on ${readiness.requiredRef}`
+  )
+  lines.push(
+    `- Qualified runs: ${readiness.qualifiedRuns}/${readiness.minimumQualifiedRuns}`
+  )
+  lines.push(
+    `- Qualified consecutive passes: ${readiness.qualifiedConsecutivePasses}/${readiness.minimumConsecutivePasses}`
+  )
+  lines.push(`- Remaining qualified runs: ${readiness.remainingQualifiedRuns}`)
+  lines.push(
+    `- Remaining qualified pass streak: ${readiness.remainingConsecutivePasses}`
+  )
+
+  if (readiness.status === 'promotion-ready') {
+    lines.push(
+      '- Note: readiness thresholds are met; milestone wording can be reviewed with human judgment.'
+    )
+  } else {
+    lines.push(
+      '- Note: local and non-mainline runs are recorded for visibility but do not advance milestone-promotion readiness.'
+    )
+  }
+
   if (latestRun) {
     lines.push('')
     lines.push('## Latest Run')
     lines.push(`- Outcome: ${latestRun.ok ? 'passed' : 'failed'}`)
+    lines.push(
+      `- Qualified for readiness: ${latestRun.qualifiedForReadiness ? 'yes' : 'no'}`
+    )
     lines.push(`- Event: ${summarizeContext(latestRun)}`)
     lines.push(`- Run: ${summarizeRun(latestRun)}`)
     lines.push(`- SHA: ${summarizeSha(latestRun)}`)
@@ -270,12 +379,12 @@ function renderHistorySummary(snapshot) {
 
   lines.push('')
   lines.push('## Recent Runs')
-  lines.push('| Completed | Outcome | Event | Run | SHA | Duration (s) | Failed step |')
-  lines.push('| --- | --- | --- | --- | --- | ---: | --- |')
+  lines.push('| Completed | Outcome | Qualified | Event | Run | SHA | Duration (s) | Failed step |')
+  lines.push('| --- | --- | --- | --- | --- | --- | ---: | --- |')
 
   for (const entry of [...snapshot.entries].reverse().slice(0, 10)) {
     lines.push(
-      `| ${entry.completedAt} | ${entry.ok ? 'passed' : 'failed'} | ${summarizeContext(entry)} | ${summarizeRun(entry)} | ${summarizeSha(entry)} | ${entry.totalDurationSeconds} | ${entry.failedStepName ?? 'none'} |`
+      `| ${entry.completedAt} | ${entry.ok ? 'passed' : 'failed'} | ${entry.qualifiedForReadiness ? 'yes' : 'no'} | ${summarizeContext(entry)} | ${summarizeRun(entry)} | ${summarizeSha(entry)} | ${entry.totalDurationSeconds} | ${entry.failedStepName ?? 'none'} |`
     )
   }
 
