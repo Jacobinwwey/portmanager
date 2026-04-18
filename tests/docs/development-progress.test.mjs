@@ -7,7 +7,6 @@ import path from 'node:path'
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 const docsSiteRoot = path.join(repoRoot, 'docs-site')
 const docsConfigPath = path.join(docsSiteRoot, '.vitepress', 'config.ts')
-const confidenceHistoryPath = path.join(repoRoot, '.portmanager', 'reports', 'milestone-confidence-history.json')
 const generatedProgressDataPath = path.join(docsSiteRoot, 'data', 'milestone-confidence-progress.ts')
 
 test('roadmap publishes a development-progress page backed by live milestone confidence data', async () => {
@@ -36,20 +35,19 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.equal(typeof milestoneConfidenceProgress.readiness.status, 'string')
   assert.equal(typeof milestoneConfidenceProgress.readiness.qualifiedRuns, 'number')
   assert.equal(typeof milestoneConfidenceProgress.visibility.localVisibilityOnlyRuns, 'number')
-
-  if (existsSync(confidenceHistoryPath)) {
-    const confidenceHistory = JSON.parse(readFileSync(confidenceHistoryPath, 'utf8'))
-
-    assert.equal(milestoneConfidenceProgress.updatedAt, confidenceHistory.updatedAt)
-    assert.equal(milestoneConfidenceProgress.readiness.status, confidenceHistory.readiness.status)
-    assert.equal(milestoneConfidenceProgress.readiness.qualifiedRuns, confidenceHistory.readiness.qualifiedRuns)
+  assert.ok(Array.isArray(milestoneConfidenceProgress.recentRuns))
+  assert.equal(typeof milestoneConfidenceProgress.readiness.minimumQualifiedRuns, 'number')
+  assert.equal(typeof milestoneConfidenceProgress.readiness.minimumConsecutivePasses, 'number')
+  assert.equal(typeof milestoneConfidenceProgress.sourceFiles.summaryPath, 'string')
+  // The committed docs-site data is a publish artifact. An ignored local .portmanager
+  // history may be newer than that artifact until docs:generate is rerun, so this
+  // acceptance test validates publishable shape and route wiring rather than forcing
+  // fresh local machine state to match committed generated docs.
+  if (milestoneConfidenceProgress.latestQualifiedRun) {
+    assert.equal(typeof milestoneConfidenceProgress.latestQualifiedRun.completedAt, 'string')
     assert.equal(
-      milestoneConfidenceProgress.latestQualifiedRun?.context?.runId ?? null,
-      confidenceHistory.latestQualifiedRun?.context?.runId ?? null
-    )
-    assert.equal(
-      milestoneConfidenceProgress.visibility.localVisibilityOnlyRuns,
-      confidenceHistory.visibility.localVisibilityOnlyRuns
+      typeof milestoneConfidenceProgress.latestQualifiedRun.context.workflow,
+      'string'
     )
   }
 })

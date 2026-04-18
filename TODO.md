@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-18
-Version: v0.5.10-real-machine-acceptance-sync
+Version: v0.5.11-real-machine-acceptance-hardening
 
 ## English
 
@@ -63,6 +63,7 @@ Version: v0.5.10-real-machine-acceptance-sync
 - [x] Milestone 2 acceptance closure: publish the synced confidence snapshot as first-class docs-site developer progress pages at `/en/roadmap/development-progress` and `/zh/roadmap/development-progress`, and surface the same live counters on roadmap home.
 - [x] Real-machine acceptance: replay `pnpm acceptance:verify` and `pnpm milestone:verify:confidence` on Windows against the latest `main`, then sync completed mainline confidence history locally with authenticated `gh` for developer review.
 - [x] Acceptance hardening: align development-progress docs validation with the committed generated confidence fallback so a fresh machine does not fail on missing ignored `.portmanager` history.
+- [x] Acceptance hardening: keep development-progress docs validation hermetic when ignored local `.portmanager` history is newer than committed docs-site progress data and `docs:generate` has not been rerun yet.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -148,6 +149,7 @@ Version: v0.5.10-real-machine-acceptance-sync
 - [x] 里程碑 2 验收闭环：把同步后的 confidence snapshot 作为 docs-site 一级开发者进度页面公开到 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，并在 roadmap 首页直接显示同一份 live 计数。
 - [x] 真机验收：在 Windows 真机上对最新 `main` 重放 `pnpm acceptance:verify` 与 `pnpm milestone:verify:confidence`，并通过已认证 `gh` 把 completed mainline confidence history 同步回本地供开发者复核。
 - [x] 验收加固：让 development-progress docs 校验与已提交的 generated confidence fallback 对齐，避免全新机器在缺失被忽略的 `.portmanager` 历史时误报失败。
+- [x] 验收加固：当被忽略的本地 `.portmanager` 历史比已提交 docs-site progress data 更新、且尚未重跑 `docs:generate` 时，development-progress docs 校验仍保持 hermetic，不再误报失败。
 
 ### 推荐推进顺序
 - [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并继续把这条 gate 在 `main` 上维持为绿，再把主动主线切到 Unit 1。
