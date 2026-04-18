@@ -416,7 +416,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       ]
     },
     dependencies: ['m1'],
-    docs: ['backup-rollback-policy', 'snapshot-diagnostics', 'sdk-docker', 'milestones']
+    docs: ['backup-rollback-policy', 'real-machine-verification-report', 'snapshot-diagnostics', 'sdk-docker', 'milestones']
   },
   {
     id: 'm3',

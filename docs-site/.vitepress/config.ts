@@ -70,7 +70,8 @@ function sidebar(locale: LocaleCode) {
         items: [
           { text: isZh ? '安装与分发契约' : 'Install Contract', link: doc(locale, 'install-distribution-contract') },
           { text: isZh ? '快照与诊断' : 'Snapshot and Diagnostics', link: doc(locale, 'snapshot-diagnostics') },
-          { text: isZh ? '备份与回滚策略' : 'Backup and Rollback Policy', link: doc(locale, 'backup-rollback-policy') }
+          { text: isZh ? '备份与回滚策略' : 'Backup and Rollback Policy', link: doc(locale, 'backup-rollback-policy') },
+          { text: isZh ? '真机验证报告' : 'Real-Machine Verification Report', link: doc(locale, 'real-machine-verification-report') }
         ]
       }
     ],
@@ -127,6 +128,7 @@ function sidebar(locale: LocaleCode) {
           { text: isZh ? '安装与分发契约' : 'Install Contract', link: doc(locale, 'install-distribution-contract') },
           { text: isZh ? '快照与诊断' : 'Snapshot and Diagnostics', link: doc(locale, 'snapshot-diagnostics') },
           { text: isZh ? '备份与回滚策略' : 'Backup and Rollback Policy', link: doc(locale, 'backup-rollback-policy') },
+          { text: isZh ? '真机验证报告' : 'Real-Machine Verification Report', link: doc(locale, 'real-machine-verification-report') },
           { text: isZh ? 'SDK 与 Docker 边界' : 'SDK and Docker Boundary', link: doc(locale, 'sdk-docker') }
         ]
       }

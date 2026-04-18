@@ -1,0 +1,143 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { generateMilestoneConfidenceProgressData } from '../../scripts/docs/extract-locales.mjs'
+
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
+
+function buildHistoryFixture(updatedAt = '2026-04-18T06:14:08.370Z') {
+  return {
+    updatedAt,
+    totalRuns: 4,
+    passedRuns: 4,
+    failedRuns: 0,
+    consecutivePasses: 4,
+    readiness: {
+      readinessVersion: '0.1.0',
+      status: 'building-history',
+      requiredRef: 'refs/heads/main',
+      qualifiedEvents: ['push', 'workflow_dispatch', 'schedule'],
+      minimumQualifiedRuns: 7,
+      minimumConsecutivePasses: 3,
+      qualifiedRuns: 1,
+      qualifiedPasses: 1,
+      qualifiedFailures: 0,
+      qualifiedConsecutivePasses: 1,
+      remainingQualifiedRuns: 6,
+      remainingConsecutivePasses: 2
+    },
+    visibility: {
+      qualifiedRuns: 1,
+      visibilityOnlyRuns: 3,
+      localVisibilityOnlyRuns: 3,
+      nonQualifiedRemoteRuns: 0
+    },
+    latestRun: {
+      id: `${updatedAt}-local-0`,
+      ok: true,
+      qualifiedForReadiness: false,
+      completedAt: updatedAt,
+      totalDurationSeconds: 54.333,
+      failedStepName: null,
+      context: {
+        eventName: null,
+        ref: null,
+        sha: null,
+        runId: null,
+        runAttempt: null,
+        workflow: null
+      }
+    },
+    latestQualifiedRun: {
+      id: '2026-04-18T02:38:43.991Z-24595022905-1',
+      ok: true,
+      qualifiedForReadiness: true,
+      completedAt: '2026-04-18T02:38:43.991Z',
+      totalDurationSeconds: 41.196,
+      failedStepName: null,
+      context: {
+        eventName: 'push',
+        ref: 'refs/heads/main',
+        sha: 'a5075a78c6f40ef27cf123c2a2e559c5044d6936',
+        runId: '24595022905',
+        runAttempt: '1',
+        workflow: 'mainline-acceptance'
+      }
+    },
+    entries: []
+  }
+}
+
+async function createSandbox(t) {
+  const sandboxRoot = await mkdtemp(path.join(repoRoot, '.tmp-extract-locales-'))
+  t.after(async () => {
+    await rm(sandboxRoot, { recursive: true, force: true })
+  })
+
+  const historyPath = path.join(sandboxRoot, 'reports', 'milestone-confidence-history.json')
+  const generatedDataPath = path.join(sandboxRoot, 'docs-site', 'data', 'milestone-confidence-progress.ts')
+  await mkdir(path.dirname(historyPath), { recursive: true })
+  await mkdir(path.dirname(generatedDataPath), { recursive: true })
+
+  return { historyPath, generatedDataPath }
+}
+
+test('default docs generation reuses the committed confidence artifact even when local history exists', async (t) => {
+  const { historyPath, generatedDataPath } = await createSandbox(t)
+  const committedArtifact = '/* committed artifact */\nexport const milestoneConfidenceProgress = { trackedRuns: 3 } as const\n'
+
+  await writeFile(generatedDataPath, committedArtifact, 'utf8')
+  await writeFile(historyPath, JSON.stringify(buildHistoryFixture(), null, 2), 'utf8')
+
+  const status = await generateMilestoneConfidenceProgressData({
+    refreshConfidenceProgress: false,
+    confidenceHistorySourcePath: historyPath,
+    generatedDataPath
+  })
+
+  assert.equal(status, 'reused')
+  assert.equal(await readFile(generatedDataPath, 'utf8'), committedArtifact)
+})
+
+test('explicit confidence refresh regenerates the committed artifact from local history', async (t) => {
+  const { historyPath, generatedDataPath } = await createSandbox(t)
+
+  await writeFile(generatedDataPath, '/* stale artifact */\n', 'utf8')
+  await writeFile(
+    historyPath,
+    JSON.stringify(buildHistoryFixture('2026-04-18T08:08:08.000Z'), null, 2),
+    'utf8'
+  )
+
+  const status = await generateMilestoneConfidenceProgressData({
+    refreshConfidenceProgress: true,
+    confidenceHistorySourcePath: historyPath,
+    generatedDataPath
+  })
+
+  const refreshedArtifact = await readFile(generatedDataPath, 'utf8')
+
+  assert.equal(status, 'refreshed')
+  assert.match(refreshedArtifact, /"updatedAt": "2026-04-18T08:08:08.000Z"/)
+  assert.match(refreshedArtifact, /"defaultMode": "reuse-committed-artifact"/)
+  assert.match(
+    refreshedArtifact,
+    /"refreshCommand": "pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence"/
+  )
+})
+
+test('explicit confidence refresh fails when local history is unavailable', async (t) => {
+  const { historyPath, generatedDataPath } = await createSandbox(t)
+
+  await assert.rejects(
+    generateMilestoneConfidenceProgressData({
+      refreshConfidenceProgress: true,
+      confidenceHistorySourcePath: historyPath,
+      generatedDataPath
+    }),
+    /Explicit confidence progress refresh requested but \.portmanager milestone confidence history is unavailable/
+  )
+})

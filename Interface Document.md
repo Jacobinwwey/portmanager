@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-18
-Version: v0.3.9-real-machine-acceptance-hardening
+Version: v0.3.10-real-machine-verification-publication
 
 ## English
 
@@ -57,6 +57,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - The sync command reads those completed CI bundles back through authenticated `gh` access with `repo` scope, imports completed qualified runs including failures, dedupes by stable history entry id, and rewrites the same local history and summary files for developer review.
 - The confidence history now distinguishes qualified Milestone 2 promotion evidence from local visibility-only runs, persists `latestQualifiedRun` plus visibility-only breakdown metadata, and classifies readiness as `local-only`, `building-history`, or `promotion-ready` against one explicit rule: `7` qualified runs plus `3` consecutive qualified passes from `push`, `workflow_dispatch`, or `schedule` on `refs/heads/main`.
 - The docs site now also publishes that synced review state through `/en/roadmap/development-progress` and `/zh/roadmap/development-progress`, backed by generated milestone confidence data and previewed directly on roadmap home.
+- Default docs publication now reuses the committed `docs-site/data/milestone-confidence-progress.ts` artifact; only `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` is allowed to republish that tracked snapshot from local `.portmanager` history.
 - Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - Fresh local proof on `2026-04-17`: `pnpm acceptance:verify` passes after the Unit 4 agent-service delivery and Unit 5 docs sync.
@@ -138,6 +139,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - 这条 sync 命令会通过已认证且具备 `repo` scope 的 `gh` 读取这些已完成 CI bundle，把包含失败 run 在内的已完成 qualified 历史导回本地，按稳定 history entry id 去重，并重写同一份本地 history 与 summary 文件供开发者复核。
 - 这组 confidence history 现在还会把真正属于 Milestone 2 readiness 推进的 qualified run 与本地可见性 run 区分开，持久化 `latestQualifiedRun` 与 visibility-only breakdown 元数据，并按照 `local-only`、`building-history`、`promotion-ready` 三种状态汇总 readiness；统一阈值为 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass。
 - docs-site 现在也会通过 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress` 公开这份同步后的复核状态，并在 roadmap 首页直接预览同一份 milestone confidence 快照。
+- 默认 docs 发布现在会复用已提交的 `docs-site/data/milestone-confidence-progress.ts`；只有 `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` 才允许把本地 `.portmanager` history 重新发布成新的被跟踪快照。
 - Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 本地最新证明也发生在 `2026-04-17`：Unit 4 agent-service 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新通过。

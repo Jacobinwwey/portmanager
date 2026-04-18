@@ -10,8 +10,10 @@
   },
   "scripts": {
     "docs:generate": "node ../scripts/docs/extract-locales.mjs",
+    "docs:generate:refresh-confidence": "node ../scripts/docs/extract-locales.mjs --refresh-confidence-progress",
     "docs:dev": "pnpm run docs:generate && vitepress dev . --host 0.0.0.0",
     "docs:build": "pnpm run docs:generate && vitepress build .",
+    "docs:build:refresh-confidence": "pnpm run docs:generate:refresh-confidence && vitepress build .",
     "docs:preview": "pnpm run docs:build && vitepress preview . --host 0.0.0.0",
     "dev": "pnpm run docs:dev",
     "build": "pnpm run docs:build",

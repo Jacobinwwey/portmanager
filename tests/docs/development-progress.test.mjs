@@ -39,6 +39,18 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.equal(typeof milestoneConfidenceProgress.readiness.minimumQualifiedRuns, 'number')
   assert.equal(typeof milestoneConfidenceProgress.readiness.minimumConsecutivePasses, 'number')
   assert.equal(typeof milestoneConfidenceProgress.sourceFiles.summaryPath, 'string')
+  assert.equal(
+    milestoneConfidenceProgress.publication.defaultMode,
+    'reuse-committed-artifact'
+  )
+  assert.equal(
+    milestoneConfidenceProgress.publication.explicitRefreshFlag,
+    '--refresh-confidence-progress'
+  )
+  assert.equal(
+    milestoneConfidenceProgress.publication.refreshCommand,
+    'pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence'
+  )
   // The committed docs-site data is a publish artifact. An ignored local .portmanager
   // history may be newer than that artifact until docs:generate is rerun, so this
   // acceptance test validates publishable shape and route wiring rather than forcing

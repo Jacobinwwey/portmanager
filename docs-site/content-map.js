@@ -182,6 +182,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'real-machine-verification-report',
+    sourcePath: 'docs/operations/portmanager-real-machine-verification-report.md',
+    route: 'operations/real-machine-verification-report',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Real-Machine Verification Report',
+      zh: '真机验证报告'
+    }
+  },
+  {
     id: 'overview-design-baseline',
     sourcePath: 'docs/design/portmanager-overview-design-baseline.md',
     route: 'architecture/overview-design-baseline',

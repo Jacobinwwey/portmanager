@@ -10,7 +10,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-docs-site-architecture.md`
 > Audience: `shared` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-16 | Version: v0.3.1-docs-site-rebuild
+> Updated: 2026-04-18 | Version: v0.3.2-docs-site-confidence-publication
 ### Purpose
 This document locks the documentation publishing architecture for PortManager.
 The repository keeps raw bilingual specifications as the source of truth, while VitePress acts as the public publishing layer for GitHub Pages.

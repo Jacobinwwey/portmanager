@@ -12,6 +12,7 @@
       <div class="pm-doc-links">
         <VPLink class="pm-doc-link" :href="`/${props.locale}/roadmap/`">{{ copy.roadmapHome }}</VPLink>
         <VPLink class="pm-doc-link" :href="docMeta(props.locale, 'milestones').link">{{ copy.milestonesDetail }}</VPLink>
+        <VPLink class="pm-doc-link" :href="docMeta(props.locale, 'real-machine-verification-report').link">{{ copy.verificationReport }}</VPLink>
       </div>
     </article>
 
@@ -163,9 +164,11 @@
           </div>
         </div>
         <ul class="pm-progress-list">
-          <li><code>{{ progress.sourceFiles.summaryPath }}</code></li>
-          <li><code>{{ progress.sourceFiles.historyPath }}</code></li>
-          <li><code>{{ progress.sourceFiles.reportPath }}</code></li>
+          <li>{{ copy.summaryFile }} <code>{{ progress.sourceFiles.summaryPath }}</code></li>
+          <li>{{ copy.historyFile }} <code>{{ progress.sourceFiles.historyPath }}</code></li>
+          <li>{{ copy.reportFile }} <code>{{ progress.sourceFiles.reportPath }}</code></li>
+          <li>{{ copy.publishedArtifact }} <code>{{ progress.publication.trackedDataPath }}</code></li>
+          <li>{{ copy.refreshCommandLabel }} <code>{{ progress.publication.refreshCommand }}</code></li>
         </ul>
       </article>
     </div>
@@ -190,6 +193,7 @@ const copy = computed(() => props.locale === 'zh'
       lede: '这个页面直接发布当前同步后的 milestone confidence 进度，避免开发者只看 roadmap 叙述却看不到最新 qualified 主线证据、visibility-only 噪声拆分和 readiness 推进刻度。',
       roadmapHome: '返回 Roadmap',
       milestonesDetail: '查看里程碑明细',
+      verificationReport: '真机验证报告',
       readinessCard: 'Readiness',
       visibilityCard: 'Visibility Breakdown',
       verificationCard: 'Current Snapshot',
@@ -205,6 +209,11 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistTitle: '开发者复核动作',
       sourceFilesKicker: 'Source Files',
       sourceFilesTitle: '当前公开页面数据来源',
+      summaryFile: 'Summary：',
+      historyFile: 'History：',
+      reportFile: 'Report：',
+      publishedArtifact: 'Published artifact：',
+      refreshCommandLabel: 'Refresh command：',
       updatedAt: '更新于：',
       qualifiedRuns: 'Qualified runs：',
       qualifiedConsecutivePasses: 'Qualified consecutive passes：',
@@ -246,6 +255,7 @@ const copy = computed(() => props.locale === 'zh'
       lede: 'This page exposes the synced milestone confidence progress directly, so developers do not have to rely on roadmap prose while the latest qualified mainline evidence, visibility-only noise split, and readiness counters keep moving.',
       roadmapHome: 'Back to Roadmap',
       milestonesDetail: 'Open Milestones Detail',
+      verificationReport: 'Real-Machine Verification Report',
       readinessCard: 'Readiness',
       visibilityCard: 'Visibility Breakdown',
       verificationCard: 'Current Snapshot',
@@ -261,6 +271,11 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistTitle: 'Developer review actions',
       sourceFilesKicker: 'Source Files',
       sourceFilesTitle: 'Current public page inputs',
+      summaryFile: 'Summary:',
+      historyFile: 'History:',
+      reportFile: 'Report:',
+      publishedArtifact: 'Published artifact:',
+      refreshCommandLabel: 'Refresh command:',
       updatedAt: 'Updated:',
       qualifiedRuns: 'Qualified runs:',
       qualifiedConsecutivePasses: 'Qualified consecutive passes:',
