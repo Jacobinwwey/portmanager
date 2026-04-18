@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-17
-Version: v0.5.6-m2-confidence-readiness
+Version: v0.5.7-m2-confidence-history-sync
 
 ## English
 
@@ -58,6 +58,7 @@ Version: v0.5.6-m2-confidence-readiness
 - [x] Milestone 2 acceptance closure: persist `.portmanager/reports/milestone-confidence-history.json` plus `.portmanager/reports/milestone-confidence-summary.md`, restore and save that bundle across CI runs, and upload it as `milestone-confidence-bundle-*` for developer review.
 - [x] Milestone 2 acceptance closure: classify persisted confidence history as `local-only`, `building-history`, or `promotion-ready`, and distinguish qualified mainline evidence from local visibility-only runs.
 - [x] Milestone 2 acceptance closure: publish `.portmanager/reports/milestone-confidence-summary.md` into the GitHub Actions job summary for direct developer progress review.
+- [x] Milestone 2 acceptance closure: land `pnpm milestone:sync:confidence-history` so developers can import completed `mainline-acceptance` bundle history into local readiness review with authenticated `gh`, deduped entries, and the same shared readiness math.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -66,7 +67,7 @@ Version: v0.5.6-m2-confidence-readiness
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
-- [ ] Next lane: keep qualified Milestone 2 confidence history green on the same live slice until the readiness summary reaches `promotion-ready`.
+- [ ] Next lane: sync completed mainline confidence history into local review, keep qualified Milestone 2 confidence history green on the same live slice, and narrow milestone wording only when the synced readiness summary justifies it.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -75,6 +76,8 @@ Version: v0.5.6-m2-confidence-readiness
 - [x] Land follow-up implementation plan: `docs/plans/2026-04-17-portmanager-m2-confidence-routine-plan.md`
 - [x] Land readiness requirements doc: `docs/brainstorms/2026-04-17-portmanager-m2-confidence-readiness-requirements.md`
 - [x] Land readiness implementation plan: `docs/plans/2026-04-17-portmanager-m2-confidence-readiness-plan.md`
+- [x] Land confidence-history sync requirements doc: `docs/brainstorms/2026-04-17-portmanager-m2-confidence-history-sync-requirements.md`
+- [x] Land confidence-history sync implementation plan: `docs/plans/2026-04-17-portmanager-m2-confidence-history-sync-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -132,6 +135,7 @@ Version: v0.5.6-m2-confidence-readiness
 - [x] 里程碑 2 验收闭环：持久化 `.portmanager/reports/milestone-confidence-history.json` 与 `.portmanager/reports/milestone-confidence-summary.md`，在 CI 各次运行之间恢复并保存这组 bundle，并以 `milestone-confidence-bundle-*` 上传给开发者核对。
 - [x] 里程碑 2 验收闭环：把持久 confidence history 明确分类为 `local-only`、`building-history`、`promotion-ready`，并把 qualified mainline 证据与本地可见性 run 区分开。
 - [x] 里程碑 2 验收闭环：把 `.portmanager/reports/milestone-confidence-summary.md` 直接发布到 GitHub Actions job summary，供开发者即时核对进度。
+- [x] 里程碑 2 验收闭环：落盘 `pnpm milestone:sync:confidence-history`，让开发者能通过已认证 `gh` 把 completed `mainline-acceptance` bundle history 导回本地 readiness review，并沿用同一套去重与 readiness 计算逻辑。
 
 ### 推荐推进顺序
 - [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并继续把这条 gate 在 `main` 上维持为绿，再把主动主线切到 Unit 1。
@@ -140,7 +144,7 @@ Version: v0.5.6-m2-confidence-readiness
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
-- [ ] 下一主线：继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，直到 readiness summary 进入 `promotion-ready`。
+- [ ] 下一主线：先把 completed mainline confidence history 同步到本地复核，再继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，并只在同步后的 readiness summary 充分支持时收窄里程碑文案。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -149,4 +153,6 @@ Version: v0.5.6-m2-confidence-readiness
 - [x] 落盘后续实现计划：`docs/plans/2026-04-17-portmanager-m2-confidence-routine-plan.md`
 - [x] 落盘 readiness 需求文档：`docs/brainstorms/2026-04-17-portmanager-m2-confidence-readiness-requirements.md`
 - [x] 落盘 readiness 实现计划：`docs/plans/2026-04-17-portmanager-m2-confidence-readiness-plan.md`
+- [x] 落盘 confidence-history sync 需求文档：`docs/brainstorms/2026-04-17-portmanager-m2-confidence-history-sync-requirements.md`
+- [x] 落盘 confidence-history sync 实现计划：`docs/plans/2026-04-17-portmanager-m2-confidence-history-sync-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

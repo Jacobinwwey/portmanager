@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-17
-Version: v0.5.6-m2-confidence-readiness
+Version: v0.5.7-m2-confidence-history-sync
 
 ## English
 
@@ -63,7 +63,8 @@ Milestone 1 is only accepted when all of the following become true:
 - `Remote-backup replay slice`: complete. `scripts/milestone/verify-reliability-remote-backup-replay.ts` now replays local-only, configured-success, and configured-failure required backups on the same live agent-backed host / rule flow, and the evidence stays aligned across API, CLI, Web backup views, and agent runtime.
 - `Confidence-history bundle slice`: complete. `pnpm milestone:verify:confidence` now writes `.portmanager/reports/milestone-confidence-report.json`, appends `.portmanager/reports/milestone-confidence-history.json`, renders `.portmanager/reports/milestone-confidence-summary.md`, and CI restores/saves that bundle across runs before uploading `milestone-confidence-bundle-*` for direct inspection.
 - `Confidence-readiness slice`: complete. Persisted history now classifies `local-only`, `building-history`, and `promotion-ready`, tracks qualified readiness runs, and publishes the same summary in the GitHub Actions run page.
-- `Next lane`: Milestone 2 confidence-readiness maintenance on the same live host / rule / policy slice by keeping qualified history green until the summary reaches `promotion-ready`.
+- `Confidence-history sync slice`: complete. `pnpm milestone:sync:confidence-history` now imports completed `mainline-acceptance` bundle history from GitHub Actions into local readiness review with deduped entries and the same shared readiness math.
+- `Next lane`: Milestone 2 confidence-readiness maintenance on the same live host / rule / policy slice by reviewing the synced summary, keeping qualified history green, and narrowing milestone wording only when the evidence justifies it.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -105,8 +106,9 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: `pnpm milestone:verify:confidence` now composes the standing `pnpm acceptance:verify` gate with the remote-backup replay proof, and `.github/workflows/mainline-acceptance.yml` now collects that heavier routine on `push main`, `workflow_dispatch`, and the daily scheduled history run.
 - Verified now: the canonical routine now writes `.portmanager/reports/milestone-confidence-report.json`, `.portmanager/reports/milestone-confidence-history.json`, and `.portmanager/reports/milestone-confidence-summary.md` with CI traceability fields for `eventName`, `ref`, `sha`, `runId`, `runAttempt`, and `workflow`, and the confidence workflow restores/saves that bundle before uploading it for developer review.
 - Verified now: the persisted confidence history now classifies `local-only`, `building-history`, and `promotion-ready`, measures progress against `7` qualified runs plus `3` consecutive qualified passes from `push`, `workflow_dispatch`, and `schedule` on `refs/heads/main`, and publishes the same summary in the workflow run page for developers.
-- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now earning the explicit readiness threshold rather than inventing more reporting surfaces.
-- Milestone 2 still remains in progress because the branch now needs the readiness summary to reach `promotion-ready`, not discovery of another missing replay state, before reliability language can advance again.
+- Verified now: `pnpm milestone:sync:confidence-history` now lets developers import those completed GitHub Actions bundles back into local readiness review with authenticated `gh`, deduped entries, and the same shared readiness summary.
+- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now the synced readiness result and milestone-language review rather than invention of more reporting surfaces.
+- Milestone 2 still remains in progress until the synced readiness evidence and human review justify narrower reliability language.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.
@@ -220,7 +222,8 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - `GitHub-backup 切片`：已完成。当配置存在时，controller backup bundle 现在会通过 GitHub Contents API 上传，required-mode 成功/失败路径也已经在 API、CLI、Web 与专门的可靠性证明里保持显式一致。
 - `Remote-backup replay 切片`：已完成。`scripts/milestone/verify-reliability-remote-backup-replay.ts` 现在会在同一条 live agent-backed host / rule 流程上重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据保持对齐。
 - `Confidence readiness 切片`：已完成。持久 history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，记录当前 run 是否真正属于 readiness 推进资格范围，并把同一份 summary 发布到 GitHub Actions workflow 页面。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 加固：把 qualified history 持续转绿，直到 summary 进入 `promotion-ready`。
+- `Confidence history sync 切片`：已完成。`pnpm milestone:sync:confidence-history` 现在会把 GitHub Actions 已完成 `mainline-acceptance` bundle history 导回本地 readiness review，并用同一套 readiness 计算逻辑与去重规则重建本地 summary。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 加固：复核同步后的 summary、把 qualified history 持续转绿，并且只在证据足够时收窄里程碑文案。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
@@ -262,8 +265,9 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - 当前已验证：`pnpm milestone:verify:confidence` 现在已经把既有 `pnpm acceptance:verify` gate 与 remote-backup replay proof 收敛成一条规范 routine，`.github/workflows/mainline-acceptance.yml` 也会在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上收集这条更重的 routine。
 - 当前已验证：规范 routine 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`、`.portmanager/reports/milestone-confidence-history.json` 与 `.portmanager/reports/milestone-confidence-summary.md`，并附带 `eventName`、`ref`、`sha`、`runId`、`runAttempt`、`workflow` 等 CI traceability 字段；confidence workflow 也会先恢复并保存这组 bundle，再上传给开发者核对。
 - 当前已验证：持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按照 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计推进进度，并把同一份 summary 直接发布到 workflow 页面给开发者查看。
-- 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架，而是把显式 readiness 阈值真正挣出来。
-- 里程碑 2 仍然处于进行中，因为仓库现在需要的是让 readiness summary 进入 `promotion-ready`，而不再是再发现某个缺失 replay 状态；只有这样，里程碑状态才有资格继续提升。
+- 当前已验证：`pnpm milestone:sync:confidence-history` 现在允许开发者通过已认证 `gh` 把这些已完成 workflow bundle 导回本地 readiness review，并按稳定 history entry id 去重。
+- 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架，而是根据同步后的 readiness 结果与人工复核来决定文案是否继续收窄。
+- 里程碑 2 仍然处于进行中，直到同步后的 readiness 证据与人工复核共同支持更收敛的可靠性文案。
 
 #### 可靠性推进规则
 - 里程碑 2 的推进必须建立在同一套 host/rule/policy 公共模型之上，而不是绕过里程碑 1 缺口。

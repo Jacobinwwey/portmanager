@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-v1-product-spec.md`
 > Audience: `shared` | Section: `overview` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.4.7-m2-confidence-readiness
+> Updated: 2026-04-17 | Version: v0.4.8-m2-confidence-history-sync
 ### Summary
 PortManager V1 is a control plane for exposing selected remote localhost services over Tailscale without treating ad-hoc shell commands as the operating model.
 The product goal is not only exposure, but safe exposure: desired state, operations history, diagnostics visibility, backup-before-mutation, and explicit rollback points.
@@ -89,5 +89,6 @@ A V1 implementation will be considered valid only if all of the following become
 - Fresh Milestone 2 orchestration slice on `2026-04-17`: `pnpm milestone:verify:confidence` now composes the standing `pnpm acceptance:verify` gate with the remote-backup replay proof, and `.github/workflows/mainline-acceptance.yml` now runs that heavier routine on `push main`, `workflow_dispatch`, and the daily scheduled history run.
 - Fresh Milestone 2 confidence-history slice on `2026-04-17`: the canonical routine now writes `.portmanager/reports/milestone-confidence-report.json`, appends `.portmanager/reports/milestone-confidence-history.json`, renders `.portmanager/reports/milestone-confidence-summary.md` with CI traceability fields for `eventName`, `ref`, `sha`, `runId`, `runAttempt`, and `workflow`, and CI restores/saves that bundle before uploading it so developers can inspect repeat-green evidence without digging through raw logs.
 - Fresh Milestone 2 confidence-readiness slice on `2026-04-17`: the persisted history now classifies `local-only`, `building-history`, and `promotion-ready`, marks whether each run qualifies for readiness advancement, uses `7` qualified runs plus `3` consecutive qualified passes as the shared threshold, and publishes the same summary into the GitHub Actions job summary for developers.
-- Deep compare against the completed `2026-04-16` reconciliation docs now shows that the old parity and proof-orchestration gaps are closed; the remaining technical gap is now earning the explicit readiness threshold on top of the canonical routine and persisted bundle rather than inventing more reporting scaffolding.
-- Current product conclusion: the first trusted public control-plane slice is now real and accepted; Milestone 2 confidence-readiness maintenance is the next active lane.
+- Fresh Milestone 2 confidence-history sync slice on `2026-04-17`: `pnpm milestone:sync:confidence-history` now imports completed `mainline-acceptance` bundle artifacts from GitHub Actions back into local `.portmanager/reports/` files through authenticated `gh`, dedupes repeated imports by stable entry id, and gives developers a repo-native readiness review path that matches CI summary math.
+- Deep compare against the completed `2026-04-16` reconciliation docs now shows that the old parity and proof-orchestration gaps are closed; the remaining technical gap is now the synced readiness result and the milestone-language review that follows from that evidence rather than more reporting scaffolding.
+- Current product conclusion: the first trusted public control-plane slice is now real and accepted; Milestone 2 confidence-readiness maintenance now means syncing completed mainline evidence into local review, keeping qualified history green, and tightening milestone language only when the evidence holds.

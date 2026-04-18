@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version, GitHub-backup, and remote-backup-replay slices, the canonical confidence routine, the durable confidence history bundle with run-trace metadata, the explicit readiness signal on top of that bundle, and the remaining work to push qualified mainline history to `promotion-ready` on the same live agent-backed flow.',
-    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version、GitHub-backup 与 remote-backup-replay 切片、规范 confidence routine、带运行追踪元数据的持久 confidence history bundle、建立在这组 bundle 之上的显式 readiness 信号，以及继续把同一条 live agent 切片上的 qualified mainline history 推进到 `promotion-ready` 的后续工作。'
+    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version, GitHub-backup, and remote-backup-replay slices, the canonical confidence routine, the durable confidence history bundle with run-trace metadata, the repo-native `pnpm milestone:sync:confidence-history` import path for local review, the explicit readiness signal on top of that bundle, and the remaining work to narrow milestone language from synced evidence on the same live agent-backed flow.',
+    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version、GitHub-backup 与 remote-backup-replay 切片、规范 confidence routine、带运行追踪元数据的持久 confidence history bundle、供本地复核使用的 repo-native `pnpm milestone:sync:confidence-history` 导入路径、建立在这组 bundle 之上的显式 readiness 信号，以及继续依据同一条 live agent 切片上的同步证据收窄里程碑文案的后续工作。'
   },
   buckets: [
     {
@@ -166,6 +166,7 @@ export const roadmapDeveloperProgress = {
           '`pnpm acceptance:verify` passes on 2026-04-17 after the Unit 4 agent-service delivery and Unit 5 docs sync.',
           '`pnpm milestone:verify:confidence` now composes `pnpm acceptance:verify` plus the remote-backup replay proof in one canonical routine.',
           '`pnpm milestone:verify:confidence` now writes `.portmanager/reports/milestone-confidence-report.json`, appends `.portmanager/reports/milestone-confidence-history.json`, renders `.portmanager/reports/milestone-confidence-summary.md`, and carries `eventName` / `ref` / `sha` / `runId` / `runAttempt` / `workflow` traceability metadata.',
+          '`pnpm milestone:sync:confidence-history` now imports completed `mainline-acceptance` bundle artifacts from GitHub Actions into local `.portmanager/reports/` readiness files, dedupes repeated imports by stable entry id, and requires authenticated `gh` access with `repo` scope.',
           'Persisted confidence history now classifies `local-only`, `building-history`, and `promotion-ready`, measures progress against `7` qualified runs plus `3` consecutive qualified passes, and publishes the same summary in the GitHub Actions run page.',
           'Milestone proof now shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.',
           'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
@@ -179,6 +180,7 @@ export const roadmapDeveloperProgress = {
           '`pnpm acceptance:verify` 已在 2026-04-17 的 Unit 4 agent-service 交付与 Unit 5 文档同步之后重新转绿。',
           '`pnpm milestone:verify:confidence` 现在已经把 `pnpm acceptance:verify` 与 remote-backup replay proof 收敛成一条规范 routine。',
           '`pnpm milestone:verify:confidence` 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`、追加 `.portmanager/reports/milestone-confidence-history.json`、渲染 `.portmanager/reports/milestone-confidence-summary.md`，并带上 `eventName` / `ref` / `sha` / `runId` / `runAttempt` / `workflow` traceability 元数据。',
+          '`pnpm milestone:sync:confidence-history` 现在会把 GitHub Actions 已完成 `mainline-acceptance` bundle artifact 导入本地 `.portmanager/reports/` readiness 文件，按稳定 entry id 去重，并要求已认证且具备 `repo` scope 的 `gh` 访问。',
           '持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计进度，并把同一份 summary 发布到 GitHub Actions workflow 页面。',
           'milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup/rollback 证据保持不变。',
           'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
@@ -200,14 +202,14 @@ export const roadmapDeveloperProgress = {
           'Milestone 2 reliability hardening is now the active lane, not Milestone 1 parity recovery.',
           'Configured, failed, and local-only GitHub backup paths now all exist inside one durable replay proof on the same live slice; remaining work is confidence maintenance, not first delivery.',
           'Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host/rule/policy slice.',
-          'The remaining architecture gap is no longer proof orchestration or missing history scaffolding; the canonical routine and persisted bundle now exist, and remaining work is earning the readiness threshold on the same live slice.',
+          'The remaining architecture gap is no longer proof orchestration, missing history scaffolding, or missing local import plumbing; the canonical routine, persisted bundle, and sync command now exist, and remaining work is reading synced evidence and narrowing milestone language only when it holds.',
           'Mainline evidence collection now keeps `pnpm acceptance:verify` on PRs while `push main`, `workflow_dispatch`, and the daily schedule run `pnpm milestone:verify:confidence`, restore/save the confidence history bundle, upload the bundle artifact, and publish the readiness summary for developers.'
         ],
         zh: [
           '当前主线已经转到 Milestone 2 可靠性加固，而不再是 Milestone 1 一致性补洞。',
           'configured、failed、local-only 三类 GitHub backup 路径现在都已经落在同一条 durable replay proof 的 live 切片上；剩余工作不再是首次交付，而是常态化维持与可信度加深。',
           'controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经在同一条 live host/rule/policy 切片上分组展示最新诊断、degraded diagnostics history 与 recovery-ready 成功证据。',
-          '剩余架构缺口已经不再是证明编排，也不再是历史脚手架缺失；规范 confidence routine 与持久 history bundle 已存在，剩余工作已经收窄为把显式 readiness 阈值真正挣出来。',
+          '剩余架构缺口已经不再是证明编排、历史脚手架缺失，或本地导入路径缺失；规范 confidence routine、持久 history bundle 与 sync 命令都已存在，剩余工作已经收窄为读取同步证据，并且只在证据站得住时收窄里程碑文案。',
           'mainline evidence collection 现在会继续把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 路径上运行 `pnpm milestone:verify:confidence`、恢复并保存 confidence history bundle、上传 bundle artifact，并向开发者发布 readiness summary。'
         ]
       }
@@ -222,16 +224,18 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Keep Unit 0 green while qualified Milestone 2 confidence history advances toward `promotion-ready`.',
-          'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane until the summary reaches `7` qualified runs plus `3` consecutive qualified passes.',
-          'Review the workflow job summary and uploaded confidence-history bundle together instead of relying on raw CI logs to judge readiness accumulation.',
+          'Run `pnpm milestone:sync:confidence-history -- --limit 20` after completed mainline runs so local readiness review uses real workflow evidence instead of only local history.',
+          'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while the synced summary and human review drive milestone-language decisions.',
+          'Review the workflow job summary, uploaded confidence-history bundle, and synced local `.portmanager/reports/milestone-confidence-summary.md` together instead of relying on raw CI logs to judge readiness accumulation.',
           'Protect the lighter Unit 0 branch gate while the heavier confidence routine keeps collecting evidence.',
           'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.',
           'Keep Toward C deferred until Milestone 2 evidence becomes trustworthy.'
         ],
         zh: [
           '继续把 Unit 0 保持为绿，再让 qualified Milestone 2 confidence history 朝 `promotion-ready` 推进。',
-          '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，直到 summary 达到 `7` 次 qualified run 加 `3` 次连续 qualified pass。',
-          '优先同时查看 workflow job summary 与上传后的 confidence-history bundle，而不是继续只靠原始 CI 日志判断 readiness 积累。',
+          '在主线出现已完成 run 之后执行 `pnpm milestone:sync:confidence-history -- --limit 20`，让本地 readiness 复核使用真实 workflow 证据，而不只依赖本地 history。',
+          '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，同时让同步后的 summary 与人工复核共同驱动里程碑文案决策。',
+          '优先同时查看 workflow job summary、上传后的 confidence-history bundle 与同步后的本地 `.portmanager/reports/milestone-confidence-summary.md`，而不是继续只靠原始 CI 日志判断 readiness 积累。',
           '在更重的 confidence routine 继续收集证据时，保住更轻的 Unit 0 分支 gate 不被重新定义。',
           '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。',
           '在 Milestone 2 证据真正可信之前，继续把 Toward C 保持为延后方向。'

@@ -10,10 +10,10 @@ const CONFIDENCE_REPORT_VERSION = '0.2.0'
 const CONFIDENCE_HISTORY_VERSION = '0.2.0'
 const CONFIDENCE_READINESS_VERSION = '0.1.0'
 const DEFAULT_HISTORY_LIMIT = 30
-const READINESS_REQUIRED_REF = 'refs/heads/main'
-const READINESS_QUALIFIED_EVENTS = ['push', 'workflow_dispatch', 'schedule']
-const READINESS_MINIMUM_QUALIFIED_RUNS = 7
-const READINESS_MINIMUM_CONSECUTIVE_PASSES = 3
+export const READINESS_REQUIRED_REF = 'refs/heads/main'
+export const READINESS_QUALIFIED_EVENTS = ['push', 'workflow_dispatch', 'schedule']
+export const READINESS_MINIMUM_QUALIFIED_RUNS = 7
+export const READINESS_MINIMUM_CONSECUTIVE_PASSES = 3
 
 function createStep(name, args) {
   return {
@@ -161,7 +161,7 @@ function writeVerificationReport({
   return report
 }
 
-function resolveHistoryLimit(rawLimit) {
+export function resolveHistoryLimit(rawLimit) {
   const parsedLimit = Number.parseInt(String(rawLimit ?? DEFAULT_HISTORY_LIMIT), 10)
 
   if (Number.isFinite(parsedLimit) && parsedLimit > 0) {
@@ -171,7 +171,7 @@ function resolveHistoryLimit(rawLimit) {
   return DEFAULT_HISTORY_LIMIT
 }
 
-function readHistoryEntries(historyPath) {
+export function readHistoryEntries(historyPath) {
   if (!historyPath || !existsSync(historyPath)) {
     return []
   }
@@ -189,7 +189,7 @@ function readHistoryEntries(historyPath) {
   return []
 }
 
-function buildHistoryEntry(report) {
+export function buildHistoryEntry(report) {
   const passedStepCount = report.steps.filter((step) => step.status === 'passed').length
   const failedStepCount = report.steps.filter((step) => step.status === 'failed').length
   const skippedStepCount = report.steps.filter((step) => step.status === 'skipped').length
@@ -212,6 +212,51 @@ function buildHistoryEntry(report) {
     qualifiedForReadiness: report.qualifiedForReadiness ?? isQualifiedReadinessContext(report.context),
     context: report.context
   }
+}
+
+function compareHistoryEntries(left, right) {
+  const completedAtComparison = left.completedAt.localeCompare(right.completedAt)
+
+  if (completedAtComparison !== 0) {
+    return completedAtComparison
+  }
+
+  const startedAtComparison = left.startedAt.localeCompare(right.startedAt)
+
+  if (startedAtComparison !== 0) {
+    return startedAtComparison
+  }
+
+  return left.id.localeCompare(right.id)
+}
+
+function normalizeHistoryEntry(entry) {
+  return {
+    ...entry,
+    qualifiedForReadiness:
+      entry.qualifiedForReadiness ?? isQualifiedReadinessContext(entry.context ?? {})
+  }
+}
+
+export function mergeHistoryEntries(entries, historyLimit = DEFAULT_HISTORY_LIMIT) {
+  const mergedEntries = new Map()
+
+  for (const entry of entries) {
+    if (!entry || typeof entry !== 'object' || typeof entry.id !== 'string') {
+      continue
+    }
+
+    const normalizedEntry = normalizeHistoryEntry(entry)
+    const existingEntry = mergedEntries.get(normalizedEntry.id)
+
+    if (!existingEntry || compareHistoryEntries(existingEntry, normalizedEntry) <= 0) {
+      mergedEntries.set(normalizedEntry.id, normalizedEntry)
+    }
+  }
+
+  return [...mergedEntries.values()]
+    .sort(compareHistoryEntries)
+    .slice(-historyLimit)
 }
 
 function countConsecutivePasses(entries) {
@@ -285,25 +330,43 @@ function buildReadinessSnapshot(entries) {
   }
 }
 
-function buildHistorySnapshot({ report, historyPath, historyLimit }) {
-  const previousEntries = readHistoryEntries(historyPath)
-  const entries = [...previousEntries, buildHistoryEntry(report)].slice(-historyLimit)
-  const passedRuns = entries.filter((entry) => entry.ok).length
-  const failedRuns = entries.length - passedRuns
+export function buildHistorySnapshotFromEntries({
+  label,
+  entries,
+  updatedAt,
+  historyLimit = DEFAULT_HISTORY_LIMIT
+}) {
+  const mergedEntries = mergeHistoryEntries(entries, historyLimit)
+  const latestRun = mergedEntries.at(-1) ?? null
+  const resolvedUpdatedAt = updatedAt ?? latestRun?.completedAt ?? new Date().toISOString()
+  const passedRuns = mergedEntries.filter((entry) => entry.ok).length
+  const failedRuns = mergedEntries.length - passedRuns
 
   return {
     historyVersion: CONFIDENCE_HISTORY_VERSION,
-    label: report.label,
-    updatedAt: report.completedAt,
+    label,
+    updatedAt: resolvedUpdatedAt,
     historyLimit,
-    totalRuns: entries.length,
+    totalRuns: mergedEntries.length,
     passedRuns,
     failedRuns,
-    consecutivePasses: countConsecutivePasses(entries),
-    latestRun: entries.at(-1) ?? null,
-    readiness: buildReadinessSnapshot(entries),
-    entries
+    consecutivePasses: countConsecutivePasses(mergedEntries),
+    latestRun,
+    readiness: buildReadinessSnapshot(mergedEntries),
+    entries: mergedEntries
   }
+}
+
+function buildHistorySnapshot({ report, historyPath, historyLimit }) {
+  const previousEntries = readHistoryEntries(historyPath)
+  const entries = [...previousEntries, buildHistoryEntry(report)]
+
+  return buildHistorySnapshotFromEntries({
+    label: report.label,
+    entries,
+    updatedAt: report.completedAt,
+    historyLimit
+  })
 }
 
 function summarizeContext(entry) {
@@ -322,7 +385,7 @@ function summarizeSha(entry) {
   return entry.context.sha ? entry.context.sha.slice(0, 12) : 'local'
 }
 
-function renderHistorySummary(snapshot) {
+export function renderHistorySummary(snapshot) {
   const latestRun = snapshot.latestRun
   const readiness = snapshot.readiness
   const lines = [
@@ -392,16 +455,10 @@ function renderHistorySummary(snapshot) {
   return `${lines.join('\n')}\n`
 }
 
-function writeConfidenceHistory({ historyPath, summaryPath, report, historyLimit }) {
+export function writeHistorySnapshot({ historyPath, summaryPath, snapshot }) {
   if (!historyPath && !summaryPath) {
-    return
+    return snapshot
   }
-
-  const snapshot = buildHistorySnapshot({
-    report,
-    historyPath,
-    historyLimit
-  })
 
   if (historyPath) {
     mkdirSync(path.dirname(historyPath), { recursive: true })
@@ -412,6 +469,25 @@ function writeConfidenceHistory({ historyPath, summaryPath, report, historyLimit
     mkdirSync(path.dirname(summaryPath), { recursive: true })
     writeFileSync(summaryPath, renderHistorySummary(snapshot), 'utf8')
   }
+
+  return snapshot
+}
+
+function writeConfidenceHistory({ historyPath, summaryPath, report, historyLimit }) {
+  if (!historyPath && !summaryPath) {
+    return
+  }
+
+  const snapshot = buildHistorySnapshot({
+    report,
+    historyPath,
+    historyLimit
+  })
+  writeHistorySnapshot({
+    historyPath,
+    summaryPath,
+    snapshot
+  })
 }
 
 export function runVerificationSteps({
