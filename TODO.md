@@ -51,7 +51,9 @@ Version: v0.5.2-m2-confidence-plan
 - [x] Milestone 2 acceptance closure: expand live degraded/recovery/diagnostics-history UX on the same host/rule/policy model.
 - [x] Milestone 2 acceptance closure: deliver real GitHub backup on top of the now-explicit remote-backup guidance surfaces.
 - [x] Milestone 2 reliability slice: replay configured, failed, and local-only required remote-backup evidence on the same live agent-backed host/rule flow across API, CLI, Web, and agent proof.
-- [ ] Milestone 2 acceptance closure: package `pnpm acceptance:verify` plus the remote-backup replay proof into one canonical confidence routine, collect that routine on the accepted live slice, and use repeat green history before advancing Milestone 2 wording.
+- [ ] Milestone 2 acceptance closure: keep `pnpm milestone:verify:confidence` green on the accepted live slice long enough to accumulate repeat history before advancing Milestone 2 wording again.
+- [x] Milestone 2 acceptance closure: land `pnpm milestone:verify:confidence` as the canonical composed routine while preserving `pnpm acceptance:verify` as the Unit 0 gate.
+- [x] Milestone 2 acceptance closure: wire the canonical confidence routine into `.github/workflows/mainline-acceptance.yml` for `push main` and `workflow_dispatch`.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -60,7 +62,7 @@ Version: v0.5.2-m2-confidence-plan
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
-- [ ] Next lane: harden Milestone 2 confidence routine on the same live slice by replacing the current two-command proof story with one canonical routine and then keeping that routine green.
+- [ ] Next lane: keep Milestone 2 canonical confidence routine green on the same live slice long enough to earn simpler milestone wording.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -117,7 +119,9 @@ Version: v0.5.2-m2-confidence-plan
 - [x] 里程碑 2 验收闭环：继续在统一 host/rule/policy 模型上补强 live degraded/recovery/diagnostics-history UX。
 - [x] 里程碑 2 验收闭环：在已经显式化的远端备份提示表面之上，真正交付 GitHub backup。
 - [x] 里程碑 2 可靠性切片：在同一条 live agent-backed host/rule 流程上，围绕 configured、failed、local-only 三类 required remote-backup 证据重放 API、CLI、Web 与 agent proof。
-- [ ] 里程碑 2 验收闭环：把 `pnpm acceptance:verify` 与 remote-backup replay proof 收敛成一个规范 confidence routine，在已验收的 live 切片上收集这条 routine 的持续绿历史，再决定 Milestone 2 文案何时可以无保留提升。
+- [ ] 里程碑 2 验收闭环：让 `pnpm milestone:verify:confidence` 在已验收的 live 切片上持续保持为绿，先积累稳定历史，再决定 Milestone 2 文案何时可以无保留提升。
+- [x] 里程碑 2 验收闭环：落地 `pnpm milestone:verify:confidence` 作为规范组合 routine，同时保留 `pnpm acceptance:verify` 作为 Unit 0 gate。
+- [x] 里程碑 2 验收闭环：把规范 confidence routine 接入 `.github/workflows/mainline-acceptance.yml` 的 `push main` 与 `workflow_dispatch` 路径。
 
 ### 推荐推进顺序
 - [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并继续把这条 gate 在 `main` 上维持为绿，再把主动主线切到 Unit 1。
@@ -126,7 +130,7 @@ Version: v0.5.2-m2-confidence-plan
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
-- [ ] 下一主线：继续在同一条 live 切片上加固 Milestone 2 的 confidence routine，把当前双入口证明链收敛成一条规范 routine，再把它持续保持为绿直到可信度变成常态。
+- [ ] 下一主线：继续在同一条 live 切片上把 Milestone 2 规范 confidence routine 持续保持为绿，直到可信度变成常态。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`

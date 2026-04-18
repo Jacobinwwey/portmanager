@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.5.2-m2-confidence-plan
+> Updated: 2026-04-17 | Version: v0.5.3-m2-confidence-routine
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -107,8 +107,9 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: repeated remote-backup replay is durable in repo. `scripts/milestone/verify-reliability-remote-backup-replay.ts` plus `tests/milestone/reliability-remote-backup-replay.test.ts` now prove local-only, configured-success, and configured-failure required backups on the same live agent-backed host / rule slice while `tests/web/live-controller-shell.test.ts` keeps the Web backup surface aligned.
 - Verified now: agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics on the accepted live slice.
 - Verified now from the accepted Milestone 1 slice: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures; live unreachable-agent paths now degrade hosts and rules explicitly; controller-side diagnostics promote rules to `active` after real verification.
-- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity and steady-state delivery gaps are closed; the remaining architecture gap is proof orchestration, because `pnpm acceptance:verify` still stops at the accepted one-host proof while the remote-backup replay still lives in a separate command.
-- Milestone 2 still remains in progress because the repo has not yet turned those two proofs into one canonical confidence routine with enough sustained green history. The states are now covered, but the branch still needs that tighter routine before reliability language can advance again.
+- Verified now: `pnpm milestone:verify:confidence` now composes the standing `pnpm acceptance:verify` gate with the remote-backup replay proof, and `.github/workflows/mainline-acceptance.yml` now collects that heavier routine on `push main` and `workflow_dispatch`.
+- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is confidence accumulation, because the canonical routine now exists but still needs sustained green history.
+- Milestone 2 still remains in progress because the branch now needs repeat green confidence history, not discovery of another missing replay state, before reliability language can advance again.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.

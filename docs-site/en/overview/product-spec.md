@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-v1-product-spec.md`
 > Audience: `shared` | Section: `overview` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.4.3-m2-confidence-plan
+> Updated: 2026-04-17 | Version: v0.4.4-m2-confidence-routine
 ### Summary
 PortManager V1 is a control plane for exposing selected remote localhost services over Tailscale without treating ad-hoc shell commands as the operating model.
 The product goal is not only exposure, but safe exposure: desired state, operations history, diagnostics visibility, backup-before-mutation, and explicit rollback points.
@@ -86,5 +86,6 @@ A V1 implementation will be considered valid only if all of the following become
 - Fresh acceptance evidence on `2026-04-17`: `pnpm acceptance:verify` passes; the embedded milestone proof now shows live bootstrap to `ready`, bridge-rule activation to `active` after controller diagnostics, live agent HTTP apply/runtime collection, and preserved backup/rollback evidence.
 - Controller-side rule lifecycle intentionally becomes `active` only after diagnostics while raw agent runtime remains `applied_unverified` until verification. That split keeps operator truth on the controller side without breaking current artifact compatibility.
 - Fresh Milestone 2 slice on `2026-04-17`: agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.
-- Deep compare against the completed `2026-04-16` reconciliation docs now shows that the old parity gap is closed; the remaining technical gap is confidence orchestration, because `pnpm acceptance:verify` and `pnpm milestone:verify:reliability-remote-backup-replay` are still separate proof entrypoints.
-- Current product conclusion: the first trusted public control-plane slice is now real and accepted; Milestone 2 confidence-routine hardening is the next active lane.
+- Fresh Milestone 2 orchestration slice on `2026-04-17`: `pnpm milestone:verify:confidence` now composes the standing `pnpm acceptance:verify` gate with the remote-backup replay proof, and `.github/workflows/mainline-acceptance.yml` now runs that heavier routine on `push main` and `workflow_dispatch`.
+- Deep compare against the completed `2026-04-16` reconciliation docs now shows that the old parity and proof-orchestration gaps are closed; the remaining technical gap is confidence accumulation, because the canonical routine now exists but still needs sustained green history before Milestone 2 wording can narrow again.
+- Current product conclusion: the first trusted public control-plane slice is now real and accepted; Milestone 2 confidence-routine maintenance is the next active lane.

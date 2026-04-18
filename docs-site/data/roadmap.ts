@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version, GitHub-backup, and remote-backup-replay slices, and the remaining work to turn those proofs into one routine confidence story on the same live agent-backed flow.',
-    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version、GitHub-backup 与 remote-backup-replay 切片，以及建立在同一条 live agent 切片之上的剩余 confidence-routine 收敛工作。'
+    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version, GitHub-backup, and remote-backup-replay slices, the new canonical confidence routine, and the remaining work to accumulate repeated green history on that same live agent-backed flow.',
+    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version、GitHub-backup 与 remote-backup-replay 切片、新增的规范 confidence routine，以及建立在同一条 live agent 切片之上的后续持续转绿历史积累工作。'
   },
   buckets: [
     {
@@ -164,6 +164,7 @@ export const roadmapDeveloperProgress = {
           'Docs-first baseline, contracts, and roadmap sequencing remain locked.',
           'Units 0 through 5 are now complete: controller, CLI, web, live agent boundary, acceptance replay, and docs sync now tell one mainline story.',
           '`pnpm acceptance:verify` passes on 2026-04-17 after the Unit 4 agent-service delivery and Unit 5 docs sync.',
+          '`pnpm milestone:verify:confidence` now composes `pnpm acceptance:verify` plus the remote-backup replay proof in one canonical routine.',
           'Milestone proof now shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.',
           'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
           'Configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and publishes explicit succeeded remote redundancy state across API, CLI, web, and dedicated reliability proof.',
@@ -174,6 +175,7 @@ export const roadmapDeveloperProgress = {
           'Docs-first 基线、契约和路线排序继续保持锁定。',
           'Unit 0 到 Unit 5 现在都已完成：controller、CLI、web、live agent 边界、验收重放与文档同步已经讲同一条主线故事。',
           '`pnpm acceptance:verify` 已在 2026-04-17 的 Unit 4 agent-service 交付与 Unit 5 文档同步之后重新转绿。',
+          '`pnpm milestone:verify:confidence` 现在已经把 `pnpm acceptance:verify` 与 remote-backup replay proof 收敛成一条规范 routine。',
           'milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup/rollback 证据保持不变。',
           'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
           '当 GitHub backup 已配置时，controller backup bundle 现在会通过 GitHub Contents API 上传，并在 API、CLI、web 与专门的可靠性证明里显式暴露远端冗余成功状态。',
@@ -194,15 +196,15 @@ export const roadmapDeveloperProgress = {
           'Milestone 2 reliability hardening is now the active lane, not Milestone 1 parity recovery.',
           'Configured, failed, and local-only GitHub backup paths now all exist inside one durable replay proof on the same live slice; remaining work is confidence maintenance, not first delivery.',
           'Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host/rule/policy slice.',
-          'The remaining architecture gap is proof orchestration: `pnpm acceptance:verify` and `pnpm milestone:verify:reliability-remote-backup-replay` are still separate entrypoints even though the current status story depends on both.',
-          'Broader reliability replay on the same live agent-backed slice still needs a canonical confidence routine and then continued green history before the status language can simplify.'
+          'The remaining architecture gap is no longer proof orchestration; the canonical routine now exists and the remaining work is sustained green history on the same live slice.',
+          'Mainline evidence collection now keeps `pnpm acceptance:verify` on PRs while `push main` and `workflow_dispatch` run `pnpm milestone:verify:confidence`.'
         ],
         zh: [
           '当前主线已经转到 Milestone 2 可靠性加固，而不再是 Milestone 1 一致性补洞。',
           'configured、failed、local-only 三类 GitHub backup 路径现在都已经落在同一条 durable replay proof 的 live 切片上；剩余工作不再是首次交付，而是常态化维持与可信度加深。',
           'controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经在同一条 live host/rule/policy 切片上分组展示最新诊断、degraded diagnostics history 与 recovery-ready 成功证据。',
-          '剩余架构缺口已经转到证明编排：`pnpm acceptance:verify` 与 `pnpm milestone:verify:reliability-remote-backup-replay` 仍然是两个入口，但当前状态叙事已经依赖它们同时成立。',
-          '同一条 live agent-backed 切片上的可靠性重放仍需要先收敛成一条规范 confidence routine，再积累持续为绿的历史，之后状态文案才能继续收窄。'
+          '剩余架构缺口已经不再是证明编排；规范 confidence routine 已存在，剩余工作已经收窄为同一条 live 切片上的持续转绿历史。',
+          'mainline evidence collection 现在会继续把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main` 与 `workflow_dispatch` 上运行 `pnpm milestone:verify:confidence`。'
         ]
       }
     },
@@ -215,16 +217,16 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Keep Unit 0 green while Milestone 2 confidence-routine work lands.',
-          'Replace the current two-command proof story with one canonical confidence routine instead of relying on contributor memory.',
-          'Wire that routine into mainline evidence collection without redefining the lighter Unit 0 branch gate.',
+          'Keep Unit 0 green while the canonical Milestone 2 confidence routine accumulates history.',
+          'Keep `pnpm milestone:verify:confidence` green on `main` and manual promotion runs.',
+          'Protect the lighter Unit 0 branch gate while the heavier confidence routine keeps collecting evidence.',
           'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.',
           'Keep Toward C deferred until Milestone 2 evidence becomes trustworthy.'
         ],
         zh: [
-          '继续把 Unit 0 保持为绿，再让 Milestone 2 的 confidence-routine 工作落地。',
-          '把当前双入口证明链收敛成一条规范 confidence routine，而不是继续依赖贡献者记住两条命令。',
-          '把这条 routine 接入 mainline evidence collection，但不要重新定义更轻量的 Unit 0 分支 gate。',
+          '继续把 Unit 0 保持为绿，再让规范 Milestone 2 confidence routine 积累历史。',
+          '继续让 `pnpm milestone:verify:confidence` 在 `main` 与手动 promotion 路径上持续转绿。',
+          '在更重的 confidence routine 继续收集证据时，保住更轻的 Unit 0 分支 gate 不被重新定义。',
           '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。',
           '在 Milestone 2 证据真正可信之前，继续把 Toward C 保持为延后方向。'
         ]
@@ -369,26 +371,26 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     blockingGaps: {
       en: [
-        'Milestone 2 acceptance still lacks one canonical confidence routine: `pnpm acceptance:verify` and the remote-backup replay proof still live behind separate entrypoints even though the current status story depends on both.',
-        'After that routine exists, the remaining gap becomes trust that stays green over time rather than discovery of a missing remote-backup state.'
+        'Milestone 2 acceptance no longer lacks a canonical confidence routine; the remaining gap is sustained green history from `pnpm milestone:verify:confidence` on the accepted live slice.',
+        'After that history accumulates, the remaining work becomes milestone-language tightening rather than discovery of a missing remote-backup state.'
       ],
       zh: [
-        '在同一条 live agent-backed 切片上，Milestone 2 的验收仍然缺少一条规范 confidence routine：`pnpm acceptance:verify` 与 remote-backup replay 证明仍然停留在两个入口里，但当前状态叙事已经依赖它们同时成立。',
-        '等这条 routine 存在之后，剩余缺口才会收敛为“能长期保持为绿的可信度”，而不再是缺失某个 remote-backup 状态。'
+        '在同一条 live agent-backed 切片上，Milestone 2 的验收已经不再缺少规范 confidence routine；剩余缺口已经收窄为 `pnpm milestone:verify:confidence` 的持续转绿历史。',
+        '等这段历史积累起来之后，剩余工作才会继续收敛为里程碑文案收紧，而不再是缺失某个 remote-backup 状态。'
       ]
     },
     developerFocus: {
       en: [
         'Build Milestone 2 on the completed Unit 0 through Unit 5 lane instead of reopening Milestone 1 parity work.',
         'Keep configured, failed, and local-only backup evidence aligned across controller, CLI, web, and agent.',
-        'Turn the current acceptance-plus-replay proof story into one canonical confidence routine on the same accepted agent-backed slice.',
+        'Keep `pnpm milestone:verify:confidence` green on the same accepted agent-backed slice.',
         'Collect repeated green history from that routine before simplifying milestone wording again.',
         'Keep one evidence model and one acceptance gate across controller, CLI, web, and agent.'
       ],
       zh: [
         '把 Milestone 2 建立在已经完成的 Unit 0 到 Unit 5 主线之上，而不是重新打开 Milestone 1 的表面补洞。',
         '继续让 controller、CLI、web、agent 在 configured、failed、local-only 三类 backup 证据上保持一致。',
-        '把当前 acceptance 加 replay 的双入口证明链收敛成同一条已验收 live agent-backed 切片上的规范 confidence routine。',
+        '继续让 `pnpm milestone:verify:confidence` 在同一条已验收 live agent-backed 切片上保持为绿。',
         '先从这条 routine 收集持续为绿的历史，再收窄后续里程碑文案。',
         '继续让 controller、CLI、web、agent 共用同一套证据模型与同一条验收 gate。'
       ]
