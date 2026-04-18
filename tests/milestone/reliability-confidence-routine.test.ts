@@ -1,5 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import path from 'node:path'
+import { tmpdir } from 'node:os'
 
 import {
   getAcceptanceVerificationSteps,
@@ -89,6 +92,73 @@ test('confidence routine fails on replay after acceptance succeeds', () => {
     true
   )
   assert.equal(calls.length, getConfidenceVerificationSteps().length)
+})
+
+test('confidence routine writes success report with executed steps', () => {
+  const reportDirectory = mkdtempSync(path.join(tmpdir(), 'portmanager-confidence-report-'))
+  const reportPath = path.join(reportDirectory, 'milestone-confidence-report.json')
+
+  try {
+    const result = runVerificationSteps({
+      steps: getConfidenceVerificationSteps(),
+      reportPath,
+      spawnSyncImpl() {
+        return { status: 0, signal: null }
+      },
+      stdout: createWritableBuffer(),
+      stderr: createWritableBuffer()
+    })
+
+    const report = JSON.parse(readFileSync(reportPath, 'utf8')) as {
+      ok: boolean
+      failedStepName: string | null
+      steps: Array<{ status: string; name: string }>
+    }
+
+    assert.equal(result.ok, true)
+    assert.equal(report.ok, true)
+    assert.equal(report.failedStepName, null)
+    assert.equal(report.steps.length, getConfidenceVerificationSteps().length)
+    assert.equal(report.steps.at(-1)?.status, 'passed')
+    assert.equal(report.steps.at(-1)?.name, 'Run reliability remote-backup replay proof')
+  } finally {
+    rmSync(reportDirectory, { recursive: true, force: true })
+  }
+})
+
+test('confidence routine writes failure report with skipped trailing steps', () => {
+  const reportDirectory = mkdtempSync(path.join(tmpdir(), 'portmanager-confidence-report-'))
+  const reportPath = path.join(reportDirectory, 'milestone-confidence-report.json')
+
+  try {
+    const result = runVerificationSteps({
+      steps: getConfidenceVerificationSteps(),
+      reportPath,
+      spawnSyncImpl(_command, args) {
+        if (args.includes('typecheck')) {
+          return { status: 2, signal: null }
+        }
+
+        return { status: 0, signal: null }
+      },
+      stdout: createWritableBuffer(),
+      stderr: createWritableBuffer()
+    })
+
+    const report = JSON.parse(readFileSync(reportPath, 'utf8')) as {
+      ok: boolean
+      failedStepName: string | null
+      steps: Array<{ status: string; name: string }>
+    }
+
+    assert.equal(result.ok, false)
+    assert.equal(report.ok, false)
+    assert.equal(report.failedStepName, 'Run workspace type checks')
+    assert.equal(report.steps[1]?.status, 'failed')
+    assert.equal(report.steps.at(-1)?.status, 'skipped')
+  } finally {
+    rmSync(reportDirectory, { recursive: true, force: true })
+  }
 })
 
 function createWritableBuffer() {

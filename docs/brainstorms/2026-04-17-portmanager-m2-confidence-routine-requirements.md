@@ -5,6 +5,9 @@ topic: portmanager-m2-confidence-routine
 
 # PortManager Milestone 2 Confidence Routine Requirements
 
+Status note on `2026-04-17`: requirements baseline is now satisfied in `main`.
+`pnpm milestone:verify:confidence` closes proof orchestration, and remaining work has narrowed to repeat-green history accumulation plus durable developer-facing confidence reports.
+
 ## Problem Frame
 The `2026-04-16` mainline reconciliation requirements and implementation plan are now substantially executed.
 The repo no longer has the old Milestone 1 parity gap between frozen contracts and shipped code: controller, CLI, Web, and the steady-state agent boundary are now aligned on one live host / rule / policy slice, and later Milestone 2 slices already cover heartbeat/version semantics, diagnostics history, GitHub backup delivery, and remote-backup replay.

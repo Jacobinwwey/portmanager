@@ -88,4 +88,21 @@ jobs:
         run: pnpm --dir docs-site --ignore-workspace install --frozen-lockfile --prefer-offline
 
       - name: Run milestone confidence verification
+        id: confidence_run
+        continue-on-error: true
         run: pnpm milestone:verify:confidence
+
+      - name: Upload milestone confidence report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milestone-confidence-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .portmanager/reports/milestone-confidence-report.json
+          if-no-files-found: error
+
+      - name: Enforce milestone confidence success
+        if: always()
+        run: |
+          if [ "${{ steps.confidence_run.outcome }}" != "success" ]; then
+            exit 1
+          fi

@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-17 | Version：v0.5.3-m2-confidence-routine
+> Updated：2026-04-17 | Version：v0.5.4-m2-confidence-history
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -108,7 +108,8 @@ status: active
 - 当前已验证：agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会在同一条 live 切片上统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。
 - 已被接受的 Milestone 1 切片进一步证明：即使上游断连在本机上表现为 `502`，CLI 仍将其明确归类为 transport 级故障，而不是 controller 业务错误；live unreachable-agent 路径现在也会显式把 host / rule 置为 degraded；controller-side diagnostics 还会在真实验证后把规则提升到 `active`。
 - 当前已验证：`pnpm milestone:verify:confidence` 现在已经把既有 `pnpm acceptance:verify` gate 与 remote-backup replay proof 收敛成一条规范 routine，`.github/workflows/mainline-acceptance.yml` 也会在 `push main` 与 `workflow_dispatch` 上收集这条更重的 routine。
-- 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经收窄为 confidence 积累，因为规范 routine 已存在，但仍需要持续为绿的历史。
+- 当前已验证：规范 routine 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`，而 confidence workflow 也会上传同一份报告 artifact 供开发者核对。
+- 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经收窄为 confidence 积累，因为规范 routine 与报告 artifact 已存在，但仍需要持续为绿的历史。
 - 里程碑 2 仍然处于进行中，因为仓库现在需要的是重复转绿的 confidence 历史，而不再是再发现某个缺失 replay 状态；只有这样，里程碑状态才有资格继续提升。
 
 #### 可靠性推进规则

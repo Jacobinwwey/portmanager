@@ -1,7 +1,7 @@
 ---
 title: PortManager Milestone 2 Confidence Routine Plan
 type: hardening
-status: active
+status: completed
 date: 2026-04-17
 origin: docs/brainstorms/2026-04-17-portmanager-m2-confidence-routine-requirements.md
 ---
@@ -9,12 +9,15 @@ origin: docs/brainstorms/2026-04-17-portmanager-m2-confidence-routine-requiremen
 # PortManager Milestone 2 Confidence Routine Plan
 
 Updated: 2026-04-17
-Version: v0.1.0-active
+Version: v0.2.0-completed
 
 ## Overview
 This plan starts after the completed `2026-04-16` reconciliation program.
 Its job is not to reopen Milestone 1 parity or invent a new runtime architecture.
 Its job is to turn the already-shipped Milestone 2 evidence into one canonical confidence routine, wire that routine into mainline evidence collection, and keep docs aligned with the new narrower gap.
+
+Status note: Units 6 through 8 are now completed in `main`.
+Current remaining lane has narrowed further to confidence-history accumulation on top of the shipped routine, including durable report artifacts for developers and CI review.
 
 ## Problem Frame
 PortManager now has an accepted live host / rule / policy slice plus real Milestone 2 reliability follow-through work on the same model.
@@ -81,7 +84,7 @@ flowchart TD
 
 ## Implementation Units
 
-- [ ] **Unit 6: Canonical Confidence Routine**
+- [x] **Unit 6: Canonical Confidence Routine**
 
 **Goal:** Introduce one developer-facing and automation-friendly command that composes the standing acceptance gate with the remote-backup replay proof.
 
@@ -115,7 +118,7 @@ flowchart TD
 - Run the new confidence routine locally.
 - Re-run `pnpm acceptance:verify` to confirm Unit 0 semantics still hold.
 
-- [ ] **Unit 7: Mainline Evidence Wiring**
+- [x] **Unit 7: Mainline Evidence Wiring**
 
 **Goal:** Collect the new confidence routine automatically on the branches or triggers that matter for Milestone 2 confidence history without turning every PR into a milestone-promotion event.
 
@@ -146,7 +149,7 @@ flowchart TD
 - Validate the workflow locally as far as practical by running the composed command.
 - Confirm workflow YAML still preserves the existing acceptance path.
 
-- [ ] **Unit 8: Progress and Promotion Sync**
+- [x] **Unit 8: Progress and Promotion Sync**
 
 **Goal:** Update root docs, milestone/spec docs, roadmap data, and developer-progress wording so the repo’s narrative matches the new confidence routine and the closed `2026-04-16` history.
 

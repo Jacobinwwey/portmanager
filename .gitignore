@@ -68,6 +68,7 @@ venv/
 target/
 
 # Local databases and machine state
+.portmanager/
 *.db
 *.sqlite
 *.sqlite3

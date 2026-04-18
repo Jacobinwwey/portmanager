@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -69,10 +70,40 @@ export function resolveInvocation(step, environment = process.env) {
   }
 }
 
+function secondsFromMilliseconds(durationMs) {
+  return Number((durationMs / 1000).toFixed(3))
+}
+
 function formatDuration(startedAt) {
   const totalMs = Date.now() - startedAt
   const seconds = (totalMs / 1000).toFixed(1)
   return `${seconds}s`
+}
+
+function writeVerificationReport({ reportPath, successLabel, startedAt, completedAt, result, stepReports }) {
+  if (!reportPath) {
+    return
+  }
+
+  mkdirSync(path.dirname(reportPath), { recursive: true })
+  writeFileSync(
+    reportPath,
+    JSON.stringify(
+      {
+        label: successLabel,
+        ok: result.ok,
+        status: result.status,
+        startedAt: new Date(startedAt).toISOString(),
+        completedAt: new Date(completedAt).toISOString(),
+        totalDurationSeconds: secondsFromMilliseconds(completedAt - startedAt),
+        failedStepName: result.failedStep?.name ?? null,
+        steps: stepReports
+      },
+      null,
+      2
+    ),
+    'utf8'
+  )
 }
 
 export function runVerificationSteps({
@@ -82,9 +113,18 @@ export function runVerificationSteps({
   spawnSyncImpl = spawnSync,
   stdout = process.stdout,
   stderr = process.stderr,
-  successLabel = 'Verification'
+  successLabel = 'Verification',
+  reportPath = null
 }) {
   const startedAt = Date.now()
+  const stepReports = steps.map((step, index) => ({
+    index: index + 1,
+    name: step.name,
+    command: step.command,
+    args: step.args,
+    status: 'skipped',
+    durationSeconds: 0
+  }))
 
   for (const [index, step] of steps.entries()) {
     const stepStartedAt = Date.now()
@@ -98,33 +138,76 @@ export function runVerificationSteps({
       env
     })
     const status = result.status ?? 1
+    const stepDurationMs = Date.now() - stepStartedAt
 
     if (result.error) {
       stderr.write(`\n${prefix} Failed after ${formatDuration(stepStartedAt)} (${result.error.message})\n`)
-      return {
+      const failureResult = {
         ok: false,
         status,
         failedStep: step
       }
+      stepReports[index] = {
+        ...stepReports[index],
+        status: 'failed',
+        durationSeconds: secondsFromMilliseconds(stepDurationMs)
+      }
+      writeVerificationReport({
+        reportPath,
+        successLabel,
+        startedAt,
+        completedAt: Date.now(),
+        result: failureResult,
+        stepReports
+      })
+      return failureResult
     }
 
     if (status !== 0) {
       const signalMessage = result.signal ? ` (signal: ${result.signal})` : ''
       stderr.write(`\n${prefix} Failed after ${formatDuration(stepStartedAt)}${signalMessage}\n`)
-      return {
+      const failureResult = {
         ok: false,
         status,
         failedStep: step
       }
+      stepReports[index] = {
+        ...stepReports[index],
+        status: 'failed',
+        durationSeconds: secondsFromMilliseconds(stepDurationMs)
+      }
+      writeVerificationReport({
+        reportPath,
+        successLabel,
+        startedAt,
+        completedAt: Date.now(),
+        result: failureResult,
+        stepReports
+      })
+      return failureResult
     }
 
+    stepReports[index] = {
+      ...stepReports[index],
+      status: 'passed',
+      durationSeconds: secondsFromMilliseconds(stepDurationMs)
+    }
     stdout.write(`${prefix} Completed in ${formatDuration(stepStartedAt)}\n`)
   }
 
   stdout.write(`\n${successLabel} completed in ${formatDuration(startedAt)}\n`)
-  return {
+  const successResult = {
     ok: true,
     status: 0,
     failedStep: null
   }
+  writeVerificationReport({
+    reportPath,
+    successLabel,
+    startedAt,
+    completedAt: Date.now(),
+    result: successResult,
+    stepReports
+  })
+  return successResult
 }

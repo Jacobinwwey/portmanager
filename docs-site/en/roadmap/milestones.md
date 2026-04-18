@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-17 | Version: v0.5.3-m2-confidence-routine
+> Updated: 2026-04-17 | Version: v0.5.4-m2-confidence-history
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -68,7 +68,8 @@ Milestone 1 is only accepted when all of the following become true:
 - `Diagnostics-history slice`: complete. Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host / rule / policy slice.
 - `GitHub-backup slice`: complete. Controller backup bundles now upload through the GitHub Contents API when configured, and required-mode success/failure paths stay explicit across API, CLI, Web, and dedicated reliability proof.
 - `Remote-backup replay slice`: complete. `scripts/milestone/verify-reliability-remote-backup-replay.ts` now replays local-only, configured-success, and configured-failure required backups on the same live agent-backed host / rule flow, and the evidence stays aligned across API, CLI, Web backup views, and agent runtime.
-- `Next lane`: Milestone 2 confidence-routine hardening on the same live host / rule / policy slice by turning the current acceptance-plus-replay story into one canonical routine and then letting repeated green history earn simpler wording.
+- `Confidence-report slice`: complete. `pnpm milestone:verify:confidence` now writes `.portmanager/reports/milestone-confidence-report.json`, and CI uploads the same report artifact so developers can inspect repeat-green evidence directly.
+- `Next lane`: Milestone 2 confidence-routine maintenance on the same live host / rule / policy slice by keeping that routine and report history green long enough for simpler wording.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -108,7 +109,8 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics on the accepted live slice.
 - Verified now from the accepted Milestone 1 slice: upstream disconnects that surface as `502` are still treated as transport-level failures rather than controller business-state failures; live unreachable-agent paths now degrade hosts and rules explicitly; controller-side diagnostics promote rules to `active` after real verification.
 - Verified now: `pnpm milestone:verify:confidence` now composes the standing `pnpm acceptance:verify` gate with the remote-backup replay proof, and `.github/workflows/mainline-acceptance.yml` now collects that heavier routine on `push main` and `workflow_dispatch`.
-- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is confidence accumulation, because the canonical routine now exists but still needs sustained green history.
+- Verified now: the canonical routine now writes `.portmanager/reports/milestone-confidence-report.json`, and the confidence workflow uploads the same report artifact for developer review.
+- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is confidence accumulation, because the canonical routine and report artifact now exist but still need sustained green history.
 - Milestone 2 still remains in progress because the branch now needs repeat green confidence history, not discovery of another missing replay state, before reliability language can advance again.
 
 #### Reliability sequencing rule
