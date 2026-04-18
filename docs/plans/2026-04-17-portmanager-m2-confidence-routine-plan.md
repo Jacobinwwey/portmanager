@@ -9,7 +9,7 @@ origin: docs/brainstorms/2026-04-17-portmanager-m2-confidence-routine-requiremen
 # PortManager Milestone 2 Confidence Routine Plan
 
 Updated: 2026-04-17
-Version: v0.2.0-completed
+Version: v0.2.1-completed
 
 ## Overview
 This plan starts after the completed `2026-04-16` reconciliation program.
@@ -17,7 +17,7 @@ Its job is not to reopen Milestone 1 parity or invent a new runtime architecture
 Its job is to turn the already-shipped Milestone 2 evidence into one canonical confidence routine, wire that routine into mainline evidence collection, and keep docs aligned with the new narrower gap.
 
 Status note: Units 6 through 8 are now completed in `main`.
-Current remaining lane has narrowed further to confidence-history accumulation on top of the shipped routine, including durable report artifacts with CI traceability metadata plus `push main` / `workflow_dispatch` / daily schedule evidence collection for developers and CI review.
+Current remaining lane has narrowed further to empirical confidence-history accumulation on top of the shipped routine, because durable report, history, and summary artifacts with CI traceability metadata now exist alongside `push main` / `workflow_dispatch` / daily schedule evidence collection for developers and CI review.
 
 ## Problem Frame
 PortManager now has an accepted live host / rule / policy slice plus real Milestone 2 reliability follow-through work on the same model.
@@ -68,7 +68,7 @@ That split is manageable for a repo owner who already knows the story, but it is
 
 ### Resolved During Implementation
 - Final command naming settled as `milestone:verify:confidence`.
-- CI now runs the heavier routine on `push main`, `workflow_dispatch`, and the daily `schedule` path while PRs keep the lighter acceptance gate.
+- CI now runs the heavier routine on `push main`, `workflow_dispatch`, and the daily `schedule` path while PRs keep the lighter acceptance gate, and the confidence workflow now restores/saves the history bundle across runs.
 
 ## High-Level Technical Design
 

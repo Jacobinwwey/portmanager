@@ -89,18 +89,40 @@ jobs:
       - name: Install docs-site dependencies
         run: pnpm --dir docs-site --ignore-workspace install --frozen-lockfile --prefer-offline
 
+      - name: Restore milestone confidence history
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .portmanager/reports/milestone-confidence-history.json
+            .portmanager/reports/milestone-confidence-summary.md
+          key: milestone-confidence-history-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            milestone-confidence-history-${{ runner.os }}-${{ github.ref_name }}-
+
       - name: Run milestone confidence verification
         id: confidence_run
         continue-on-error: true
         run: pnpm milestone:verify:confidence
 
-      - name: Upload milestone confidence report
+      - name: Upload milestone confidence bundle
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: milestone-confidence-report-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .portmanager/reports/milestone-confidence-report.json
+          name: milestone-confidence-bundle-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .portmanager/reports/milestone-confidence-report.json
+            .portmanager/reports/milestone-confidence-history.json
+            .portmanager/reports/milestone-confidence-summary.md
           if-no-files-found: error
+
+      - name: Save milestone confidence history
+        if: always() && hashFiles('.portmanager/reports/milestone-confidence-history.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .portmanager/reports/milestone-confidence-history.json
+            .portmanager/reports/milestone-confidence-summary.md
+          key: milestone-confidence-history-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Enforce milestone confidence success
         if: always()

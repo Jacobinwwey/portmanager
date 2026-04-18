@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-17
-Version: v0.5.2-m2-confidence-plan
+Version: v0.5.5-m2-confidence-history-bundle
 
 ## English
 
@@ -55,6 +55,7 @@ Version: v0.5.2-m2-confidence-plan
 - [x] Milestone 2 acceptance closure: land `pnpm milestone:verify:confidence` as the canonical composed routine while preserving `pnpm acceptance:verify` as the Unit 0 gate.
 - [x] Milestone 2 acceptance closure: wire the canonical confidence routine into `.github/workflows/mainline-acceptance.yml` for `push main`, `workflow_dispatch`, and the daily scheduled history lane.
 - [x] Milestone 2 acceptance closure: write `.portmanager/reports/milestone-confidence-report.json` from the canonical confidence routine with CI traceability metadata, and upload the same report from CI for developer inspection.
+- [x] Milestone 2 acceptance closure: persist `.portmanager/reports/milestone-confidence-history.json` plus `.portmanager/reports/milestone-confidence-summary.md`, restore and save that bundle across CI runs, and upload it as `milestone-confidence-bundle-*` for developer review.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -124,6 +125,7 @@ Version: v0.5.2-m2-confidence-plan
 - [x] 里程碑 2 验收闭环：落地 `pnpm milestone:verify:confidence` 作为规范组合 routine，同时保留 `pnpm acceptance:verify` 作为 Unit 0 gate。
 - [x] 里程碑 2 验收闭环：把规范 confidence routine 接入 `.github/workflows/mainline-acceptance.yml` 的 `push main`、`workflow_dispatch` 与每日 schedule 历史路径。
 - [x] 里程碑 2 验收闭环：让规范 confidence routine 写出带 CI traceability 元数据的 `.portmanager/reports/milestone-confidence-report.json`，并把同一份报告从 CI 上传给开发者核对。
+- [x] 里程碑 2 验收闭环：持久化 `.portmanager/reports/milestone-confidence-history.json` 与 `.portmanager/reports/milestone-confidence-summary.md`，在 CI 各次运行之间恢复并保存这组 bundle，并以 `milestone-confidence-bundle-*` 上传给开发者核对。
 
 ### 推荐推进顺序
 - [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并继续把这条 gate 在 `main` 上维持为绿，再把主动主线切到 Unit 1。

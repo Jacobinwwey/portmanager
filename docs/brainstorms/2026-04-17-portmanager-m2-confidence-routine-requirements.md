@@ -6,7 +6,7 @@ topic: portmanager-m2-confidence-routine
 # PortManager Milestone 2 Confidence Routine Requirements
 
 Status note on `2026-04-17`: requirements baseline is now satisfied in `main`.
-`pnpm milestone:verify:confidence` closes proof orchestration, and remaining work has narrowed to repeat-green history accumulation plus durable developer-facing confidence reports.
+`pnpm milestone:verify:confidence` closes proof orchestration, and remaining work has narrowed to repeat-green history accumulation on top of a now-persisted developer-facing confidence history bundle.
 
 ## Problem Frame
 The `2026-04-16` mainline reconciliation requirements and implementation plan are now substantially executed.
@@ -79,7 +79,7 @@ Because Milestone 2 wording currently depends on both proofs rather than either 
 
 ### Resolved in Delivered Slice
 - [Affects R3][Technical] The canonical confidence routine now ships as sibling command `pnpm milestone:verify:confidence`, reusing the shared step runner while composing the standing acceptance gate with the replay proof.
-- [Affects R4][Technical] CI now keeps the lighter gate on PRs and runs the full confidence routine on `push main`, `workflow_dispatch`, and the daily scheduled history path while green history is being earned.
+- [Affects R4][Technical] CI now keeps the lighter gate on PRs, runs the full confidence routine on `push main`, `workflow_dispatch`, and the daily scheduled history path while green history is being earned, and persists the history bundle across runs for developer review.
 
 ## Next Steps
 - Move to `docs/plans/2026-04-17-portmanager-m2-confidence-routine-plan.md` for the concrete implementation sequence.

@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -7,6 +7,8 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const repoRoot = path.resolve(__dirname, '..', '..')
 const CONFIDENCE_REPORT_VERSION = '0.2.0'
+const CONFIDENCE_HISTORY_VERSION = '0.1.0'
+const DEFAULT_HISTORY_LIMIT = 30
 
 function createStep(name, args) {
   return {
@@ -92,6 +94,28 @@ function buildVerificationContext(environment) {
   }
 }
 
+function buildVerificationReport({
+  successLabel,
+  startedAt,
+  completedAt,
+  result,
+  stepReports,
+  env
+}) {
+  return {
+    reportVersion: CONFIDENCE_REPORT_VERSION,
+    label: successLabel,
+    ok: result.ok,
+    status: result.status,
+    startedAt: new Date(startedAt).toISOString(),
+    completedAt: new Date(completedAt).toISOString(),
+    totalDurationSeconds: secondsFromMilliseconds(completedAt - startedAt),
+    context: buildVerificationContext(env),
+    failedStepName: result.failedStep?.name ?? null,
+    steps: stepReports
+  }
+}
+
 function writeVerificationReport({
   reportPath,
   successLabel,
@@ -101,31 +125,184 @@ function writeVerificationReport({
   stepReports,
   env
 }) {
-  if (!reportPath) {
+  const report = buildVerificationReport({
+    successLabel,
+    startedAt,
+    completedAt,
+    result,
+    stepReports,
+    env
+  })
+
+  if (reportPath) {
+    mkdirSync(path.dirname(reportPath), { recursive: true })
+    writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8')
+  }
+
+  return report
+}
+
+function resolveHistoryLimit(rawLimit) {
+  const parsedLimit = Number.parseInt(String(rawLimit ?? DEFAULT_HISTORY_LIMIT), 10)
+
+  if (Number.isFinite(parsedLimit) && parsedLimit > 0) {
+    return parsedLimit
+  }
+
+  return DEFAULT_HISTORY_LIMIT
+}
+
+function readHistoryEntries(historyPath) {
+  if (!historyPath || !existsSync(historyPath)) {
+    return []
+  }
+
+  try {
+    const history = JSON.parse(readFileSync(historyPath, 'utf8'))
+
+    if (Array.isArray(history.entries)) {
+      return history.entries
+    }
+  } catch {
+    return []
+  }
+
+  return []
+}
+
+function buildHistoryEntry(report) {
+  const passedStepCount = report.steps.filter((step) => step.status === 'passed').length
+  const failedStepCount = report.steps.filter((step) => step.status === 'failed').length
+  const skippedStepCount = report.steps.filter((step) => step.status === 'skipped').length
+  const runId = report.context.runId ?? 'local'
+  const runAttempt = report.context.runAttempt ?? '0'
+
+  return {
+    id: `${report.completedAt}-${runId}-${runAttempt}`,
+    reportVersion: report.reportVersion,
+    ok: report.ok,
+    status: report.status,
+    startedAt: report.startedAt,
+    completedAt: report.completedAt,
+    totalDurationSeconds: report.totalDurationSeconds,
+    failedStepName: report.failedStepName,
+    passedStepCount,
+    failedStepCount,
+    skippedStepCount,
+    stepCount: report.steps.length,
+    context: report.context
+  }
+}
+
+function countConsecutivePasses(entries) {
+  let total = 0
+
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    if (!entries[index].ok) {
+      break
+    }
+
+    total += 1
+  }
+
+  return total
+}
+
+function buildHistorySnapshot({ report, historyPath, historyLimit }) {
+  const previousEntries = readHistoryEntries(historyPath)
+  const entries = [...previousEntries, buildHistoryEntry(report)].slice(-historyLimit)
+  const passedRuns = entries.filter((entry) => entry.ok).length
+  const failedRuns = entries.length - passedRuns
+
+  return {
+    historyVersion: CONFIDENCE_HISTORY_VERSION,
+    label: report.label,
+    updatedAt: report.completedAt,
+    historyLimit,
+    totalRuns: entries.length,
+    passedRuns,
+    failedRuns,
+    consecutivePasses: countConsecutivePasses(entries),
+    latestRun: entries.at(-1) ?? null,
+    entries
+  }
+}
+
+function summarizeContext(entry) {
+  return entry.context.eventName ?? 'local'
+}
+
+function summarizeRun(entry) {
+  if (entry.context.runId) {
+    return `${entry.context.runId}/${entry.context.runAttempt ?? '1'}`
+  }
+
+  return 'local'
+}
+
+function summarizeSha(entry) {
+  return entry.context.sha ? entry.context.sha.slice(0, 12) : 'local'
+}
+
+function renderHistorySummary(snapshot) {
+  const latestRun = snapshot.latestRun
+  const lines = [
+    '# Milestone Confidence History',
+    '',
+    `Updated: ${snapshot.updatedAt}`,
+    `Tracked runs: ${snapshot.totalRuns}`,
+    `Passing runs: ${snapshot.passedRuns}`,
+    `Failing runs: ${snapshot.failedRuns}`,
+    `Consecutive passing runs: ${snapshot.consecutivePasses}`
+  ]
+
+  if (latestRun) {
+    lines.push('')
+    lines.push('## Latest Run')
+    lines.push(`- Outcome: ${latestRun.ok ? 'passed' : 'failed'}`)
+    lines.push(`- Event: ${summarizeContext(latestRun)}`)
+    lines.push(`- Run: ${summarizeRun(latestRun)}`)
+    lines.push(`- SHA: ${summarizeSha(latestRun)}`)
+    lines.push(`- Workflow: ${latestRun.context.workflow ?? 'local'}`)
+    lines.push(`- Completed: ${latestRun.completedAt}`)
+    lines.push(`- Failed step: ${latestRun.failedStepName ?? 'none'}`)
+  }
+
+  lines.push('')
+  lines.push('## Recent Runs')
+  lines.push('| Completed | Outcome | Event | Run | SHA | Duration (s) | Failed step |')
+  lines.push('| --- | --- | --- | --- | --- | ---: | --- |')
+
+  for (const entry of [...snapshot.entries].reverse().slice(0, 10)) {
+    lines.push(
+      `| ${entry.completedAt} | ${entry.ok ? 'passed' : 'failed'} | ${summarizeContext(entry)} | ${summarizeRun(entry)} | ${summarizeSha(entry)} | ${entry.totalDurationSeconds} | ${entry.failedStepName ?? 'none'} |`
+    )
+  }
+
+  lines.push('')
+  return `${lines.join('\n')}\n`
+}
+
+function writeConfidenceHistory({ historyPath, summaryPath, report, historyLimit }) {
+  if (!historyPath && !summaryPath) {
     return
   }
 
-  mkdirSync(path.dirname(reportPath), { recursive: true })
-  writeFileSync(
-    reportPath,
-    JSON.stringify(
-      {
-        reportVersion: CONFIDENCE_REPORT_VERSION,
-        label: successLabel,
-        ok: result.ok,
-        status: result.status,
-        startedAt: new Date(startedAt).toISOString(),
-        completedAt: new Date(completedAt).toISOString(),
-        totalDurationSeconds: secondsFromMilliseconds(completedAt - startedAt),
-        context: buildVerificationContext(env),
-        failedStepName: result.failedStep?.name ?? null,
-        steps: stepReports
-      },
-      null,
-      2
-    ),
-    'utf8'
-  )
+  const snapshot = buildHistorySnapshot({
+    report,
+    historyPath,
+    historyLimit
+  })
+
+  if (historyPath) {
+    mkdirSync(path.dirname(historyPath), { recursive: true })
+    writeFileSync(historyPath, JSON.stringify(snapshot, null, 2), 'utf8')
+  }
+
+  if (summaryPath) {
+    mkdirSync(path.dirname(summaryPath), { recursive: true })
+    writeFileSync(summaryPath, renderHistorySummary(snapshot), 'utf8')
+  }
 }
 
 export function runVerificationSteps({
@@ -136,7 +313,10 @@ export function runVerificationSteps({
   stdout = process.stdout,
   stderr = process.stderr,
   successLabel = 'Verification',
-  reportPath = null
+  reportPath = null,
+  historyPath = null,
+  summaryPath = null,
+  historyLimit = resolveHistoryLimit(env.PORTMANAGER_CONFIDENCE_HISTORY_LIMIT)
 }) {
   const startedAt = Date.now()
   const stepReports = steps.map((step, index) => ({
@@ -174,7 +354,7 @@ export function runVerificationSteps({
         status: 'failed',
         durationSeconds: secondsFromMilliseconds(stepDurationMs)
       }
-      writeVerificationReport({
+      const report = writeVerificationReport({
         reportPath,
         successLabel,
         startedAt,
@@ -182,6 +362,12 @@ export function runVerificationSteps({
         result: failureResult,
         stepReports,
         env
+      })
+      writeConfidenceHistory({
+        historyPath,
+        summaryPath,
+        report,
+        historyLimit
       })
       return failureResult
     }
@@ -199,7 +385,7 @@ export function runVerificationSteps({
         status: 'failed',
         durationSeconds: secondsFromMilliseconds(stepDurationMs)
       }
-      writeVerificationReport({
+      const report = writeVerificationReport({
         reportPath,
         successLabel,
         startedAt,
@@ -207,6 +393,12 @@ export function runVerificationSteps({
         result: failureResult,
         stepReports,
         env
+      })
+      writeConfidenceHistory({
+        historyPath,
+        summaryPath,
+        report,
+        historyLimit
       })
       return failureResult
     }
@@ -225,7 +417,7 @@ export function runVerificationSteps({
     status: 0,
     failedStep: null
   }
-  writeVerificationReport({
+  const report = writeVerificationReport({
     reportPath,
     successLabel,
     startedAt,
@@ -233,6 +425,12 @@ export function runVerificationSteps({
     result: successResult,
     stepReports,
     env
+  })
+  writeConfidenceHistory({
+    historyPath,
+    summaryPath,
+    report,
+    historyLimit
   })
   return successResult
 }
