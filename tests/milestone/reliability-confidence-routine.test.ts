@@ -141,7 +141,7 @@ test('confidence routine writes success report with executed steps', () => {
     assert.equal(report.steps.length, getConfidenceVerificationSteps().length)
     assert.equal(report.steps.at(-1)?.status, 'passed')
     assert.equal(report.steps.at(-1)?.name, 'Run reliability remote-backup replay proof')
-    assert.equal(history.historyVersion, '0.2.0')
+    assert.equal(history.historyVersion, '0.3.0')
     assert.equal(history.totalRuns, 1)
     assert.equal(history.passedRuns, 1)
     assert.equal(history.failedRuns, 0)
@@ -451,9 +451,19 @@ test('local runs stay visible without advancing qualified readiness streak', () 
         qualifiedRuns: number
         qualifiedConsecutivePasses: number
       }
+      visibility: {
+        qualifiedRuns: number
+        visibilityOnlyRuns: number
+        localVisibilityOnlyRuns: number
+        nonQualifiedRemoteRuns: number
+      }
       latestRun: {
         qualifiedForReadiness: boolean
         context: { eventName: string | null }
+      } | null
+      latestQualifiedRun: {
+        qualifiedForReadiness: boolean
+        context: { eventName: string | null; runId: string | null }
       } | null
     }
     const summary = readFileSync(summaryPath, 'utf8')
@@ -462,10 +472,22 @@ test('local runs stay visible without advancing qualified readiness streak', () 
     assert.equal(history.readiness.status, 'building-history')
     assert.equal(history.readiness.qualifiedRuns, 2)
     assert.equal(history.readiness.qualifiedConsecutivePasses, 2)
+    assert.equal(history.visibility.qualifiedRuns, 2)
+    assert.equal(history.visibility.visibilityOnlyRuns, 1)
+    assert.equal(history.visibility.localVisibilityOnlyRuns, 1)
+    assert.equal(history.visibility.nonQualifiedRemoteRuns, 0)
     assert.equal(history.latestRun?.qualifiedForReadiness, false)
     assert.equal(history.latestRun?.context.eventName, null)
+    assert.equal(history.latestQualifiedRun?.qualifiedForReadiness, true)
+    assert.equal(history.latestQualifiedRun?.context.eventName, 'schedule')
+    assert.equal(history.latestQualifiedRun?.context.runId, '11')
     assert.match(summary, /Status: building-history/)
     assert.match(summary, /Qualified for readiness: no/)
+    assert.match(summary, /## Visibility Breakdown/)
+    assert.match(summary, /Qualified mainline runs in tracked history: 2/)
+    assert.match(summary, /Local visibility-only runs: 1/)
+    assert.match(summary, /## Latest Qualified Run/)
+    assert.match(summary, /Run: 11\/1/)
   } finally {
     rmSync(reportDirectory, { recursive: true, force: true })
   }

@@ -227,6 +227,109 @@ test('syncConfidenceHistory dedupes imported runs against existing history and r
   }
 })
 
+test('syncConfidenceHistory keeps latest qualified signal visible when newer local runs exist', () => {
+  const reportDirectory = mkdtempSync(path.join(tmpdir(), 'portmanager-confidence-sync-'))
+  const historyPath = path.join(reportDirectory, 'milestone-confidence-history.json')
+  const summaryPath = path.join(reportDirectory, 'milestone-confidence-summary.md')
+
+  try {
+    const localEntry = createLocalHistoryEntry({
+      completedAt: '2026-04-17T12:00:00.000Z',
+      startedAt: '2026-04-17T11:59:00.000Z'
+    })
+
+    writeFileSync(
+      historyPath,
+      JSON.stringify(
+        {
+          historyVersion: '0.2.0',
+          label: 'Milestone confidence verification',
+          updatedAt: localEntry.completedAt,
+          historyLimit: 30,
+          totalRuns: 1,
+          passedRuns: 1,
+          failedRuns: 0,
+          consecutivePasses: 1,
+          latestRun: localEntry,
+          readiness: {
+            readinessVersion: '0.1.0',
+            status: 'local-only',
+            requiredRef: 'refs/heads/main',
+            qualifiedEvents: ['push', 'workflow_dispatch', 'schedule'],
+            minimumQualifiedRuns: 7,
+            minimumConsecutivePasses: 3,
+            qualifiedRuns: 0,
+            qualifiedPasses: 0,
+            qualifiedFailures: 0,
+            qualifiedConsecutivePasses: 0,
+            remainingQualifiedRuns: 7,
+            remainingConsecutivePasses: 3
+          },
+          entries: [localEntry]
+        },
+        null,
+        2
+      ),
+      'utf8'
+    )
+
+    const importedReport = createReport({
+      completedAt: '2026-04-17T11:00:00.000Z',
+      startedAt: '2026-04-17T10:59:00.000Z',
+      runId: '401',
+      runAttempt: '1',
+      sha: 'signal401abcd',
+      eventName: 'push',
+      ok: true
+    })
+
+    syncConfidenceHistory({
+      repo: 'Jacobinwwey/portmanager',
+      historyPath,
+      summaryPath,
+      listWorkflowRunsImpl() {
+        return [{ id: 401, event: 'push', conclusion: 'success', run_attempt: 1 }]
+      },
+      downloadRunReportsImpl() {
+        return [importedReport]
+      }
+    })
+
+    const history = JSON.parse(readFileSync(historyPath, 'utf8')) as {
+      totalRuns: number
+      visibility: {
+        qualifiedRuns: number
+        visibilityOnlyRuns: number
+        localVisibilityOnlyRuns: number
+        nonQualifiedRemoteRuns: number
+      }
+      latestRun: { qualifiedForReadiness: boolean; context: { runId: string | null } } | null
+      latestQualifiedRun: {
+        qualifiedForReadiness: boolean
+        context: { runId: string | null; eventName: string | null }
+      } | null
+    }
+    const summary = readFileSync(summaryPath, 'utf8')
+
+    assert.equal(history.totalRuns, 2)
+    assert.equal(history.visibility.qualifiedRuns, 1)
+    assert.equal(history.visibility.visibilityOnlyRuns, 1)
+    assert.equal(history.visibility.localVisibilityOnlyRuns, 1)
+    assert.equal(history.visibility.nonQualifiedRemoteRuns, 0)
+    assert.equal(history.latestRun?.qualifiedForReadiness, false)
+    assert.equal(history.latestRun?.context.runId, null)
+    assert.equal(history.latestQualifiedRun?.qualifiedForReadiness, true)
+    assert.equal(history.latestQualifiedRun?.context.runId, '401')
+    assert.equal(history.latestQualifiedRun?.context.eventName, 'push')
+    assert.match(summary, /## Latest Qualified Run/)
+    assert.match(summary, /Run: 401\/1/)
+    assert.match(summary, /Qualified mainline runs in tracked history: 1/)
+    assert.match(summary, /Local visibility-only runs: 1/)
+  } finally {
+    rmSync(reportDirectory, { recursive: true, force: true })
+  }
+})
+
 function createReport({
   completedAt,
   startedAt,
@@ -274,5 +377,37 @@ function createReport({
         durationSeconds: 60
       }
     ]
+  }
+}
+
+function createLocalHistoryEntry({
+  completedAt,
+  startedAt
+}: {
+  completedAt: string
+  startedAt: string
+}) {
+  return {
+    id: `${completedAt}-local-0`,
+    reportVersion: '0.2.0',
+    ok: true,
+    status: 0,
+    startedAt,
+    completedAt,
+    totalDurationSeconds: 60,
+    failedStepName: null,
+    passedStepCount: 1,
+    failedStepCount: 0,
+    skippedStepCount: 0,
+    stepCount: 1,
+    qualifiedForReadiness: false,
+    context: {
+      eventName: null,
+      ref: null,
+      sha: null,
+      runId: null,
+      runAttempt: null,
+      workflow: null
+    }
   }
 }

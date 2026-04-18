@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const repoRoot = path.resolve(__dirname, '..', '..')
 const CONFIDENCE_REPORT_VERSION = '0.2.0'
-const CONFIDENCE_HISTORY_VERSION = '0.2.0'
+const CONFIDENCE_HISTORY_VERSION = '0.3.0'
 const CONFIDENCE_READINESS_VERSION = '0.1.0'
 const DEFAULT_HISTORY_LIMIT = 30
 export const READINESS_REQUIRED_REF = 'refs/heads/main'
@@ -330,6 +330,35 @@ function buildReadinessSnapshot(entries) {
   }
 }
 
+function findLatestQualifiedRun(entries) {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index]
+
+    if (isQualifiedReadinessEntry(entry)) {
+      return entry
+    }
+  }
+
+  return null
+}
+
+function buildVisibilitySnapshot(entries) {
+  const qualifiedRuns = entries.filter((entry) => isQualifiedReadinessEntry(entry)).length
+  const localVisibilityOnlyRuns = entries.filter(
+    (entry) => !isQualifiedReadinessEntry(entry) && !entry.context?.runId
+  ).length
+  const nonQualifiedRemoteRuns = entries.filter(
+    (entry) => !isQualifiedReadinessEntry(entry) && Boolean(entry.context?.runId)
+  ).length
+
+  return {
+    qualifiedRuns,
+    visibilityOnlyRuns: localVisibilityOnlyRuns + nonQualifiedRemoteRuns,
+    localVisibilityOnlyRuns,
+    nonQualifiedRemoteRuns
+  }
+}
+
 export function buildHistorySnapshotFromEntries({
   label,
   entries,
@@ -338,6 +367,7 @@ export function buildHistorySnapshotFromEntries({
 }) {
   const mergedEntries = mergeHistoryEntries(entries, historyLimit)
   const latestRun = mergedEntries.at(-1) ?? null
+  const latestQualifiedRun = findLatestQualifiedRun(mergedEntries)
   const resolvedUpdatedAt = updatedAt ?? latestRun?.completedAt ?? new Date().toISOString()
   const passedRuns = mergedEntries.filter((entry) => entry.ok).length
   const failedRuns = mergedEntries.length - passedRuns
@@ -352,6 +382,8 @@ export function buildHistorySnapshotFromEntries({
     failedRuns,
     consecutivePasses: countConsecutivePasses(mergedEntries),
     latestRun,
+    latestQualifiedRun,
+    visibility: buildVisibilitySnapshot(mergedEntries),
     readiness: buildReadinessSnapshot(mergedEntries),
     entries: mergedEntries
   }
@@ -387,6 +419,9 @@ function summarizeSha(entry) {
 
 export function renderHistorySummary(snapshot) {
   const latestRun = snapshot.latestRun
+  const latestQualifiedRun =
+    snapshot.latestQualifiedRun ?? findLatestQualifiedRun(snapshot.entries ?? [])
+  const visibility = snapshot.visibility ?? buildVisibilitySnapshot(snapshot.entries ?? [])
   const readiness = snapshot.readiness
   const lines = [
     '# Milestone Confidence History',
@@ -425,6 +460,13 @@ export function renderHistorySummary(snapshot) {
     )
   }
 
+  lines.push('')
+  lines.push('## Visibility Breakdown')
+  lines.push(`- Qualified mainline runs in tracked history: ${visibility.qualifiedRuns}`)
+  lines.push(`- Visibility-only runs in tracked history: ${visibility.visibilityOnlyRuns}`)
+  lines.push(`- Local visibility-only runs: ${visibility.localVisibilityOnlyRuns}`)
+  lines.push(`- Non-qualified remote runs: ${visibility.nonQualifiedRemoteRuns}`)
+
   if (latestRun) {
     lines.push('')
     lines.push('## Latest Run')
@@ -438,6 +480,28 @@ export function renderHistorySummary(snapshot) {
     lines.push(`- Workflow: ${latestRun.context.workflow ?? 'local'}`)
     lines.push(`- Completed: ${latestRun.completedAt}`)
     lines.push(`- Failed step: ${latestRun.failedStepName ?? 'none'}`)
+
+    if (latestQualifiedRun && latestQualifiedRun.id !== latestRun.id) {
+      lines.push(
+        '- Review note: latest visible run is not readiness-qualified; use the latest qualified run below for milestone progress.'
+      )
+    }
+  }
+
+  lines.push('')
+  lines.push('## Latest Qualified Run')
+
+  if (latestQualifiedRun) {
+    lines.push(`- Outcome: ${latestQualifiedRun.ok ? 'passed' : 'failed'}`)
+    lines.push(`- Event: ${summarizeContext(latestQualifiedRun)}`)
+    lines.push(`- Run: ${summarizeRun(latestQualifiedRun)}`)
+    lines.push(`- SHA: ${summarizeSha(latestQualifiedRun)}`)
+    lines.push(`- Workflow: ${latestQualifiedRun.context.workflow ?? 'local'}`)
+    lines.push(`- Completed: ${latestQualifiedRun.completedAt}`)
+    lines.push(`- Failed step: ${latestQualifiedRun.failedStepName ?? 'none'}`)
+  } else {
+    lines.push('- Outcome: none yet')
+    lines.push('- Note: no qualified mainline run is present in tracked history yet.')
   }
 
   lines.push('')
