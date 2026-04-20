@@ -1,7 +1,7 @@
 # PortManager Real-Machine Verification Report
 
 Updated: 2026-04-20
-Version: v0.2.1-confidence-countdown-sync
+Version: v0.2.2-confidence-review-digest
 
 ## English
 
@@ -81,14 +81,28 @@ Commands executed:
   - `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
 - Publication rule:
   - only run the explicit refresh command after a deliberate verification or sync step whose evidence should become the new public snapshot
+  - use `pnpm milestone:review:confidence` first if you need one repo-native comparison between synced local history and the tracked public artifact before deciding whether publication should move
 - Why this rule exists:
   - local `.portmanager` history is machine-local and intentionally ignored by Git
   - allowing every docs build to rewrite the tracked confidence artifact from local history causes noisy diffs and publication drift
   - the tracked docs artifact must change only when publication intent is explicit
 
+### Default developer review digest
+- Default local review sequence after sync:
+  - `pnpm milestone:sync:confidence-history -- --limit 20`
+  - `pnpm milestone:review:confidence`
+- What the review-digest command adds:
+  - writes `.portmanager/reports/milestone-confidence-review.md`
+  - compares synced local readiness with tracked `docs-site/data/milestone-confidence-progress.ts`
+  - reports countdown alignment separately from full local visibility-only drift
+  - keeps strict published-countdown failure opt-in behind `--require-published-countdown-match`
+- Publication rule after that digest:
+  - refresh the tracked docs artifact only when the digest and human review agree that the public countdown should move
+
 ### Review protocol
 - Read the GitHub Actions `mainline-acceptance` summary first when reviewing readiness accumulation.
 - Sync completed confidence history back into local `.portmanager/reports/`.
+- Run `pnpm milestone:review:confidence` so `.portmanager/reports/milestone-confidence-review.md` records whether the published countdown is aligned or only visibility-drifted.
 - Compare the synced local summary, the tracked docs confidence artifact, and the public development-progress page together.
 - Use `Latest Qualified Run` plus the visibility breakdown for milestone-language review, not raw local rerun recency.
 
@@ -170,13 +184,27 @@ Commands executed:
   - `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
 - 发布规则：
   - 只有在一次有意的 verification 或 sync 之后，才运行这条显式刷新命令，把那次证据提升为新的公开快照
+  - 如果需要在决定是否刷新公开快照前先做一次 repo-native 对比，应先执行 `pnpm milestone:review:confidence`
 - 这条规则存在的原因：
   - 本地 `.portmanager` history 是 machine-local 文件，并且刻意被 Git 忽略
   - 如果允许每次 docs build 都直接用本地 history 改写已跟踪 confidence artifact，就会造成噪音 diff 与发布漂移
   - 已跟踪 docs artifact 只能在“明确有发布意图”的时候变化
 
+### 默认开发者复核摘要
+- sync 之后的默认本地复核顺序：
+  - `pnpm milestone:sync:confidence-history -- --limit 20`
+  - `pnpm milestone:review:confidence`
+- 这条 review-digest 命令补上的信息：
+  - 写出 `.portmanager/reports/milestone-confidence-review.md`
+  - 直接对比同步后的本地 readiness 与已跟踪 `docs-site/data/milestone-confidence-progress.ts`
+  - 把 countdown 对齐状态与完整本地 visibility-only 漂移拆开汇报
+  - 只在显式传入 `--require-published-countdown-match` 时才把公开倒计时不一致变成失败
+- digest 之后的发布规则：
+  - 只有当 digest 结论与人工复核都认为公开倒计时应该变化时，才刷新已跟踪 docs artifact
+
 ### 复核协议
 - 在判断 readiness 累积时，先看 GitHub Actions `mainline-acceptance` summary。
 - 把已完成 confidence history 同步回本地 `.portmanager/reports/`。
+- 执行 `pnpm milestone:review:confidence`，让 `.portmanager/reports/milestone-confidence-review.md` 先记录公开倒计时是否真正对齐、还是只有 visibility-only 漂移。
 - 同时对比同步后的本地 summary、已跟踪 docs confidence artifact 与公开 development-progress 页面。
 - 在评审里程碑文案时，应优先使用 `Latest Qualified Run` 与 visibility breakdown，而不是只看最近一次本地 rerun。

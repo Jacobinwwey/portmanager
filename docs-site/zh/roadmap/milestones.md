@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-20 | Version：v0.5.13-confidence-countdown-sync
+> Updated：2026-04-20 | Version：v0.5.14-confidence-review-digest
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -75,7 +75,8 @@ status: active
 - `Confidence history sync 切片`：已完成。`pnpm milestone:sync:confidence-history` 现在会把 GitHub Actions 已完成 `mainline-acceptance` bundle history 导回本地 readiness review，并用同一套 readiness 计算逻辑与去重规则重建本地 summary。
 - `Confidence review-signal 切片`：已完成。同步后与本地 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计本地 visibility-only 与非 qualified 远端噪声，让开发者在本地 rerun 之后仍然能看见真实主线证据。
 - `Confidence progress page 切片`：已完成。docs-site 现在会从生成后的 confidence 数据发布一级开发者进度页，并在 roadmap 首页显示相同的 live 计数。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 倒计时加固：复核同步后 summary 的 latest-qualified 信号、验证报告与公开 development-progress 页面、把 qualified history 持续转绿，并等最后 `2` 次 qualified runs 到位后再收窄里程碑文案。
+- `Confidence review digest 切片`：已完成。`pnpm milestone:review:confidence` 现在会把同步后的本地 readiness 与已跟踪公开 progress artifact 直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，区分 countdown 漂移与 visibility-only 漂移，并把严格公开倒计时检查保持为显式可选。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 倒计时加固：先同步 completed history、再执行 `pnpm milestone:review:confidence`，复核验证报告与公开 development-progress 页面、把 qualified history 持续转绿，并等最后 `2` 次 qualified runs 到位后再收窄里程碑文案。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库

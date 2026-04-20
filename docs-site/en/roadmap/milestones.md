@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-20 | Version: v0.5.13-confidence-countdown-sync
+> Updated: 2026-04-20 | Version: v0.5.14-confidence-review-digest
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -76,7 +76,8 @@ Milestone 1 is only accepted when all of the following become true:
 - `Confidence-history sync slice`: complete. `pnpm milestone:sync:confidence-history` now imports completed `mainline-acceptance` bundle history from GitHub Actions into local readiness review with deduped entries and the same shared readiness math.
 - `Confidence-review-signal slice`: complete. Synced and local confidence summaries now separate `Latest Run` from `Latest Qualified Run` and count visibility-only local versus non-qualified remote noise, so developer review keeps real mainline evidence visible after local reruns.
 - `Confidence-progress-page slice`: complete. The docs site now publishes a first-class development-progress page from generated confidence data and surfaces the same live counters on roadmap home.
-- `Next lane`: Milestone 2 confidence-readiness countdown maintenance on the same live host / rule / policy slice by reviewing the synced summary's latest-qualified signal, verification report, and public development-progress page, keeping qualified history green, and waiting for the final `2` qualified runs before narrowing milestone wording.
+- `Confidence-review-digest slice`: complete. `pnpm milestone:review:confidence` now compares synced local readiness with the tracked public progress artifact, writes `.portmanager/reports/milestone-confidence-review.md`, separates countdown drift from visibility-only drift, and keeps strict published-countdown failure opt-in.
+- `Next lane`: Milestone 2 confidence-readiness countdown maintenance on the same live host / rule / policy slice by syncing completed history, running `pnpm milestone:review:confidence`, reviewing the verification report plus the public development-progress page, keeping qualified history green, and waiting for the final `2` qualified runs before narrowing milestone wording.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store

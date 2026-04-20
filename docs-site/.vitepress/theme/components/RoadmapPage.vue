@@ -211,7 +211,7 @@
           <VPLink class="pm-doc-link" :href="`/${props.locale}/roadmap/development-progress`">{{ copy.liveConfidenceLink }}</VPLink>
           <VPLink class="pm-doc-link" :href="docMeta(locale, 'milestones').link">{{ copy.liveConfidenceMilestonesLink }}</VPLink>
           <VPLink class="pm-doc-link" :href="docMeta(locale, 'real-machine-verification-report').link">{{ copy.liveConfidenceVerificationLink }}</VPLink>
-          <VPLink class="pm-doc-link" :href="countdownPlanSourceLink">{{ copy.liveConfidencePlanLink }}</VPLink>
+          <VPLink class="pm-doc-link" :href="reviewDigestPlanSourceLink">{{ copy.liveConfidencePlanLink }}</VPLink>
         </div>
       </article>
     </section>
@@ -331,7 +331,7 @@ const copy = computed(() => props.locale === 'zh'
       developerProgressLabel: 'Developer Progress',
       liveConfidenceLabel: 'Live Confidence',
       liveConfidenceTitle: '当前公开进度',
-      liveConfidenceBody: 'Roadmap 首页现在直接显示同步后的 confidence-ready 进度快照，开发者无需离开页面就能看到最新 qualified 主线证据、最新可见 run、visibility-only 噪声拆分，以及还剩多少 qualified runs。',
+      liveConfidenceBody: 'Roadmap 首页现在直接显示同步后的 confidence-ready 进度快照，开发者无需离开页面就能看到最新 qualified 主线证据、最新可见 run、visibility-only 噪声拆分，以及默认复核链路已经进入 `pnpm milestone:review:confidence` 的事实。',
       liveConfidenceReadiness: 'Readiness',
       liveQualifiedRuns: 'Qualified runs：',
       liveQualifiedPasses: 'Qualified consecutive passes：',
@@ -351,7 +351,7 @@ const copy = computed(() => props.locale === 'zh'
       liveConfidenceLink: '打开开发进度页',
       liveConfidenceMilestonesLink: '查看里程碑明细',
       liveConfidenceVerificationLink: '真机验证报告',
-      liveConfidencePlanLink: '倒计时实现计划',
+      liveConfidencePlanLink: '复核摘要实现计划',
       decisionLabel: '判定与取舍',
       advantagesLabel: '优势',
       costsLabel: '成本 / 风险',
@@ -385,7 +385,7 @@ const copy = computed(() => props.locale === 'zh'
       developerProgressLabel: 'Developer Progress',
       liveConfidenceLabel: 'Live Confidence',
       liveConfidenceTitle: 'Current published progress',
-      liveConfidenceBody: 'The roadmap home page now exposes the synced confidence-readiness snapshot directly, so developers can see the latest qualified mainline evidence, latest visible run, visibility-only noise split, and the remaining qualified-run countdown without leaving this page.',
+      liveConfidenceBody: 'The roadmap home page now exposes the synced confidence-readiness snapshot directly, so developers can see the latest qualified mainline evidence, latest visible run, visibility-only noise split, and the fact that the default review chain now includes `pnpm milestone:review:confidence` without leaving this page.',
       liveConfidenceReadiness: 'Readiness',
       liveQualifiedRuns: 'Qualified runs:',
       liveQualifiedPasses: 'Qualified consecutive passes:',
@@ -405,7 +405,7 @@ const copy = computed(() => props.locale === 'zh'
       liveConfidenceLink: 'Open Development Progress',
       liveConfidenceMilestonesLink: 'Open Milestones Detail',
       liveConfidenceVerificationLink: 'Open Verification Report',
-      liveConfidencePlanLink: 'Open Countdown Plan',
+      liveConfidencePlanLink: 'Open Review Digest Plan',
       decisionLabel: 'Decision and trade-off',
       advantagesLabel: 'Advantages',
       costsLabel: 'Costs / Risks',
@@ -461,8 +461,8 @@ const confidenceUpdatedAt = computed(() => formatTimestamp(confidenceProgress.up
 const confidenceLatestQualifiedRun = computed(() => formatRun(confidenceProgress.latestQualifiedRun))
 const confidenceLatestQualifiedSha = computed(() => formatSha(confidenceProgress.latestQualifiedRun))
 const confidenceLatestVisibleRun = computed(() => formatRun(confidenceProgress.latestRun))
-const countdownPlanSourceLink = githubSourceLink(
-  'docs/plans/2026-04-19-portmanager-m2-confidence-promotion-countdown-plan.md'
+const reviewDigestPlanSourceLink = githubSourceLink(
+  'docs/plans/2026-04-20-portmanager-m2-confidence-review-digest-plan.md'
 )
 
 function stageLabel(stage: string) {

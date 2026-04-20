@@ -185,6 +185,8 @@
           <li>{{ copy.summaryFile }} <code>{{ progress.sourceFiles.summaryPath }}</code></li>
           <li>{{ copy.historyFile }} <code>{{ progress.sourceFiles.historyPath }}</code></li>
           <li>{{ copy.reportFile }} <code>{{ progress.sourceFiles.reportPath }}</code></li>
+          <li>{{ copy.reviewDigestFile }} <code>.portmanager/reports/milestone-confidence-review.md</code></li>
+          <li>{{ copy.reviewCommandLabel }} <code>pnpm milestone:review:confidence</code></li>
           <li>{{ copy.publishedArtifact }} <code>{{ progress.publication.trackedDataPath }}</code></li>
           <li>{{ copy.refreshCommandLabel }} <code>{{ progress.publication.refreshCommand }}</code></li>
         </ul>
@@ -226,16 +228,18 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistKicker: 'Developer Review',
       reviewChecklistTitle: '开发者复核动作',
       currentDirectionKicker: 'Current Direction',
-      currentDirectionTitle: '当前倒计时方向',
-      currentDirectionEvidence: 'Countdown',
-      currentDirectionRequirementsLink: '倒计时需求文档',
-      currentDirectionPlanLink: '倒计时实现计划',
+      currentDirectionTitle: '当前复核方向',
+      currentDirectionEvidence: 'Review Digest',
+      currentDirectionRequirementsLink: '复核摘要需求文档',
+      currentDirectionPlanLink: '复核摘要实现计划',
       currentDirectionVerificationLink: '真机验证报告',
       sourceFilesKicker: 'Source Files',
       sourceFilesTitle: '当前公开页面数据来源',
       summaryFile: 'Summary：',
       historyFile: 'History：',
       reportFile: 'Report：',
+      reviewDigestFile: 'Review digest：',
+      reviewCommandLabel: 'Review command：',
       publishedArtifact: 'Published artifact：',
       refreshCommandLabel: 'Refresh command：',
       updatedAt: '更新于：',
@@ -294,16 +298,18 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistKicker: 'Developer Review',
       reviewChecklistTitle: 'Developer review actions',
       currentDirectionKicker: 'Current Direction',
-      currentDirectionTitle: 'Current countdown direction',
-      currentDirectionEvidence: 'Countdown',
-      currentDirectionRequirementsLink: 'Countdown requirements',
-      currentDirectionPlanLink: 'Countdown plan',
+      currentDirectionTitle: 'Current review direction',
+      currentDirectionEvidence: 'Review Digest',
+      currentDirectionRequirementsLink: 'Review-digest requirements',
+      currentDirectionPlanLink: 'Review-digest plan',
       currentDirectionVerificationLink: 'Verification report',
       sourceFilesKicker: 'Source Files',
       sourceFilesTitle: 'Current public page inputs',
       summaryFile: 'Summary:',
       historyFile: 'History:',
       reportFile: 'Report:',
+      reviewDigestFile: 'Review digest:',
+      reviewCommandLabel: 'Review command:',
       publishedArtifact: 'Published artifact:',
       refreshCommandLabel: 'Refresh command:',
       updatedAt: 'Updated:',
@@ -379,13 +385,15 @@ const reviewChecklist = computed(() => props.locale === 'zh'
   ? [
       '先在 GitHub Actions 查看 `mainline-acceptance` job summary，再回到这个页面核对相同计数。',
       '在本地主线执行 `pnpm milestone:sync:confidence-history -- --limit 20`，把 completed mainline bundle 导回 `.portmanager/reports/`。',
-      '优先读取 `Latest Qualified Run` 和 visibility breakdown，再决定里程碑文案是否允许继续收窄。',
+      '执行 `pnpm milestone:review:confidence`，让 `.portmanager/reports/milestone-confidence-review.md` 先明确 countdown 是否与公开快照对齐。',
+      '优先读取 `Latest Qualified Run`、review digest 与 visibility breakdown，再决定里程碑文案是否允许继续收窄。',
       `连续 pass 门槛已经满足；继续保持 \`pnpm milestone:verify:confidence\` 与 \`pnpm acceptance:verify\` 为绿，直到最后 ${progress.readiness.remainingQualifiedRuns} 次 qualified runs 到位。`
     ]
   : [
       'Read the GitHub Actions `mainline-acceptance` job summary first, then confirm the same counters on this page.',
       'Run `pnpm milestone:sync:confidence-history -- --limit 20` on local main to pull completed mainline bundles back into `.portmanager/reports/`.',
-      'Use `Latest Qualified Run` plus the visibility breakdown before deciding whether milestone wording can narrow further.',
+      'Run `pnpm milestone:review:confidence` so `.portmanager/reports/milestone-confidence-review.md` records whether the published countdown is aligned.',
+      'Use `Latest Qualified Run`, the review digest, and the visibility breakdown before deciding whether milestone wording can narrow further.',
       `The pass-streak gate is already satisfied; keep both \`pnpm milestone:verify:confidence\` and \`pnpm acceptance:verify\` green until the final ${progress.readiness.remainingQualifiedRuns} qualified runs land.`
     ]
 )
@@ -394,24 +402,24 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
   ? [
       `当前公开状态仍为 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
       `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；连续 pass 门槛已经满足。`,
-      `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}，还剩 ${progress.readiness.remainingQualifiedRuns} 次 qualified runs。`,
-      '里程碑文案只能在 qualified-run 计数达到 7/7 之后继续收窄。'
+      `默认复核顺序已经变成先同步 history、再执行 \`pnpm milestone:review:confidence\`，然后才判断是否需要刷新公开快照。`,
+      `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}，还剩 ${progress.readiness.remainingQualifiedRuns} 次 qualified runs；里程碑文案只能在 qualified-run 计数达到 7/7 之后继续收窄。`
     ]
   : [
       `Current public status remains \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
       `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the pass-streak gate is satisfied.`,
-      `The latest qualified mainline run is ${latestQualifiedRunLabel.value}, and ${progress.readiness.remainingQualifiedRuns} qualified runs still remain.`,
-      'Milestone wording should narrow only after the qualified-run counter reaches 7/7.'
+      'The default review flow is now sync history, run `pnpm milestone:review:confidence`, then decide whether the public snapshot should move.',
+      `The latest qualified mainline run is ${latestQualifiedRunLabel.value}, ${progress.readiness.remainingQualifiedRuns} qualified runs still remain, and milestone wording should narrow only after the qualified-run counter reaches 7/7.`
     ]
 )
 
 const currentDirectionDocs = computed(() => [
   {
-    href: githubSourceLink('docs/brainstorms/2026-04-19-portmanager-m2-confidence-promotion-countdown-requirements.md'),
+    href: githubSourceLink('docs/brainstorms/2026-04-20-portmanager-m2-confidence-review-digest-requirements.md'),
     label: copy.value.currentDirectionRequirementsLink
   },
   {
-    href: githubSourceLink('docs/plans/2026-04-19-portmanager-m2-confidence-promotion-countdown-plan.md'),
+    href: githubSourceLink('docs/plans/2026-04-20-portmanager-m2-confidence-review-digest-plan.md'),
     label: copy.value.currentDirectionPlanLink
   },
   {

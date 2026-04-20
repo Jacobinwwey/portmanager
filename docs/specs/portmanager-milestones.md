@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-20
-Version: v0.5.13-confidence-countdown-sync
+Version: v0.5.14-confidence-review-digest
 
 ## English
 
@@ -69,7 +69,8 @@ Milestone 1 is only accepted when all of the following become true:
 - `Confidence-history sync slice`: complete. `pnpm milestone:sync:confidence-history` now imports completed `mainline-acceptance` bundle history from GitHub Actions into local readiness review with deduped entries and the same shared readiness math.
 - `Confidence-review-signal slice`: complete. Synced and local confidence summaries now separate `Latest Run` from `Latest Qualified Run` and count visibility-only local versus non-qualified remote noise, so developer review keeps real mainline evidence visible after local reruns.
 - `Confidence-progress-page slice`: complete. The docs site now publishes a first-class development-progress page from generated confidence data and surfaces the same live counters on roadmap home.
-- `Next lane`: Milestone 2 confidence-readiness countdown maintenance on the same live host / rule / policy slice by reviewing the synced summary's latest-qualified signal, verification report, and public development-progress page, keeping qualified history green, and waiting for the final `2` qualified runs before narrowing milestone wording.
+- `Confidence-review-digest slice`: complete. `pnpm milestone:review:confidence` now compares synced local readiness with the tracked public progress artifact, writes `.portmanager/reports/milestone-confidence-review.md`, separates countdown drift from visibility-only drift, and keeps strict published-countdown failure opt-in.
+- `Next lane`: Milestone 2 confidence-readiness countdown maintenance on the same live host / rule / policy slice by syncing completed history, running `pnpm milestone:review:confidence`, reviewing the verification report plus the public development-progress page, keeping qualified history green, and waiting for the final `2` qualified runs before narrowing milestone wording.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -237,7 +238,8 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - `Confidence history sync 切片`：已完成。`pnpm milestone:sync:confidence-history` 现在会把 GitHub Actions 已完成 `mainline-acceptance` bundle history 导回本地 readiness review，并用同一套 readiness 计算逻辑与去重规则重建本地 summary。
 - `Confidence review-signal 切片`：已完成。同步后与本地 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计本地 visibility-only 与非 qualified 远端噪声，让开发者在本地 rerun 之后仍然能看见真实主线证据。
 - `Confidence progress page 切片`：已完成。docs-site 现在会从生成后的 confidence 数据发布一级开发者进度页，并在 roadmap 首页显示相同的 live 计数。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 倒计时加固：复核同步后 summary 的 latest-qualified 信号、验证报告与公开 development-progress 页面、把 qualified history 持续转绿，并等最后 `2` 次 qualified runs 到位后再收窄里程碑文案。
+- `Confidence review digest 切片`：已完成。`pnpm milestone:review:confidence` 现在会把同步后的本地 readiness 与已跟踪公开 progress artifact 直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，区分 countdown 漂移与 visibility-only 漂移，并把严格公开倒计时检查保持为显式可选。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 倒计时加固：先同步 completed history、再执行 `pnpm milestone:review:confidence`，复核验证报告与公开 development-progress 页面、把 qualified history 持续转绿，并等最后 `2` 次 qualified runs 到位后再收窄里程碑文案。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库

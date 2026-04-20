@@ -8,6 +8,20 @@ const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 const docsSiteRoot = path.join(repoRoot, 'docs-site')
 const docsConfigPath = path.join(docsSiteRoot, '.vitepress', 'config.ts')
 const generatedProgressDataPath = path.join(docsSiteRoot, 'data', 'milestone-confidence-progress.ts')
+const milestoneConfidenceComponentPath = path.join(
+  docsSiteRoot,
+  '.vitepress',
+  'theme',
+  'components',
+  'MilestoneConfidencePage.vue'
+)
+const roadmapComponentPath = path.join(
+  docsSiteRoot,
+  '.vitepress',
+  'theme',
+  'components',
+  'RoadmapPage.vue'
+)
 
 test('roadmap publishes a development-progress page backed by live milestone confidence data', async () => {
   const enPagePath = path.join(docsSiteRoot, 'en', 'roadmap', 'development-progress.md')
@@ -20,10 +34,19 @@ test('roadmap publishes a development-progress page backed by live milestone con
   const enPage = readFileSync(enPagePath, 'utf8')
   const zhPage = readFileSync(zhPagePath, 'utf8')
   const docsConfig = readFileSync(docsConfigPath, 'utf8')
+  const milestoneConfidenceComponent = readFileSync(milestoneConfidenceComponentPath, 'utf8')
+  const roadmapComponent = readFileSync(roadmapComponentPath, 'utf8')
 
   assert.match(enPage, /<MilestoneConfidencePage locale="en" \/>/)
   assert.match(zhPage, /<MilestoneConfidencePage locale="zh" \/>/)
   assert.match(docsConfig, /roadmap\/development-progress/)
+  assert.match(milestoneConfidenceComponent, /pnpm milestone:review:confidence/)
+  assert.match(
+    milestoneConfidenceComponent,
+    /2026-04-20-portmanager-m2-confidence-review-digest-plan\.md/
+  )
+  assert.match(roadmapComponent, /pnpm milestone:review:confidence/)
+  assert.match(roadmapComponent, /2026-04-20-portmanager-m2-confidence-review-digest-plan\.md/)
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
 
