@@ -1,7 +1,7 @@
 # PortManager
 
-Updated: 2026-04-18
-Version: v0.5.11-real-machine-acceptance-hardening
+Updated: 2026-04-20
+Version: v0.5.12-confidence-countdown-sync
 
 ## English
 
@@ -51,7 +51,7 @@ Version: v0.5.11-real-machine-acceptance-hardening
 - [x] Milestone 2 acceptance closure: expand live degraded/recovery/diagnostics-history UX on the same host/rule/policy model.
 - [x] Milestone 2 acceptance closure: deliver real GitHub backup on top of the now-explicit remote-backup guidance surfaces.
 - [x] Milestone 2 reliability slice: replay configured, failed, and local-only required remote-backup evidence on the same live agent-backed host/rule flow across API, CLI, Web, and agent proof.
-- [ ] Milestone 2 acceptance closure: keep qualified `pnpm milestone:verify:confidence` history green until the readiness summary reaches `promotion-ready` with `7` qualified runs plus `3` consecutive qualified passes.
+- [ ] Milestone 2 acceptance closure: keep qualified `pnpm milestone:verify:confidence` history green until the readiness summary reaches `promotion-ready` with `7` qualified runs plus `3` consecutive qualified passes. Current synced checkpoint on `2026-04-20`: `5/7` qualified runs, `5/3` qualified consecutive passes, `2` remaining qualified runs.
 - [x] Milestone 2 acceptance closure: land `pnpm milestone:verify:confidence` as the canonical composed routine while preserving `pnpm acceptance:verify` as the Unit 0 gate.
 - [x] Milestone 2 acceptance closure: wire the canonical confidence routine into `.github/workflows/mainline-acceptance.yml` for `push main`, `workflow_dispatch`, and the daily scheduled history lane.
 - [x] Milestone 2 acceptance closure: write `.portmanager/reports/milestone-confidence-report.json` from the canonical confidence routine with CI traceability metadata, and upload the same report from CI for developer inspection.
@@ -72,7 +72,7 @@ Version: v0.5.11-real-machine-acceptance-hardening
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
-- [ ] Next lane: sync completed mainline confidence history into local review, use the summary's latest-qualified signal plus the public development-progress page during developer review, keep qualified Milestone 2 confidence history green on the same live slice, and narrow milestone wording only when the synced readiness summary justifies it.
+- [ ] Next lane: sync completed mainline confidence history into local review, use the summary's latest-qualified signal plus the verification report and public development-progress page during developer review, keep qualified Milestone 2 confidence history green on the same live slice, and wait for the final `2` qualified runs before narrowing milestone wording.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -87,6 +87,8 @@ Version: v0.5.11-real-machine-acceptance-hardening
 - [x] Land confidence-review-signal implementation plan: `docs/plans/2026-04-17-portmanager-m2-confidence-review-signal-plan.md`
 - [x] Land confidence-progress-page requirements doc: `docs/brainstorms/2026-04-17-portmanager-m2-confidence-progress-page-requirements.md`
 - [x] Land confidence-progress-page implementation plan: `docs/plans/2026-04-17-portmanager-m2-confidence-progress-page-plan.md`
+- [x] Land confidence-promotion-countdown requirements doc: `docs/brainstorms/2026-04-19-portmanager-m2-confidence-promotion-countdown-requirements.md`
+- [x] Land confidence-promotion-countdown implementation plan: `docs/plans/2026-04-19-portmanager-m2-confidence-promotion-countdown-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -137,7 +139,7 @@ Version: v0.5.11-real-machine-acceptance-hardening
 - [x] 里程碑 2 验收闭环：继续在统一 host/rule/policy 模型上补强 live degraded/recovery/diagnostics-history UX。
 - [x] 里程碑 2 验收闭环：在已经显式化的远端备份提示表面之上，真正交付 GitHub backup。
 - [x] 里程碑 2 可靠性切片：在同一条 live agent-backed host/rule 流程上，围绕 configured、failed、local-only 三类 required remote-backup 证据重放 API、CLI、Web 与 agent proof。
-- [ ] 里程碑 2 验收闭环：让 qualified `pnpm milestone:verify:confidence` 历史持续保持为绿，直到 readiness summary 以 `7` 次 qualified run 加 `3` 次连续 qualified pass 进入 `promotion-ready`，再决定 Milestone 2 文案何时可以无保留提升。
+- [ ] 里程碑 2 验收闭环：让 qualified `pnpm milestone:verify:confidence` 历史持续保持为绿，直到 readiness summary 以 `7` 次 qualified run 加 `3` 次连续 qualified pass 进入 `promotion-ready`，再决定 Milestone 2 文案何时可以无保留提升。当前已同步检查点为 `2026-04-20` 的 `5/7` qualified runs、`5/3` qualified consecutive passes，仍剩 `2` 次 qualified runs。
 - [x] 里程碑 2 验收闭环：落地 `pnpm milestone:verify:confidence` 作为规范组合 routine，同时保留 `pnpm acceptance:verify` 作为 Unit 0 gate。
 - [x] 里程碑 2 验收闭环：把规范 confidence routine 接入 `.github/workflows/mainline-acceptance.yml` 的 `push main`、`workflow_dispatch` 与每日 schedule 历史路径。
 - [x] 里程碑 2 验收闭环：让规范 confidence routine 写出带 CI traceability 元数据的 `.portmanager/reports/milestone-confidence-report.json`，并把同一份报告从 CI 上传给开发者核对。
@@ -158,7 +160,7 @@ Version: v0.5.11-real-machine-acceptance-hardening
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
-- [ ] 下一主线：先把 completed mainline confidence history 同步到本地复核，再利用 summary 里的 latest-qualified 信号与公开 development-progress 页面做开发者判断，继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，并只在同步后的 readiness summary 充分支持时收窄里程碑文案。
+- [ ] 下一主线：先把 completed mainline confidence history 同步到本地复核，再利用 summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面做开发者判断，继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，并等最后 `2` 次 qualified runs 到位后再收窄里程碑文案。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -173,4 +175,6 @@ Version: v0.5.11-real-machine-acceptance-hardening
 - [x] 落盘 confidence-review-signal 实现计划：`docs/plans/2026-04-17-portmanager-m2-confidence-review-signal-plan.md`
 - [x] 落盘 confidence-progress-page 需求文档：`docs/brainstorms/2026-04-17-portmanager-m2-confidence-progress-page-requirements.md`
 - [x] 落盘 confidence-progress-page 实现计划：`docs/plans/2026-04-17-portmanager-m2-confidence-progress-page-plan.md`
+- [x] 落盘 confidence-promotion-countdown 需求文档：`docs/brainstorms/2026-04-19-portmanager-m2-confidence-promotion-countdown-requirements.md`
+- [x] 落盘 confidence-promotion-countdown 实现计划：`docs/plans/2026-04-19-portmanager-m2-confidence-promotion-countdown-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

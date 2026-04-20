@@ -176,6 +176,8 @@
                 {{ copy.liveQualifiedPasses }}
                 {{ confidenceProgress.readiness.qualifiedConsecutivePasses }}/{{ confidenceProgress.readiness.minimumConsecutivePasses }}
               </li>
+              <li>{{ copy.liveRemainingQualifiedRuns }} {{ confidenceProgress.readiness.remainingQualifiedRuns }}</li>
+              <li>{{ copy.liveRemainingQualifiedPassGap }} {{ confidenceProgress.readiness.remainingConsecutivePasses }}</li>
               <li>{{ copy.liveUpdatedAt }} {{ confidenceUpdatedAt }}</li>
             </ul>
           </section>
@@ -208,6 +210,8 @@
         <div class="pm-doc-links">
           <VPLink class="pm-doc-link" :href="`/${props.locale}/roadmap/development-progress`">{{ copy.liveConfidenceLink }}</VPLink>
           <VPLink class="pm-doc-link" :href="docMeta(locale, 'milestones').link">{{ copy.liveConfidenceMilestonesLink }}</VPLink>
+          <VPLink class="pm-doc-link" :href="docMeta(locale, 'real-machine-verification-report').link">{{ copy.liveConfidenceVerificationLink }}</VPLink>
+          <VPLink class="pm-doc-link" :href="countdownPlanSourceLink">{{ copy.liveConfidencePlanLink }}</VPLink>
         </div>
       </article>
     </section>
@@ -301,7 +305,7 @@ import { computed } from 'vue'
 import { VPLink } from 'vitepress/theme'
 import { roadmapDeveloperProgress as developerProgress, roadmapMilestones, roadmapPrinciples as principles, roadmapProgression as progression, roadmapTracks as tracks, schemeCProfile as schemeC } from '../../../data/roadmap'
 import { milestoneConfidenceProgress as confidenceProgress } from '../../../data/milestone-confidence-progress'
-import { docMeta, type LocaleCode } from '../../../data/docs'
+import { docMeta, githubSourceLink, type LocaleCode } from '../../../data/docs'
 
 const props = defineProps<{ locale: LocaleCode }>()
 const locale = computed(() => props.locale)
@@ -327,10 +331,12 @@ const copy = computed(() => props.locale === 'zh'
       developerProgressLabel: 'Developer Progress',
       liveConfidenceLabel: 'Live Confidence',
       liveConfidenceTitle: '当前公开进度',
-      liveConfidenceBody: 'Roadmap 首页现在直接显示同步后的 confidence-ready 进度快照，开发者无需离开页面就能看到最新 qualified 主线证据、最新可见 run 与 visibility-only 噪声拆分。',
+      liveConfidenceBody: 'Roadmap 首页现在直接显示同步后的 confidence-ready 进度快照，开发者无需离开页面就能看到最新 qualified 主线证据、最新可见 run、visibility-only 噪声拆分，以及还剩多少 qualified runs。',
       liveConfidenceReadiness: 'Readiness',
       liveQualifiedRuns: 'Qualified runs：',
       liveQualifiedPasses: 'Qualified consecutive passes：',
+      liveRemainingQualifiedRuns: 'Remaining qualified runs：',
+      liveRemainingQualifiedPassGap: 'Remaining qualified pass gap：',
       liveUpdatedAt: 'Updated：',
       liveConfidenceLatest: 'Latest Evidence',
       liveConfidenceEvidence: 'Mainline evidence',
@@ -344,6 +350,8 @@ const copy = computed(() => props.locale === 'zh'
       liveRemoteNoiseRuns: 'Non-qualified remote runs：',
       liveConfidenceLink: '打开开发进度页',
       liveConfidenceMilestonesLink: '查看里程碑明细',
+      liveConfidenceVerificationLink: '真机验证报告',
+      liveConfidencePlanLink: '倒计时实现计划',
       decisionLabel: '判定与取舍',
       advantagesLabel: '优势',
       costsLabel: '成本 / 风险',
@@ -377,10 +385,12 @@ const copy = computed(() => props.locale === 'zh'
       developerProgressLabel: 'Developer Progress',
       liveConfidenceLabel: 'Live Confidence',
       liveConfidenceTitle: 'Current published progress',
-      liveConfidenceBody: 'The roadmap home page now exposes the synced confidence-readiness snapshot directly, so developers can see the latest qualified mainline evidence, latest visible run, and visibility-only noise split without leaving this page.',
+      liveConfidenceBody: 'The roadmap home page now exposes the synced confidence-readiness snapshot directly, so developers can see the latest qualified mainline evidence, latest visible run, visibility-only noise split, and the remaining qualified-run countdown without leaving this page.',
       liveConfidenceReadiness: 'Readiness',
       liveQualifiedRuns: 'Qualified runs:',
       liveQualifiedPasses: 'Qualified consecutive passes:',
+      liveRemainingQualifiedRuns: 'Remaining qualified runs:',
+      liveRemainingQualifiedPassGap: 'Remaining qualified pass gap:',
       liveUpdatedAt: 'Updated:',
       liveConfidenceLatest: 'Latest Evidence',
       liveConfidenceEvidence: 'Mainline evidence',
@@ -394,6 +404,8 @@ const copy = computed(() => props.locale === 'zh'
       liveRemoteNoiseRuns: 'Non-qualified remote runs:',
       liveConfidenceLink: 'Open Development Progress',
       liveConfidenceMilestonesLink: 'Open Milestones Detail',
+      liveConfidenceVerificationLink: 'Open Verification Report',
+      liveConfidencePlanLink: 'Open Countdown Plan',
       decisionLabel: 'Decision and trade-off',
       advantagesLabel: 'Advantages',
       costsLabel: 'Costs / Risks',
@@ -449,6 +461,9 @@ const confidenceUpdatedAt = computed(() => formatTimestamp(confidenceProgress.up
 const confidenceLatestQualifiedRun = computed(() => formatRun(confidenceProgress.latestQualifiedRun))
 const confidenceLatestQualifiedSha = computed(() => formatSha(confidenceProgress.latestQualifiedRun))
 const confidenceLatestVisibleRun = computed(() => formatRun(confidenceProgress.latestRun))
+const countdownPlanSourceLink = githubSourceLink(
+  'docs/plans/2026-04-19-portmanager-m2-confidence-promotion-countdown-plan.md'
+)
 
 function stageLabel(stage: string) {
   if (stage === 'now') return 'Now'

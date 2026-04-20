@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-20 | Version: v0.5.12-node24-compatibility-trial
+> Updated: 2026-04-20 | Version: v0.5.13-confidence-countdown-sync
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -76,7 +76,7 @@ Milestone 1 is only accepted when all of the following become true:
 - `Confidence-history sync slice`: complete. `pnpm milestone:sync:confidence-history` now imports completed `mainline-acceptance` bundle history from GitHub Actions into local readiness review with deduped entries and the same shared readiness math.
 - `Confidence-review-signal slice`: complete. Synced and local confidence summaries now separate `Latest Run` from `Latest Qualified Run` and count visibility-only local versus non-qualified remote noise, so developer review keeps real mainline evidence visible after local reruns.
 - `Confidence-progress-page slice`: complete. The docs site now publishes a first-class development-progress page from generated confidence data and surfaces the same live counters on roadmap home.
-- `Next lane`: Milestone 2 confidence-readiness maintenance on the same live host / rule / policy slice by reviewing the synced summary's latest-qualified signal and public development-progress page, keeping qualified history green, and narrowing milestone wording only when the evidence justifies it.
+- `Next lane`: Milestone 2 confidence-readiness countdown maintenance on the same live host / rule / policy slice by reviewing the synced summary's latest-qualified signal, verification report, and public development-progress page, keeping qualified history green, and waiting for the final `2` qualified runs before narrowing milestone wording.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -121,7 +121,7 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: `pnpm milestone:sync:confidence-history` now lets developers import those completed GitHub Actions bundles back into local readiness review with authenticated `gh`, deduped entries, and the same shared readiness summary.
 - Verified now: the synced/local summary now persists `latestQualifiedRun`, shows a visibility breakdown for qualified mainline versus visibility-only noise, and keeps the latest mainline evidence readable even when newer local runs exist.
 - Verified now: the docs site now publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress` from generated milestone confidence data, and roadmap home previews the same readiness snapshot for public developer review.
-- Fresh real-machine developer-review proof on `2026-04-18`: `pnpm milestone:verify:confidence` passed on Windows, `pnpm milestone:sync:confidence-history -- --limit 20` imported one qualified `mainline-acceptance` run through authenticated `gh`, and the synced summary now truthfully reports `building-history` with `1/7` qualified runs and `1/3` qualified consecutive passes.
+- Fresh confidence-countdown refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported 5 qualified `mainline-acceptance` runs through authenticated `gh`, `docs:generate:refresh-confidence` republished the tracked docs artifact, and the synced summary now truthfully reports `building-history` with `5/7` qualified runs, `5/3` qualified consecutive passes, and `2` remaining qualified runs. The latest qualified run is `24646210070/1` on `1338fb8998d1`.
 - Fresh runtime-transition proof on `2026-04-20`: forcing GitHub workflow JavaScript actions onto Node 24 did not break `mainline-acceptance` or `docs-pages`; the remaining Node 20 deprecation annotations now come from GitHub official action metadata rather than repo-local workflow drift.
 - Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now sustained qualified green history and milestone-language review rather than invention of more reporting surfaces or review-signal repair.
 - Milestone 2 still remains in progress until the qualified history stays green long enough for the synced readiness evidence and human review to justify narrower reliability language.

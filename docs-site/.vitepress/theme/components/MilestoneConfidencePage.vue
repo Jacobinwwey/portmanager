@@ -143,7 +143,7 @@
       </div>
     </article>
 
-    <div class="pm-docs-grid two">
+    <div class="pm-docs-grid three pm-progress-grid">
       <article class="pm-callout-card">
         <div class="pm-card-header">
           <div>
@@ -154,6 +154,24 @@
         <ul class="pm-progress-list">
           <li v-for="item in reviewChecklist" :key="item">{{ item }}</li>
         </ul>
+      </article>
+
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
+            <span class="pm-kicker">{{ copy.currentDirectionKicker }}</span>
+            <h3>{{ copy.currentDirectionTitle }}</h3>
+          </div>
+          <span class="pm-badge next">{{ copy.currentDirectionEvidence }}</span>
+        </div>
+        <ul class="pm-progress-list">
+          <li v-for="item in currentDirectionSummary" :key="item">{{ item }}</li>
+        </ul>
+        <div class="pm-doc-links">
+          <VPLink v-for="item in currentDirectionDocs" :key="item.href" class="pm-doc-link" :href="item.href">
+            {{ item.label }}
+          </VPLink>
+        </div>
       </article>
 
       <article class="pm-callout-card">
@@ -180,7 +198,7 @@ import { computed } from 'vue'
 import { VPLink } from 'vitepress/theme'
 
 import { milestoneConfidenceProgress as progress } from '../../../data/milestone-confidence-progress'
-import { docMeta, type LocaleCode } from '../../../data/docs'
+import { docMeta, githubSourceLink, type LocaleCode } from '../../../data/docs'
 
 type ProgressRun = (typeof progress.latestRun)
 
@@ -207,6 +225,12 @@ const copy = computed(() => props.locale === 'zh'
       recentRunsTitle: '最近运行',
       reviewChecklistKicker: 'Developer Review',
       reviewChecklistTitle: '开发者复核动作',
+      currentDirectionKicker: 'Current Direction',
+      currentDirectionTitle: '当前倒计时方向',
+      currentDirectionEvidence: 'Countdown',
+      currentDirectionRequirementsLink: '倒计时需求文档',
+      currentDirectionPlanLink: '倒计时实现计划',
+      currentDirectionVerificationLink: '真机验证报告',
       sourceFilesKicker: 'Source Files',
       sourceFilesTitle: '当前公开页面数据来源',
       summaryFile: 'Summary：',
@@ -269,6 +293,12 @@ const copy = computed(() => props.locale === 'zh'
       recentRunsTitle: 'Recent runs',
       reviewChecklistKicker: 'Developer Review',
       reviewChecklistTitle: 'Developer review actions',
+      currentDirectionKicker: 'Current Direction',
+      currentDirectionTitle: 'Current countdown direction',
+      currentDirectionEvidence: 'Countdown',
+      currentDirectionRequirementsLink: 'Countdown requirements',
+      currentDirectionPlanLink: 'Countdown plan',
+      currentDirectionVerificationLink: 'Verification report',
       sourceFilesKicker: 'Source Files',
       sourceFilesTitle: 'Current public page inputs',
       summaryFile: 'Summary:',
@@ -337,20 +367,58 @@ const qualifiedScopeLabel = computed(
   () => `${progress.readiness.qualifiedEvents.join(', ')} on ${progress.readiness.requiredRef}`
 )
 
+const latestQualifiedRunLabel = computed(() => {
+  if (!progress.latestQualifiedRun) {
+    return copy.value.noQualifiedRun
+  }
+
+  return runLabel(progress.latestQualifiedRun)
+})
+
 const reviewChecklist = computed(() => props.locale === 'zh'
   ? [
       '先在 GitHub Actions 查看 `mainline-acceptance` job summary，再回到这个页面核对相同计数。',
       '在本地主线执行 `pnpm milestone:sync:confidence-history -- --limit 20`，把 completed mainline bundle 导回 `.portmanager/reports/`。',
       '优先读取 `Latest Qualified Run` 和 visibility breakdown，再决定里程碑文案是否允许继续收窄。',
-      '继续保持 `pnpm milestone:verify:confidence` 与 `pnpm acceptance:verify` 为绿，直到 readiness 真正达到 `promotion-ready`。'
+      `连续 pass 门槛已经满足；继续保持 \`pnpm milestone:verify:confidence\` 与 \`pnpm acceptance:verify\` 为绿，直到最后 ${progress.readiness.remainingQualifiedRuns} 次 qualified runs 到位。`
     ]
   : [
       'Read the GitHub Actions `mainline-acceptance` job summary first, then confirm the same counters on this page.',
       'Run `pnpm milestone:sync:confidence-history -- --limit 20` on local main to pull completed mainline bundles back into `.portmanager/reports/`.',
       'Use `Latest Qualified Run` plus the visibility breakdown before deciding whether milestone wording can narrow further.',
-      'Keep both `pnpm milestone:verify:confidence` and `pnpm acceptance:verify` green until readiness truly reaches `promotion-ready`.'
+      `The pass-streak gate is already satisfied; keep both \`pnpm milestone:verify:confidence\` and \`pnpm acceptance:verify\` green until the final ${progress.readiness.remainingQualifiedRuns} qualified runs land.`
     ]
 )
+
+const currentDirectionSummary = computed(() => props.locale === 'zh'
+  ? [
+      `当前公开状态仍为 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
+      `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；连续 pass 门槛已经满足。`,
+      `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}，还剩 ${progress.readiness.remainingQualifiedRuns} 次 qualified runs。`,
+      '里程碑文案只能在 qualified-run 计数达到 7/7 之后继续收窄。'
+    ]
+  : [
+      `Current public status remains \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
+      `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the pass-streak gate is satisfied.`,
+      `The latest qualified mainline run is ${latestQualifiedRunLabel.value}, and ${progress.readiness.remainingQualifiedRuns} qualified runs still remain.`,
+      'Milestone wording should narrow only after the qualified-run counter reaches 7/7.'
+    ]
+)
+
+const currentDirectionDocs = computed(() => [
+  {
+    href: githubSourceLink('docs/brainstorms/2026-04-19-portmanager-m2-confidence-promotion-countdown-requirements.md'),
+    label: copy.value.currentDirectionRequirementsLink
+  },
+  {
+    href: githubSourceLink('docs/plans/2026-04-19-portmanager-m2-confidence-promotion-countdown-plan.md'),
+    label: copy.value.currentDirectionPlanLink
+  },
+  {
+    href: docMeta(props.locale, 'real-machine-verification-report').link,
+    label: copy.value.currentDirectionVerificationLink
+  }
+])
 
 function formatTimestamp(value: string | null) {
   if (!value) {

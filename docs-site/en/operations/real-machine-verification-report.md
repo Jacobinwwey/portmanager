@@ -12,14 +12,14 @@ status: active
 ---
 > Source of truth: `docs/operations/portmanager-real-machine-verification-report.md`
 > Audience: `shared` | Section: `operations` | Status: `active`
-> Updated: 2026-04-20 | Version: v0.2.0-mainline-acceptance-node24-trial
+> Updated: 2026-04-20 | Version: v0.2.1-confidence-countdown-sync
 ### Purpose
 This document freezes the current real-machine verification report for PortManager.
 It exists so that acceptance truth, confidence truth, and docs-publication truth are recorded in one place instead of being inferred from scattered progress notes.
 
 ### Verification session
 The latest recorded verification session for this report happened on `2026-04-20`.
-It combined a Windows development-machine replay against the latest local `main` with a GitHub-hosted confirmation pass after forcing JavaScript-based workflow actions onto Node 24.
+It combined a Windows development-machine replay against the latest local `main` with a GitHub-hosted confirmation pass after forcing JavaScript-based workflow actions onto Node 24, then a latest-main sync refresh that republished the tracked confidence-progress artifact from the completed `mainline-acceptance` history.
 
 Commands executed:
 - `corepack pnpm acceptance:verify`
@@ -54,14 +54,17 @@ Commands executed:
 - Local acceptance gate: passed
 - Local confidence routine: passed
 - Synced mainline evidence: imported successfully
-- Imported qualified workflow run: `24595022905/1`
+- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`
 - Imported qualified workflow: `mainline-acceptance`
 - Imported qualified event: `push`
 - Current published readiness state: `building-history`
-- Current published qualified runs: `1/7`
-- Current published qualified consecutive passes: `1/3`
-- Current published tracked runs: `5`
-- Current published local visibility-only runs: `4`
+- Current published qualified runs: `5/7`
+- Current published qualified consecutive passes: `5/3`
+- Current published remaining qualified runs: `2`
+- Current published tracked runs: `11`
+- Current published local visibility-only runs: `6`
+- Current published latest qualified run: `24646210070/1`
+- Current published latest qualified SHA: `1338fb8998d1`
 - GitHub-hosted `mainline-acceptance` run: `24645898239` passed
 - GitHub-hosted `docs-pages` run: `24645898212` passed
 - Node 24 forced-action trial: passed
@@ -73,6 +76,7 @@ Commands executed:
 - The docs publication gate is also complete and currently healthy on GitHub Pages after the Node 24 forcing trial.
 - Milestone 2 confidence maintenance is real and operational, but promotion criteria are not yet met.
 - The current truthful public wording remains `building-history`, not `promotion-ready`.
+- The consecutive-pass gate is already satisfied; the remaining public countdown is `2` more qualified mainline runs.
 - The latest visible local run is intentionally separated from the latest qualified mainline run, so local reruns no longer erase mainline review evidence.
 - The remaining Node 20 deprecation annotations are now upstream-only warning debt in GitHub official actions; they no longer indicate a repo-local acceptance or publication failure.
 

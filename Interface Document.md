@@ -1,7 +1,7 @@
 # Interface Document
 
-Updated: 2026-04-18
-Version: v0.3.10-real-machine-verification-publication
+Updated: 2026-04-20
+Version: v0.3.11-confidence-countdown-sync
 
 ## English
 
@@ -61,11 +61,11 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - Fresh local proof on `2026-04-17`: `pnpm acceptance:verify` passes after the Unit 4 agent-service delivery and Unit 5 docs sync.
-- Fresh Windows real-machine proof on `2026-04-18`: `pnpm acceptance:verify` and `pnpm milestone:verify:confidence` both passed on the latest `main`, and `pnpm milestone:sync:confidence-history -- --limit 20` successfully imported one qualified `mainline-acceptance` run into local review.
+- Fresh countdown refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported 5 qualified `mainline-acceptance` runs into local review, `docs:generate:refresh-confidence` republished the tracked docs artifact, and the current latest qualified run became `24646210070/1` on `1338fb8998d1`.
 - Fresh verification hardening on `2026-04-18`: development-progress docs validation now matches `scripts/docs/extract-locales.mjs` by accepting the committed generated confidence snapshot when `.portmanager` history is absent, so a fresh machine no longer fails the standing gate on an ignored local-only file.
 - Fresh verification hardening on `2026-04-18`: the same development-progress docs validation also no longer requires committed docs-site progress data to match a newer ignored local `.portmanager` history snapshot, so the standing gate remains stable until docs generation is intentionally rerun.
 - The confidence routine extends that baseline with the remote-backup replay proof on the same accepted live slice. It does **not** mean Milestone 2 reliability hardening is complete yet; repeated green history is still required.
-- Current readiness truth after that sync remains `building-history` with `1/7` qualified runs and `1/3` qualified consecutive passes, so Milestone 2 promotion language must remain conservative.
+- Current readiness truth after that sync remains `building-history` with `5/7` qualified runs and `5/3` qualified consecutive passes. The pass-streak gate is already satisfied, but `2` qualified runs still remain, so Milestone 2 promotion language must remain conservative.
 
 ### Current delivery status
 - `Unit 1`: complete. Controller `hosts`, `bridge-rules`, and `exposure-policies` now exist as real source-of-truth resources.
@@ -83,7 +83,7 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 slice shipped`: `pnpm milestone:sync:confidence-history` now lets developers pull completed `mainline-acceptance` bundle history back into local readiness review with authenticated `gh`, deduped entries, and the same shared readiness summary.
 - `Milestone 2 slice shipped`: synced and local confidence summaries now separate `Latest Run` from `Latest Qualified Run` and count visibility-only local versus non-qualified remote runs, so developer review stays truthful after local reruns.
 - `Milestone 2 slice shipped`: the docs site now publishes the same synced confidence snapshot as a first-class development-progress page and roadmap-home preview for public developer review.
-- `Next lane`: Milestone 2 confidence-readiness maintenance on the same live host / rule / policy slice by reviewing the synced summary's latest-qualified signal and public progress page, keeping qualified history green, and narrowing milestone wording only when the evidence justifies it.
+- `Next lane`: Milestone 2 confidence-readiness countdown maintenance on the same live host / rule / policy slice by reviewing the synced summary's latest-qualified signal, verification report, and public progress page, keeping qualified history green, and waiting for the final `2` qualified runs before narrowing milestone wording.
 
 ## 中文
 
@@ -143,11 +143,11 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 本地最新证明也发生在 `2026-04-17`：Unit 4 agent-service 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新通过。
-- `2026-04-18` 的 Windows 真机证明也已经成立：最新 `main` 上的 `pnpm acceptance:verify` 与 `pnpm milestone:verify:confidence` 均已通过，`pnpm milestone:sync:confidence-history -- --limit 20` 也已成功把 1 次 qualified `mainline-acceptance` 运行导入本地复核。
+- `2026-04-20` 的倒计时刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已成功把 5 次 qualified `mainline-acceptance` 运行导入本地复核，`docs:generate:refresh-confidence` 也已把被跟踪 docs 产物刷新到同一份同步状态；当前最新 qualified run 已更新为 `24646210070/1`，对应 `1338fb8998d1`。
 - `2026-04-18` 的验证加固也已经完成：development-progress docs 校验现在已经与 `scripts/docs/extract-locales.mjs` 的发布契约保持一致，在 `.portmanager` 历史缺失时会接受已提交的 generated confidence snapshot，因此一台全新的机器不再因为一个被忽略的本地文件而误报 gate 失败。
 - `2026-04-18` 的验证加固还继续补齐了一层：同一条 development-progress docs 校验不再要求已提交的 docs-site progress data 必须与一个更新的、被忽略的本地 `.portmanager` 历史快照完全相等，因此在未主动重跑 docs 生成前，standing gate 仍然保持稳定。
 - 这条 confidence routine 会在同一条已验收 live 切片上继续叠加 remote-backup replay proof，但它**并不**意味着 Milestone 2 可靠性加固已经完成；仍然需要持续为绿的历史。
-- 同步后的当前 readiness 真相仍然是 `building-history`，进度为 `1/7` qualified runs 与 `1/3` qualified consecutive passes，因此 Milestone 2 的提升文案仍需保持克制。
+- 同步后的当前 readiness 真相仍然是 `building-history`，进度为 `5/7` qualified runs 与 `5/3` qualified consecutive passes；连续 pass 门槛已经满足，但还剩 `2` 次 qualified runs，因此 Milestone 2 的提升文案仍需保持克制。
 
 ### 当前交付状态
 - `Unit 1`：已完成。controller 的 `hosts`、`bridge-rules`、`exposure-policies` 真源资源已经落地。
@@ -164,4 +164,4 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 切片已交付`：`pnpm milestone:sync:confidence-history` 现在已经允许开发者通过已认证 `gh` 把 completed `mainline-acceptance` bundle history 导回本地 readiness review，并保持与同一套 summary 计算逻辑一致。
 - `Milestone 2 切片已交付`：同步后与本地的 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计本地 visibility-only 与非 qualified 远端 run，让开发者在本地 rerun 之后仍然能看到真实主线证据。
 - `Milestone 2 切片已交付`：docs-site 现在也会把同一份同步后的 confidence snapshot 发布成一级开发者进度页面，并在 roadmap 首页直接公开预览。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 维护：复核同步后 summary 的 latest-qualified 信号和公开 progress page、保持 qualified history 持续转绿，并且只在证据足够时收窄里程碑文案。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 倒计时维护：复核同步后 summary 的 latest-qualified 信号、验证报告与公开 progress page、保持 qualified history 持续转绿，并等最后 `2` 次 qualified runs 到位后再收窄里程碑文案。
