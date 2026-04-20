@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-20
-Version: v0.5.15-confidence-review-helper
+Version: v0.5.17-confidence-review-helper
 
 ## English
 
@@ -94,6 +94,8 @@ Version: v0.5.15-confidence-review-helper
 - [x] Land confidence-review-digest implementation plan: `docs/plans/2026-04-20-portmanager-m2-confidence-review-digest-plan.md`
 - [x] Land confidence-promotion-ready-wording requirements doc: `docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-ready-wording-requirements.md`
 - [x] Land confidence-promotion-ready-wording implementation plan: `docs/plans/2026-04-20-portmanager-m2-confidence-promotion-ready-wording-plan.md`
+- [x] Land confidence-promotion-review-helper requirements doc: `docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-review-helper-requirements.md`
+- [x] Land confidence-promotion-review-helper implementation plan: `docs/plans/2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -187,4 +189,6 @@ Version: v0.5.15-confidence-review-helper
 - [x] 落盘 confidence-review-digest 实现计划：`docs/plans/2026-04-20-portmanager-m2-confidence-review-digest-plan.md`
 - [x] 落盘 confidence-promotion-ready-wording 需求文档：`docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-ready-wording-requirements.md`
 - [x] 落盘 confidence-promotion-ready-wording 实现计划：`docs/plans/2026-04-20-portmanager-m2-confidence-promotion-ready-wording-plan.md`
+- [x] 落盘 confidence-promotion-review-helper 需求文档：`docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-review-helper-requirements.md`
+- [x] 落盘 confidence-promotion-review-helper 实现计划：`docs/plans/2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

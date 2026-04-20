@@ -419,7 +419,7 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `当前公开状态已经是 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
         `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；promotion 门槛已经满足。`,
-        '默认复核顺序保持为先同步 history、再执行 `pnpm milestone:review:confidence`，只在人工复核同意时才用显式刷新命令更新公开快照。',
+        '默认复核顺序已经收敛为执行 `pnpm milestone:review:promotion-ready -- --limit 20`，由 helper 内部同步 history 并写出 `pnpm milestone:review:confidence`，只在人工复核同意时才用显式刷新命令更新公开快照。',
         `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前主线已从倒计时积累收窄为文案复核与 gate 持续健康，而不是继续补 readiness 脚手架。`
       ]
     : [
@@ -432,7 +432,7 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `Current public status is now \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
         `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the promotion threshold is met.`,
-        'The default review flow stays sync history, run `pnpm milestone:review:confidence`, then use the explicit refresh command only when human review agrees that the public snapshot should move.',
+        'The default review flow now starts with `pnpm milestone:review:promotion-ready -- --limit 20`, letting the helper sync history and write `pnpm milestone:review:confidence` before any explicit refresh decision.',
         `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active lane has narrowed from countdown accumulation to wording review plus sustained gate health.`
       ]
     : [
@@ -445,11 +445,11 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
 
 const currentDirectionDocs = computed(() => [
   {
-    href: githubSourceLink('docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-ready-wording-requirements.md'),
+    href: githubSourceLink('docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-review-helper-requirements.md'),
     label: copy.value.currentDirectionRequirementsLink
   },
   {
-    href: githubSourceLink('docs/plans/2026-04-20-portmanager-m2-confidence-promotion-ready-wording-plan.md'),
+    href: githubSourceLink('docs/plans/2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan.md'),
     label: copy.value.currentDirectionPlanLink
   },
   {
