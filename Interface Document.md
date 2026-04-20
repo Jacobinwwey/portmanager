@@ -1,7 +1,7 @@
 # Interface Document
 
 Updated: 2026-04-20
-Version: v0.3.13-confidence-promotion-ready
+Version: v0.3.14-confidence-review-helper
 
 ## English
 
@@ -63,11 +63,11 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - Fresh local proof on `2026-04-17`: `pnpm acceptance:verify` passes after the Unit 4 agent-service delivery and Unit 5 docs sync.
-- Fresh promotion-ready publication refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported 7 qualified `mainline-acceptance` runs into local review, `pnpm milestone:review:confidence` first exposed published countdown drift, `docs:generate:refresh-confidence` then republished the tracked docs artifact, and the current latest qualified run is `24647442700/1` on `ddc15a3116d3`.
+- Fresh promotion-ready publication refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported enough qualified `mainline-acceptance` runs into local review to meet the promotion threshold, `pnpm milestone:review:confidence` first exposed published countdown drift, and `docs:generate:refresh-confidence` then republished the tracked docs artifact. Exact live counters and the latest qualified run now live in the generated development-progress surface plus the tracked confidence artifact, not as brittle interface-doc literals.
 - Fresh verification hardening on `2026-04-18`: development-progress docs validation now matches `scripts/docs/extract-locales.mjs` by accepting the committed generated confidence snapshot when `.portmanager` history is absent, so a fresh machine no longer fails the standing gate on an ignored local-only file.
 - Fresh verification hardening on `2026-04-18`: the same development-progress docs validation also no longer requires committed docs-site progress data to match a newer ignored local `.portmanager` history snapshot, so the standing gate remains stable until docs generation is intentionally rerun.
 - The confidence routine extends that baseline with the remote-backup replay proof on the same accepted live slice. It does **not** mean Milestone 2 reliability wording can broaden automatically; continued green history and deliberate human review are still required.
-- Current readiness truth after that sync is now `promotion-ready` with `7/7` qualified runs and `7/3` qualified consecutive passes. The default local review flow stays sync history, run `pnpm milestone:review:confidence`, refresh the tracked public snapshot only through the explicit docs command when review agrees, and then use human judgment to narrow milestone wording. The countdown is closed, so the remaining work is sustained gate health and deliberate wording review rather than more readiness accumulation.
+- Current readiness truth after that sync is now `promotion-ready` with promotion thresholds met. The default local review flow now has one repo-native helper, `pnpm milestone:review:promotion-ready -- --limit 20`, which syncs history and writes the review digest before any explicit refresh decision; the tracked public snapshot still moves only through the explicit docs command when review agrees. Exact live counters stay on the development-progress page and tracked confidence artifact, while this interface guide keeps the threshold-met conclusion stable.
 
 ### Current delivery status
 - `Unit 1`: complete. Controller `hosts`, `bridge-rules`, and `exposure-policies` now exist as real source-of-truth resources.
@@ -148,11 +148,11 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 本地最新证明也发生在 `2026-04-17`：Unit 4 agent-service 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新通过。
-- `2026-04-20` 的 promotion-ready 发布刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已成功把 7 次 qualified `mainline-acceptance` 运行导入本地复核，`pnpm milestone:review:confidence` 先暴露公开倒计时漂移，`docs:generate:refresh-confidence` 随后把被跟踪 docs 产物刷新到同一份同步状态；当前最新 qualified run 已更新为 `24647442700/1`，对应 `ddc15a3116d3`。
+- `2026-04-20` 的 promotion-ready 发布刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已成功把足够多的 qualified `mainline-acceptance` 运行导入本地复核以满足 promotion 门槛，`pnpm milestone:review:confidence` 先暴露公开倒计时漂移，`docs:generate:refresh-confidence` 随后把被跟踪 docs 产物刷新到同一份同步状态；精确实时计数与最新 qualified run 现在统一以下发到 development-progress 页面与被跟踪 confidence artifact 为准，而不再写死在接口说明里。
 - `2026-04-18` 的验证加固也已经完成：development-progress docs 校验现在已经与 `scripts/docs/extract-locales.mjs` 的发布契约保持一致，在 `.portmanager` 历史缺失时会接受已提交的 generated confidence snapshot，因此一台全新的机器不再因为一个被忽略的本地文件而误报 gate 失败。
 - `2026-04-18` 的验证加固还继续补齐了一层：同一条 development-progress docs 校验不再要求已提交的 docs-site progress data 必须与一个更新的、被忽略的本地 `.portmanager` 历史快照完全相等，因此在未主动重跑 docs 生成前，standing gate 仍然保持稳定。
 - 这条 confidence routine 会在同一条已验收 live 切片上继续叠加 remote-backup replay proof，但它**并不**意味着 Milestone 2 可靠性文案可以自动放宽；仍然需要持续为绿的历史与谨慎的人工复核。
-- 同步后的当前 readiness 真相现在已经是 `promotion-ready`，进度为 `7/7` qualified runs 与 `7/3` qualified consecutive passes；当前默认本地复核链路保持为先同步 history、再执行 `pnpm milestone:review:confidence`，只在人工复核同意时才用显式 docs 命令刷新公开快照，最后再判断里程碑文案如何继续收窄。倒计时已经闭环，因此剩余工作是持续保持 gate 健康并谨慎复核文案，而不是继续累积 readiness run。
+- 同步后的当前 readiness 真相现在已经是 `promotion-ready`，promotion 门槛也已经满足；当前默认本地复核链路也已经有一条 repo-native helper：`pnpm milestone:review:promotion-ready -- --limit 20`，它会先同步 history、再写出 review digest，然后才让开发者决定是否使用显式 docs 命令刷新公开快照。精确实时计数统一留给 development-progress 页面与被跟踪 confidence artifact，而这份接口说明保留更稳定的 threshold-met 结论。倒计时已经闭环，因此剩余工作是持续保持 gate 健康并谨慎复核文案，而不是继续累积 readiness run。
 
 ### 当前交付状态
 - `Unit 1`：已完成。controller 的 `hosts`、`bridge-rules`、`exposure-policies` 真源资源已经落地。

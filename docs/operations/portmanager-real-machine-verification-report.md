@@ -46,18 +46,18 @@ Commands executed:
 - Local acceptance gate: passed
 - Local confidence routine: passed
 - Synced mainline evidence: imported successfully
-- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`, `24646810439/1`, `24647442700/1`
+- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`, `24646810439/1`, `24647442700/1`, `24648118236/1`
 - Imported qualified workflow: `mainline-acceptance`
 - Imported qualified event: `push`
 - Current published readiness state: `promotion-ready`
-- Current published qualified runs: `7/7`
-- Current published qualified consecutive passes: `7/3`
+- Current published qualified runs: `8/7`
+- Current published qualified consecutive passes: `8/3`
 - Current published remaining qualified runs: `0`
-- Current published tracked runs: `13`
+- Current published tracked runs: `14`
 - Current published local visibility-only runs: `6`
-- Current published latest qualified run: `24647442700/1`
-- Current published latest qualified SHA: `ddc15a3116d3`
-- GitHub-hosted `mainline-acceptance` run: `24647442700` passed
+- Current published latest qualified run: `24648118236/1`
+- Current published latest qualified SHA: `40780ac3b283`
+- GitHub-hosted `mainline-acceptance` run: `24648118236` passed
 - GitHub-hosted `docs-pages` run: `24645898212` passed
 - Node 24 forced-action trial: passed
 - Remaining warning source: GitHub official action metadata still declaring `node20`
@@ -150,18 +150,18 @@ Commands executed:
 - 本地 acceptance gate：已通过
 - 本地 confidence routine：已通过
 - 主线 evidence 同步：已成功导入
-- 已导入并纳入跟踪的 qualified workflow runs：`24595022905/1`、`24645377989/1`、`24645746838/1`、`24645898239/1`、`24646210070/1`、`24646810439/1`、`24647442700/1`
+- 已导入并纳入跟踪的 qualified workflow runs：`24595022905/1`、`24645377989/1`、`24645746838/1`、`24645898239/1`、`24646210070/1`、`24646810439/1`、`24647442700/1`、`24648118236/1`
 - 已导入 qualified workflow：`mainline-acceptance`
 - 已导入 qualified event：`push`
 - 当前公开 readiness 状态：`promotion-ready`
-- 当前公开 qualified runs：`7/7`
-- 当前公开 qualified consecutive passes：`7/3`
+- 当前公开 qualified runs：`8/7`
+- 当前公开 qualified consecutive passes：`8/3`
 - 当前公开 remaining qualified runs：`0`
-- 当前公开 tracked runs：`13`
+- 当前公开 tracked runs：`14`
 - 当前公开 local visibility-only runs：`6`
-- 当前公开 latest qualified run：`24647442700/1`
-- 当前公开 latest qualified SHA：`ddc15a3116d3`
-- GitHub 托管 `mainline-acceptance` run：`24647442700` 已通过
+- 当前公开 latest qualified run：`24648118236/1`
+- 当前公开 latest qualified SHA：`40780ac3b283`
+- GitHub 托管 `mainline-acceptance` run：`24648118236` 已通过
 - GitHub 托管 `docs-pages` run：`24645898212` 已通过
 - Node 24 强制 action 试跑：已通过
 - 剩余 warning 来源：GitHub 官方 action 元数据仍声明 `node20`

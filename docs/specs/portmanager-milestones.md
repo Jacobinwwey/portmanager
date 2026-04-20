@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-20
-Version: v0.5.15-confidence-promotion-ready
+Version: v0.5.16-confidence-review-helper
 
 ## English
 
@@ -115,7 +115,7 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: `pnpm milestone:sync:confidence-history` now lets developers import those completed GitHub Actions bundles back into local readiness review with authenticated `gh`, deduped entries, and the same shared readiness summary.
 - Verified now: the synced/local summary now persists `latestQualifiedRun`, shows a visibility breakdown for qualified mainline versus visibility-only noise, and keeps the latest mainline evidence readable even when newer local runs exist.
 - Verified now: the docs site now publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress` from generated milestone confidence data, and roadmap home previews the same readiness snapshot for public developer review.
-- Fresh promotion-ready publication refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported 7 qualified `mainline-acceptance` runs through authenticated `gh`, `pnpm milestone:review:confidence` first exposed published countdown drift, `docs:generate:refresh-confidence` then republished the tracked docs artifact, and the synced plus published summary now truthfully report `promotion-ready` with `7/7` qualified runs, `7/3` qualified consecutive passes, and `0` remaining qualified runs. The latest qualified run is `24647442700/1` on `ddc15a3116d3`.
+- Fresh promotion-ready publication refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported enough qualified `mainline-acceptance` runs through authenticated `gh` to meet the promotion threshold, `pnpm milestone:review:confidence` first exposed published countdown drift, and `docs:generate:refresh-confidence` then republished the tracked docs artifact. Exact live counters and the latest qualified run now live on the generated development-progress page and tracked confidence artifact, while this roadmap spec keeps the broader threshold-met conclusion stable.
 - Fresh runtime-transition proof on `2026-04-20`: forcing GitHub workflow JavaScript actions onto Node 24 did not break `mainline-acceptance` or `docs-pages`; the remaining Node 20 deprecation annotations now come from GitHub official action metadata rather than repo-local workflow drift.
 - Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now sustained qualified green history and milestone-language review rather than invention of more reporting surfaces or review-signal repair.
 - Milestone 2 still remains in progress while human milestone-language review deliberately narrows public wording on top of the now promotion-ready evidence and the confidence routine stays green.
@@ -283,7 +283,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - 当前已验证：持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按照 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计推进进度，并把同一份 summary 直接发布到 workflow 页面给开发者查看。
 - 当前已验证：`pnpm milestone:sync:confidence-history` 现在允许开发者通过已认证 `gh` 把这些已完成 workflow bundle 导回本地 readiness review，并按稳定 history entry id 去重。
 - 当前已验证：docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 readiness 快照，方便开发者公开复核。
-- `2026-04-20` 的 promotion-ready 开发者复核刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已通过已认证 `gh` 成功导入 7 次 qualified `mainline-acceptance` 运行，`pnpm milestone:review:confidence` 先暴露公开倒计时漂移，`docs:generate:refresh-confidence` 再把被跟踪 docs 产物刷新到同一份同步状态；同步后的本地与公开 summary 现在都真实显示 readiness 为 `promotion-ready`，进度为 `7/7` qualified runs、`7/3` qualified consecutive passes，且剩余 qualified runs 为 `0`。
+- `2026-04-20` 的 promotion-ready 开发者复核刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已通过已认证 `gh` 成功导入足够多的 qualified `mainline-acceptance` 运行以满足 promotion 门槛，`pnpm milestone:review:confidence` 先暴露公开倒计时漂移，`docs:generate:refresh-confidence` 再把被跟踪 docs 产物刷新到同一份同步状态；同步后的本地与公开 summary 现在都持续保持 `promotion-ready`。精确实时计数改由 development-progress 页面与被跟踪 confidence artifact 发布，而这份 roadmap spec 保留更稳定的 threshold-met 结论。
 - `2026-04-20` 的运行时迁移证明也已经成立：在把 GitHub workflow JavaScript actions 强制运行到 Node 24 之后，`mainline-acceptance` 与 `docs-pages` 仍然保持通过；当前剩余的 Node 20 退役 annotation 现在已经收敛为 GitHub 官方 action 元数据层面的上游 warning，而不是 repo 本地 workflow 漂移。
 - 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架或继续修复 summary 复核语义，而是持续积累 qualified 绿历史，并根据同步后的证据与人工复核来决定文案是否继续收窄。
 - 里程碑 2 仍然处于进行中，但当前阶段已经从倒计时积累收窄为基于 promotion-ready 证据的人工文案复核与 gate 持续健康。

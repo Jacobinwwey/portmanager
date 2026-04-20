@@ -385,8 +385,8 @@ const reviewChecklist = computed(() => props.locale === 'zh'
   ? progress.readiness.status === 'promotion-ready'
     ? [
         '先在 GitHub Actions 查看 `mainline-acceptance` job summary，再回到这个页面核对同一份 promotion-ready 计数。',
-        '在本地主线执行 `pnpm milestone:sync:confidence-history -- --limit 20`，把 completed mainline bundle 导回 `.portmanager/reports/`。',
-        '执行 `pnpm milestone:review:confidence`；如果 digest 先暴露 countdown 漂移，再决定是否运行显式刷新命令。',
+        '在本地主线执行 `pnpm milestone:review:promotion-ready -- --limit 20`，用一条 repo-native helper 同步 completed mainline bundle 并写出 review digest。',
+        '如果 digest 先暴露 countdown 漂移，再决定是否运行显式刷新命令。',
         '只有在人工复核同意时，才执行 `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` 把公开快照推进到相同 truth。',
         'promotion 门槛已经满足；继续保持 `pnpm milestone:verify:confidence` 与 `pnpm acceptance:verify` 为绿，同时让人工里程碑文案复核逐步收窄表述。'
       ]
@@ -400,8 +400,8 @@ const reviewChecklist = computed(() => props.locale === 'zh'
   : progress.readiness.status === 'promotion-ready'
     ? [
         'Read the GitHub Actions `mainline-acceptance` job summary first, then confirm the same promotion-ready counters on this page.',
-        'Run `pnpm milestone:sync:confidence-history -- --limit 20` on local main to pull completed mainline bundles back into `.portmanager/reports/`.',
-        'Run `pnpm milestone:review:confidence`; if the digest exposes countdown drift first, decide whether the explicit refresh command should move the public artifact.',
+        'Run `pnpm milestone:review:promotion-ready -- --limit 20` on local main to sync completed mainline bundles and write the review digest in one repo-native step.',
+        'If the digest exposes countdown drift first, decide whether the explicit refresh command should move the public artifact.',
         'Only run `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` when human review agrees that the public snapshot should move to the same truth.',
         'The promotion threshold is already met; keep both `pnpm milestone:verify:confidence` and `pnpm acceptance:verify` green while human milestone-language review narrows wording deliberately.'
       ]

@@ -54,18 +54,18 @@ Commands executed:
 - Local acceptance gate: passed
 - Local confidence routine: passed
 - Synced mainline evidence: imported successfully
-- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`, `24646810439/1`, `24647442700/1`
+- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`, `24646810439/1`, `24647442700/1`, `24648118236/1`
 - Imported qualified workflow: `mainline-acceptance`
 - Imported qualified event: `push`
 - Current published readiness state: `promotion-ready`
-- Current published qualified runs: `7/7`
-- Current published qualified consecutive passes: `7/3`
+- Current published qualified runs: `8/7`
+- Current published qualified consecutive passes: `8/3`
 - Current published remaining qualified runs: `0`
-- Current published tracked runs: `13`
+- Current published tracked runs: `14`
 - Current published local visibility-only runs: `6`
-- Current published latest qualified run: `24647442700/1`
-- Current published latest qualified SHA: `ddc15a3116d3`
-- GitHub-hosted `mainline-acceptance` run: `24647442700` passed
+- Current published latest qualified run: `24648118236/1`
+- Current published latest qualified SHA: `40780ac3b283`
+- GitHub-hosted `mainline-acceptance` run: `24648118236` passed
 - GitHub-hosted `docs-pages` run: `24645898212` passed
 - Node 24 forced-action trial: passed
 - Remaining warning source: GitHub official action metadata still declaring `node20`
