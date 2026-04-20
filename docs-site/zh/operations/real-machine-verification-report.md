@@ -12,7 +12,7 @@ status: active
 ---
 > 真源文档：`docs/operations/portmanager-real-machine-verification-report.md`
 > Audience：`shared` | Section：`operations` | Status：`active`
-> Updated：2026-04-20 | Version：v0.2.2-confidence-review-digest
+> Updated：2026-04-20 | Version：v0.2.3-confidence-promotion-ready
 ### 用途
 这份文档用于冻结 PortManager 当前的真机验证报告。
 它的目标是把 acceptance 真相、confidence 真相与 docs 发布真相收束到同一个位置，而不是继续散落在不同的进度说明里。
@@ -54,29 +54,30 @@ status: active
 - 本地 acceptance gate：已通过
 - 本地 confidence routine：已通过
 - 主线 evidence 同步：已成功导入
-- 已导入并纳入跟踪的 qualified workflow runs：`24595022905/1`、`24645377989/1`、`24645746838/1`、`24645898239/1`、`24646210070/1`
+- 已导入并纳入跟踪的 qualified workflow runs：`24595022905/1`、`24645377989/1`、`24645746838/1`、`24645898239/1`、`24646210070/1`、`24646810439/1`、`24647442700/1`
 - 已导入 qualified workflow：`mainline-acceptance`
 - 已导入 qualified event：`push`
-- 当前公开 readiness 状态：`building-history`
-- 当前公开 qualified runs：`5/7`
-- 当前公开 qualified consecutive passes：`5/3`
-- 当前公开 remaining qualified runs：`2`
-- 当前公开 tracked runs：`11`
+- 当前公开 readiness 状态：`promotion-ready`
+- 当前公开 qualified runs：`7/7`
+- 当前公开 qualified consecutive passes：`7/3`
+- 当前公开 remaining qualified runs：`0`
+- 当前公开 tracked runs：`13`
 - 当前公开 local visibility-only runs：`6`
-- 当前公开 latest qualified run：`24646210070/1`
-- 当前公开 latest qualified SHA：`1338fb8998d1`
-- GitHub 托管 `mainline-acceptance` run：`24645898239` 已通过
+- 当前公开 latest qualified run：`24647442700/1`
+- 当前公开 latest qualified SHA：`ddc15a3116d3`
+- GitHub 托管 `mainline-acceptance` run：`24647442700` 已通过
 - GitHub 托管 `docs-pages` run：`24645898212` 已通过
 - Node 24 强制 action 试跑：已通过
 - 剩余 warning 来源：GitHub 官方 action 元数据仍声明 `node20`
+- 显式刷新后的 review digest：已对齐
 
 ### 当前结论
 - Milestone 1 的 accepted public-surface 真相仍然成立。
 - 常驻 acceptance 契约现在已经在本地 gate 与 GitHub 托管 gate 两端同时闭环，并且当前健康。
 - docs 发布 gate 也已经在 Node 24 强制试跑之后继续保持完整与健康。
-- Milestone 2 的 confidence 维护已经真实落地且可操作，但 promotion 条件仍未满足。
-- 当前对外公开的真实表述仍然必须是 `building-history`，不能写成 `promotion-ready`。
-- 连续 pass 门槛已经满足；当前对外公开的倒计时只剩 `2` 次 qualified mainline runs。
+- Milestone 2 的 confidence 维护已经真实落地且可操作，而且 promotion 条件现在已经满足。
+- 当前对外公开的真实表述已经在显式刷新之后进入 `promotion-ready`。
+- 当前已经允许人工里程碑文案复核；剩余公开主线是谨慎收窄文案并持续保持 gate 健康。
 - 最新可见 local run 现在被刻意与最新 qualified mainline run 分离，因此本地 rerun 不会再抹掉主线复核证据。
 - 当前剩余的 Node 20 退役 annotation 已经收敛为 GitHub 官方 action 的上游 warning debt，不再代表 repo 本地 acceptance 或 docs publication 失败。
 
@@ -105,7 +106,7 @@ status: active
   - 把 countdown 对齐状态与完整本地 visibility-only 漂移拆开汇报
   - 只在显式传入 `--require-published-countdown-match` 时才把公开倒计时不一致变成失败
 - digest 之后的发布规则：
-  - 只有当 digest 结论与人工复核都认为公开倒计时应该变化时，才刷新已跟踪 docs artifact
+  - 只有当 digest 结论与人工复核都认为公开快照应该变化时，才显式刷新已跟踪 docs artifact；`2026-04-20` 的 `promotion-ready` 快照就是按这个顺序重发的
 
 ### 复核协议
 - 在判断 readiness 累积时，先看 GitHub Actions `mainline-acceptance` summary。

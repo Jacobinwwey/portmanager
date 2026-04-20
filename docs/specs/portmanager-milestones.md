@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-20
-Version: v0.5.14-confidence-review-digest
+Version: v0.5.15-confidence-promotion-ready
 
 ## English
 
@@ -70,7 +70,7 @@ Milestone 1 is only accepted when all of the following become true:
 - `Confidence-review-signal slice`: complete. Synced and local confidence summaries now separate `Latest Run` from `Latest Qualified Run` and count visibility-only local versus non-qualified remote noise, so developer review keeps real mainline evidence visible after local reruns.
 - `Confidence-progress-page slice`: complete. The docs site now publishes a first-class development-progress page from generated confidence data and surfaces the same live counters on roadmap home.
 - `Confidence-review-digest slice`: complete. `pnpm milestone:review:confidence` now compares synced local readiness with the tracked public progress artifact, writes `.portmanager/reports/milestone-confidence-review.md`, separates countdown drift from visibility-only drift, and keeps strict published-countdown failure opt-in.
-- `Next lane`: Milestone 2 confidence-readiness countdown maintenance on the same live host / rule / policy slice by syncing completed history, running `pnpm milestone:review:confidence`, reviewing the verification report plus the public development-progress page, keeping qualified history green, and waiting for the final `2` qualified runs before narrowing milestone wording.
+- `Next lane`: Milestone 2 promotion-ready wording review on the same live host / rule / policy slice by syncing completed history, running `pnpm milestone:review:confidence`, refreshing the tracked public snapshot only through the explicit docs command when review agrees, reviewing the verification report plus the public development-progress page, and keeping qualified history green while human milestone-language review stays deliberate.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -115,10 +115,10 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: `pnpm milestone:sync:confidence-history` now lets developers import those completed GitHub Actions bundles back into local readiness review with authenticated `gh`, deduped entries, and the same shared readiness summary.
 - Verified now: the synced/local summary now persists `latestQualifiedRun`, shows a visibility breakdown for qualified mainline versus visibility-only noise, and keeps the latest mainline evidence readable even when newer local runs exist.
 - Verified now: the docs site now publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress` from generated milestone confidence data, and roadmap home previews the same readiness snapshot for public developer review.
-- Fresh confidence-countdown refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported 5 qualified `mainline-acceptance` runs through authenticated `gh`, `docs:generate:refresh-confidence` republished the tracked docs artifact, and the synced summary now truthfully reports `building-history` with `5/7` qualified runs, `5/3` qualified consecutive passes, and `2` remaining qualified runs. The latest qualified run is `24646210070/1` on `1338fb8998d1`.
+- Fresh promotion-ready publication refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported 7 qualified `mainline-acceptance` runs through authenticated `gh`, `pnpm milestone:review:confidence` first exposed published countdown drift, `docs:generate:refresh-confidence` then republished the tracked docs artifact, and the synced plus published summary now truthfully report `promotion-ready` with `7/7` qualified runs, `7/3` qualified consecutive passes, and `0` remaining qualified runs. The latest qualified run is `24647442700/1` on `ddc15a3116d3`.
 - Fresh runtime-transition proof on `2026-04-20`: forcing GitHub workflow JavaScript actions onto Node 24 did not break `mainline-acceptance` or `docs-pages`; the remaining Node 20 deprecation annotations now come from GitHub official action metadata rather than repo-local workflow drift.
 - Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now sustained qualified green history and milestone-language review rather than invention of more reporting surfaces or review-signal repair.
-- Milestone 2 still remains in progress until the qualified history stays green long enough for the synced readiness evidence and human review to justify narrower reliability language.
+- Milestone 2 still remains in progress while human milestone-language review deliberately narrows public wording on top of the now promotion-ready evidence and the confidence routine stays green.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.
@@ -239,7 +239,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - `Confidence review-signal 切片`：已完成。同步后与本地 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计本地 visibility-only 与非 qualified 远端噪声，让开发者在本地 rerun 之后仍然能看见真实主线证据。
 - `Confidence progress page 切片`：已完成。docs-site 现在会从生成后的 confidence 数据发布一级开发者进度页，并在 roadmap 首页显示相同的 live 计数。
 - `Confidence review digest 切片`：已完成。`pnpm milestone:review:confidence` 现在会把同步后的本地 readiness 与已跟踪公开 progress artifact 直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，区分 countdown 漂移与 visibility-only 漂移，并把严格公开倒计时检查保持为显式可选。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 倒计时加固：先同步 completed history、再执行 `pnpm milestone:review:confidence`，复核验证报告与公开 development-progress 页面、把 qualified history 持续转绿，并等最后 `2` 次 qualified runs 到位后再收窄里程碑文案。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：先同步 completed history、再执行 `pnpm milestone:review:confidence`，只在人工复核同意时用显式 docs 命令刷新公开快照，复核验证报告与公开 development-progress 页面，并把 qualified history 持续转绿。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
@@ -283,10 +283,10 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - 当前已验证：持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按照 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计推进进度，并把同一份 summary 直接发布到 workflow 页面给开发者查看。
 - 当前已验证：`pnpm milestone:sync:confidence-history` 现在允许开发者通过已认证 `gh` 把这些已完成 workflow bundle 导回本地 readiness review，并按稳定 history entry id 去重。
 - 当前已验证：docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 readiness 快照，方便开发者公开复核。
-- `2026-04-20` 的倒计时开发者复核刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已通过已认证 `gh` 成功导入 5 次 qualified `mainline-acceptance` 运行，`docs:generate:refresh-confidence` 也已把被跟踪 docs 产物刷新到同一份同步状态；同步后的 summary 现在真实显示 readiness 仍为 `building-history`，进度为 `5/7` qualified runs、`5/3` qualified consecutive passes，且只剩 `2` 次 qualified runs。
+- `2026-04-20` 的 promotion-ready 开发者复核刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已通过已认证 `gh` 成功导入 7 次 qualified `mainline-acceptance` 运行，`pnpm milestone:review:confidence` 先暴露公开倒计时漂移，`docs:generate:refresh-confidence` 再把被跟踪 docs 产物刷新到同一份同步状态；同步后的本地与公开 summary 现在都真实显示 readiness 为 `promotion-ready`，进度为 `7/7` qualified runs、`7/3` qualified consecutive passes，且剩余 qualified runs 为 `0`。
 - `2026-04-20` 的运行时迁移证明也已经成立：在把 GitHub workflow JavaScript actions 强制运行到 Node 24 之后，`mainline-acceptance` 与 `docs-pages` 仍然保持通过；当前剩余的 Node 20 退役 annotation 现在已经收敛为 GitHub 官方 action 元数据层面的上游 warning，而不是 repo 本地 workflow 漂移。
 - 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架或继续修复 summary 复核语义，而是持续积累 qualified 绿历史，并根据同步后的证据与人工复核来决定文案是否继续收窄。
-- 里程碑 2 仍然处于进行中，直到同步后的 readiness 证据与人工复核共同支持更收敛的可靠性文案。
+- 里程碑 2 仍然处于进行中，但当前阶段已经从倒计时积累收窄为基于 promotion-ready 证据的人工文案复核与 gate 持续健康。
 
 #### 可靠性推进规则
 - 里程碑 2 的推进必须建立在同一套 host/rule/policy 公共模型之上，而不是绕过里程碑 1 缺口。

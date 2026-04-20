@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-20 | Version：v0.5.14-confidence-review-digest
+> Updated：2026-04-20 | Version：v0.5.15-confidence-promotion-ready
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
@@ -76,7 +76,7 @@ status: active
 - `Confidence review-signal 切片`：已完成。同步后与本地 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计本地 visibility-only 与非 qualified 远端噪声，让开发者在本地 rerun 之后仍然能看见真实主线证据。
 - `Confidence progress page 切片`：已完成。docs-site 现在会从生成后的 confidence 数据发布一级开发者进度页，并在 roadmap 首页显示相同的 live 计数。
 - `Confidence review digest 切片`：已完成。`pnpm milestone:review:confidence` 现在会把同步后的本地 readiness 与已跟踪公开 progress artifact 直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，区分 countdown 漂移与 visibility-only 漂移，并把严格公开倒计时检查保持为显式可选。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 confidence-readiness 倒计时加固：先同步 completed history、再执行 `pnpm milestone:review:confidence`，复核验证报告与公开 development-progress 页面、把 qualified history 持续转绿，并等最后 `2` 次 qualified runs 到位后再收窄里程碑文案。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：先同步 completed history、再执行 `pnpm milestone:review:confidence`，只在人工复核同意时用显式 docs 命令刷新公开快照，复核验证报告与公开 development-progress 页面，并把 qualified history 持续转绿。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
@@ -120,10 +120,10 @@ status: active
 - 当前已验证：持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按照 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计推进进度，并把同一份 summary 直接发布到 workflow 页面给开发者查看。
 - 当前已验证：`pnpm milestone:sync:confidence-history` 现在允许开发者通过已认证 `gh` 把这些已完成 workflow bundle 导回本地 readiness review，并按稳定 history entry id 去重。
 - 当前已验证：docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 readiness 快照，方便开发者公开复核。
-- `2026-04-20` 的倒计时开发者复核刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已通过已认证 `gh` 成功导入 5 次 qualified `mainline-acceptance` 运行，`docs:generate:refresh-confidence` 也已把被跟踪 docs 产物刷新到同一份同步状态；同步后的 summary 现在真实显示 readiness 仍为 `building-history`，进度为 `5/7` qualified runs、`5/3` qualified consecutive passes，且只剩 `2` 次 qualified runs。
+- `2026-04-20` 的 promotion-ready 开发者复核刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已通过已认证 `gh` 成功导入 7 次 qualified `mainline-acceptance` 运行，`pnpm milestone:review:confidence` 先暴露公开倒计时漂移，`docs:generate:refresh-confidence` 再把被跟踪 docs 产物刷新到同一份同步状态；同步后的本地与公开 summary 现在都真实显示 readiness 为 `promotion-ready`，进度为 `7/7` qualified runs、`7/3` qualified consecutive passes，且剩余 qualified runs 为 `0`。
 - `2026-04-20` 的运行时迁移证明也已经成立：在把 GitHub workflow JavaScript actions 强制运行到 Node 24 之后，`mainline-acceptance` 与 `docs-pages` 仍然保持通过；当前剩余的 Node 20 退役 annotation 现在已经收敛为 GitHub 官方 action 元数据层面的上游 warning，而不是 repo 本地 workflow 漂移。
 - 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架或继续修复 summary 复核语义，而是持续积累 qualified 绿历史，并根据同步后的证据与人工复核来决定文案是否继续收窄。
-- 里程碑 2 仍然处于进行中，直到同步后的 readiness 证据与人工复核共同支持更收敛的可靠性文案。
+- 里程碑 2 仍然处于进行中，但当前阶段已经从倒计时积累收窄为基于 promotion-ready 证据的人工文案复核与 gate 持续健康。
 
 #### 可靠性推进规则
 - 里程碑 2 的推进必须建立在同一套 host/rule/policy 公共模型之上，而不是绕过里程碑 1 缺口。

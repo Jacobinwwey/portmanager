@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version, GitHub-backup, and remote-backup-replay slices, the canonical confidence routine, the durable confidence history bundle with run-trace metadata, the repo-native `pnpm milestone:sync:confidence-history` import path for local review, the explicit readiness signal on top of that bundle, the new qualified-review signal that separates latest mainline evidence from local visibility-only noise, the public development-progress page generated from that same synced evidence, and the remaining work to narrow milestone language from sustained qualified history on the same live agent-backed flow.',
-    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version、GitHub-backup 与 remote-backup-replay 切片、规范 confidence routine、带运行追踪元数据的持久 confidence history bundle、供本地复核使用的 repo-native `pnpm milestone:sync:confidence-history` 导入路径、建立在这组 bundle 之上的显式 readiness 信号、把真实主线证据与本地 visibility-only 噪声分开的 qualified-review signal、由同一份同步证据生成的公开 development-progress 页面，以及继续依据同一条 live agent 切片上持续累积的 qualified 历史来收窄里程碑文案的后续工作。'
+    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version, GitHub-backup, and remote-backup-replay slices, the canonical confidence routine, the durable confidence history bundle with run-trace metadata, the repo-native `pnpm milestone:sync:confidence-history` import path for local review, the explicit readiness signal on top of that bundle, the qualified-review signal that separates latest mainline evidence from local visibility-only noise, the public development-progress page generated from that same synced evidence, the deliberate publication-refresh path for the tracked confidence artifact, and the remaining work to keep promotion-ready milestone wording honest on the same live agent-backed flow.',
+    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version、GitHub-backup 与 remote-backup-replay 切片、规范 confidence routine、带运行追踪元数据的持久 confidence history bundle、供本地复核使用的 repo-native `pnpm milestone:sync:confidence-history` 导入路径、建立在这组 bundle 之上的显式 readiness 信号、把真实主线证据与本地 visibility-only 噪声分开的 qualified-review signal、由同一份同步证据生成的公开 development-progress 页面、被跟踪 confidence artifact 的显式发布刷新路径，以及继续在同一条 live agent 切片上把 promotion-ready 里程碑文案保持诚实的后续工作。'
   },
   buckets: [
     {
@@ -170,7 +170,7 @@ export const roadmapDeveloperProgress = {
           'Persisted confidence history now classifies `local-only`, `building-history`, and `promotion-ready`, measures progress against `7` qualified runs plus `3` consecutive qualified passes, and publishes the same summary in the GitHub Actions run page.',
           'Synced/local confidence summary now separates `Latest Run` from `Latest Qualified Run` and counts qualified mainline runs versus visibility-only local and non-qualified remote noise, so developer review no longer loses real mainline evidence after local reruns.',
           'The docs site now publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress` from generated milestone confidence data, and roadmap home previews the same live counters.',
-          'The latest sync refresh on 2026-04-20 moved the public countdown to `5/7` qualified runs, `5/3` qualified consecutive passes, and `2` remaining qualified runs; the latest qualified mainline run is `24646210070/1` on `1338fb8998d1`.',
+          'The latest promotion-ready refresh on 2026-04-20 moved the public snapshot to `promotion-ready` with `7/7` qualified runs, `7/3` qualified consecutive passes, and `0` remaining qualified runs; the latest qualified mainline run is `24647442700/1` on `ddc15a3116d3`.',
           'Milestone proof now shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.',
           'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
           'Configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and publishes explicit succeeded remote redundancy state across API, CLI, web, and dedicated reliability proof.',
@@ -187,7 +187,7 @@ export const roadmapDeveloperProgress = {
           '持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计进度，并把同一份 summary 发布到 GitHub Actions workflow 页面。',
           '同步后与本地 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计 qualified mainline run、本地 visibility-only 噪声、非 qualified 远端噪声，开发者在本地 rerun 之后也不会丢掉真实主线证据。',
           'docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 live 计数。',
-          '`2026-04-20` 的最新 sync refresh 已把公开倒计时推进到 `5/7` qualified runs、`5/3` qualified consecutive passes，且只剩 `2` 次 qualified runs；当前最新 qualified mainline run 为 `24646210070/1`，对应 `1338fb8998d1`。',
+          '`2026-04-20` 的最新 promotion-ready refresh 已把公开快照推进到 `promotion-ready`，达到 `7/7` qualified runs、`7/3` qualified consecutive passes，且剩余 qualified runs 为 `0`；当前最新 qualified mainline run 为 `24647442700/1`，对应 `ddc15a3116d3`。',
           'milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup/rollback 证据保持不变。',
           'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
           '当 GitHub backup 已配置时，controller backup bundle 现在会通过 GitHub Contents API 上传，并在 API、CLI、web 与专门的可靠性证明里显式暴露远端冗余成功状态。',
@@ -205,17 +205,17 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Milestone 2 reliability hardening is now the active lane, not Milestone 1 parity recovery.',
+          'Milestone 2 promotion-ready wording review is now the active lane, not Milestone 1 parity recovery and not more confidence scaffolding.',
           'Configured, failed, and local-only GitHub backup paths now all exist inside one durable replay proof on the same live slice; remaining work is confidence maintenance, not first delivery.',
           'Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host/rule/policy slice.',
-          'The remaining architecture gap is no longer proof orchestration, missing history scaffolding, missing local import plumbing, or missing review-signal truth; the canonical routine, persisted bundle, sync command, latest-qualified summary view, and public progress page already exist, and the remaining work is now the final `2` qualified mainline runs plus milestone-language review only when they land.',
+          'The remaining architecture gap is no longer proof orchestration, missing history scaffolding, missing local import plumbing, missing review-signal truth, or published-artifact drift; the canonical routine, persisted bundle, sync command, latest-qualified summary view, review digest, and public progress page already exist, and the remaining work is deliberate milestone-language review plus sustained gate health.',
           'Mainline evidence collection now keeps `pnpm acceptance:verify` on PRs while `push main`, `workflow_dispatch`, and the daily schedule run `pnpm milestone:verify:confidence`, restore/save the confidence history bundle, upload the bundle artifact, and publish the readiness summary for developers.'
         ],
         zh: [
-          '当前主线已经转到 Milestone 2 可靠性加固，而不再是 Milestone 1 一致性补洞。',
+          '当前主线已经转到 Milestone 2 的 promotion-ready 文案复核，而不再是 Milestone 1 一致性补洞，也不再是继续补 confidence 脚手架。',
           'configured、failed、local-only 三类 GitHub backup 路径现在都已经落在同一条 durable replay proof 的 live 切片上；剩余工作不再是首次交付，而是常态化维持与可信度加深。',
           'controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经在同一条 live host/rule/policy 切片上分组展示最新诊断、degraded diagnostics history 与 recovery-ready 成功证据。',
-          '剩余架构缺口已经不再是证明编排、历史脚手架缺失、本地导入路径缺失，或 summary 复核语义缺失；规范 confidence routine、持久 history bundle、sync 命令、latest-qualified summary 视图与公开 progress page 都已存在，剩余工作已经收窄为最后 `2` 次 qualified mainline runs，并且只在它们到位后收窄里程碑文案。',
+          '剩余架构缺口已经不再是证明编排、历史脚手架缺失、本地导入路径缺失、summary 复核语义缺失，或公开 artifact 漂移；规范 confidence routine、持久 history bundle、sync 命令、latest-qualified summary 视图、review digest 与公开 progress page 都已存在，剩余工作已经收窄为谨慎推进里程碑文案复核并持续保持 gate 健康。',
           'mainline evidence collection 现在会继续把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 路径上运行 `pnpm milestone:verify:confidence`、恢复并保存 confidence history bundle、上传 bundle artifact，并向开发者发布 readiness summary。'
         ]
       }
@@ -229,22 +229,24 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Keep Unit 0 green while the final `2` qualified mainline runs are collected.',
-          'Run `pnpm milestone:sync:confidence-history -- --limit 20` after completed mainline runs so local readiness review uses real workflow evidence instead of only local history; the current synced countdown is already `5/7` with the pass-streak gate satisfied.',
-          'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while the synced summary and human review drive milestone-language decisions.',
+          'Keep Unit 0 green now that the qualified-history threshold is met and the published state is `promotion-ready`.',
+          'Run `pnpm milestone:sync:confidence-history -- --limit 20` after completed mainline runs so local readiness review uses real workflow evidence instead of only local history; the current synced and published state is already `promotion-ready` at `7/7`, and the latest qualified run is `24647442700/1`.',
+          'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while synced summaries and human review drive milestone-language decisions.',
+          'Use `pnpm milestone:review:confidence` before any public wording move, and refresh the tracked confidence artifact only through `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` when review agrees.',
           'Review the workflow job summary, uploaded confidence-history bundle, synced local `.portmanager/reports/milestone-confidence-summary.md`, and the verification report together, and use `Latest Qualified Run` plus the visibility breakdown instead of raw CI logs to judge readiness accumulation.',
           'Protect the lighter Unit 0 branch gate while the heavier confidence routine keeps collecting evidence.',
           'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.',
-          'Keep Toward C deferred until Milestone 2 evidence becomes trustworthy.'
+          'Keep Toward C deferred even though promotion thresholds are met; this lane is wording review, not platform expansion.'
         ],
         zh: [
-          '继续把 Unit 0 保持为绿，并把最后 `2` 次 qualified mainline runs 收齐。',
-          '在主线出现已完成 run 之后执行 `pnpm milestone:sync:confidence-history -- --limit 20`，让本地 readiness 复核使用真实 workflow 证据，而不只依赖本地 history；当前已同步倒计时已经来到 `5/7`，连续 pass 门槛也已满足。',
+          '当前 promotion-ready 门槛已经满足，继续把 Unit 0 保持为绿。',
+          '在主线出现已完成 run 之后执行 `pnpm milestone:sync:confidence-history -- --limit 20`，让本地 readiness 复核使用真实 workflow 证据，而不只依赖本地 history；当前同步后与公开状态都已经到达 `promotion-ready` 的 `7/7`，最新 qualified run 为 `24647442700/1`。',
           '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，同时让同步后的 summary 与人工复核共同驱动里程碑文案决策。',
+          '在任何公开文案变动前先执行 `pnpm milestone:review:confidence`，并且只在人工复核同意时通过 `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` 刷新被跟踪 confidence artifact。',
           '优先同时查看 workflow job summary、上传后的 confidence-history bundle、同步后的本地 `.portmanager/reports/milestone-confidence-summary.md` 与验证报告，并直接使用 `Latest Qualified Run` 与 visibility breakdown，而不是继续只靠原始 CI 日志判断 readiness 积累。',
           '在更重的 confidence routine 继续收集证据时，保住更轻的 Unit 0 分支 gate 不被重新定义。',
           '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。',
-          '在 Milestone 2 证据真正可信之前，继续把 Toward C 保持为延后方向。'
+          '即使 promotion 门槛已经满足，也继续把 Toward C 保持为延后方向；当前主线是文案复核，而不是平台扩展。'
         ]
       }
     }
@@ -334,14 +336,14 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     id: 'm2',
     stage: 'next',
     title: { en: 'Milestone 2: Engineering Reliability', zh: '里程碑 2：Engineering Reliability' },
-    status: { en: 'Reliability Hardening In Progress', zh: '可靠性加固进行中' },
+    status: { en: 'Promotion-Ready Review', zh: 'Promotion-Ready 文案复核' },
     summary: {
-      en: 'Strengthen the accepted B-state slice until degraded handling, rollback confidence, remote-backup clarity, and drift visibility become operationally trustworthy across repeated real runs.',
-      zh: '把已经被接受的 B 状态切片继续强化到 degraded 处理、rollback 信心、远端备份清晰度与 drift 可见性都能在多次真实运行中值得信任。'
+      en: 'Strengthen the accepted B-state slice until degraded handling, rollback confidence, remote-backup clarity, and drift visibility become operationally trustworthy across repeated real runs; the confidence lane has now reached promotion-ready and moved into deliberate wording review.',
+      zh: '把已经被接受的 B 状态切片继续强化到 degraded 处理、rollback 信心、远端备份清晰度与 drift 可见性都能在多次真实运行中值得信任；当前 confidence 主线已经到达 promotion-ready，并转入谨慎的文案复核。'
     },
     decision: {
-      en: 'Reliability stays ahead of platform expansion, but it now builds on a completed Milestone 1 slice rather than a missing-parity story.',
-      zh: '可靠性仍然优先于平台扩展，但它现在建立在已经完成的 Milestone 1 切片之上，而不再建立在“缺表面”的叙事上。'
+      en: 'Reliability stays ahead of platform expansion, and it now builds on a completed Milestone 1 slice plus a promotion-ready confidence lane; the remaining work is deliberate wording review and gate health, not more readiness machinery.',
+      zh: '可靠性仍然优先于平台扩展，而且它现在建立在已经完成的 Milestone 1 切片与一条 promotion-ready 的 confidence 主线上；剩余工作是谨慎推进文案复核与 gate 健康，而不是继续补 readiness 机器。'
     },
     productOutcomes: {
       en: ['Degraded state becomes operationally visible across live surfaces.', 'Backup policy becomes explicit and enforceable with matching evidence trails.', 'Diagnostics and operations views mature without depending on mock-only presentation.'],
@@ -372,6 +374,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Live agent-backed behavior now participates in degraded handling, rule verification, and controller-side activation semantics.',
         'Synced/local confidence summary now persists `latestQualifiedRun` plus visibility-only breakdown metadata, so the latest mainline evidence stays explicit even when newer local runs exist.',
         'The docs site now publishes the same synced milestone confidence state as a first-class development-progress page and roadmap-home preview.',
+        'The tracked public confidence artifact now also matches that synced state at `promotion-ready` with `7/7` qualified runs, `7/3` qualified consecutive passes, `0` remaining qualified runs, and latest qualified run `24647442700/1` on `ddc15a3116d3`.',
         'The mainline acceptance gate now protects this reliability slice from docs, contract, and test drift while Milestone 2 hardening continues.'
       ],
       zh: [
@@ -386,17 +389,18 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'live agent-backed 行为现在也已经进入 degraded 处理、规则验证与 controller-side 激活语义。',
         '同步后与本地 confidence summary 现在会持久化 `latestQualifiedRun` 与 visibility-only breakdown 元数据，因此即使本地出现更新的 rerun，也不会掩盖最新主线证据。',
         'docs-site 现在也会把同一份同步后的 milestone confidence 状态发布成一级 development-progress 页面，并在 roadmap 首页直接预览。',
+        '被跟踪的公开 confidence artifact 现在也已经与这份同步状态对齐，进入 `promotion-ready`，达到 `7/7` qualified runs、`7/3` qualified consecutive passes、`0` 剩余 qualified runs，且最新 qualified run 为 `24647442700/1`，对应 `ddc15a3116d3`。',
         '在 Milestone 2 可靠性加固继续推进时，主线验收 gate 也继续保护这条切片，避免文档、契约和测试发生漂移。'
       ]
     },
     blockingGaps: {
       en: [
-        'Milestone 2 acceptance no longer lacks a canonical confidence routine or a truthful synced review signal; the remaining gap is sustained green history from `pnpm milestone:verify:confidence` and its uploaded reports on the accepted live slice.',
-        'After that history accumulates, the remaining work becomes milestone-language tightening rather than discovery of a missing remote-backup state.'
+        'Milestone 2 acceptance no longer lacks a canonical confidence routine, a truthful synced review signal, sustained qualified green history, or a truthful public confidence artifact.',
+        'The remaining gap is deliberate human milestone-language review plus continued gate health on the accepted live slice before broader roadmap language moves.'
       ],
       zh: [
-        '在同一条 live agent-backed 切片上，Milestone 2 的验收已经不再缺少规范 confidence routine，也不再缺少可信的同步复核信号；剩余缺口已经收窄为 `pnpm milestone:verify:confidence` 及其上传报告的持续转绿历史。',
-        '等这段历史积累起来之后，剩余工作才会继续收敛为里程碑文案收紧，而不再是缺失某个 remote-backup 状态。'
+        '在同一条 live agent-backed 切片上，Milestone 2 的验收已经不再缺少规范 confidence routine、可信的同步复核信号、持续为绿的 qualified history，或真实对齐的公开 confidence artifact。',
+        '剩余缺口已经收窄为基于已验收 live 切片的人工里程碑文案复核，以及持续保持 gate 健康，然后才考虑更宽的路线表述。'
       ]
     },
     developerFocus: {
@@ -404,17 +408,17 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Build Milestone 2 on the completed Unit 0 through Unit 5 lane instead of reopening Milestone 1 parity work.',
         'Keep configured, failed, and local-only backup evidence aligned across controller, CLI, web, and agent.',
         'Keep `pnpm milestone:verify:confidence` green on the same accepted agent-backed slice.',
-        'Use `Latest Qualified Run` plus the visibility breakdown in synced/local summaries and the public development-progress page during developer review.',
-        'Collect repeated green history from that routine and its uploaded reports before simplifying milestone wording again.',
-        'Keep one evidence model and one acceptance gate across controller, CLI, web, and agent.'
+        'Use `pnpm milestone:sync:confidence-history`, `pnpm milestone:review:confidence`, `Latest Qualified Run`, and the visibility breakdown in synced/local summaries plus the public development-progress page during developer review.',
+        'Refresh the tracked public confidence artifact only through `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` when the digest and human review agree.',
+        'Do not treat promotion-ready as automatic Toward C activation; keep one evidence model and one acceptance gate across controller, CLI, web, and agent.'
       ],
       zh: [
         '把 Milestone 2 建立在已经完成的 Unit 0 到 Unit 5 主线之上，而不是重新打开 Milestone 1 的表面补洞。',
         '继续让 controller、CLI、web、agent 在 configured、failed、local-only 三类 backup 证据上保持一致。',
         '继续让 `pnpm milestone:verify:confidence` 在同一条已验收 live agent-backed 切片上保持为绿。',
-        '在开发者复核时直接使用同步后与本地 summary 里的 `Latest Qualified Run`、visibility breakdown 与公开 development-progress 页面。',
-        '先从这条 routine 及其上传报告收集持续为绿的历史，再收窄后续里程碑文案。',
-        '继续让 controller、CLI、web、agent 共用同一套证据模型与同一条验收 gate。'
+        '在开发者复核时直接使用 `pnpm milestone:sync:confidence-history`、`pnpm milestone:review:confidence`、同步后与本地 summary 里的 `Latest Qualified Run`、visibility breakdown 与公开 development-progress 页面。',
+        '只有在 digest 与人工复核共同同意时，才通过 `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` 刷新被跟踪公开 confidence artifact。',
+        '不要把 promotion-ready 误解成 Toward C 自动启动；继续让 controller、CLI、web、agent 共用同一套证据模型与同一条验收 gate。'
       ]
     },
     dependencies: ['m1'],
