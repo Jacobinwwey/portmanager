@@ -10,6 +10,9 @@ import {
   runVerificationSteps
 } from '../../scripts/acceptance/confidence.mjs'
 
+// Keep local-only confidence scenarios hermetic even when tests run inside CI.
+const LOCAL_ENV = Object.freeze({})
+
 test('confidence routine appends replay proof after standing acceptance steps', () => {
   const acceptanceSteps = getAcceptanceVerificationSteps()
   const confidenceSteps = getConfidenceVerificationSteps()
@@ -43,6 +46,7 @@ test('confidence routine stops before replay when acceptance step fails', () => 
 
   const result = runVerificationSteps({
     steps: getConfidenceVerificationSteps(),
+    env: LOCAL_ENV,
     spawnSyncImpl(command, args) {
       calls.push({ command, args: [...args] })
 
@@ -69,6 +73,7 @@ test('confidence routine fails on replay after acceptance succeeds', () => {
 
   const result = runVerificationSteps({
     steps: getConfidenceVerificationSteps(),
+    env: LOCAL_ENV,
     spawnSyncImpl(command, args) {
       calls.push({ command, args: [...args] })
 
@@ -103,6 +108,7 @@ test('confidence routine writes success report with executed steps', () => {
   try {
     const result = runVerificationSteps({
       steps: getConfidenceVerificationSteps(),
+      env: LOCAL_ENV,
       reportPath,
       historyPath,
       summaryPath,
@@ -167,6 +173,7 @@ test('confidence routine writes failure report with skipped trailing steps', () 
   try {
     const result = runVerificationSteps({
       steps: getConfidenceVerificationSteps(),
+      env: LOCAL_ENV,
       reportPath,
       historyPath,
       summaryPath,
@@ -434,6 +441,7 @@ test('local runs stay visible without advancing qualified readiness streak', () 
 
     runVerificationSteps({
       steps: getConfidenceVerificationSteps(),
+      env: LOCAL_ENV,
       reportPath,
       historyPath,
       summaryPath,
