@@ -1,7 +1,7 @@
 # PortManager Milestones
 
-Updated: 2026-04-18
-Version: v0.5.11-real-machine-acceptance-hardening
+Updated: 2026-04-20
+Version: v0.5.12-node24-compatibility-trial
 
 ## English
 
@@ -50,6 +50,7 @@ Milestone 1 is only accepted when all of the following become true:
 - Fresh acceptance evidence on `2026-04-17`: `pnpm acceptance:verify` now passes after Unit 4 delivery and Unit 5 docs sync; the embedded milestone proof shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.
 - Fresh Windows real-machine acceptance on `2026-04-18`: `pnpm acceptance:verify` passed again on the latest `main`, and development-progress docs validation now honors the committed generated confidence fallback when local `.portmanager` history is absent, matching the docs publication contract on a fresh machine.
 - Fresh acceptance hardening on `2026-04-18`: that same development-progress docs validation now also stays stable when ignored local `.portmanager` history is newer than committed docs-site progress data, so acceptance no longer depends on local hidden-state freshness unless docs generation is intentionally rerun.
+- Fresh GitHub-hosted acceptance completion proof on `2026-04-20`: local `corepack pnpm acceptance:verify` still passed, `mainline-acceptance` run `24645898239` passed, and `docs-pages` run `24645898212` passed after forcing JavaScript workflow actions onto Node 24. The standing acceptance gate and the docs publication gate are therefore both complete and healthy under the controlled runtime-transition trial.
 - Controller-side rule truth intentionally becomes `active` only after diagnostics while raw agent runtime remains `applied_unverified` until verification. That separation is now shipped behavior, not a Milestone 1 gap.
 
 #### Current development sequence
@@ -114,6 +115,7 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: the synced/local summary now persists `latestQualifiedRun`, shows a visibility breakdown for qualified mainline versus visibility-only noise, and keeps the latest mainline evidence readable even when newer local runs exist.
 - Verified now: the docs site now publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress` from generated milestone confidence data, and roadmap home previews the same readiness snapshot for public developer review.
 - Fresh real-machine developer-review proof on `2026-04-18`: `pnpm milestone:verify:confidence` passed on Windows, `pnpm milestone:sync:confidence-history -- --limit 20` imported one qualified `mainline-acceptance` run through authenticated `gh`, and the synced summary now truthfully reports `building-history` with `1/7` qualified runs and `1/3` qualified consecutive passes.
+- Fresh runtime-transition proof on `2026-04-20`: forcing GitHub workflow JavaScript actions onto Node 24 did not break `mainline-acceptance` or `docs-pages`; the remaining Node 20 deprecation annotations now come from GitHub official action metadata rather than repo-local workflow drift.
 - Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now sustained qualified green history and milestone-language review rather than invention of more reporting surfaces or review-signal repair.
 - Milestone 2 still remains in progress until the qualified history stays green long enough for the synced readiness evidence and human review to justify narrower reliability language.
 
@@ -217,6 +219,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - `2026-04-17` 的最新验收证据已经成立：Unit 4 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新转绿；其中内嵌的 milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup / rollback 证据保持不变。
 - `2026-04-18` 的 Windows 真机验收也已经成立：最新 `main` 上的 `pnpm acceptance:verify` 再次通过，而且 development-progress docs 校验现在已经在本地 `.portmanager` 历史缺失时尊重已提交的 generated confidence fallback，使全新机器的 gate 行为与 docs 发布契约保持一致。
 - `2026-04-18` 还继续补齐了一层 acceptance 加固：当被忽略的本地 `.portmanager` 历史比已提交 docs-site progress data 更新时，这条 development-progress docs 校验也会继续保持稳定，因此 acceptance 不再依赖本地隐藏状态是否“刚好够新”，除非开发者明确重跑 docs 生成。
+- `2026-04-20` 的 GitHub 托管验收闭环也已经成立：本地 `corepack pnpm acceptance:verify` 继续通过，`mainline-acceptance` run `24645898239` 与 `docs-pages` run `24645898212` 也在强制 JavaScript workflow actions 使用 Node 24 之后继续通过。因此常驻 acceptance gate 与 docs 发布 gate 现在都已经在受控运行时迁移试跑下保持完整且健康。
 - controller 侧规则真相会在 diagnostics 之后进入 `active`，而原始 agent runtime 在验证完成前仍保持 `applied_unverified`。这已经是有意保留的已交付语义，不再是里程碑 1 缺口。
 
 #### 当前推进顺序
@@ -279,6 +282,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - 当前已验证：`pnpm milestone:sync:confidence-history` 现在允许开发者通过已认证 `gh` 把这些已完成 workflow bundle 导回本地 readiness review，并按稳定 history entry id 去重。
 - 当前已验证：docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 readiness 快照，方便开发者公开复核。
 - `2026-04-18` 的真机开发者复核证据也已经成立：`pnpm milestone:verify:confidence` 已在 Windows 真机通过，`pnpm milestone:sync:confidence-history -- --limit 20` 也已通过已认证 `gh` 成功导入 1 次 qualified `mainline-acceptance` 运行；同步后的 summary 现在真实显示 readiness 仍为 `building-history`，进度为 `1/7` qualified runs 与 `1/3` qualified consecutive passes。
+- `2026-04-20` 的运行时迁移证明也已经成立：在把 GitHub workflow JavaScript actions 强制运行到 Node 24 之后，`mainline-acceptance` 与 `docs-pages` 仍然保持通过；当前剩余的 Node 20 退役 annotation 现在已经收敛为 GitHub 官方 action 元数据层面的上游 warning，而不是 repo 本地 workflow 漂移。
 - 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架或继续修复 summary 复核语义，而是持续积累 qualified 绿历史，并根据同步后的证据与人工复核来决定文案是否继续收窄。
 - 里程碑 2 仍然处于进行中，直到同步后的 readiness 证据与人工复核共同支持更收敛的可靠性文案。
 

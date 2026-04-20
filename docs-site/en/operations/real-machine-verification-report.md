@@ -12,22 +12,25 @@ status: active
 ---
 > Source of truth: `docs/operations/portmanager-real-machine-verification-report.md`
 > Audience: `shared` | Section: `operations` | Status: `active`
-> Updated: 2026-04-18 | Version: v0.1.0-real-machine-verification-report
+> Updated: 2026-04-20 | Version: v0.2.0-mainline-acceptance-node24-trial
 ### Purpose
 This document freezes the current real-machine verification report for PortManager.
 It exists so that acceptance truth, confidence truth, and docs-publication truth are recorded in one place instead of being inferred from scattered progress notes.
 
 ### Verification session
-The latest recorded real-machine verification session for this report happened on `2026-04-18` on a Windows development machine against the latest local `main`.
+The latest recorded verification session for this report happened on `2026-04-20`.
+It combined a Windows development-machine replay against the latest local `main` with a GitHub-hosted confirmation pass after forcing JavaScript-based workflow actions onto Node 24.
 
 Commands executed:
-- `pnpm acceptance:verify`
+- `corepack pnpm acceptance:verify`
 - `pnpm milestone:verify:confidence`
 - `pnpm milestone:sync:confidence-history -- --limit 20`
 - `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
+- GitHub Actions run `24645898239` for `mainline-acceptance`
+- GitHub Actions run `24645898212` for `docs-pages`
 
 ### What each command proves
-- `pnpm acceptance:verify`
+- `corepack pnpm acceptance:verify`
   - proves the standing local acceptance gate still passes across tests, type checks, Rust workspace checks, contract drift checks, docs build, and milestone verification
 - `pnpm milestone:verify:confidence`
   - proves the heavier Milestone 2 confidence routine still passes on top of the accepted live slice
@@ -40,6 +43,12 @@ Commands executed:
 - `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
   - intentionally republishes the tracked docs artifact `docs-site/data/milestone-confidence-progress.ts` from the synced local history
   - records the current published readiness snapshot without letting normal docs builds drift every time local `.portmanager` history changes
+- GitHub Actions run `24645898239` for `mainline-acceptance`
+  - proves the standing CI acceptance gate still passes after the workflow migration away from `pnpm/action-setup`
+  - proves `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` does not break the accepted control-plane proof or the confidence routine
+- GitHub Actions run `24645898212` for `docs-pages`
+  - proves the published docs build and Pages deployment still succeed after the same Node 24 forcing change
+  - proves the docs publication workflow remains operational alongside the standing acceptance gate
 
 ### Evidence frozen by this report
 - Local acceptance gate: passed
@@ -53,12 +62,19 @@ Commands executed:
 - Current published qualified consecutive passes: `1/3`
 - Current published tracked runs: `5`
 - Current published local visibility-only runs: `4`
+- GitHub-hosted `mainline-acceptance` run: `24645898239` passed
+- GitHub-hosted `docs-pages` run: `24645898212` passed
+- Node 24 forced-action trial: passed
+- Remaining warning source: GitHub official action metadata still declaring `node20`
 
 ### Current conclusion
 - Milestone 1 accepted public-surface truth still holds.
+- The standing acceptance contract is now complete and currently healthy across both the local gate and the GitHub-hosted gate.
+- The docs publication gate is also complete and currently healthy on GitHub Pages after the Node 24 forcing trial.
 - Milestone 2 confidence maintenance is real and operational, but promotion criteria are not yet met.
 - The current truthful public wording remains `building-history`, not `promotion-ready`.
 - The latest visible local run is intentionally separated from the latest qualified mainline run, so local reruns no longer erase mainline review evidence.
+- The remaining Node 20 deprecation annotations are now upstream-only warning debt in GitHub official actions; they no longer indicate a repo-local acceptance or publication failure.
 
 ### Docs publication contract for confidence progress
 - Default docs generation must reuse the committed artifact at `docs-site/data/milestone-confidence-progress.ts`.
