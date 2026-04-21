@@ -1346,7 +1346,7 @@ export interface components {
             targetProfileId: string;
             targetProfileLabel: string;
             /** @enum {string} */
-            targetProfileStatus: "supported" | "unsupported";
+            targetProfileStatus: "supported" | "candidate" | "unsupported";
             /** Format: date-time */
             updatedAt: string;
         };
@@ -1508,6 +1508,7 @@ export interface components {
         SecondTargetPolicyPack: {
             blockingCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
             candidateTargetProfileIds: string[];
+            candidateTargetProfiles: components["schemas"]["TargetProfileSummary"][];
             decisionState: components["schemas"]["SecondTargetPolicyDecisionState"];
             expansionReviewRequired: boolean;
             /** @enum {string} */
@@ -1534,7 +1535,7 @@ export interface components {
             id: string;
             label: string;
             /** @enum {string} */
-            status: "supported" | "unsupported";
+            status: "supported" | "candidate" | "unsupported";
         };
         TlsSummary: {
             enabled?: boolean;

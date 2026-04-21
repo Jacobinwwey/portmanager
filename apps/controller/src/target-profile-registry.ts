@@ -4,6 +4,7 @@ export type TargetProfile = components['schemas']['TargetProfile']
 export type TargetProfileSummary = components['schemas']['TargetProfileSummary']
 
 export const defaultTargetProfileId = 'ubuntu-24.04-systemd-tailscale'
+export const candidateTargetProfileId = 'debian-12-systemd-tailscale'
 
 const unsupportedTargetProfileLabel = 'Unsupported target profile'
 
@@ -24,7 +25,27 @@ const lockedTargetProfile: TargetProfile = {
   ]
 }
 
-const targetProfiles = new Map<string, TargetProfile>([[lockedTargetProfile.id, lockedTargetProfile]])
+const candidateTargetProfile: TargetProfile = {
+  id: candidateTargetProfileId,
+  label: 'Debian 12 + systemd + Tailscale',
+  status: 'candidate',
+  platform: 'Debian 12',
+  serviceManager: 'systemd',
+  steadyStateTransport: 'http-over-tailscale',
+  bootstrapTransport: 'ssh',
+  capabilities: [
+    'probe-host',
+    'bootstrap-host',
+    'apply-desired-state',
+    'collect-diagnostics',
+    'rollback'
+  ]
+}
+
+const targetProfiles = new Map<string, TargetProfile>([
+  [lockedTargetProfile.id, lockedTargetProfile],
+  [candidateTargetProfile.id, candidateTargetProfile]
+])
 
 function unsupportedTargetProfile(id: string): TargetProfile {
   return {
@@ -45,6 +66,23 @@ export function getTargetProfile(id: string) {
 
 export function listTargetProfiles() {
   return [...targetProfiles.values()]
+}
+
+export function listSupportedTargetProfiles() {
+  return listTargetProfiles().filter((profile) => profile.status === 'supported')
+}
+
+export function listCandidateTargetProfiles() {
+  return listTargetProfiles().filter((profile) => profile.status === 'candidate')
+}
+
+export function isSupportedTargetProfileId(id: string | null | undefined) {
+  const resolvedId = id?.trim()
+  if (!resolvedId) {
+    return false
+  }
+
+  return getTargetProfile(resolvedId)?.status === 'supported'
 }
 
 export function summarizeTargetProfile(id: string | null | undefined): TargetProfileSummary {

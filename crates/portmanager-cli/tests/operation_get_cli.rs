@@ -1398,26 +1398,39 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                         "status": "supported"
                     }
                 ],
-                "candidateTargetProfileIds": [],
+                "candidateTargetProfiles": [
+                    {
+                        "id": "debian-12-systemd-tailscale",
+                        "label": "Debian 12 + systemd + Tailscale",
+                        "status": "candidate"
+                    }
+                ],
+                "candidateTargetProfileIds": ["debian-12-systemd-tailscale"],
                 "decisionState": "hold",
                 "expansionReviewRequired": false,
-                "summary": "Second-target support must stay on hold because candidate target, transport parity, backup parity, diagnostics parity, and rollback parity are still missing.",
+                "summary": "Second-target support must stay on hold because bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity, docs contract ready, acceptance recipe ready, and operator ownership defined are still missing.",
                 "nextActions": [
                     "Keep supported targets locked to ubuntu-24.04-systemd-tailscale.",
-                    "Prove transport, backup, diagnostics, and rollback parity before any second-target support claim."
+                    "Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.",
+                    "Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim."
                 ],
                 "satisfiedCriteria": [
                     {
                         "id": "locked_target_registry",
                         "label": "Locked target registry",
                         "reason": "One explicit locked target profile is already published across controller, CLI, and Web."
+                    },
+                    {
+                        "id": "candidate_target_declared",
+                        "label": "Candidate target declared",
+                        "reason": "One explicit second-target candidate is declared for review."
                     }
                 ],
                 "blockingCriteria": [
                     {
-                        "id": "candidate_target_declared",
-                        "label": "Candidate target declared",
-                        "reason": "No second target candidate is declared yet."
+                        "id": "bootstrap_transport_parity",
+                        "label": "Bootstrap transport parity",
+                        "reason": "Bootstrap transport parity is still missing for the candidate target."
                     }
                 ]
             }),
@@ -1436,7 +1449,9 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("Locked Target Profile: ubuntu-24.04-systemd-tailscale"));
     assert!(stdout.contains("Decision State: hold"));
     assert!(stdout.contains("Expansion Review Required: no"));
-    assert!(stdout.contains("candidate_target_declared"));
+    assert!(stdout.contains("Candidate Targets"));
+    assert!(stdout.contains("debian-12-systemd-tailscale"));
+    assert!(stdout.contains("bootstrap_transport_parity"));
 }
 
 #[test]
@@ -1455,7 +1470,14 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                         "status": "supported"
                     }
                 ],
-                "candidateTargetProfileIds": [],
+                "candidateTargetProfiles": [
+                    {
+                        "id": "debian-12-systemd-tailscale",
+                        "label": "Debian 12 + systemd + Tailscale",
+                        "status": "candidate"
+                    }
+                ],
+                "candidateTargetProfileIds": ["debian-12-systemd-tailscale"],
                 "decisionState": "hold",
                 "expansionReviewRequired": false,
                 "summary": "second target policy pack is alive",
@@ -1463,8 +1485,8 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                 "satisfiedCriteria": [],
                 "blockingCriteria": [
                     {
-                        "id": "candidate_target_declared",
-                        "label": "Candidate target declared",
+                        "id": "bootstrap_transport_parity",
+                        "label": "Bootstrap transport parity",
                         "reason": "still missing"
                     }
                 ]

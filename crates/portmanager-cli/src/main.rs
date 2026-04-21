@@ -2031,22 +2031,6 @@ fn format_target_profile_summaries(title: &str, profiles: &Value) -> String {
     }
 }
 
-fn format_string_list_block(title: &str, values: &Value) -> String {
-    let lines = values
-        .as_array()
-        .into_iter()
-        .flatten()
-        .filter_map(Value::as_str)
-        .map(|value| format!("- {value}"))
-        .collect::<Vec<_>>();
-
-    if lines.is_empty() {
-        format!("{}:\n- none", title)
-    } else {
-        format!("{}:\n{}", title, lines.join("\n"))
-    }
-}
-
 fn format_consumer_boundary_decision_pack_text(pack: &Value) -> String {
     let action_lines = pack["nextActions"]
         .as_array()
@@ -2106,7 +2090,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
         pack["summary"].as_str().unwrap_or("no summary"),
         action_block,
         format_target_profile_summaries("Supported Targets", &pack["supportedTargetProfiles"]),
-        format_string_list_block("Candidate Targets", &pack["candidateTargetProfileIds"]),
+        format_target_profile_summaries("Candidate Targets", &pack["candidateTargetProfiles"]),
         format_decision_criteria_block("Satisfied Criteria", &pack["satisfiedCriteria"]),
         format_decision_criteria_block("Blocking Criteria", &pack["blockingCriteria"])
     )

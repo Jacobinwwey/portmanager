@@ -33,9 +33,13 @@ export { createLocalBackupPrimitive } from './local-backup-primitive.ts'
 export { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.ts'
 export { createOperationStore } from './operation-store.ts'
 export {
+  candidateTargetProfileId,
   defaultTargetProfileId,
   describeTargetProfile,
   getTargetProfile,
+  isSupportedTargetProfileId,
+  listCandidateTargetProfiles,
+  listSupportedTargetProfiles,
   listTargetProfiles,
   summarizeTargetProfile
 } from './target-profile-registry.ts'

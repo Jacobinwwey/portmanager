@@ -658,7 +658,7 @@ components:
           type: string
         status:
           type: string
-          enum: [supported, unsupported]
+          enum: [supported, candidate, unsupported]
     TargetProfile:
       allOf:
         - $ref: '#/components/schemas/TargetProfileSummary'
@@ -734,7 +734,7 @@ components:
           type: string
         targetProfileStatus:
           type: string
-          enum: [supported, unsupported]
+          enum: [supported, candidate, unsupported]
         lastBackupAt:
           type: string
           format: date-time
@@ -1369,6 +1369,7 @@ components:
           lockedTargetProfileId,
           reviewOwner,
           supportedTargetProfiles,
+          candidateTargetProfiles,
           candidateTargetProfileIds,
           decisionState,
           expansionReviewRequired,
@@ -1385,6 +1386,10 @@ components:
           type: string
           enum: [controller]
         supportedTargetProfiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/TargetProfileSummary'
+        candidateTargetProfiles:
           type: array
           items:
             $ref: '#/components/schemas/TargetProfileSummary'

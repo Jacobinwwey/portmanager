@@ -1,7 +1,9 @@
 import type { TargetProfileSummary } from './target-profile-registry.ts'
 import {
+  candidateTargetProfileId,
   defaultTargetProfileId,
-  listTargetProfiles,
+  listCandidateTargetProfiles,
+  listSupportedTargetProfiles,
   summarizeTargetProfile
 } from './target-profile-registry.ts'
 
@@ -30,6 +32,7 @@ export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
   supportedTargetProfiles: TargetProfileSummary[]
+  candidateTargetProfiles: TargetProfileSummary[]
   candidateTargetProfileIds: string[]
   targetRegistryPublished: boolean
   bootstrapTransportParity: boolean
@@ -46,6 +49,7 @@ export interface SecondTargetPolicyPack {
   lockedTargetProfileId: string
   reviewOwner: SecondTargetPolicySnapshot['reviewOwner']
   supportedTargetProfiles: TargetProfileSummary[]
+  candidateTargetProfiles: TargetProfileSummary[]
   candidateTargetProfileIds: string[]
   decisionState: SecondTargetPolicyDecisionState
   expansionReviewRequired: boolean
@@ -129,8 +133,16 @@ function supportedTargetBaselineStable(snapshot: SecondTargetPolicySnapshot) {
   return snapshot.supportedTargetProfiles.length === 1 && hasLockedSupportedTarget(snapshot)
 }
 
+function resolvedCandidateTargetProfileIds(snapshot: SecondTargetPolicySnapshot) {
+  if (snapshot.candidateTargetProfileIds.length > 0) {
+    return snapshot.candidateTargetProfileIds
+  }
+
+  return snapshot.candidateTargetProfiles.map((profile) => profile.id)
+}
+
 function candidateTargetDeclared(snapshot: SecondTargetPolicySnapshot) {
-  return snapshot.candidateTargetProfileIds.length > 0
+  return resolvedCandidateTargetProfileIds(snapshot).length > 0
 }
 
 const criteria: Array<
@@ -217,7 +229,8 @@ function buildNextActions(
   decisionState: SecondTargetPolicyDecisionState
 ) {
   const lockedTarget = snapshot.lockedTargetProfileId
-  const candidateTargets = snapshot.candidateTargetProfileIds.join(', ') || 'one explicit candidate'
+  const candidateTargets =
+    resolvedCandidateTargetProfileIds(snapshot).join(', ') || 'one explicit candidate'
 
   if (decisionState === 'review_required') {
     return [
@@ -230,24 +243,39 @@ function buildNextActions(
   if (decisionState === 'prepare_review') {
     return [
       `Keep supported targets locked to ${lockedTarget} while docs, acceptance recipe, and operator ownership are completed for ${candidateTargets}.`,
-      'Bundle transport, backup, diagnostics, and rollback parity evidence into one review packet before widening support claims.',
+      'Bundle bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity evidence into one review packet before widening support claims.',
       'Do not publish broader target support until the formal second-target review is opened.'
+    ]
+  }
+
+  if (candidateTargetDeclared(snapshot)) {
+    return [
+      `Keep supported targets locked to ${lockedTarget}.`,
+      `Keep ${candidateTargets} in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.`,
+      'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
     ]
   }
 
   return [
     `Keep supported targets locked to ${lockedTarget}.`,
     'Declare one explicit second-target candidate before discussing broader platform support.',
-    'Prove transport, backup, diagnostics, and rollback parity before any second-target support claim.'
+    'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
   ]
 }
 
 export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySnapshot {
+  const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
+    summarizeTargetProfile(profile.id)
+  )
+
   return {
     lockedTargetProfileId: defaultTargetProfileId,
     reviewOwner: 'controller',
-    supportedTargetProfiles: listTargetProfiles().map((profile) => summarizeTargetProfile(profile.id)),
-    candidateTargetProfileIds: [],
+    supportedTargetProfiles: listSupportedTargetProfiles().map((profile) =>
+      summarizeTargetProfile(profile.id)
+    ),
+    candidateTargetProfiles,
+    candidateTargetProfileIds: candidateTargetProfiles.map((profile) => profile.id),
     targetRegistryPublished: true,
     bootstrapTransportParity: false,
     steadyStateTransportParity: false,
@@ -275,7 +303,8 @@ export function buildSecondTargetPolicyPack(
     lockedTargetProfileId: snapshot.lockedTargetProfileId,
     reviewOwner: snapshot.reviewOwner,
     supportedTargetProfiles: [...snapshot.supportedTargetProfiles],
-    candidateTargetProfileIds: [...snapshot.candidateTargetProfileIds],
+    candidateTargetProfiles: [...snapshot.candidateTargetProfiles],
+    candidateTargetProfileIds: [...resolvedCandidateTargetProfileIds(snapshot)],
     decisionState,
     expansionReviewRequired: decisionState === 'review_required',
     summary: buildSummary(decisionState, blockingCriteria),

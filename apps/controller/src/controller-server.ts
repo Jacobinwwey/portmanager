@@ -26,7 +26,7 @@ import {
   buildSecondTargetPolicyPack,
   createDefaultSecondTargetPolicySnapshot
 } from './second-target-policy-pack.ts'
-import { defaultTargetProfileId, getTargetProfile } from './target-profile-registry.ts'
+import { defaultTargetProfileId, isSupportedTargetProfileId } from './target-profile-registry.ts'
 
 export interface ControllerServer {
   close(): Promise<void>
@@ -218,7 +218,7 @@ export function createControllerServer(options: {
         return
       }
 
-      if (!requestedTargetProfileId || !getTargetProfile(requestedTargetProfileId)) {
+      if (!requestedTargetProfileId || !isSupportedTargetProfileId(requestedTargetProfileId)) {
         sendJson(response, 400, { error: 'invalid_target_profile' })
         return
       }

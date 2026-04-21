@@ -64,11 +64,13 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /deployment-boundary-decision-pack/)
   assert.match(milestoneConfidenceComponent, /persistence-decision-pack/)
   assert.match(milestoneConfidenceComponent, /second-target-policy-pack/)
+  assert.match(milestoneConfidenceComponent, /debian-12-systemd-tailscale/)
   assert.match(
     milestoneConfidenceComponent,
     /\.portmanager\/reports\/milestone-wording-review\.md/
   )
   assert.match(roadmapData, /Units 51 through 62/)
+  assert.match(roadmapData, /debian-12-systemd-tailscale/)
   assert.match(roadmapData, /consumer-boundary-decision-pack/)
   assert.match(roadmapData, /deployment-boundary-decision-pack/)
   assert.match(roadmapData, /consumer-boundary split criteria/)

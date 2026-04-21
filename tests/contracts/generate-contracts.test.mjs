@@ -69,6 +69,8 @@ test('contracts generator emits openapi and json schema types into target tree',
     assert.match(openapiOutput, /PersistenceDecisionPack/u)
     assert.match(openapiOutput, /PersistenceReadiness/u)
     assert.match(openapiOutput, /SecondTargetPolicyPack/u)
+    assert.match(openapiOutput, /candidateTargetProfiles/u)
+    assert.match(openapiOutput, /"supported" \| "candidate" \| "unsupported"/u)
     assert.match(runtimeStateOutput, /export interface RuntimeState/u)
     assert.match(runtimeStateOutput, /agentState/u)
     assert.match(indexOutput, /export \* from '\.\/generated\/openapi\.js'/u)

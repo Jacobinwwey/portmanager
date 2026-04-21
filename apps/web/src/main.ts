@@ -1455,15 +1455,22 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         status: 'supported'
       }
     ],
-    candidateTargetProfileIds: [],
+    candidateTargetProfiles: [
+      {
+        id: 'debian-12-systemd-tailscale',
+        label: 'Debian 12 + systemd + Tailscale',
+        status: 'candidate'
+      }
+    ],
+    candidateTargetProfileIds: ['debian-12-systemd-tailscale'],
     decisionState: 'hold',
     expansionReviewRequired: false,
     summary:
-      'Second-target support must stay on hold because candidate target declared, bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity, docs contract ready, acceptance recipe ready, operator ownership defined are still missing.',
+      'Second-target support must stay on hold because bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity, docs contract ready, acceptance recipe ready, and operator ownership defined are still missing.',
     nextActions: [
       'Keep supported targets locked to ubuntu-24.04-systemd-tailscale.',
-      'Declare one explicit second-target candidate before discussing broader platform support.',
-      'Prove transport, backup, diagnostics, and rollback parity before any second-target support claim.'
+      'Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.',
+      'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
     ],
     satisfiedCriteria: [
       {
@@ -1477,14 +1484,14 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         label: 'Supported target baseline',
         reason:
           'Supported-target claims are still locked to one explicit Ubuntu 24.04 + systemd + Tailscale baseline.'
-      }
-    ],
-    blockingCriteria: [
+      },
       {
         id: 'candidate_target_declared',
         label: 'Candidate target declared',
-        reason: 'No second target candidate is declared yet.'
-      },
+        reason: 'One explicit second-target candidate is declared for review.'
+      }
+    ],
+    blockingCriteria: [
       {
         id: 'bootstrap_transport_parity',
         label: 'Bootstrap transport parity',
@@ -3266,15 +3273,16 @@ function SecondTargetPolicyCard(props: {
       h(SectionHeading, {
         key: 'heading',
         title: 'Candidate targets',
-        detail: `${props.pack.candidateTargetProfileIds.length} targets`
+        detail: `${props.pack.candidateTargetProfiles.length} targets`
       }),
-      props.pack.candidateTargetProfileIds.length
+      props.pack.candidateTargetProfiles.length
         ? h(
             'ul',
             { className: 'pm-list', key: 'list' },
-            props.pack.candidateTargetProfileIds.map((targetId) =>
-              h('li', { className: 'pm-list-item', key: targetId }, [
-                h('div', { key: 'line1' }, targetId)
+            props.pack.candidateTargetProfiles.map((profile) =>
+              h('li', { className: 'pm-list-item', key: profile.id }, [
+                h('div', { key: 'line1' }, `${profile.label} · ${profile.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, `status ${profile.status}`)
               ])
             )
           )

@@ -437,14 +437,22 @@ test('overview loader keeps consumer boundary base path when building controller
               status: 'supported'
             }
           ],
-          candidateTargetProfileIds: [],
+          candidateTargetProfiles: [
+            {
+              id: 'debian-12-systemd-tailscale',
+              label: 'Debian 12 + systemd + Tailscale',
+              status: 'candidate'
+            }
+          ],
+          candidateTargetProfileIds: ['debian-12-systemd-tailscale'],
           decisionState: 'hold',
           expansionReviewRequired: false,
           summary:
-            'Second-target support must stay on hold because candidate target, transport parity, backup parity, diagnostics parity, and rollback parity are still missing.',
+            'Second-target support must stay on hold because bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity, docs contract ready, acceptance recipe ready, and operator ownership defined are still missing.',
           nextActions: [
             'Keep supported targets locked to ubuntu-24.04-systemd-tailscale.',
-            'Prove transport, backup, diagnostics, and rollback parity before any second-target support claim.'
+            'Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.',
+            'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
           ],
           satisfiedCriteria: [
             {
@@ -458,7 +466,14 @@ test('overview loader keeps consumer boundary base path when building controller
             {
               id: 'candidate_target_declared',
               label: 'Candidate target declared',
-              reason: 'No second target candidate is declared yet.'
+              reason: 'One explicit second-target candidate is declared for review.'
+            }
+          ],
+          blockingCriteria: [
+            {
+              id: 'bootstrap_transport_parity',
+              label: 'Bootstrap transport parity',
+              reason: 'Bootstrap transport parity is still missing for the candidate target.'
             }
           ]
         }),
@@ -621,7 +636,14 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
               status: 'supported'
             }
           ],
-          candidateTargetProfileIds: [],
+          candidateTargetProfiles: [
+            {
+              id: 'debian-12-systemd-tailscale',
+              label: 'Debian 12 + systemd + Tailscale',
+              status: 'candidate'
+            }
+          ],
+          candidateTargetProfileIds: ['debian-12-systemd-tailscale'],
           decisionState: 'hold',
           expansionReviewRequired: false,
           summary: 'second target policy pack is alive',
@@ -629,8 +651,8 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
           satisfiedCriteria: [],
           blockingCriteria: [
             {
-              id: 'candidate_target_declared',
-              label: 'Candidate target declared',
+              id: 'bootstrap_transport_parity',
+              label: 'Bootstrap transport parity',
               reason: 'still missing'
             }
           ]

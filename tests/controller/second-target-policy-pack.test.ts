@@ -30,7 +30,14 @@ test('second target policy pack keeps expansion review on hold while only locked
         status: 'supported'
       }
     ],
-    candidateTargetProfileIds: [],
+    candidateTargetProfiles: [
+      {
+        id: 'debian-12-systemd-tailscale',
+        label: 'Debian 12 + systemd + Tailscale',
+        status: 'candidate'
+      }
+    ],
+    candidateTargetProfileIds: ['debian-12-systemd-tailscale'],
     targetRegistryPublished: true,
     bootstrapTransportParity: false,
     steadyStateTransportParity: false,
@@ -47,10 +54,12 @@ test('second target policy pack keeps expansion review on hold while only locked
   assert.equal(pack.lockedTargetProfileId, 'ubuntu-24.04-systemd-tailscale')
   assert.equal(pack.reviewOwner, 'controller')
   assert.equal(pack.supportedTargetProfiles.length, 1)
-  assert.deepEqual(pack.candidateTargetProfileIds, [])
+  assert.equal(pack.candidateTargetProfiles.length, 1)
+  assert.deepEqual(pack.candidateTargetProfileIds, ['debian-12-systemd-tailscale'])
   assert.match(pack.summary, /stay on hold/i)
   assert.equal(pack.satisfiedCriteria[0]?.id, 'locked_target_registry')
-  assert.equal(pack.blockingCriteria[0]?.id, 'candidate_target_declared')
+  assert.equal(pack.satisfiedCriteria.some((criterion) => criterion.id === 'candidate_target_declared'), true)
+  assert.equal(pack.blockingCriteria[0]?.id, 'bootstrap_transport_parity')
   assert.equal(pack.nextActions.length >= 2, true)
 })
 
@@ -63,6 +72,13 @@ test('second target policy pack requires expansion review when candidate, parity
         id: 'ubuntu-24.04-systemd-tailscale',
         label: 'Ubuntu 24.04 + systemd + Tailscale',
         status: 'supported'
+      }
+    ],
+    candidateTargetProfiles: [
+      {
+        id: 'debian-12-systemd-tailscale',
+        label: 'Debian 12 + systemd + Tailscale',
+        status: 'candidate'
       }
     ],
     candidateTargetProfileIds: ['debian-12-systemd-tailscale'],
@@ -104,6 +120,7 @@ test('controller server exposes second target policy pack as explicit controller
         lockedTargetProfileId: string
         reviewOwner: string
         supportedTargetProfiles: Array<{ id: string; status: string }>
+        candidateTargetProfiles: Array<{ id: string; label: string; status: string }>
         candidateTargetProfileIds: string[]
         decisionState: string
         expansionReviewRequired: boolean
@@ -118,7 +135,10 @@ test('controller server exposes second target policy pack as explicit controller
       assert.equal(payload.supportedTargetProfiles.length, 1)
       assert.equal(payload.supportedTargetProfiles[0]?.id, 'ubuntu-24.04-systemd-tailscale')
       assert.equal(payload.supportedTargetProfiles[0]?.status, 'supported')
-      assert.deepEqual(payload.candidateTargetProfileIds, [])
+      assert.equal(payload.candidateTargetProfiles.length, 1)
+      assert.equal(payload.candidateTargetProfiles[0]?.id, 'debian-12-systemd-tailscale')
+      assert.equal(payload.candidateTargetProfiles[0]?.status, 'candidate')
+      assert.deepEqual(payload.candidateTargetProfileIds, ['debian-12-systemd-tailscale'])
       assert.equal(payload.decisionState, 'hold')
       assert.equal(payload.expansionReviewRequired, false)
       assert.match(payload.summary, /stay on hold/i)
@@ -128,7 +148,11 @@ test('controller server exposes second target policy pack as explicit controller
         true
       )
       assert.equal(
-        payload.blockingCriteria.some((criterion) => criterion.id === 'candidate_target_declared'),
+        payload.satisfiedCriteria.some((criterion) => criterion.id === 'candidate_target_declared'),
+        true
+      )
+      assert.equal(
+        payload.blockingCriteria.some((criterion) => criterion.id === 'bootstrap_transport_parity'),
         true
       )
     } finally {

@@ -59,7 +59,7 @@ In that scheme:
 | First-class bounded agent role | Agent already serves `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback` with live controller sync | Partially earned |
 | Batch host orchestration | One bounded batch exposure-policy envelope now lands as an auditable parent operation with host-scoped child outcomes across controller, CLI, and Web | Phase 0 baseline landed |
 | Persistence readiness beyond SQLite | `operation-store` now runs behind a SQLite-backed persistence adapter seam, publishes measurable PostgreSQL readiness pressure from live store counts, and exposes `/persistence-decision-pack` so cutover review pressure is explicit while SQLite stays active | Phase 0 baseline landed |
-| Platform abstraction for second targets | The locked Ubuntu 24.04 + systemd + Tailscale target is now explicit through the target-profile registry, and `/second-target-policy-pack` keeps every broader target claim on hold until candidate-target parity evidence is real | Phase 0 baseline landed |
+| Platform abstraction for second targets | The locked Ubuntu 24.04 + systemd + Tailscale target is now explicit through the target-profile registry, and `/second-target-policy-pack` keeps every broader target claim on hold while `debian-12-systemd-tailscale` sits in review-prep until parity evidence is real | Phase 0 baseline landed |
 
 ### Why keep C
 Without C, PortManager risks staying only a narrow single-purpose exposure tool.
@@ -94,7 +94,7 @@ Milestone 3 now continues from landed seams instead of restarting them:
 - Unit 60: complete. consumer-boundary split criteria now publish `/consumer-boundary-decision-pack`, keeping `/api/controller` embedded until standalone deployment boundary, edge-policy ownership, and external consumer pressure justify a split review
 - Unit 61: complete. deployment-boundary decision pack now publishes `/deployment-boundary-decision-pack`, keeping `/api/controller` controller-embedded until deployable artifact, edge runtime controls, replay parity, observability ownership, and external pressure justify standalone deployment review
 - Unit 62: complete. second-target policy pack now publishes `/second-target-policy-pack`, keeping support locked to Ubuntu until candidate-target declaration, parity evidence, docs contract, acceptance recipe, and operator ownership justify review
-- Next queue: candidate-target declaration plus parity, docs, acceptance, and ownership evidence under `/second-target-policy-pack`, not a PostgreSQL default-store claim or a fake standalone deployment push
+- Next queue: transport parity, recovery parity, docs, acceptance, and ownership evidence for declared candidate `debian-12-systemd-tailscale` under `/second-target-policy-pack`, not a PostgreSQL default-store claim or a fake standalone deployment push
 - keep bounded batch work on the same evidence model instead of inventing a second orchestration path
 
 ### Language and boundary decisions carried into C

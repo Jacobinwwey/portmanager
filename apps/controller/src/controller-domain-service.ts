@@ -10,7 +10,7 @@ import type {
   OperationDetail,
   OperationStore
 } from './operation-store.ts'
-import { defaultTargetProfileId, getTargetProfile } from './target-profile-registry.ts'
+import { defaultTargetProfileId, isSupportedTargetProfileId } from './target-profile-registry.ts'
 
 export interface ControllerDomainService {
   applyExposurePolicyBatch(input: {
@@ -107,7 +107,7 @@ export function createControllerDomainService(options: {
 
   function ensureSupportedTargetProfileId(targetProfileId?: string) {
     const resolvedId = targetProfileId ?? defaultTargetProfileId
-    if (!getTargetProfile(resolvedId)) {
+    if (!isSupportedTargetProfileId(resolvedId)) {
       throw new Error(`Unsupported target profile: ${resolvedId}`)
     }
     return resolvedId
@@ -119,7 +119,7 @@ export function createControllerDomainService(options: {
       throw new Error(`Host not found: ${hostId}`)
     }
 
-    if (!getTargetProfile(host.targetProfileId)) {
+    if (!isSupportedTargetProfileId(host.targetProfileId)) {
       throw new Error(`Unsupported target profile for host ${hostId}: ${host.targetProfileId}`)
     }
 

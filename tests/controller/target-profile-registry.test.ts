@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os'
 import { setTimeout as delay } from 'node:timers/promises'
 
 import {
+  candidateTargetProfileId,
   defaultTargetProfileId,
   getTargetProfile,
   summarizeTargetProfile,
@@ -60,6 +61,20 @@ test('target profile registry exposes locked Ubuntu profile and marks unknown id
     'rollback'
   ])
 
+  const candidateProfile = getTargetProfile(candidateTargetProfileId)
+  assert.ok(candidateProfile)
+  assert.equal(candidateProfile.id, 'debian-12-systemd-tailscale')
+  assert.equal(candidateProfile.status, 'candidate')
+  assert.equal(candidateProfile.platform, 'Debian 12')
+  assert.equal(candidateProfile.serviceManager, 'systemd')
+  assert.equal(candidateProfile.steadyStateTransport, 'http-over-tailscale')
+  assert.equal(candidateProfile.bootstrapTransport, 'ssh')
+
+  const candidateSummary = summarizeTargetProfile(candidateTargetProfileId)
+  assert.equal(candidateSummary.id, 'debian-12-systemd-tailscale')
+  assert.equal(candidateSummary.label, 'Debian 12 + systemd + Tailscale')
+  assert.equal(candidateSummary.status, 'candidate')
+
   const unsupportedSummary = summarizeTargetProfile('future-lab')
   assert.equal(unsupportedSummary.id, 'future-lab')
   assert.equal(unsupportedSummary.label, 'Unsupported target profile')
@@ -93,6 +108,26 @@ test('controller server defaults locked target profile and rejects unknown profi
 
       assert.equal(invalidProfileResponse.status, 400)
       assert.deepEqual(await invalidProfileResponse.json(), {
+        error: 'invalid_target_profile'
+      })
+
+      const candidateProfileResponse = await fetch(`${listening.baseUrl}/hosts`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: 'Candidate Relay',
+          targetProfileId: 'debian-12-systemd-tailscale',
+          ssh: {
+            host: '100.64.0.18',
+            port: 22
+          }
+        })
+      })
+
+      assert.equal(candidateProfileResponse.status, 400)
+      assert.deepEqual(await candidateProfileResponse.json(), {
         error: 'invalid_target_profile'
       })
 
