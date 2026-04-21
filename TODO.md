@@ -62,6 +62,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Milestone 2 acceptance closure: keep synced/local `.portmanager/reports/milestone-confidence-summary.md` truthful for developer review by surfacing `Latest Qualified Run` and visibility-only noise counts beside the latest visible run.
 - [x] Milestone 2 acceptance closure: publish the synced confidence snapshot as first-class docs-site developer progress pages at `/en/roadmap/development-progress` and `/zh/roadmap/development-progress`, and surface the same live counters on roadmap home.
 - [x] Milestone 2 acceptance closure: add `pnpm milestone:review:confidence` as the repo-native developer review digest so synced local history and the tracked public progress artifact can be compared before any docs refresh or milestone-language change.
+- [x] Milestone 2 acceptance closure: add `.portmanager/reports/milestone-wording-review.md` so `pnpm milestone:review:promotion-ready` emits one local wording-review checklist with guardrails, source surfaces, and publication-alignment state.
 - [x] Real-machine acceptance: replay `pnpm acceptance:verify` and `pnpm milestone:verify:confidence` on Windows against the latest `main`, then sync completed mainline confidence history locally with authenticated `gh` for developer review.
 - [x] Acceptance hardening: align development-progress docs validation with the committed generated confidence fallback so a fresh machine does not fail on missing ignored `.portmanager` history.
 - [x] Acceptance hardening: keep development-progress docs validation hermetic when ignored local `.portmanager` history is newer than committed docs-site progress data and `docs:generate` has not been rerun yet.
@@ -73,7 +74,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
-- [ ] Next lane: run `pnpm milestone:review:promotion-ready -- --limit 20`, rerun the same helper with `--refresh-published-artifact` when review agrees that publication should move, use the summary's latest-qualified signal plus the verification report and public development-progress page during developer review, and keep qualified Milestone 2 confidence history green on the same live slice while human milestone-language review narrows wording.
+- [ ] Next lane: run `pnpm milestone:review:promotion-ready -- --limit 20`, read `.portmanager/reports/milestone-wording-review.md` with the latest-qualified signal plus the verification report and public development-progress page during developer review, rerun the same helper with `--refresh-published-artifact` when review agrees that publication should move, and keep qualified Milestone 2 confidence history green on the same live slice while human milestone-language review narrows wording.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -96,6 +97,8 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Land confidence-promotion-ready-wording implementation plan: `docs/plans/2026-04-20-portmanager-m2-confidence-promotion-ready-wording-plan.md`
 - [x] Land confidence-promotion-review-helper requirements doc: `docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-review-helper-requirements.md`
 - [x] Land confidence-promotion-review-helper implementation plan: `docs/plans/2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan.md`
+- [x] Land confidence-wording-review-report requirements doc: `docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-review-report-requirements.md`
+- [x] Land confidence-wording-review-report implementation plan: `docs/plans/2026-04-21-portmanager-m2-confidence-wording-review-report-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -157,6 +160,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] 里程碑 2 验收闭环：让同步后与本地的 `.portmanager/reports/milestone-confidence-summary.md` 在开发者复核时保持真实，通过 `Latest Qualified Run` 与 visibility-only 噪声计数避免本地 rerun 掩盖主线证据。
 - [x] 里程碑 2 验收闭环：把同步后的 confidence snapshot 作为 docs-site 一级开发者进度页面公开到 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，并在 roadmap 首页直接显示同一份 live 计数。
 - [x] 里程碑 2 验收闭环：补上 `pnpm milestone:review:confidence` 作为 repo-native 开发者复核摘要命令，让同步后的本地 history 与已跟踪公开 progress artifact 能在任何 docs 刷新或里程碑文案收窄前先被直接对比。
+- [x] 里程碑 2 验收闭环：补上 `.portmanager/reports/milestone-wording-review.md`，让 `pnpm milestone:review:promotion-ready` 直接产出一份包含文案护栏、source surfaces 与公开对齐状态的本地 wording-review 清单。
 - [x] 真机验收：在 Windows 真机上对最新 `main` 重放 `pnpm acceptance:verify` 与 `pnpm milestone:verify:confidence`，并通过已认证 `gh` 把 completed mainline confidence history 同步回本地供开发者复核。
 - [x] 验收加固：让 development-progress docs 校验与已提交的 generated confidence fallback 对齐，避免全新机器在缺失被忽略的 `.portmanager` 历史时误报失败。
 - [x] 验收加固：当被忽略的本地 `.portmanager` 历史比已提交 docs-site progress data 更新、且尚未重跑 `docs:generate` 时，development-progress docs 校验仍保持 hermetic，不再误报失败。
@@ -168,7 +172,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
-- [ ] 下一主线：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 推进公开 confidence artifact，利用 summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面做开发者判断，并继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，同时谨慎收窄里程碑文案。
+- [ ] 下一主线：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，结合 `.portmanager/reports/milestone-wording-review.md`、summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面做开发者判断，只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 推进公开 confidence artifact，并继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，同时谨慎收窄里程碑文案。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -191,4 +195,6 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] 落盘 confidence-promotion-ready-wording 实现计划：`docs/plans/2026-04-20-portmanager-m2-confidence-promotion-ready-wording-plan.md`
 - [x] 落盘 confidence-promotion-review-helper 需求文档：`docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-review-helper-requirements.md`
 - [x] 落盘 confidence-promotion-review-helper 实现计划：`docs/plans/2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan.md`
+- [x] 落盘 confidence-wording-review-report 需求文档：`docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-review-report-requirements.md`
+- [x] 落盘 confidence-wording-review-report 实现计划：`docs/plans/2026-04-21-portmanager-m2-confidence-wording-review-report-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

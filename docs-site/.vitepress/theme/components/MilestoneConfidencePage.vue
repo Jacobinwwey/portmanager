@@ -186,6 +186,7 @@
           <li>{{ copy.historyFile }} <code>{{ progress.sourceFiles.historyPath }}</code></li>
           <li>{{ copy.reportFile }} <code>{{ progress.sourceFiles.reportPath }}</code></li>
           <li>{{ copy.reviewDigestFile }} <code>.portmanager/reports/milestone-confidence-review.md</code></li>
+          <li>{{ copy.wordingReviewFile }} <code>.portmanager/reports/milestone-wording-review.md</code></li>
           <li>{{ copy.reviewCommandLabel }} <code>pnpm milestone:review:confidence</code></li>
           <li>{{ copy.publishedArtifact }} <code>{{ progress.publication.trackedDataPath }}</code></li>
           <li>{{ copy.refreshCommandLabel }} <code>{{ progress.publication.refreshCommand }}</code></li>
@@ -229,7 +230,7 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistTitle: '开发者复核动作',
       currentDirectionKicker: 'Current Direction',
       currentDirectionTitle: '当前复核方向',
-      currentDirectionEvidence: 'Review Digest',
+      currentDirectionEvidence: 'Review Pack',
       currentDirectionRequirementsLink: '当前方向需求文档',
       currentDirectionPlanLink: '当前方向实现计划',
       currentDirectionVerificationLink: '真机验证报告',
@@ -239,6 +240,7 @@ const copy = computed(() => props.locale === 'zh'
       historyFile: 'History：',
       reportFile: 'Report：',
       reviewDigestFile: 'Review digest：',
+      wordingReviewFile: 'Wording review：',
       reviewCommandLabel: 'Review command：',
       publishedArtifact: 'Published artifact：',
       refreshCommandLabel: 'Refresh command：',
@@ -299,7 +301,7 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistTitle: 'Developer review actions',
       currentDirectionKicker: 'Current Direction',
       currentDirectionTitle: 'Current review direction',
-      currentDirectionEvidence: 'Review Digest',
+      currentDirectionEvidence: 'Review Pack',
       currentDirectionRequirementsLink: 'Current-direction requirements',
       currentDirectionPlanLink: 'Current-direction plan',
       currentDirectionVerificationLink: 'Verification report',
@@ -309,6 +311,7 @@ const copy = computed(() => props.locale === 'zh'
       historyFile: 'History:',
       reportFile: 'Report:',
       reviewDigestFile: 'Review digest:',
+      wordingReviewFile: 'Wording review:',
       reviewCommandLabel: 'Review command:',
       publishedArtifact: 'Published artifact:',
       refreshCommandLabel: 'Refresh command:',
@@ -386,8 +389,8 @@ const reviewChecklist = computed(() => props.locale === 'zh'
     ? [
         '先在 GitHub Actions 查看 `mainline-acceptance` job summary，再回到这个页面核对同一份 promotion-ready 计数。',
         '在本地主线执行 `pnpm milestone:review:promotion-ready -- --limit 20`，用一条 repo-native helper 同步 completed mainline bundle 并写出 review digest。',
-        '如果 digest 先暴露 countdown 漂移，再决定是否运行显式刷新命令。',
-        '只有在人工复核同意时，才执行 `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` 把公开快照推进到相同 truth。',
+        '先读 `.portmanager/reports/milestone-wording-review.md`，确认 `Wording review allowed`、source surfaces 与文案护栏。',
+        '如果 checklist 或 digest 先暴露 countdown 漂移，再决定是否通过同一条 helper 加上 `--refresh-published-artifact` 推进公开快照。',
         'promotion 门槛已经满足；继续保持 `pnpm milestone:verify:confidence` 与 `pnpm acceptance:verify` 为绿，同时让人工里程碑文案复核逐步收窄表述。'
       ]
     : [
@@ -401,8 +404,8 @@ const reviewChecklist = computed(() => props.locale === 'zh'
     ? [
         'Read the GitHub Actions `mainline-acceptance` job summary first, then confirm the same promotion-ready counters on this page.',
         'Run `pnpm milestone:review:promotion-ready -- --limit 20` on local main to sync completed mainline bundles and write the review digest in one repo-native step.',
-        'If the digest exposes countdown drift first, decide whether the explicit refresh command should move the public artifact.',
-        'Only run `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` when human review agrees that the public snapshot should move to the same truth.',
+        'Read `.portmanager/reports/milestone-wording-review.md` next, so `Wording review allowed`, source surfaces, and guardrails are frozen in one local checklist.',
+        'If the checklist or digest exposes countdown drift first, decide whether the same helper should rerun with `--refresh-published-artifact` to move the public artifact.',
         'The promotion threshold is already met; keep both `pnpm milestone:verify:confidence` and `pnpm acceptance:verify` green while human milestone-language review narrows wording deliberately.'
       ]
     : [
@@ -419,7 +422,7 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `当前公开状态已经是 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
         `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；promotion 门槛已经满足。`,
-        '默认复核顺序已经收敛为执行 `pnpm milestone:review:promotion-ready -- --limit 20`，由 helper 内部同步 history 并写出 `pnpm milestone:review:confidence`，只在人工复核同意时才用显式刷新命令更新公开快照。',
+        '默认复核顺序已经收敛为执行 `pnpm milestone:review:promotion-ready -- --limit 20`，由 helper 内部同步 history、写出 `pnpm milestone:review:confidence`，并额外生成 `.portmanager/reports/milestone-wording-review.md` 供人工文案复核。',
         `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前主线已从倒计时积累收窄为文案复核与 gate 持续健康，而不是继续补 readiness 脚手架。`
       ]
     : [
@@ -432,7 +435,7 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `Current public status is now \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
         `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the promotion threshold is met.`,
-        'The default review flow now starts with `pnpm milestone:review:promotion-ready -- --limit 20`, letting the helper sync history and write `pnpm milestone:review:confidence` before any explicit refresh decision.',
+        'The default review flow now starts with `pnpm milestone:review:promotion-ready -- --limit 20`, letting the helper sync history, write `pnpm milestone:review:confidence`, and emit `.portmanager/reports/milestone-wording-review.md` before any explicit refresh decision.',
         `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active lane has narrowed from countdown accumulation to wording review plus sustained gate health.`
       ]
     : [
@@ -445,11 +448,11 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
 
 const currentDirectionDocs = computed(() => [
   {
-    href: githubSourceLink('docs/brainstorms/2026-04-20-portmanager-m2-confidence-promotion-review-helper-requirements.md'),
+    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-review-report-requirements.md'),
     label: copy.value.currentDirectionRequirementsLink
   },
   {
-    href: githubSourceLink('docs/plans/2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan.md'),
+    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m2-confidence-wording-review-report-plan.md'),
     label: copy.value.currentDirectionPlanLink
   },
   {

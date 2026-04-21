@@ -44,15 +44,20 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-20-portmanager-m2-confidence-promotion-review-helper-requirements\.md/
+    /2026-04-21-portmanager-m2-confidence-wording-review-report-requirements\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan\.md/
+    /2026-04-21-portmanager-m2-confidence-wording-review-report-plan\.md/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /\.portmanager\/reports\/milestone-wording-review\.md/
   )
   assert.match(roadmapComponent, /pnpm milestone:review:confidence/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
-  assert.match(roadmapComponent, /2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-21-portmanager-m2-confidence-wording-review-report-plan\.md/)
+  assert.match(roadmapComponent, /\.portmanager\/reports\/milestone-wording-review\.md/)
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
 

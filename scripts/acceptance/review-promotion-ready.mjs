@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -8,6 +9,12 @@ import { syncConfidenceHistory } from './sync-confidence-history.mjs'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const repoRoot = path.resolve(__dirname, '..', '..')
+const defaultWordingReviewPath = path.join(
+  repoRoot,
+  '.portmanager',
+  'reports',
+  'milestone-wording-review.md'
+)
 const DEFAULT_LIMIT = 20
 const DEFAULT_REFRESH_COMMAND = [
   'corepack',
@@ -17,6 +24,17 @@ const DEFAULT_REFRESH_COMMAND = [
   '--ignore-workspace',
   'run',
   'docs:generate:refresh-confidence'
+]
+const DEFAULT_WORDING_SURFACES = [
+  'README.md',
+  'TODO.md',
+  'Interface Document.md',
+  'docs/specs/portmanager-milestones.md',
+  'docs/specs/portmanager-v1-product-spec.md',
+  'docs/operations/portmanager-real-machine-verification-report.md',
+  'docs-site/data/roadmap.ts',
+  'docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue',
+  'docs-site/.vitepress/theme/components/RoadmapPage.vue'
 ]
 
 export function parseArgs(argv) {
@@ -28,7 +46,9 @@ export function parseArgs(argv) {
     summaryPath: undefined,
     publishedDataPath: undefined,
     reviewPath: undefined,
-    verificationReportPath: undefined
+    verificationReportPath: undefined,
+    wordingReviewPath: defaultWordingReviewPath,
+    skipWordingReview: false
   }
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -74,6 +94,15 @@ export function parseArgs(argv) {
       continue
     }
 
+    if (current === '--wording-review-path') {
+      options.wordingReviewPath = path.resolve(
+        repoRoot,
+        argv[index + 1] ?? defaultWordingReviewPath
+      )
+      index += 1
+      continue
+    }
+
     if (current === '--refresh-published-artifact') {
       options.refreshPublishedArtifact = true
       continue
@@ -81,6 +110,11 @@ export function parseArgs(argv) {
 
     if (current === '--print-digest') {
       options.printDigest = true
+      continue
+    }
+
+    if (current === '--skip-wording-review') {
+      options.skipWordingReview = true
       continue
     }
 
@@ -119,6 +153,95 @@ export function refreshPublishedConfidenceArtifact({
   return result
 }
 
+function formatRun(run) {
+  if (!run?.context?.runId) {
+    return 'local'
+  }
+
+  return `${run.context.runId}/${run.context.runAttempt ?? '1'}`
+}
+
+function formatSha(run) {
+  return run?.context?.sha ? run.context.sha.slice(0, 12) : 'local'
+}
+
+function readinessLine(review) {
+  return `${review.local.readiness.qualifiedRuns}/${review.local.readiness.minimumQualifiedRuns}`
+}
+
+function consecutiveLine(review) {
+  return `${review.local.readiness.qualifiedConsecutivePasses}/${review.local.readiness.minimumConsecutivePasses}`
+}
+
+export function buildMilestoneWordingReview({
+  review,
+  wordingReviewPath = defaultWordingReviewPath,
+  generatedAt = new Date().toISOString(),
+  wordingSurfaces = DEFAULT_WORDING_SURFACES
+}) {
+  const wordingReviewAllowed =
+    review.local.readiness.status === 'promotion-ready' &&
+    review.countdownAligned &&
+    review.local.readiness.remainingQualifiedRuns === 0 &&
+    review.local.readiness.remainingConsecutivePasses === 0
+  const lines = [
+    '# Milestone Wording Review Checklist',
+    '',
+    `Generated: ${generatedAt}`,
+    `Confidence review: ${review.reviewPath}`,
+    `Verification report: ${review.verificationReportPath}`,
+    `Wording review path: ${wordingReviewPath}`,
+    '',
+    '## Confidence Gate',
+    `- Status: ${review.local.readiness.status}`,
+    `- Qualified runs: ${readinessLine(review)}`,
+    `- Qualified consecutive passes: ${consecutiveLine(review)}`,
+    `- Remaining qualified runs: ${review.local.readiness.remainingQualifiedRuns}`,
+    `- Remaining qualified pass gap: ${review.local.readiness.remainingConsecutivePasses}`,
+    `- Latest qualified run: ${formatRun(review.local.latestQualifiedRun)}`,
+    `- Latest qualified SHA: ${formatSha(review.local.latestQualifiedRun)}`,
+    `- Published countdown aligned: ${review.countdownAligned ? 'yes' : 'no'}`,
+    `- Full snapshot aligned: ${review.fullSnapshotAligned ? 'yes' : 'no'}`,
+    `- Wording review allowed: ${wordingReviewAllowed ? 'yes' : 'no'}`,
+    '',
+    '## Human Review Checklist',
+    '- [ ] Keep Milestone 1 wording at accepted public-surface truth.',
+    '- [ ] Keep Milestone 2 wording at promotion-ready until human review deliberately narrows it.',
+    '- [ ] Do not claim Milestone 2 is complete solely from confidence thresholds.',
+    '- [ ] Do not claim Toward C activation from promotion-ready evidence alone.',
+    '- [ ] Keep exact counters on the development-progress page and tracked confidence artifact.',
+    '- [ ] Re-run `pnpm milestone:review:promotion-ready -- --limit 20` before any public wording change.',
+    '- [ ] Re-run `pnpm acceptance:verify` before merging wording changes.',
+    '',
+    '## Source Surfaces To Review',
+    ...wordingSurfaces.map((surface) => `- [ ] ${surface}`),
+    ''
+  ]
+
+  return {
+    allowed: wordingReviewAllowed,
+    path: wordingReviewPath,
+    content: `${lines.join('\n')}\n`
+  }
+}
+
+export function writeMilestoneWordingReview({
+  review,
+  wordingReviewPath = defaultWordingReviewPath,
+  generatedAt = new Date().toISOString()
+}) {
+  const wordingReview = buildMilestoneWordingReview({
+    review,
+    wordingReviewPath,
+    generatedAt
+  })
+
+  mkdirSync(path.dirname(wordingReviewPath), { recursive: true })
+  writeFileSync(wordingReviewPath, wordingReview.content, 'utf8')
+
+  return wordingReview
+}
+
 export function reviewPromotionReady({
   limit = DEFAULT_LIMIT,
   refreshPublishedArtifact = false,
@@ -127,10 +250,13 @@ export function reviewPromotionReady({
   publishedDataPath,
   reviewPath,
   verificationReportPath,
+  wordingReviewPath = defaultWordingReviewPath,
+  skipWordingReview = false,
   cwd = repoRoot,
   syncConfidenceHistoryImpl = syncConfidenceHistory,
   reviewConfidenceImpl = reviewConfidence,
-  refreshPublishedConfidenceArtifactImpl = refreshPublishedConfidenceArtifact
+  refreshPublishedConfidenceArtifactImpl = refreshPublishedConfidenceArtifact,
+  writeMilestoneWordingReviewImpl = writeMilestoneWordingReview
 } = {}) {
   const syncResult = syncConfidenceHistoryImpl({
     limit,
@@ -160,12 +286,19 @@ export function reviewPromotionReady({
           requirePublishedCountdownMatch: true
         })
       : initialReview
+  const wordingReview = skipWordingReview
+    ? null
+    : writeMilestoneWordingReviewImpl({
+        review: finalReview.review,
+        wordingReviewPath
+      })
 
   return {
     syncResult,
     initialReview,
     finalReview,
-    refreshedArtifact
+    refreshedArtifact,
+    wordingReview
   }
 }
 
@@ -178,7 +311,8 @@ export function renderPromotionReadyReview(result) {
     `Refreshed published artifact: ${result.refreshedArtifact ? 'yes' : 'no'}`,
     `Qualified countdown aligned: ${result.finalReview.review.countdownAligned ? 'yes' : 'no'}`,
     `Full snapshot aligned: ${result.finalReview.review.fullSnapshotAligned ? 'yes' : 'no'}`,
-    `Review path: ${result.finalReview.review.reviewPath}`
+    `Review path: ${result.finalReview.review.reviewPath}`,
+    `Wording review path: ${result.wordingReview?.path ?? 'skipped'}`
   ].join('\n')
 }
 

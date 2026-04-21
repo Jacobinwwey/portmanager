@@ -13,6 +13,7 @@ test('interface document stays aligned with helper-first promotion review flow',
   assert.match(interfaceDocument, /pnpm milestone:review:confidence/)
   assert.match(interfaceDocument, /pnpm milestone:review:promotion-ready -- --limit 20/)
   assert.match(interfaceDocument, /--refresh-published-artifact/)
+  assert.match(interfaceDocument, /\.portmanager\/reports\/milestone-wording-review\.md/)
   assert.match(
     interfaceDocument,
     /pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence/

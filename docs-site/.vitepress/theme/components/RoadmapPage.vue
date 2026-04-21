@@ -331,7 +331,7 @@ const copy = computed(() => props.locale === 'zh'
       developerProgressLabel: 'Developer Progress',
       liveConfidenceLabel: 'Live Confidence',
       liveConfidenceTitle: '当前公开进度',
-      liveConfidenceBody: 'Roadmap 首页现在直接显示已经进入 `promotion-ready` 的公开进度快照，开发者无需离开页面就能看到最新 qualified 主线证据、最新可见 run、visibility-only 噪声拆分，以及默认复核链路会先经过 `pnpm milestone:review:promotion-ready -- --limit 20`、内部写出 `pnpm milestone:review:confidence` digest、再按需显式刷新公开 artifact 的事实。',
+      liveConfidenceBody: 'Roadmap 首页现在直接显示已经进入 `promotion-ready` 的公开进度快照，开发者无需离开页面就能看到最新 qualified 主线证据、最新可见 run、visibility-only 噪声拆分，以及默认复核链路会先经过 `pnpm milestone:review:promotion-ready -- --limit 20`、内部写出 `pnpm milestone:review:confidence` digest 与 `.portmanager/reports/milestone-wording-review.md`，再按需显式刷新公开 artifact 的事实。',
       liveConfidenceReadiness: 'Readiness',
       liveQualifiedRuns: 'Qualified runs：',
       liveQualifiedPasses: 'Qualified consecutive passes：',
@@ -385,7 +385,7 @@ const copy = computed(() => props.locale === 'zh'
       developerProgressLabel: 'Developer Progress',
       liveConfidenceLabel: 'Live Confidence',
       liveConfidenceTitle: 'Current published progress',
-      liveConfidenceBody: 'The roadmap home page now exposes the published `promotion-ready` confidence snapshot directly, so developers can see the latest qualified mainline evidence, latest visible run, visibility-only noise split, and the fact that the default review chain runs `pnpm milestone:review:promotion-ready -- --limit 20`, writes the `pnpm milestone:review:confidence` digest internally, and only then considers any explicit artifact refresh.',
+      liveConfidenceBody: 'The roadmap home page now exposes the published `promotion-ready` confidence snapshot directly, so developers can see the latest qualified mainline evidence, latest visible run, visibility-only noise split, and the fact that the default review chain runs `pnpm milestone:review:promotion-ready -- --limit 20`, writes the `pnpm milestone:review:confidence` digest plus `.portmanager/reports/milestone-wording-review.md`, and only then considers any explicit artifact refresh.',
       liveConfidenceReadiness: 'Readiness',
       liveQualifiedRuns: 'Qualified runs:',
       liveQualifiedPasses: 'Qualified consecutive passes:',
@@ -462,7 +462,7 @@ const confidenceLatestQualifiedRun = computed(() => formatRun(confidenceProgress
 const confidenceLatestQualifiedSha = computed(() => formatSha(confidenceProgress.latestQualifiedRun))
 const confidenceLatestVisibleRun = computed(() => formatRun(confidenceProgress.latestRun))
 const reviewDigestPlanSourceLink = githubSourceLink(
-  'docs/plans/2026-04-20-portmanager-m2-confidence-promotion-review-helper-plan.md'
+  'docs/plans/2026-04-21-portmanager-m2-confidence-wording-review-report-plan.md'
 )
 
 function stageLabel(stage: string) {
