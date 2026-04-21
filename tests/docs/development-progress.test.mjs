@@ -76,6 +76,15 @@ test('roadmap publishes a development-progress page backed by live milestone con
     milestoneConfidenceComponent,
     /sourceSurfaceInstruction\('docs-site\/\.vitepress\/theme\/components\/RoadmapPage\.vue'\)/
   )
+  assert.match(milestoneConfidenceComponent, /progress\.currentReviewPack/)
+  assert.match(
+    milestoneConfidenceComponent,
+    /currentReviewPackRequiredFile\('milestone-confidence-review\.md'\)/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /currentReviewPackOptionalFile\('milestone-confidence-summary\.md'\)/
+  )
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
@@ -94,6 +103,15 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(
     roadmapComponent,
     /confidenceSurfaceInstruction\('docs-site\/data\/milestone-confidence-progress\.ts'\)/
+  )
+  assert.match(roadmapComponent, /confidenceProgress\.currentReviewPack/)
+  assert.match(
+    roadmapComponent,
+    /currentReviewPackRequiredFile\('milestone-wording-review\.md'\)/
+  )
+  assert.match(
+    roadmapComponent,
+    /currentReviewPackOptionalFile\('milestone-confidence-summary\.md'\)/
   )
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
@@ -136,6 +154,16 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.equal(
     milestoneConfidenceProgress.wordingReview.sourceSurfaces['docs-site/data/milestone-confidence-progress.ts'].reviewInstruction,
     'Exact published counters belong here and on the development-progress page, not in root-doc prose.'
+  )
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.manifestPath, 'string')
+  assert.equal(
+    milestoneConfidenceProgress.currentReviewPack.helperCommand,
+    'pnpm milestone:fetch:review-pack'
+  )
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.id, 'number')
+  assert.equal(
+    milestoneConfidenceProgress.currentReviewPack.files.required['milestone-confidence-review.md'],
+    '.portmanager/reports/current-ci-review-pack/milestone-confidence-review.md'
   )
   // The committed docs-site data is a publish artifact. An ignored local .portmanager
   // history may be newer than that artifact until docs:generate is rerun, so this

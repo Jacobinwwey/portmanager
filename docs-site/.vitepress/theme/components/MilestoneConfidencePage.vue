@@ -213,7 +213,18 @@
           <li>{{ copy.reviewCommandLabel }} <code>pnpm milestone:review:confidence</code></li>
           <li>{{ copy.publishedArtifact }} <code>{{ progress.publication.trackedDataPath }}</code></li>
           <li>{{ copy.refreshCommandLabel }} <code>{{ progress.publication.refreshCommand }}</code></li>
+          <template v-if="progress.currentReviewPack">
+            <li>{{ copy.currentReviewPackHelper }} <code>{{ progress.currentReviewPack.helperCommand }}</code></li>
+            <li>{{ copy.currentReviewPackDir }} <code>{{ progress.currentReviewPack.outputDir }}</code></li>
+            <li>{{ copy.currentReviewPackManifest }} <code>{{ progress.currentReviewPack.manifestPath }}</code></li>
+            <li>{{ copy.currentReviewPackRun }} {{ currentReviewPackRunLabel }}</li>
+            <li>{{ copy.currentReviewPackFetchedAt }} {{ formatTimestamp(progress.currentReviewPack.fetchedAt) }}</li>
+            <li>{{ copy.currentReviewPackReviewDigest }} <code>{{ currentReviewPackRequiredFile('milestone-confidence-review.md') }}</code></li>
+            <li>{{ copy.currentReviewPackWordingReview }} <code>{{ currentReviewPackRequiredFile('milestone-wording-review.md') }}</code></li>
+            <li>{{ copy.currentReviewPackSummary }} <code>{{ currentReviewPackOptionalFile('milestone-confidence-summary.md') }}</code></li>
+          </template>
         </ul>
+        <p v-if="!progress.currentReviewPack" class="pm-doc-note">{{ copy.noCurrentReviewPack }}</p>
       </article>
     </div>
   </section>
@@ -277,6 +288,14 @@ const copy = computed(() => props.locale === 'zh'
       reviewCommandLabel: 'Review command：',
       publishedArtifact: 'Published artifact：',
       refreshCommandLabel: 'Refresh command：',
+      currentReviewPackHelper: 'Current CI review-pack helper：',
+      currentReviewPackDir: 'Current CI review-pack dir：',
+      currentReviewPackManifest: 'Current CI review-pack manifest：',
+      currentReviewPackRun: 'Current CI review-pack run：',
+      currentReviewPackFetchedAt: 'Current CI review-pack fetched：',
+      currentReviewPackReviewDigest: 'Current CI review digest：',
+      currentReviewPackWordingReview: 'Current CI wording review：',
+      currentReviewPackSummary: 'Current CI summary：',
       updatedAt: '更新于：',
       qualifiedRuns: 'Qualified runs：',
       qualifiedConsecutivePasses: 'Qualified consecutive passes：',
@@ -301,6 +320,7 @@ const copy = computed(() => props.locale === 'zh'
       completed: 'Completed',
       failedStep: 'Failed step',
       noWordingReview: '当前公开 artifact 还没有携带 wording-review 快照。',
+      noCurrentReviewPack: '当前公开 artifact 还没有携带 staged current-CI review-pack 元数据。',
       noQualifiedRun: '当前还没有 qualified 主线运行可公开显示。',
       none: 'none',
       yes: 'yes',
@@ -359,6 +379,14 @@ const copy = computed(() => props.locale === 'zh'
       reviewCommandLabel: 'Review command:',
       publishedArtifact: 'Published artifact:',
       refreshCommandLabel: 'Refresh command:',
+      currentReviewPackHelper: 'Current CI review-pack helper:',
+      currentReviewPackDir: 'Current CI review-pack dir:',
+      currentReviewPackManifest: 'Current CI review-pack manifest:',
+      currentReviewPackRun: 'Current CI review-pack run:',
+      currentReviewPackFetchedAt: 'Current CI review-pack fetched:',
+      currentReviewPackReviewDigest: 'Current CI review digest:',
+      currentReviewPackWordingReview: 'Current CI wording review:',
+      currentReviewPackSummary: 'Current CI summary:',
       updatedAt: 'Updated:',
       qualifiedRuns: 'Qualified runs:',
       qualifiedConsecutivePasses: 'Qualified consecutive passes:',
@@ -383,6 +411,7 @@ const copy = computed(() => props.locale === 'zh'
       completed: 'Completed',
       failedStep: 'Failed step',
       noWordingReview: 'No wording-review snapshot is published on this artifact yet.',
+      noCurrentReviewPack: 'No staged current-CI review-pack metadata is published on this artifact yet.',
       noQualifiedRun: 'No qualified mainline run is available yet.',
       none: 'none',
       yes: 'yes',
@@ -434,6 +463,14 @@ const latestQualifiedRunLabel = computed(() => {
   }
 
   return runLabel(progress.latestQualifiedRun)
+})
+
+const currentReviewPackRunLabel = computed(() => {
+  if (!progress.currentReviewPack?.sourceRun?.id) {
+    return copy.value.none
+  }
+
+  return `${progress.currentReviewPack.sourceRun.id}/${progress.currentReviewPack.sourceRun.attempt ?? '1'}`
 })
 
 const reviewChecklist = computed(() => props.locale === 'zh'
@@ -574,5 +611,13 @@ function sourceSurfaceStatus(surfacePath: string) {
 
 function sourceSurfaceInstruction(surfacePath: string) {
   return progress.wordingReview?.sourceSurfaces[surfacePath]?.reviewInstruction ?? copy.value.none
+}
+
+function currentReviewPackRequiredFile(fileName: string) {
+  return progress.currentReviewPack?.files.required[fileName] ?? copy.value.none
+}
+
+function currentReviewPackOptionalFile(fileName: string) {
+  return progress.currentReviewPack?.files.optional[fileName] ?? copy.value.none
 }
 </script>

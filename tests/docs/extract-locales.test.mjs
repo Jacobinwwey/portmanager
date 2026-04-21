@@ -79,11 +79,18 @@ async function createSandbox(t) {
 
   const historyPath = path.join(sandboxRoot, 'reports', 'milestone-confidence-history.json')
   const wordingReviewPath = path.join(sandboxRoot, 'reports', 'milestone-wording-review.md')
+  const reviewPackManifestPath = path.join(
+    sandboxRoot,
+    'reports',
+    'current-ci-review-pack',
+    'review-pack-manifest.json'
+  )
   const generatedDataPath = path.join(sandboxRoot, 'docs-site', 'data', 'milestone-confidence-progress.ts')
   await mkdir(path.dirname(historyPath), { recursive: true })
+  await mkdir(path.dirname(reviewPackManifestPath), { recursive: true })
   await mkdir(path.dirname(generatedDataPath), { recursive: true })
 
-  return { historyPath, wordingReviewPath, generatedDataPath }
+  return { historyPath, wordingReviewPath, reviewPackManifestPath, generatedDataPath }
 }
 
 test('default docs generation reuses the committed confidence artifact even when local history exists', async (t) => {
@@ -104,7 +111,7 @@ test('default docs generation reuses the committed confidence artifact even when
 })
 
 test('explicit confidence refresh regenerates the committed artifact from local history', async (t) => {
-  const { historyPath, wordingReviewPath, generatedDataPath } = await createSandbox(t)
+  const { historyPath, wordingReviewPath, reviewPackManifestPath, generatedDataPath } = await createSandbox(t)
 
   await writeFile(generatedDataPath, '/* stale artifact */\n', 'utf8')
   await writeFile(
@@ -133,11 +140,52 @@ test('explicit confidence refresh regenerates the committed artifact from local 
     ].join('\n'),
     'utf8'
   )
+  await writeFile(
+    reviewPackManifestPath,
+    JSON.stringify({
+      manifestVersion: '0.1.0',
+      fetchedAt: '2026-04-21T06:33:31.931Z',
+      repo: 'Jacobinwwey/portmanager',
+      workflowRef: 'mainline-acceptance.yml',
+      branch: 'main',
+      artifactPattern: 'milestone-confidence-bundle-*',
+      outputDir: '/tmp/sandbox/.portmanager/reports/current-ci-review-pack',
+      sourceRun: {
+        id: 24706987559,
+        attempt: 1,
+        event: 'push',
+        conclusion: 'success',
+        status: 'completed',
+        htmlUrl: 'https://github.com/Jacobinwwey/portmanager/actions/runs/24706987559',
+        workflowUrl: 'https://api.github.com/repos/Jacobinwwey/portmanager/actions/workflows/262328672',
+        headSha: '68d94be0e61b816a6294173e6c6ecbbe04495c28',
+        createdAt: '2026-04-21T06:09:40Z',
+        updatedAt: '2026-04-21T06:11:54Z'
+      },
+      files: {
+        required: {
+          'milestone-confidence-review.md': {
+            localPath: '/tmp/sandbox/.portmanager/reports/current-ci-review-pack/milestone-confidence-review.md'
+          },
+          'milestone-wording-review.md': {
+            localPath: '/tmp/sandbox/.portmanager/reports/current-ci-review-pack/milestone-wording-review.md'
+          }
+        },
+        optional: {
+          'milestone-confidence-summary.md': {
+            localPath: '/tmp/sandbox/.portmanager/reports/current-ci-review-pack/milestone-confidence-summary.md'
+          }
+        }
+      }
+    }, null, 2),
+    'utf8'
+  )
 
   const status = await generateMilestoneConfidenceProgressData({
     refreshConfidenceProgress: true,
     confidenceHistorySourcePath: historyPath,
     wordingReviewSourcePath: wordingReviewPath,
+    reviewPackManifestSourcePath: reviewPackManifestPath,
     generatedDataPath
   })
 
@@ -154,10 +202,15 @@ test('explicit confidence refresh regenerates the committed artifact from local 
   assert.match(refreshedArtifact, /"wordingReviewAllowed": true/)
   assert.match(refreshedArtifact, /"requiredNextAction": "Review milestone wording against helper outputs\."/)
   assert.match(refreshedArtifact, /"development-progress-counter-surface"/)
+  assert.match(refreshedArtifact, /"currentReviewPack"/)
+  assert.match(refreshedArtifact, /"manifestPath": "\.portmanager\/reports\/current-ci-review-pack\/review-pack-manifest\.json"/)
+  assert.match(refreshedArtifact, /"helperCommand": "pnpm milestone:fetch:review-pack"/)
+  assert.match(refreshedArtifact, /"id": 24706987559/)
+  assert.match(refreshedArtifact, /"milestone-confidence-review\.md": "\.portmanager\/reports\/current-ci-review-pack\/milestone-confidence-review\.md"/)
 })
 
 test('explicit confidence refresh still succeeds when wording-review artifact is unavailable', async (t) => {
-  const { historyPath, wordingReviewPath, generatedDataPath } = await createSandbox(t)
+  const { historyPath, wordingReviewPath, reviewPackManifestPath, generatedDataPath } = await createSandbox(t)
 
   await writeFile(
     historyPath,
@@ -169,6 +222,7 @@ test('explicit confidence refresh still succeeds when wording-review artifact is
     refreshConfidenceProgress: true,
     confidenceHistorySourcePath: historyPath,
     wordingReviewSourcePath: wordingReviewPath,
+    reviewPackManifestSourcePath: reviewPackManifestPath,
     generatedDataPath
   })
 
@@ -176,6 +230,7 @@ test('explicit confidence refresh still succeeds when wording-review artifact is
 
   assert.equal(status, 'refreshed')
   assert.match(refreshedArtifact, /"wordingReview": null/)
+  assert.match(refreshedArtifact, /"currentReviewPack": null/)
 })
 
 test('explicit confidence refresh fails when local history is unavailable', async (t) => {

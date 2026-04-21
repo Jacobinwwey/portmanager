@@ -212,6 +212,40 @@ export const milestoneConfidenceProgress = {
       }
     }
   },
+  "currentReviewPack": {
+    "manifestVersion": "0.1.0",
+    "fetchedAt": "2026-04-21T06:33:31.931Z",
+    "repo": "Jacobinwwey/portmanager",
+    "workflowRef": "mainline-acceptance.yml",
+    "branch": "main",
+    "artifactPattern": "milestone-confidence-bundle-*",
+    "outputDir": ".portmanager/reports/current-ci-review-pack",
+    "manifestPath": ".portmanager/reports/current-ci-review-pack/review-pack-manifest.json",
+    "helperCommand": "pnpm milestone:fetch:review-pack",
+    "sourceRun": {
+      "id": 24706987559,
+      "attempt": 1,
+      "event": "push",
+      "conclusion": "success",
+      "status": "completed",
+      "htmlUrl": "https://github.com/Jacobinwwey/portmanager/actions/runs/24706987559",
+      "workflowUrl": "https://api.github.com/repos/Jacobinwwey/portmanager/actions/workflows/262328672",
+      "headSha": "68d94be0e61b816a6294173e6c6ecbbe04495c28",
+      "createdAt": "2026-04-21T06:09:40Z",
+      "updatedAt": "2026-04-21T06:11:54Z"
+    },
+    "files": {
+      "required": {
+        "milestone-confidence-review.md": ".portmanager/reports/current-ci-review-pack/milestone-confidence-review.md",
+        "milestone-wording-review.md": ".portmanager/reports/current-ci-review-pack/milestone-wording-review.md"
+      },
+      "optional": {
+        "milestone-confidence-history.json": ".portmanager/reports/current-ci-review-pack/milestone-confidence-history.json",
+        "milestone-confidence-report.json": ".portmanager/reports/current-ci-review-pack/milestone-confidence-report.json",
+        "milestone-confidence-summary.md": ".portmanager/reports/current-ci-review-pack/milestone-confidence-summary.md"
+      }
+    }
+  },
   "publication": {
     "trackedDataPath": "docs-site/data/milestone-confidence-progress.ts",
     "defaultMode": "reuse-committed-artifact",

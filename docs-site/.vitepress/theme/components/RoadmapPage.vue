@@ -236,9 +236,18 @@
                 <li>{{ copy.liveRoadmapPreviewInstruction }} {{ confidenceSurfaceInstruction('docs-site/.vitepress/theme/components/RoadmapPage.vue') }}</li>
                 <li>{{ copy.liveTrackedArtifactSurface }} <code>{{ confidenceSurfaceStatus('docs-site/data/milestone-confidence-progress.ts') }}</code></li>
                 <li>{{ copy.liveTrackedArtifactInstruction }} {{ confidenceSurfaceInstruction('docs-site/data/milestone-confidence-progress.ts') }}</li>
+                <template v-if="confidenceProgress.currentReviewPack">
+                  <li>{{ copy.liveCurrentReviewPackRun }} {{ currentReviewPackRunLabel }}</li>
+                  <li>{{ copy.liveCurrentReviewPackFetchedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.fetchedAt) }}</li>
+                  <li>{{ copy.liveCurrentReviewPackManifest }} <code>{{ confidenceProgress.currentReviewPack.manifestPath }}</code></li>
+                  <li>{{ copy.liveCurrentReviewPackDigest }} <code>{{ currentReviewPackRequiredFile('milestone-confidence-review.md') }}</code></li>
+                  <li>{{ copy.liveCurrentReviewPackWording }} <code>{{ currentReviewPackRequiredFile('milestone-wording-review.md') }}</code></li>
+                  <li>{{ copy.liveCurrentReviewPackSummary }} <code>{{ currentReviewPackOptionalFile('milestone-confidence-summary.md') }}</code></li>
+                </template>
               </ul>
             </template>
             <p v-else class="pm-doc-note">{{ copy.liveNoWordingReview }}</p>
+            <p v-if="confidenceProgress.wordingReview && !confidenceProgress.currentReviewPack" class="pm-doc-note">{{ copy.liveNoCurrentReviewPack }}</p>
           </section>
         </div>
 
@@ -392,6 +401,13 @@ const copy = computed(() => props.locale === 'zh'
       liveTrackedArtifactSurface: 'Tracked artifact surface：',
       liveTrackedArtifactInstruction: 'Tracked artifact review instruction：',
       liveNoWordingReview: '当前公开快照还没有携带 wording-review 姿态。',
+      liveCurrentReviewPackRun: 'Current CI review-pack run：',
+      liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched：',
+      liveCurrentReviewPackManifest: 'Current CI review-pack manifest：',
+      liveCurrentReviewPackDigest: 'Current CI review digest：',
+      liveCurrentReviewPackWording: 'Current CI wording review：',
+      liveCurrentReviewPackSummary: 'Current CI summary：',
+      liveNoCurrentReviewPack: '当前公开快照还没有携带 staged current-CI review-pack 元数据。',
       liveQualifiedMainlineRuns: 'Qualified mainline runs：',
       liveLocalVisibilityRuns: 'Local visibility-only runs：',
       liveRemoteNoiseRuns: 'Non-qualified remote runs：',
@@ -458,6 +474,13 @@ const copy = computed(() => props.locale === 'zh'
       liveTrackedArtifactSurface: 'Tracked artifact surface:',
       liveTrackedArtifactInstruction: 'Tracked artifact review instruction:',
       liveNoWordingReview: 'No wording-review posture is published on this snapshot yet.',
+      liveCurrentReviewPackRun: 'Current CI review-pack run:',
+      liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched:',
+      liveCurrentReviewPackManifest: 'Current CI review-pack manifest:',
+      liveCurrentReviewPackDigest: 'Current CI review digest:',
+      liveCurrentReviewPackWording: 'Current CI wording review:',
+      liveCurrentReviewPackSummary: 'Current CI summary:',
+      liveNoCurrentReviewPack: 'No staged current-CI review-pack metadata is published on this snapshot yet.',
       liveQualifiedMainlineRuns: 'Qualified mainline runs:',
       liveLocalVisibilityRuns: 'Local visibility-only runs:',
       liveRemoteNoiseRuns: 'Non-qualified remote runs:',
@@ -520,6 +543,10 @@ const confidenceUpdatedAt = computed(() => formatTimestamp(confidenceProgress.up
 const confidenceLatestQualifiedRun = computed(() => formatRun(confidenceProgress.latestQualifiedRun))
 const confidenceLatestQualifiedSha = computed(() => formatSha(confidenceProgress.latestQualifiedRun))
 const confidenceLatestVisibleRun = computed(() => formatRun(confidenceProgress.latestRun))
+const currentReviewPackRunLabel = computed(() => {
+  if (!confidenceProgress.currentReviewPack?.sourceRun?.id) return 'none'
+  return `${confidenceProgress.currentReviewPack.sourceRun.id}/${confidenceProgress.currentReviewPack.sourceRun.attempt ?? '1'}`
+})
 const confidenceWordingTone = computed(() => {
   if (!confidenceProgress.wordingReview) return 'planned'
   return confidenceProgress.wordingReview.publicClaimClass === 'promotion-ready-refresh-required' ? 'next' : 'safe'
@@ -565,6 +592,14 @@ function confidenceSurfaceStatus(surfacePath: string) {
 
 function confidenceSurfaceInstruction(surfacePath: string) {
   return confidenceProgress.wordingReview?.sourceSurfaces[surfacePath]?.reviewInstruction ?? 'none'
+}
+
+function currentReviewPackRequiredFile(fileName: string) {
+  return confidenceProgress.currentReviewPack?.files.required[fileName] ?? 'none'
+}
+
+function currentReviewPackOptionalFile(fileName: string) {
+  return confidenceProgress.currentReviewPack?.files.optional[fileName] ?? 'none'
 }
 
 function badgeTone(stage: string) {
