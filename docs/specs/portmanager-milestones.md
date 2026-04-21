@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-21
-Version: v0.5.20-confidence-refresh-maintenance
+Version: v0.6.0-m3-phase0-enablement
 
 ## English
 
@@ -72,7 +72,7 @@ Milestone 1 is only accepted when all of the following become true:
 - `Confidence-review-digest slice`: complete. `pnpm milestone:review:confidence` now compares synced local readiness with the tracked public progress artifact, writes `.portmanager/reports/milestone-confidence-review.md`, separates countdown drift from visibility-only drift, and keeps strict published-countdown failure opt-in.
 - `Confidence-review-pack CI slice`: complete. `pnpm milestone:review:promotion-ready -- --skip-sync` now lets `mainline-acceptance` publish the current-run `.portmanager/reports/milestone-confidence-review.md` and `.portmanager/reports/milestone-wording-review.md` inside `milestone-confidence-bundle-*`.
 - `Confidence-review-pack fetch slice`: complete. `pnpm milestone:fetch:review-pack` now stages the uploaded current-run review bundle into `.portmanager/reports/current-ci-review-pack/` and writes `review-pack-manifest.json` for CI-first review.
-- `Next lane`: Milestone 2 promotion-ready publication refresh and maintenance on the same live host / rule / policy slice by keeping `pnpm milestone:review:promotion-ready -- --limit 20` as the default completed-mainline review entrypoint, refreshing the tracked public snapshot only through the same helper plus `--refresh-published-artifact` when review agrees, running `pnpm milestone:fetch:review-pack` when the current CI run is the first question, reviewing the verification report plus the public development-progress page and `.portmanager/reports/current-ci-review-pack/` as one maintenance bundle, and keeping qualified history green while human milestone-language review stays deliberate.
+- `Next lane`: Milestone 3 now opens as bounded `Phase 0 enablement` on top of the same live host / rule / policy slice. Milestone 2 review helpers remain mandatory guardrails: keep `pnpm milestone:review:promotion-ready -- --limit 20` as the default completed-mainline review entrypoint, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, keep the public development-progress page plus `.portmanager/reports/milestone-wording-review.md` as the wording-truth bundle, and only move the tracked public snapshot through the same helper plus `--refresh-published-artifact` when review agrees. New implementation energy now goes to gateway-ready boundaries, controller seam extraction, event/audit indexing, bounded batch orchestration, and persistence-readiness work described in `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -120,8 +120,8 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: `mainline-acceptance` confidence collection now runs `pnpm milestone:review:promotion-ready -- --skip-sync`, so the uploaded `milestone-confidence-bundle-*` also carries `.portmanager/reports/milestone-confidence-review.md` plus `.portmanager/reports/milestone-wording-review.md` for the current run.
 - Fresh promotion-ready publication refresh on `2026-04-21`: after pulling the latest `main`, `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` synced completed `mainline-acceptance` runs through authenticated `gh`, wrote the review digest, and republished the tracked docs artifact from the same completed workflow evidence. Exact live counters and the latest qualified run still live on the generated development-progress page and tracked confidence artifact, while this roadmap spec keeps the broader threshold-met conclusion stable.
 - Fresh runtime-transition proof on `2026-04-20`: forcing GitHub workflow JavaScript actions onto Node 24 did not break `mainline-acceptance` or `docs-pages`; the remaining Node 20 deprecation annotations now come from GitHub official action metadata rather than repo-local workflow drift.
-- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now sustained qualified green history and milestone-language review rather than invention of more reporting surfaces or review-signal repair.
-- Milestone 2 still remains in progress while human milestone-language review deliberately narrows public wording on top of the now promotion-ready evidence and the confidence routine stays green.
+- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now the explicit Milestone 3 seams that Scheme C still requires rather than invention of more reporting surfaces or review-signal repair.
+- Milestone 2 remains an active guardrail lane while human milestone-language review deliberately keeps public wording honest on top of the now promotion-ready evidence. That guardrail no longer blocks Milestone 3 Phase 0 enablement; it is the proof discipline Milestone 3 must keep.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.
@@ -147,26 +147,38 @@ In that scheme:
 The attraction of C is architectural completeness and long-term extensibility.
 The danger of C is equally real: at empty-repository time, it can spend too much effort on infrastructure shape before PortManager has earned its first reliable value slice.
 
-#### Why C is not Milestone 1 or Milestone 2
-- If Milestone 1 is not real, C is only architecture theater.
-- If Milestone 2 is not real, C only multiplies unreliability across more hosts and more surfaces.
-- C must therefore build on a trusted `B` state plus explicit reliability work, rather than skipping those gates.
-- C is retained as a later direction precisely because its upside is strategic, while its downside at V1 time is over-design and delayed practical delivery.
+#### Current verified entry signal
+Milestone 3 can now begin as a bounded execution phase because all of the following are already true:
+- the `B` validation state is credible enough that Milestone 3 no longer needs to stay purely theoretical
+- backup, rollback, degraded handling, and public review surfaces are already protected by the same accepted live slice
+- shared contracts already govern Web, controller, CLI, agent, and docs-site publication surfaces
+- minimal agent-service migration is complete enough that the product no longer revolves around shell-only behavior
 
-#### Entry gate into C
-Milestone 3 can only begin as a real execution phase when all of the following are true:
-- the `B` validation state is trusted in real use
-- backup, rollback, and degraded handling are stable enough that scope expansion does not erase accountability
-- shared contracts are already governing Web, controller, CLI, agent, and SDK-facing shapes
-- minimal agent-service migration has proven the product can absorb existing behavior without losing control-plane semantics
+#### Deep compare against current code
 
-#### Locked C workstreams
-- stronger agent reporting and event semantics
-- batch host management and bounded orchestration primitives
-- PostgreSQL migration or migration-readiness once SQLite becomes a real concurrency or reliability constraint
-- broader platform abstraction, but still through explicit supported-target layers
-- preparation for macOS, mobile, wider Linux, Windows remote, and more general consumer surfaces only after the abstraction layer is credible
-- progressive movement toward the Agent-First Distributed Platform shape only after the value-delivery and robustness gates have already been earned
+| Scheme C expectation | Current verified state | Gap classification |
+| --- | --- | --- |
+| Gateway-ready consumer boundary | Web and CLI still call the controller directly over `REST + SSE` | Not started |
+| Explicit controller / policy / event / audit separation | `apps/controller/src/controller-server.ts` plus `apps/controller/src/operation-store.ts` still centralize most of that work | Not started |
+| First-class bounded remote agent | Live agent service boundary already exists with `/health`, `/runtime-state`, `/apply`, `/snapshot`, `/rollback` | Partially earned |
+| Batch host management | Current verified proof remains one host / one rule plus reliability replay | Not started |
+| Persistence readiness beyond SQLite | SQLite remains the only real store | Not started |
+| Platform abstraction for additional targets | Ubuntu 24.04 + systemd + Tailscale remains the only credible target | Not started |
+
+#### Milestone 3 Phase 0 workstreams
+- gateway-ready consumer boundary
+- controller seam extraction for orchestration, policy, read models, and event/audit indexing
+- richer event and audit semantics on top of the same operation evidence model
+- bounded multi-host and batch-operation primitives
+- persistence seams and PostgreSQL readiness criteria
+- explicit target-abstraction rules before second-target claims
+
+#### Guardrails that still stay in force
+- keep `pnpm acceptance:verify` green
+- keep `pnpm milestone:verify:confidence` green
+- keep `pnpm milestone:review:promotion-ready -- --limit 20` and `.portmanager/reports/milestone-wording-review.md` as the wording-truth bundle
+- do not create a second evidence model while opening Milestone 3
+- do not weaken backup, rollback, degraded, or contract governance semantics in the name of distribution
 
 #### Explicit non-goals for C
 - C is not a pivot to arbitrary shell orchestration as the operating model
@@ -174,7 +186,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - C is not a requirement to rewrite everything into one language for ideological purity
 - C is not simultaneous support for every platform before support boundaries are explicit
 - C is not permission to weaken contract review discipline in the name of speed
-- C is not the right starting posture for an empty-repository V1 that is supposed to prove practical robustness quickly
+- C is not permission to claim a gateway, split audit service, fleet orchestration, PostgreSQL default, or broader platform support before those seams are real
 
 ## 中文
 
@@ -244,7 +256,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - `Confidence review digest 切片`：已完成。`pnpm milestone:review:confidence` 现在会把同步后的本地 readiness 与已跟踪公开 progress artifact 直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，区分 countdown 漂移与 visibility-only 漂移，并把严格公开倒计时检查保持为显式可选。
 - `Confidence review-pack CI 切片`：已完成。`pnpm milestone:review:promotion-ready -- --skip-sync` 现在会让 `mainline-acceptance` 把当前 run 的 `.portmanager/reports/milestone-confidence-review.md` 与 `.portmanager/reports/milestone-wording-review.md` 直接上传进 `milestone-confidence-bundle-*`，供开发者查看当前 run。
 - `Confidence review-pack fetch 切片`：已完成。`pnpm milestone:fetch:review-pack` 现在会把上传后的 current-run review bundle 落到 `.portmanager/reports/current-ci-review-pack/`，并写出 `review-pack-manifest.json`，让开发者用 repo-native 路径复核当前 CI run。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 发布刷新与维护：把 `pnpm milestone:review:promotion-ready -- --limit 20` 作为 completed-mainline 之后的默认复核入口；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；随后把验证报告、公开 development-progress 页面与当前 run review pack 当成同一份维护复核包，只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照，并把 qualified history 持续转绿。
+- `下一主线`：Milestone 3 现在已经作为有边界的 `Phase 0 enablement` 打开，但仍然建立在同一条 live host / rule / policy 切片上。Milestone 2 的 review helper 继续保留为 guardrail：把 `pnpm milestone:review:promotion-ready -- --limit 20` 作为 completed-mainline 之后的默认复核入口；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；继续把公开 development-progress 页面、`.portmanager/reports/milestone-wording-review.md` 与验证报告当作文案真相包；只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 推进公开快照。新的实现主线转到 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 定义的 gateway-ready boundary、controller seam extraction、event/audit indexing、bounded batch orchestration 与 persistence-readiness 工作流。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
@@ -292,7 +304,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - `2026-04-21` 的最新 promotion-ready 开发者复核刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` 已通过已认证 `gh` 同步 completed `mainline-acceptance` 运行、写出 review digest，并把被跟踪 docs 产物刷新到同一份已完成 workflow 证据；精确实时计数与最新 qualified run 改由 development-progress 页面与被跟踪 confidence artifact 发布，而这份 roadmap spec 保留更稳定的 threshold-met 结论。
 - `2026-04-20` 的运行时迁移证明也已经成立：在把 GitHub workflow JavaScript actions 强制运行到 Node 24 之后，`mainline-acceptance` 与 `docs-pages` 仍然保持通过；当前剩余的 Node 20 退役 annotation 现在已经收敛为 GitHub 官方 action 元数据层面的上游 warning，而不是 repo 本地 workflow 漂移。
 - 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架或继续修复 summary 复核语义，而是持续积累 qualified 绿历史，并根据同步后的证据与人工复核来决定文案是否继续收窄。
-- 里程碑 2 仍然处于进行中，但当前阶段已经从倒计时积累收窄为基于 promotion-ready 证据的人工文案复核与 gate 持续健康。
+- 里程碑 2 现在仍然是必须保持的 guardrail 主线，但它已经不再阻塞 Milestone 3 Phase 0 enablement。当前阶段的职责，是继续基于 promotion-ready 证据保持人工文案复核与 gate 健康，让 Milestone 3 的启动仍然站在同一套证明纪律上。
 
 #### 可靠性推进规则
 - 里程碑 2 的推进必须建立在同一套 host/rule/policy 公共模型之上，而不是绕过里程碑 1 缺口。
@@ -318,26 +330,38 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 C 的吸引力，在于架构完整性和长期扩展性。
 但它的风险也同样明确：在空仓库起步阶段，很容易把时间消耗在基础设施形状上，而不是先把 PortManager 的第一条可靠价值链路做出来。
 
-#### 为什么 C 不是里程碑 1 或 2
-- 如果里程碑 1 不真实，C 就只是架构表演。
-- 如果里程碑 2 不真实，C 只会把不可靠性复制到更多主机和更多界面。
-- 所以 C 必须建立在可信 `B` 状态和显式可靠性工作之后，而不是跳过这些门槛。
-- 之所以把 C 留在后面，就是因为它的上限是战略性的，而它在 V1 阶段的下限则是明显过度设计与价值交付延迟。
+#### 当前已验证的进入信号
+Milestone 3 现在已经可以作为有边界的执行阶段启动，因为下面这些条件都已经成立：
+- `B` 验证状态已经足够可信，不再需要把 Milestone 3 纯粹停留在纸面上
+- backup、rollback、degraded 处理与公共 review surface 已经被同一条 accepted live slice 保护住
+- Web、controller、CLI、agent 与 docs-site 发布表面都已经受共享契约治理
+- 最小 agent-service 迁移已经足够完成，产品不再围绕 shell-only 行为打转
 
-#### 进入 C 的前置门槛
-只有当以下条件都成立时，里程碑 3 才能从口号变成真实执行阶段：
-- `B` 验证状态已经在真实使用中被证明可信
-- backup、rollback 与 degraded 处理已经足够稳定，不会在扩展范围时抹掉责任边界
-- Web、controller、CLI、agent 与 SDK-facing 结构都已经受共享契约治理
-- 最小 agent-service 迁移已经证明产品可以吸收现有行为，同时不丢失控制平面语义
+#### 对照当前代码的深度比较
 
-#### C 中锁定的工作流
-- 更强的 agent reporting 与 event semantics
-- 批量主机管理与有边界的 orchestration primitive
-- 当 SQLite 真正成为并发或可靠性瓶颈后，再推进 PostgreSQL 迁移或迁移就绪工作
-- 更广的平台抽象，但仍然通过明确支持目标层推进
-- 只有当抽象层可信之后，才为 macOS、移动端、更广 Linux、Windows 远端以及更通用 consumer surface 做准备
-- 只有在价值交付与鲁棒性门槛已经达标之后，才逐步朝 Agent-First Distributed Platform 形态演进
+| Scheme C 预期 | 当前已验证状态 | 缺口分类 |
+| --- | --- | --- |
+| gateway-ready 的 consumer boundary | Web 与 CLI 仍然通过 `REST + SSE` 直接访问 controller | 尚未开始 |
+| 显式 controller / policy / event / audit 分层 | `apps/controller/src/controller-server.ts` 与 `apps/controller/src/operation-store.ts` 仍集中承载大部分相关职责 | 尚未开始 |
+| 一等但有边界的远端 agent | live agent service boundary 已经存在，并提供 `/health`、`/runtime-state`、`/apply`、`/snapshot`、`/rollback` | 部分达成 |
+| 批量主机管理 | 当前已验证证明仍然是一条 one host / one rule 加可靠性重放切片 | 尚未开始 |
+| 超出 SQLite 的持久化就绪度 | SQLite 仍然是唯一真实状态库 | 尚未开始 |
+| 面向更多目标画像的平台抽象 | Ubuntu 24.04 + systemd + Tailscale 仍然是唯一可信目标 | 尚未开始 |
+
+#### Milestone 3 Phase 0 工作流
+- gateway-ready 的 consumer boundary
+- controller 的 seam extraction，用于 orchestration、policy、read model 与 event/audit indexing
+- 建立在同一套 operation evidence model 上的更强 event / audit 语义
+- 有边界的 multi-host / batch-operation primitive
+- persistence seam 与 PostgreSQL readiness criteria
+- 在第二目标画像出现前先锁定 target-abstraction rule
+
+#### 仍然必须保持的 guardrail
+- 继续让 `pnpm acceptance:verify` 转绿
+- 继续让 `pnpm milestone:verify:confidence` 转绿
+- 继续把 `pnpm milestone:review:promotion-ready -- --limit 20` 与 `.portmanager/reports/milestone-wording-review.md` 当作文案真相包
+- 在 Milestone 3 开始时，不允许长出第二套 evidence model
+- 不允许以“分布式”为名削弱 backup、rollback、degraded 或 contract governance 语义
 
 #### C 的明确非目标
 - C 不是把任意 shell 编排升格为产品运行模型
@@ -345,4 +369,4 @@ C 的吸引力，在于架构完整性和长期扩展性。
 - C 不是出于语言洁癖而要求把一切重写成单一语言
 - C 不是在支持边界尚未明确前就同时支持所有平台
 - C 不是以“速度”为名削弱契约评审纪律的许可
-- C 不是空仓库 V1 的正确起手姿态，因为那会直接削弱你最看重的“实践与鲁棒性落地”
+- C 也不是在 gateway、audit service、fleet orchestration、PostgreSQL default 或更广平台支持还没真实存在前，就提前对外宣称这些能力

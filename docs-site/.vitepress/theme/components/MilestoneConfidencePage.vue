@@ -567,9 +567,9 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `当前公开状态已经是 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
         `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；promotion 门槛已经满足。`,
-        'review-pack 访问缺口已经关闭：当前 CI-first 复核先执行 `pnpm milestone:fetch:review-pack`，completed-mainline 复核仍然经过 `pnpm milestone:review:promotion-ready -- --limit 20`，当前主线已经转到公开快照刷新与维护。',
-        'helper 现在会把 `promotion-ready-reviewed` 与 `promotion-ready-refresh-required` 明确区分开，只有当公开快照真的落后于最新评审过的证据时才推动刷新。',
-        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前主线已从 helper 补洞收窄为公开进度维护、文案复核与 gate 持续健康，而不是继续补 readiness 脚手架或提前推进 Toward C。`
+        'Milestone 2 现在继续承担 guardrail 角色：当前 CI-first 复核先执行 `pnpm milestone:fetch:review-pack`，completed-mainline 复核仍然经过 `pnpm milestone:review:promotion-ready -- --limit 20`。',
+        'Milestone 3 已经作为有边界的 `Phase 0 enablement` 打开，但当前代码仍然没有 gateway app、显式 event/audit 分层、batch orchestration，或 PostgreSQL readiness seam。',
+        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；新的实现能量现在转到 gateway-ready boundary、controller seam extraction、event/audit indexing、bounded batch orchestration 与 persistence-readiness，而不是继续把 Toward C 留在纯口号层。`
       ]
     : [
         `当前公开状态仍为 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
@@ -581,9 +581,9 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `Current public status is now \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
         `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the promotion threshold is met.`,
-        'Review-pack access is now closed: current CI-first review starts with `pnpm milestone:fetch:review-pack`, completed-mainline review still runs through `pnpm milestone:review:promotion-ready -- --limit 20`, and the active lane is public-snapshot refresh plus maintenance.',
-        'The helper now separates `promotion-ready-reviewed` from `promotion-ready-refresh-required`, so refresh only happens when the published artifact really trails the latest reviewed evidence.',
-        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active lane has narrowed from helper-gap closure to public-progress maintenance, wording review, and sustained gate health rather than more readiness plumbing or Toward C expansion.`
+        'Milestone 2 now stays in guardrail mode: current CI-first review starts with `pnpm milestone:fetch:review-pack`, and completed-mainline review still runs through `pnpm milestone:review:promotion-ready -- --limit 20`.',
+        'Milestone 3 is now open as bounded `Phase 0 enablement`, but current code still lacks a gateway app, explicit event/audit separation, batch orchestration, and a PostgreSQL readiness seam.',
+        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; new implementation energy now moves to gateway-ready boundaries, controller seam extraction, event/audit indexing, bounded batch orchestration, and persistence-readiness work instead of leaving Toward C as a distant slogan.`
       ]
     : [
         `Current public status remains \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
@@ -595,11 +595,11 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
 
 const currentDirectionDocs = computed(() => [
   {
-    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-requirements.md'),
+    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md'),
     label: copy.value.currentDirectionRequirementsLink
   },
   {
-    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md'),
+    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'),
     label: copy.value.currentDirectionPlanLink
   },
   {

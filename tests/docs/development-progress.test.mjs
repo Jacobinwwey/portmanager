@@ -45,12 +45,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /pnpm milestone:fetch:review-pack/)
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-requirements\.md/
+    /2026-04-21-portmanager-m3-toward-c-enablement-requirements\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan\.md/
+    /2026-04-21-portmanager-m3-toward-c-enablement-plan\.md/
   )
+  assert.match(milestoneConfidenceComponent, /Phase 0 enablement/)
+  assert.match(milestoneConfidenceComponent, /gateway-ready/)
   assert.match(
     milestoneConfidenceComponent,
     /\.portmanager\/reports\/milestone-wording-review\.md/
@@ -140,7 +142,8 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
-  assert.match(roadmapComponent, /2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-toward-c-enablement-plan\.md/)
+  assert.match(roadmapComponent, /lane\.items\.length > 0/)
   assert.match(roadmapComponent, /milestone-confidence-bundle-\*/)
   assert.match(roadmapComponent, /Required next action/)
   assert.match(roadmapComponent, /Public claim class/)

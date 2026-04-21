@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-21 | Version: v0.5.20-confidence-refresh-maintenance
+> Updated: 2026-04-21 | Version: v0.6.0-m3-phase0-enablement
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
@@ -79,7 +79,7 @@ Milestone 1 is only accepted when all of the following become true:
 - `Confidence-review-digest slice`: complete. `pnpm milestone:review:confidence` now compares synced local readiness with the tracked public progress artifact, writes `.portmanager/reports/milestone-confidence-review.md`, separates countdown drift from visibility-only drift, and keeps strict published-countdown failure opt-in.
 - `Confidence-review-pack CI slice`: complete. `pnpm milestone:review:promotion-ready -- --skip-sync` now lets `mainline-acceptance` publish the current-run `.portmanager/reports/milestone-confidence-review.md` and `.portmanager/reports/milestone-wording-review.md` inside `milestone-confidence-bundle-*`.
 - `Confidence-review-pack fetch slice`: complete. `pnpm milestone:fetch:review-pack` now stages the uploaded current-run review bundle into `.portmanager/reports/current-ci-review-pack/` and writes `review-pack-manifest.json` for CI-first review.
-- `Next lane`: Milestone 2 promotion-ready publication refresh and maintenance on the same live host / rule / policy slice by keeping `pnpm milestone:review:promotion-ready -- --limit 20` as the default completed-mainline review entrypoint, refreshing the tracked public snapshot only through the same helper plus `--refresh-published-artifact` when review agrees, running `pnpm milestone:fetch:review-pack` when the current CI run is the first question, reviewing the verification report plus the public development-progress page and `.portmanager/reports/current-ci-review-pack/` as one maintenance bundle, and keeping qualified history green while human milestone-language review stays deliberate.
+- `Next lane`: Milestone 3 now opens as bounded `Phase 0 enablement` on top of the same live host / rule / policy slice. Milestone 2 review helpers remain mandatory guardrails: keep `pnpm milestone:review:promotion-ready -- --limit 20` as the default completed-mainline review entrypoint, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, keep the public development-progress page plus `.portmanager/reports/milestone-wording-review.md` as the wording-truth bundle, and only move the tracked public snapshot through the same helper plus `--refresh-published-artifact` when review agrees. New implementation energy now goes to gateway-ready boundaries, controller seam extraction, event/audit indexing, bounded batch orchestration, and persistence-readiness work described in `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -127,8 +127,8 @@ Milestone 2 is only accepted when all of the following become true:
 - Verified now: `mainline-acceptance` confidence collection now runs `pnpm milestone:review:promotion-ready -- --skip-sync`, so the uploaded `milestone-confidence-bundle-*` also carries `.portmanager/reports/milestone-confidence-review.md` plus `.portmanager/reports/milestone-wording-review.md` for the current run.
 - Fresh promotion-ready publication refresh on `2026-04-21`: after pulling the latest `main`, `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` synced completed `mainline-acceptance` runs through authenticated `gh`, wrote the review digest, and republished the tracked docs artifact from the same completed workflow evidence. Exact live counters and the latest qualified run still live on the generated development-progress page and tracked confidence artifact, while this roadmap spec keeps the broader threshold-met conclusion stable.
 - Fresh runtime-transition proof on `2026-04-20`: forcing GitHub workflow JavaScript actions onto Node 24 did not break `mainline-acceptance` or `docs-pages`; the remaining Node 20 deprecation annotations now come from GitHub official action metadata rather than repo-local workflow drift.
-- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now sustained qualified green history and milestone-language review rather than invention of more reporting surfaces or review-signal repair.
-- Milestone 2 still remains in progress while human milestone-language review deliberately narrows public wording on top of the now promotion-ready evidence and the confidence routine stays green.
+- Deep compare against the completed `2026-04-16` reconciliation plan now shows that the old parity, steady-state delivery, and proof-orchestration gaps are closed; the remaining architecture gap is now the explicit Milestone 3 seams that Scheme C still requires rather than invention of more reporting surfaces or review-signal repair.
+- Milestone 2 remains an active guardrail lane while human milestone-language review deliberately keeps public wording honest on top of the now promotion-ready evidence. That guardrail no longer blocks Milestone 3 Phase 0 enablement; it is the proof discipline Milestone 3 must keep.
 
 #### Reliability sequencing rule
 - Milestone 2 work should continue only on top of the same host/rule/policy public model that closes Milestone 1.
@@ -154,26 +154,38 @@ In that scheme:
 The attraction of C is architectural completeness and long-term extensibility.
 The danger of C is equally real: at empty-repository time, it can spend too much effort on infrastructure shape before PortManager has earned its first reliable value slice.
 
-#### Why C is not Milestone 1 or Milestone 2
-- If Milestone 1 is not real, C is only architecture theater.
-- If Milestone 2 is not real, C only multiplies unreliability across more hosts and more surfaces.
-- C must therefore build on a trusted `B` state plus explicit reliability work, rather than skipping those gates.
-- C is retained as a later direction precisely because its upside is strategic, while its downside at V1 time is over-design and delayed practical delivery.
+#### Current verified entry signal
+Milestone 3 can now begin as a bounded execution phase because all of the following are already true:
+- the `B` validation state is credible enough that Milestone 3 no longer needs to stay purely theoretical
+- backup, rollback, degraded handling, and public review surfaces are already protected by the same accepted live slice
+- shared contracts already govern Web, controller, CLI, agent, and docs-site publication surfaces
+- minimal agent-service migration is complete enough that the product no longer revolves around shell-only behavior
 
-#### Entry gate into C
-Milestone 3 can only begin as a real execution phase when all of the following are true:
-- the `B` validation state is trusted in real use
-- backup, rollback, and degraded handling are stable enough that scope expansion does not erase accountability
-- shared contracts are already governing Web, controller, CLI, agent, and SDK-facing shapes
-- minimal agent-service migration has proven the product can absorb existing behavior without losing control-plane semantics
+#### Deep compare against current code
 
-#### Locked C workstreams
-- stronger agent reporting and event semantics
-- batch host management and bounded orchestration primitives
-- PostgreSQL migration or migration-readiness once SQLite becomes a real concurrency or reliability constraint
-- broader platform abstraction, but still through explicit supported-target layers
-- preparation for macOS, mobile, wider Linux, Windows remote, and more general consumer surfaces only after the abstraction layer is credible
-- progressive movement toward the Agent-First Distributed Platform shape only after the value-delivery and robustness gates have already been earned
+| Scheme C expectation | Current verified state | Gap classification |
+| --- | --- | --- |
+| Gateway-ready consumer boundary | Web and CLI still call the controller directly over `REST + SSE` | Not started |
+| Explicit controller / policy / event / audit separation | `apps/controller/src/controller-server.ts` plus `apps/controller/src/operation-store.ts` still centralize most of that work | Not started |
+| First-class bounded remote agent | Live agent service boundary already exists with `/health`, `/runtime-state`, `/apply`, `/snapshot`, `/rollback` | Partially earned |
+| Batch host management | Current verified proof remains one host / one rule plus reliability replay | Not started |
+| Persistence readiness beyond SQLite | SQLite remains the only real store | Not started |
+| Platform abstraction for additional targets | Ubuntu 24.04 + systemd + Tailscale remains the only credible target | Not started |
+
+#### Milestone 3 Phase 0 workstreams
+- gateway-ready consumer boundary
+- controller seam extraction for orchestration, policy, read models, and event/audit indexing
+- richer event and audit semantics on top of the same operation evidence model
+- bounded multi-host and batch-operation primitives
+- persistence seams and PostgreSQL readiness criteria
+- explicit target-abstraction rules before second-target claims
+
+#### Guardrails that still stay in force
+- keep `pnpm acceptance:verify` green
+- keep `pnpm milestone:verify:confidence` green
+- keep `pnpm milestone:review:promotion-ready -- --limit 20` and `.portmanager/reports/milestone-wording-review.md` as the wording-truth bundle
+- do not create a second evidence model while opening Milestone 3
+- do not weaken backup, rollback, degraded, or contract governance semantics in the name of distribution
 
 #### Explicit non-goals for C
 - C is not a pivot to arbitrary shell orchestration as the operating model
@@ -181,4 +193,4 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - C is not a requirement to rewrite everything into one language for ideological purity
 - C is not simultaneous support for every platform before support boundaries are explicit
 - C is not permission to weaken contract review discipline in the name of speed
-- C is not the right starting posture for an empty-repository V1 that is supposed to prove practical robustness quickly
+- C is not permission to claim a gateway, split audit service, fleet orchestration, PostgreSQL default, or broader platform support before those seams are real

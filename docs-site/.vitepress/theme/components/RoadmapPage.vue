@@ -564,14 +564,16 @@ const lanes = computed(() => {
         later: { label: 'Later', title: 'Later expansion' }
       }
 
-  return (['now', 'next', 'later'] as const).map((stage) => ({
-    stage,
-    label: labels[stage].label,
-    title: labels[stage].title,
-    items: roadmapMilestones
-      .filter((milestone) => milestone.stage === stage)
-      .map((milestone) => milestone.title[props.locale])
-  }))
+  return (['now', 'next', 'later'] as const)
+    .map((stage) => ({
+      stage,
+      label: labels[stage].label,
+      title: labels[stage].title,
+      items: roadmapMilestones
+        .filter((milestone) => milestone.stage === stage)
+        .map((milestone) => milestone.title[props.locale])
+    }))
+    .filter((lane) => lane.items.length > 0)
 })
 
 const confidenceReadinessTone = computed(() => {
@@ -605,7 +607,7 @@ const confidenceWordingBadge = computed(
   () => confidenceProgress.wordingReview?.publicClaimClass ?? 'unavailable'
 )
 const reviewDigestPlanSourceLink = githubSourceLink(
-  'docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md'
+  'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
 )
 
 function stageLabel(stage: string) {

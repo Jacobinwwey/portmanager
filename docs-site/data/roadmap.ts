@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes the accepted Milestone 1 public slice, the mainline gate that keeps it honest, the shipped heartbeat/version, GitHub-backup, and remote-backup-replay slices, the canonical confidence routine, the durable confidence history bundle with run-trace metadata, the repo-native `pnpm milestone:sync:confidence-history` import path for local review, the explicit readiness signal on top of that bundle, the qualified-review signal that separates latest mainline evidence from local visibility-only noise, the public development-progress page generated from that same synced evidence, the deliberate publication-refresh path for the tracked confidence artifact, the local `.portmanager/reports/milestone-wording-review.md` checklist, and the remaining work to keep promotion-ready milestone wording honest on the same live agent-backed flow.',
-    zh: '这个页面现在直接暴露已经完成验收的 Milestone 1 公共切片、持续保护主线的 gate、已经落地的 heartbeat/version、GitHub-backup 与 remote-backup-replay 切片、规范 confidence routine、带运行追踪元数据的持久 confidence history bundle、供本地复核使用的 repo-native `pnpm milestone:sync:confidence-history` 导入路径、建立在这组 bundle 之上的显式 readiness 信号、把真实主线证据与本地 visibility-only 噪声分开的 qualified-review signal、由同一份同步证据生成的公开 development-progress 页面、被跟踪 confidence artifact 的显式发布刷新路径、本地 `.portmanager/reports/milestone-wording-review.md` 清单，以及继续在同一条 live agent 切片上把 promotion-ready 里程碑文案保持诚实的后续工作。'
+    en: 'This page now exposes three layers at once: the accepted Milestone 1 public slice, the still-mandatory Milestone 2 confidence guardrail, and the new Milestone 3 `Phase 0 enablement` lane. Current repo truth is no longer “Toward C someday” and no longer “Milestone 2 helper plumbing first.” Current repo truth is evidence-first progression: keep the same accepted live slice honest through review helpers and public counters, then use that protected base to start gateway-ready boundaries, controller seam extraction, event/audit indexing, bounded batch orchestration, and persistence-readiness work. Exact live counters stay on this development-progress page and the tracked confidence artifact.',
+    zh: '这个页面现在同时暴露三层真实状态：已经完成验收的 Milestone 1 公共切片、仍然必须保持的 Milestone 2 confidence guardrail，以及新开启的 Milestone 3 `Phase 0 enablement` 主线。当前仓库真相已经不再是“Toward C 以后再说”，也不再是“先补 Milestone 2 helper 脚手架”；当前真相是 evidence-first 递进：继续用 review helper 与公开计数保护同一条 accepted live slice，再在这条被保护的底座上启动 gateway-ready boundary、controller seam extraction、event/audit indexing、bounded batch orchestration 与 persistence-readiness 工作。精确实时计数继续留在这个 development-progress 页面与被跟踪 confidence artifact 上。'
   },
   buckets: [
     {
@@ -162,39 +162,25 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Docs-first baseline, contracts, and roadmap sequencing remain locked.',
-          'Units 0 through 5 are now complete: controller, CLI, web, live agent boundary, acceptance replay, and docs sync now tell one mainline story.',
-          '`pnpm acceptance:verify` passes on 2026-04-17 after the Unit 4 agent-service delivery and Unit 5 docs sync.',
-          '`pnpm milestone:verify:confidence` now composes `pnpm acceptance:verify` plus the remote-backup replay proof in one canonical routine.',
-          '`pnpm milestone:verify:confidence` now writes `.portmanager/reports/milestone-confidence-report.json`, appends `.portmanager/reports/milestone-confidence-history.json`, renders `.portmanager/reports/milestone-confidence-summary.md`, and carries `eventName` / `ref` / `sha` / `runId` / `runAttempt` / `workflow` traceability metadata.',
-          '`pnpm milestone:sync:confidence-history` now imports completed `mainline-acceptance` bundle artifacts from GitHub Actions into local `.portmanager/reports/` readiness files, dedupes repeated imports by stable entry id, and requires authenticated `gh` access with `repo` scope.',
-          'Persisted confidence history now classifies `local-only`, `building-history`, and `promotion-ready`, measures progress against `7` qualified runs plus `3` consecutive qualified passes, and publishes the same summary in the GitHub Actions run page.',
-          'Synced/local confidence summary now separates `Latest Run` from `Latest Qualified Run` and counts qualified mainline runs versus visibility-only local and non-qualified remote noise, so developer review no longer loses real mainline evidence after local reruns.',
-          'The docs site now publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress` from generated milestone confidence data, and roadmap home previews the same live counters.',
-          'The latest promotion-ready refresh already republished the tracked snapshot, and exact live counts plus the latest qualified mainline run now belong to the live confidence card and tracked confidence artifact rather than brittle roadmap prose.',
-          '`pnpm milestone:review:promotion-ready` now also writes `.portmanager/reports/milestone-wording-review.md`, `mainline-acceptance` still uploads the current-run review pair in `milestone-confidence-bundle-*`, and `pnpm milestone:fetch:review-pack` now stages that CI bundle locally inside `.portmanager/reports/current-ci-review-pack/`.',
+          'Units 0 through 5 are complete: controller, CLI, web, live agent boundary, acceptance replay, and docs sync now tell one mainline story.',
+          '`pnpm acceptance:verify` and `pnpm milestone:verify:confidence` still protect that same accepted live slice.',
+          'The confidence bundle, synced review signal, public development-progress page, and wording-review checklist are already real; Milestone 3 does not need more readiness plumbing before it begins.',
           'Milestone proof now shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.',
           'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
           'Configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and publishes explicit succeeded remote redundancy state across API, CLI, web, and dedicated reliability proof.',
           'Remote-backup replay is now durable in repo: one proof replays local-only, configured-success, and configured-failure required backups on the same live agent-backed slice across API, CLI, Web backup views, and agent runtime.',
-          'Roadmap page, milestone docs, product spec, and root progress docs now reflect the same truth.'
+          'Deep compare now also confirms what still does not exist: no gateway app, no explicit controller/event/audit separation, no batch orchestration, no PostgreSQL readiness seam, and no broader target abstraction.'
         ],
         zh: [
           'Docs-first 基线、契约和路线排序继续保持锁定。',
           'Unit 0 到 Unit 5 现在都已完成：controller、CLI、web、live agent 边界、验收重放与文档同步已经讲同一条主线故事。',
-          '`pnpm acceptance:verify` 已在 2026-04-17 的 Unit 4 agent-service 交付与 Unit 5 文档同步之后重新转绿。',
-          '`pnpm milestone:verify:confidence` 现在已经把 `pnpm acceptance:verify` 与 remote-backup replay proof 收敛成一条规范 routine。',
-          '`pnpm milestone:verify:confidence` 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`、追加 `.portmanager/reports/milestone-confidence-history.json`、渲染 `.portmanager/reports/milestone-confidence-summary.md`，并带上 `eventName` / `ref` / `sha` / `runId` / `runAttempt` / `workflow` traceability 元数据。',
-          '`pnpm milestone:sync:confidence-history` 现在会把 GitHub Actions 已完成 `mainline-acceptance` bundle artifact 导入本地 `.portmanager/reports/` readiness 文件，按稳定 entry id 去重，并要求已认证且具备 `repo` scope 的 `gh` 访问。',
-          '持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计进度，并把同一份 summary 发布到 GitHub Actions workflow 页面。',
-          '同步后与本地 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计 qualified mainline run、本地 visibility-only 噪声、非 qualified 远端噪声，开发者在本地 rerun 之后也不会丢掉真实主线证据。',
-          'docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 live 计数。',
-          '`2026-04-21` 的最新 promotion-ready refresh 已把公开快照重发到同步后的已审核证据；精确实时计数与最新 qualified mainline run 现在统一以下方 live confidence 卡片和被跟踪 confidence artifact 为准，而不再继续依赖易漂移的 roadmap 文案。',
-          '`pnpm milestone:review:promotion-ready` 现在还会额外写出 `.portmanager/reports/milestone-wording-review.md`，`mainline-acceptance` 仍会把当前 run 的 review pair 上传到 `milestone-confidence-bundle-*`，而 `pnpm milestone:fetch:review-pack` 现在会把这组 CI review pack 落到 `.portmanager/reports/current-ci-review-pack/`。',
+          '`pnpm acceptance:verify` 与 `pnpm milestone:verify:confidence` 仍然继续保护这条 accepted live slice。',
+          'confidence bundle、同步后的 review signal、公开 development-progress 页面与 wording-review checklist 都已经真实存在；Milestone 3 并不需要先再补一轮 readiness 脚手架。',
           'milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup/rollback 证据保持不变。',
           'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
           '当 GitHub backup 已配置时，controller backup bundle 现在会通过 GitHub Contents API 上传，并在 API、CLI、web 与专门的可靠性证明里显式暴露远端冗余成功状态。',
           'repo 内已经落地可重复执行的 remote-backup replay：同一条 live agent-backed 切片现在会重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据保持一致。',
-          'roadmap 页面、里程碑文档、产品规格与 root progress docs 现在已经反映同一套真实状态。'
+          '深度对比现在也已经明确当前尚未存在的东西：没有 gateway app、没有显式 controller/event/audit 分层、没有 batch orchestration、没有 PostgreSQL readiness seam，也没有更广目标平台抽象。'
         ]
       }
     },
@@ -207,22 +193,18 @@ export const roadmapDeveloperProgress = {
       },
       items: {
         en: [
-          'Milestone 2 promotion-ready wording review is now the active lane, not Milestone 1 parity recovery and not more confidence scaffolding.',
-          'The wording-review checklist now exists as `.portmanager/reports/milestone-wording-review.md`, and `pnpm milestone:fetch:review-pack` now stages the current-run CI bundle under `.portmanager/reports/current-ci-review-pack/`, so developers no longer have to reconstruct guardrails by hand from scattered docs or GitHub artifact clicks.',
-          'That same helper output now distinguishes `promotion-ready-reviewed` from `promotion-ready-refresh-required`, so local promotion-ready evidence cannot be misread as public-artifact alignment.',
-          'Configured, failed, and local-only GitHub backup paths now all exist inside one durable replay proof on the same live slice; remaining work is confidence maintenance, not first delivery.',
-          'Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host/rule/policy slice.',
-          'The remaining architecture gap is no longer proof orchestration, missing history scaffolding, missing local import plumbing, missing review-signal truth, or review-pack access; the canonical routine, persisted bundle, sync command, latest-qualified summary view, review digest, fetch helper, and public progress page already exist, and the remaining work is deliberate public-snapshot refresh plus milestone-language maintenance on the same live slice.',
-          'Mainline evidence collection now keeps `pnpm acceptance:verify` on PRs while `push main`, `workflow_dispatch`, and the daily schedule run `pnpm milestone:verify:confidence`, restore/save the confidence history bundle, upload the bundle artifact, and publish the readiness summary for developers.'
+          'Milestone 2 remains the guardrail lane, but Milestone 3 `Phase 0 enablement` is now the next execution phase.',
+          'Current repo work has shifted from helper-access closure to architecture enablement on top of a protected evidence model.',
+          'The remaining gap is no longer confidence plumbing; the remaining gap is the set of explicit Scheme C seams that current code still lacks.',
+          'Roadmap, milestone docs, product spec, architecture doc, and root progress docs now all publish the same Milestone 3 gap map and next direction.',
+          'Mainline evidence collection still keeps `pnpm acceptance:verify` on PRs while `push main`, `workflow_dispatch`, and the daily schedule run `pnpm milestone:verify:confidence`, restore/save the confidence history bundle, upload the bundle artifact, and publish the readiness summary for developers.'
         ],
         zh: [
-          '当前主线已经转到 Milestone 2 的 promotion-ready 文案复核，而不再是 Milestone 1 一致性补洞，也不再是继续补 confidence 脚手架。',
-          '`.portmanager/reports/milestone-wording-review.md` 现在已经落地，而且当前 CI bundle 还会一起上传 `.portmanager/reports/milestone-confidence-review.md`，开发者不再需要从分散文档里手动拼接文案护栏。',
-          '这份 helper 输出现在还会区分 `promotion-ready-reviewed` 与 `promotion-ready-refresh-required`，避免把本地 promotion-ready 证据误读成公开 artifact 已经对齐。',
-          'configured、failed、local-only 三类 GitHub backup 路径现在都已经落在同一条 durable replay proof 的 live 切片上；剩余工作不再是首次交付，而是常态化维持与可信度加深。',
-          'controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经在同一条 live host/rule/policy 切片上分组展示最新诊断、degraded diagnostics history 与 recovery-ready 成功证据。',
-          '剩余架构缺口已经不再是证明编排、历史脚手架缺失、本地导入路径缺失、summary 复核语义缺失，或 review-pack 访问缺口；规范 confidence routine、持久 history bundle、sync 命令、latest-qualified summary 视图、review digest、fetch helper 与公开 progress page 都已存在，剩余工作已经收窄为在同一条 live 切片上谨慎推进公开快照刷新、里程碑文案维护与 gate 持续健康。',
-          'mainline evidence collection 现在会继续把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 路径上运行 `pnpm milestone:verify:confidence`、恢复并保存 confidence history bundle、上传 bundle artifact，并向开发者发布 readiness summary。'
+          'Milestone 2 现在仍然是 guardrail 主线，但 Milestone 3 `Phase 0 enablement` 已经成为下一阶段。',
+          '当前仓库工作已经从 helper 访问闭环，转向建立在受保护 evidence model 之上的架构 enablement。',
+          '剩余缺口已经不再是 confidence 脚手架，而是当前代码仍然缺少的那组显式 Scheme C seam。',
+          'roadmap、里程碑文档、产品规格、架构文档与 root progress docs 现在都已经发布同一份 Milestone 3 gap map 与下一步方向。',
+          'mainline evidence collection 现在仍然会把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 路径上运行 `pnpm milestone:verify:confidence`、恢复并保存 confidence history bundle、上传 bundle artifact，并向开发者发布 readiness summary。'
         ]
       }
     },
@@ -236,23 +218,21 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Keep Unit 0 green now that the qualified-history threshold is met and the published state is `promotion-ready`.',
-          'Run `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs so local maintenance review syncs real workflow evidence, writes the digest, and updates `.portmanager/reports/milestone-wording-review.md` in one repo-native step; when the current CI run is the first question, run `pnpm milestone:fetch:review-pack` and inspect `.portmanager/reports/current-ci-review-pack/` before the synced local review.',
-          'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while synced summaries and human review drive milestone-language decisions.',
-          'Use `pnpm milestone:review:promotion-ready -- --limit 20` as the default review entrypoint before any public wording move; it syncs completed history, writes the `pnpm milestone:review:confidence` digest internally, refreshes `.portmanager/reports/milestone-wording-review.md`, labels the current claim posture, and keeps artifact publication behind the same helper plus `--refresh-published-artifact` when review agrees.',
-          'Review the workflow job summary, fetched `.portmanager/reports/current-ci-review-pack/`, synced local `.portmanager/reports/milestone-confidence-summary.md`, `.portmanager/reports/milestone-confidence-review.md`, `.portmanager/reports/milestone-wording-review.md`, and the verification report together, and use `Latest Qualified Run` plus the visibility breakdown instead of raw CI logs to judge readiness accumulation.',
+          'Run `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs and use `pnpm milestone:fetch:review-pack` when the current CI run is the first question; Milestone 3 does not replace that review chain.',
+          'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while Milestone 3 work begins.',
+          'Use the new requirements/plan pair as the current implementation map: `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.',
+          'Start with gateway-ready boundaries, controller seam extraction, event/audit indexing, bounded batch orchestration, and persistence-readiness work instead of jumping straight to topology churn.',
           'Protect the lighter Unit 0 branch gate while the heavier confidence routine keeps collecting evidence.',
-          'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.',
-          'Keep Toward C deferred even though promotion thresholds are met; this lane is wording review, not platform expansion.'
+          'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.'
         ],
         zh: [
           '当前 promotion-ready 门槛已经满足，继续把 Unit 0 保持为绿。',
-          '在主线出现已完成 run 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`，让本地维护复核在一条 repo-native helper 里同时同步真实 workflow 证据、写出 digest，并刷新 `.portmanager/reports/milestone-wording-review.md`；如果当前问题只是确认这次 CI run 的复核结论，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`。' ,
-          '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，同时让同步后的 summary 与人工复核共同驱动里程碑文案决策。',
-          '在任何公开文案变动前先执行 `pnpm milestone:review:promotion-ready -- --limit 20` 作为默认复核入口；这条 helper 会在内部同步 completed history、写出 `pnpm milestone:review:confidence` digest、刷新带 claim posture 的 `.portmanager/reports/milestone-wording-review.md`，而公开 artifact 只会在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 前进。',
-          '优先同时查看 workflow job summary、通过 `pnpm milestone:fetch:review-pack` 落到 `.portmanager/reports/current-ci-review-pack/` 的当前 run review pack、同步后的本地 `.portmanager/reports/milestone-confidence-summary.md`、`.portmanager/reports/milestone-confidence-review.md`、`.portmanager/reports/milestone-wording-review.md` 与验证报告，并直接使用 `Latest Qualified Run` 与 visibility breakdown，而不是继续只靠原始 CI 日志判断 readiness 积累。',
+          '在主线出现已完成 run 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack`，Milestone 3 不会替代这条复核链路。',
+          '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，同时 Milestone 3 开始推进。',
+          '把新的 requirements/plan 组合作为当前实现地图：`docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`。',
+          '先做 gateway-ready boundary、controller seam extraction、event/audit indexing、bounded batch orchestration 与 persistence-readiness 工作，而不是直接跳向新的部署拓扑。',
           '在更重的 confidence routine 继续收集证据时，保住更轻的 Unit 0 分支 gate 不被重新定义。',
-          '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。',
-          '即使 promotion 门槛已经满足，也继续把 Toward C 保持为延后方向；当前主线是文案复核，而不是平台扩展。'
+          '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。'
         ]
       }
     }
@@ -340,16 +320,16 @@ export const roadmapMilestones: RoadmapMilestone[] = [
   },
   {
     id: 'm2',
-    stage: 'next',
+    stage: 'now',
     title: { en: 'Milestone 2: Engineering Reliability', zh: '里程碑 2：Engineering Reliability' },
-    status: { en: 'Promotion-Ready Review', zh: 'Promotion-Ready 文案复核' },
+    status: { en: 'Promotion-Ready Guardrail', zh: 'Promotion-Ready 护栏' },
     summary: {
-      en: 'Strengthen the accepted B-state slice until degraded handling, rollback confidence, remote-backup clarity, and drift visibility become operationally trustworthy across repeated real runs; the confidence lane has now reached promotion-ready and moved into deliberate wording review.',
-      zh: '把已经被接受的 B 状态切片继续强化到 degraded 处理、rollback 信心、远端备份清晰度与 drift 可见性都能在多次真实运行中值得信任；当前 confidence 主线已经到达 promotion-ready，并转入谨慎的文案复核。'
+      en: 'Reliability work has reached a promotion-ready confidence state and now acts as the guardrail that keeps Milestone 3 honest: same accepted live slice, same review helpers, same public progress counters, and same evidence-first discipline.',
+      zh: '可靠性工作已经进入 promotion-ready 的 confidence 状态，现在转而承担 Milestone 3 的 guardrail：同一条 accepted live slice、同一组 review helper、同一套公开 progress 计数，以及同一条 evidence-first 纪律。'
     },
     decision: {
-      en: 'Reliability stays ahead of platform expansion, and it now builds on a completed Milestone 1 slice plus a promotion-ready confidence lane; the remaining work is deliberate wording review and gate health, not more readiness machinery.',
-      zh: '可靠性仍然优先于平台扩展，而且它现在建立在已经完成的 Milestone 1 切片与一条 promotion-ready 的 confidence 主线上；剩余工作是谨慎推进文案复核与 gate 健康，而不是继续补 readiness 机器。'
+      en: 'Milestone 2 no longer blocks Milestone 3 entry through missing machinery. Its job now is to preserve one trusted evidence model and one honest public wording flow while architecture scope expands carefully.',
+      zh: 'Milestone 2 现在已经不再因为缺少机器而阻塞 Milestone 3 进入。它当前的职责，是在架构范围谨慎扩展时继续保住同一套可信 evidence model 与同一条诚实的公共文案流程。'
     },
     productOutcomes: {
       en: ['Degraded state becomes operationally visible across live surfaces.', 'Backup policy becomes explicit and enforceable with matching evidence trails.', 'Diagnostics and operations views mature without depending on mock-only presentation.'],
@@ -401,30 +381,28 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     blockingGaps: {
       en: [
-        'Milestone 2 acceptance no longer lacks a canonical confidence routine, a truthful synced review signal, sustained qualified green history, or a truthful public confidence artifact.',
-        'The remaining gap is deliberate human milestone-language review plus continued gate health on the accepted live slice before broader roadmap language moves, and that review now runs through `.portmanager/reports/milestone-wording-review.md`.'
+        'Milestone 2 no longer lacks canonical confidence collection, synced review truth, or a truthful public confidence artifact.',
+        'The remaining Milestone 2 obligation is deliberate wording review plus continued gate health on the accepted live slice, and that review now runs through `.portmanager/reports/milestone-wording-review.md`.'
       ],
       zh: [
-        '在同一条 live agent-backed 切片上，Milestone 2 的验收已经不再缺少规范 confidence routine、可信的同步复核信号、持续为绿的 qualified history，或真实对齐的公开 confidence artifact。',
-        '剩余缺口已经收窄为基于已验收 live 切片、通过 `.portmanager/reports/milestone-wording-review.md` 执行的人工里程碑文案复核，以及持续保持 gate 健康，然后才考虑更宽的路线表述。'
+        '在同一条 live agent-backed 切片上，Milestone 2 的验收已经不再缺少规范 confidence 收集、可信的同步复核信号，或真实对齐的公开 confidence artifact。',
+        'Milestone 2 当前剩余职责已经收窄为基于已验收 live 切片、通过 `.portmanager/reports/milestone-wording-review.md` 执行的人工文案复核，以及持续保持 gate 健康。'
       ]
     },
     developerFocus: {
       en: [
-        'Build Milestone 2 on the completed Unit 0 through Unit 5 lane instead of reopening Milestone 1 parity work.',
         'Keep configured, failed, and local-only backup evidence aligned across controller, CLI, web, and agent.',
         'Keep `pnpm milestone:verify:confidence` green on the same accepted agent-backed slice.',
-        'Use `pnpm milestone:review:promotion-ready -- --limit 20`, `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, `Source surface status`, `Latest Qualified Run`, and the visibility breakdown in synced/local summaries plus the public development-progress page during developer review.',
+        'Use `pnpm milestone:review:promotion-ready -- --limit 20`, `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, `Source surface status`, `Latest Qualified Run`, and the visibility breakdown during developer review.',
         'Refresh the tracked public confidence artifact only through the same helper plus `--refresh-published-artifact` when the digest and human review agree.',
-        'Do not treat promotion-ready as automatic Toward C activation; keep one evidence model and one acceptance gate across controller, CLI, web, and agent.'
+        'Treat Milestone 2 as the guardrail for Milestone 3, not as a reason to reopen Milestone 1 parity work.'
       ],
       zh: [
-        '把 Milestone 2 建立在已经完成的 Unit 0 到 Unit 5 主线之上，而不是重新打开 Milestone 1 的表面补洞。',
         '继续让 controller、CLI、web、agent 在 configured、failed、local-only 三类 backup 证据上保持一致。',
         '继续让 `pnpm milestone:verify:confidence` 在同一条已验收 live agent-backed 切片上保持为绿。',
-        '在开发者复核时直接使用 `pnpm milestone:review:promotion-ready -- --limit 20`、带 `Public claim class` 与 `Source surface status` 的 `.portmanager/reports/milestone-wording-review.md`、同步后与本地 summary 里的 `Latest Qualified Run`、visibility breakdown 与公开 development-progress 页面。',
+        '在开发者复核时继续使用 `pnpm milestone:review:promotion-ready -- --limit 20`、带 `Public claim class` 与 `Source surface status` 的 `.portmanager/reports/milestone-wording-review.md`、`Latest Qualified Run` 与 visibility breakdown。',
         '只有在 digest 与人工复核共同同意时，才通过同一条 helper 加上 `--refresh-published-artifact` 刷新被跟踪公开 confidence artifact。',
-        '不要把 promotion-ready 误解成 Toward C 自动启动；继续让 controller、CLI、web、agent 共用同一套证据模型与同一条验收 gate。'
+        '把 Milestone 2 当作 Milestone 3 的 guardrail，而不是重新打开 Milestone 1 表面补洞的理由。'
       ]
     },
     dependencies: ['m1'],
@@ -432,67 +410,69 @@ export const roadmapMilestones: RoadmapMilestone[] = [
   },
   {
     id: 'm3',
-    stage: 'later',
+    stage: 'next',
     title: { en: 'Milestone 3: Toward C', zh: '里程碑 3：Toward C' },
-    status: { en: 'Planned', zh: '计划中' },
+    status: { en: 'Phase 0 Enablement', zh: 'Phase 0 启动' },
     summary: {
-      en: 'Prepare PortManager for Scheme C: Agent-First Distributed Platform, but only after practical robustness has already been earned.',
-      zh: '为方案 C：Agent-First Distributed Platform 做准备，但前提是已经先把实践鲁棒性挣出来。'
+      en: 'Milestone 3 now starts as bounded enablement: keep the same accepted evidence model, surface the current architecture gap map honestly, and begin the first seam-building work needed before any stronger Scheme C claim becomes real.',
+      zh: 'Milestone 3 现在以有边界的 enablement 方式启动：继续保住同一套已验收 evidence model，诚实公开当前架构缺口地图，并开始真正把 Scheme C 需要的第一批 seam 建起来。'
     },
     decision: {
-      en: 'C is kept as a later direction because it is architecturally the most complete option, but it is also the easiest way to over-design an empty-repository V1.',
-      zh: '保留 C 作为后续方向，是因为它在架构上最完整，但它也最容易让空仓库 V1 直接掉进过度设计。'
+      en: 'Milestone 3 begins now only because the repo has earned a credible entry signal. It still starts with seams and bounded contracts, not with premature topology theater.',
+      zh: 'Milestone 3 之所以现在可以开始，只是因为仓库已经挣到了可信进入信号。它的起点仍然应该是 seam 与有边界契约，而不是过早的拓扑表演。'
     },
     productOutcomes: {
-      en: ['Batch host management.', 'Stronger agent event model.', 'A credible path to broader platform support.'],
-      zh: ['批量主机管理。', '更强的 agent 事件模型。', '更可信的多平台扩展路径。']
+      en: ['Gateway-ready consumer boundary.', 'Stronger indexed event and audit review model.', 'A credible path to bounded multi-host operations and later platform expansion.'],
+      zh: ['Gateway-ready 的 consumer boundary。', '更强的索引化 event / audit 复核模型。', '为有边界的多主机操作与后续平台扩展建立可信路径。']
     },
     engineeringWork: {
-      en: ['Platform abstraction growth.', 'PostgreSQL migration or readiness work.', 'Preparation for macOS, mobile, Windows remote, and wider Linux support.'],
-      zh: ['平台抽象扩展。', 'PostgreSQL 迁移或迁移准备。', '为 macOS、移动端、Windows 远端与更广 Linux 支持做准备。']
+      en: ['Controller seam extraction.', 'Gateway-ready contract shaping.', 'Event/audit indexing, bounded batch-operation envelopes, and persistence-readiness seams.'],
+      zh: ['Controller seam extraction。', 'Gateway-ready 的契约边界塑形。', 'Event / audit indexing、bounded batch-operation envelope 与 persistence-readiness seam。']
     },
     entryCriteria: {
-      en: ['B-state validation is trusted in repeated real use.', 'Reliability semantics are stable enough that expansion will not erase accountability.', 'Minimal agent-service migration is already complete.'],
-      zh: ['B 状态已经在反复真实使用中被证明可信。', '可靠性语义已经足够稳定，不会在扩展范围时抹掉责任边界。', '最小 agent-service 迁移已经完成。']
+      en: ['Milestone 1 slice is accepted.', 'Milestone 2 confidence is promotion-ready and still guarded by review helpers.', 'Minimal agent-service migration is already complete.'],
+      zh: ['Milestone 1 切片已经完成验收。', 'Milestone 2 confidence 已经进入 promotion-ready，并继续受 review helper 保护。', '最小 agent-service 迁移已经完成。']
     },
     tradeoffs: {
-      en: ['Do not start with controller/agent/event/policy/audit full separation in V1.', 'Do not let infrastructure elegance outrun delivered value.', 'Do not dilute contract governance while broadening the platform.'],
-      zh: ['不要在 V1 起点就做 controller/agent/event/policy/audit 全量拆分。', '不要让基础设施优雅性跑在价值交付前面。', '不要在扩展平台时稀释契约治理。']
+      en: ['Do not start with topology churn before seam extraction.', 'Do not let infrastructure elegance outrun delivered value.', 'Do not dilute contract governance while broadening the platform.'],
+      zh: ['不要在 seam 还没抽出来前就先做拓扑改造。', '不要让基础设施优雅性跑在价值交付前面。', '不要在扩展平台时稀释契约治理。']
     },
     verifiedNow: {
       en: [
         'The architectural direction is documented and reviewable.',
-        'The entry gate is explicit instead of being treated as an automatic next step.',
-        'Current roadmap copy already constrains C behind B-state trust and reliability proof.'
+        'The entry gate is now credible enough for bounded execution, not just future narration.',
+        'Current docs now publish the explicit gap map: no gateway app, no event/audit split, no batch orchestration, no PostgreSQL readiness seam, and no broader target abstraction yet.'
       ],
       zh: [
         '这个架构方向已经被文档化并可评审。',
-        '进入门槛已经被明确写出，而不是被当成自动的下一步。',
-        '当前 roadmap 文案已经把 C 明确约束在 B 状态可信和可靠性证明之后。'
+        '进入门槛现在已经足以支撑有边界执行，而不再只是未来叙述。',
+        '当前文档已经明确公开缺口地图：还没有 gateway app、没有 event/audit 分层、没有 batch orchestration、没有 PostgreSQL readiness seam，也没有更广目标平台抽象。'
       ]
     },
     blockingGaps: {
       en: [
-        'B-state trust beyond Milestone 1 is not yet fully earned.',
-        'Milestone 2 reliability proof is still incomplete across repeated real use.',
-        'Starting distributed separation now would amplify reliability drift instead of resolving it.'
+        'Web and CLI still consume the controller directly instead of a gateway-ready boundary.',
+        'Controller transport, policy, read-model, and audit/event wiring are not yet explicitly separated.',
+        'Batch orchestration, persistence seams, and target abstractions are still missing.'
       ],
       zh: [
-        '超出 Milestone 1 之后的 B 状态可信度还没有完全挣出来。',
-        'Milestone 2 的可靠性证明在重复真实使用中仍未闭环。',
-        '现在就启动分布式拆分，只会放大可靠性漂移，而不是解决它。'
+        'Web 与 CLI 仍然直接消费 controller，而不是 gateway-ready 的 boundary。',
+        'Controller 的 transport、policy、read model 与 audit/event wiring 还没有显式分层。',
+        'Batch orchestration、persistence seam 与 target abstraction 仍然缺失。'
       ]
     },
     developerFocus: {
       en: [
-        'Treat C as a reference direction, not an active execution lane.',
-        'Do not start controller/agent/event/policy/audit separation before Milestone 1 and Milestone 2 closure.',
-        'Keep future-platform thinking documented, but spend implementation time on parity and reliability first.'
+        'Use `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` as the active implementation map.',
+        'Start with controller seam extraction and gateway-ready contracts before debating deployment topology.',
+        'Add bounded batch-operation primitives and event/audit indexing on the same evidence model.',
+        'Keep Milestone 2 review helpers and public progress counters active while Milestone 3 work lands.'
       ],
       zh: [
-        '把 C 当作参考方向，而不是当前执行主线。',
-        '在里程碑 1 和里程碑 2 闭环前，不要提前启动 controller/agent/event/policy/audit 拆分。',
-        '把未来平台思考继续写清楚，但把实现时间先花在一致性和可靠性上。'
+        '把 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 当作当前实现地图。',
+        '先做 controller seam extraction 与 gateway-ready 契约，再讨论部署拓扑。',
+        '在同一套 evidence model 上补齐 bounded batch-operation primitive 与 event/audit indexing。',
+        '在 Milestone 3 落地时，继续让 Milestone 2 review helper 与公开 progress counter 保持为真相护栏。'
       ]
     },
     focus: {
@@ -509,11 +489,11 @@ export const roadmapMilestones: RoadmapMilestone[] = [
 
 export const roadmapTracks = {
   product: {
-    en: ['Control Plane Baseline', 'Diagnostics Visibility', 'Backup & Rollback Confidence', 'SDK & Docker Maturity', 'Reliability before Expansion'],
-    zh: ['控制平面基线', '诊断可见性', '备份与回滚信心', 'SDK 与 Docker 成熟度', '先可靠性，再扩展']
+    en: ['Control Plane Baseline', 'Diagnostics Visibility', 'Backup & Rollback Confidence', 'Reliability Guardrail', 'Toward C Enablement'],
+    zh: ['控制平面基线', '诊断可见性', '备份与回滚信心', '可靠性护栏', 'Toward C 启动']
   },
   engineering: {
-    en: ['Contracts', 'Controller', 'Agent', 'CLI', 'Web', 'Backup', 'Diagnostics', 'Drift', 'Toward C'],
-    zh: ['契约', 'Controller', 'Agent', 'CLI', 'Web', 'Backup', 'Diagnostics', 'Drift', 'Toward C']
+    en: ['Contracts', 'Controller Seams', 'Agent', 'CLI', 'Web', 'Event & Audit Index', 'Batch Operations', 'Persistence Readiness', 'Toward C'],
+    zh: ['契约', 'Controller 分层', 'Agent', 'CLI', 'Web', 'Event 与 Audit 索引', '批量操作', '持久化就绪度', 'Toward C']
   }
 }
