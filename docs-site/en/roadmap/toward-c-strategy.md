@@ -54,7 +54,7 @@ In that scheme:
 
 | Scheme C expectation | Current verified state | Gap posture |
 | --- | --- | --- |
-| Gateway-ready consumer boundary | Web and CLI still call the controller directly over `REST + SSE` | Not started |
+| Gateway-ready consumer boundary | Web and CLI still call the controller directly over `REST + SSE`, but `/event-audit-index` plus `/persistence-readiness` now publish one clearer review/readiness contract surface | Phase 0 baseline landed |
 | Explicit event/policy/audit seams | `apps/controller/src/controller-server.ts` and `apps/controller/src/operation-store.ts` still concentrate most of that work | Not started |
 | First-class bounded agent role | Agent already serves `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback` with live controller sync | Partially earned |
 | Batch host orchestration | Proof slice still centers on one host / one rule plus reliability replay | Not started |
@@ -97,7 +97,7 @@ Milestone 3 starts with bounded enablement work, not full distributed separation
 - The current `TypeScript web/controller + Rust CLI/agent` split remains valid until measured pressure proves otherwise.
 - `OpenAPI + JSON Schema + codegen` stays non-negotiable.
 - `TOML` remains the preferred human-maintained config format, while `JSON` remains the transport, snapshot, and export format.
-- `PostgreSQL` is still a migration path for real concurrency or reliability pressure, not a symbolic prerequisite; the new persistence adapter and readiness report exist to measure that pressure before any default-store change.
+- `PostgreSQL` is still a migration path for real concurrency or reliability pressure, not a symbolic prerequisite; the new persistence adapter, readiness report, and explicit `/persistence-readiness` contract exist to measure that pressure before any default-store change.
 
 ### Entry criteria for real C execution
 - B-state operations are trusted in repeated use.

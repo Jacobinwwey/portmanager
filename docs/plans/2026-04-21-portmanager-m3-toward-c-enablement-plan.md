@@ -233,6 +233,42 @@ flowchart LR
 - Edge case: missing or invalid persistence configuration fails clearly.
 - Regression: host/rule/policy, diagnostics, backup, rollback, and confidence flows still pass on SQLite.
 
+- [x] **Unit 55: Review Surface Contract Hardening**
+
+**Goal:** Promote the landed indexed audit and persistence-readiness seams into explicit generated contract surfaces with CLI/Web developer parity.
+
+**Requirements:** R4-R7
+
+**Dependencies:** Units 53-54
+
+**Files:**
+- Modify: `packages/contracts/openapi/openapi.yaml`
+- Modify: `packages/typescript-contracts/src/generated/*`
+- Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/web/src/main.ts`
+- Modify: `crates/portmanager-cli/src/main.rs`
+- Create: `tests/controller/persistence-readiness.test.ts`
+- Modify: `crates/portmanager-cli/tests/operation_get_cli.rs`
+- Modify: `tests/web/web-shell.test.ts`
+- Modify: `tests/web/live-controller-shell.test.ts`
+- Modify: `tests/contracts/generate-contracts.test.mjs`
+
+**Approach:**
+- Publish `/event-audit-index` and `/persistence-readiness` in the generated OpenAPI surface instead of leaving them as controller-only implementation details.
+- Keep CLI and Web consuming the same review/readiness reads so developer inspection does not drift across surfaces.
+- Use the new public contract wording to narrow the remaining Milestone 3 gap from “missing contract surface” to “missing boundary split.”
+
+**Patterns to follow:**
+- `packages/contracts/openapi/openapi.yaml`
+- `crates/portmanager-cli/tests/operation_get_cli.rs`
+- `tests/web/live-controller-shell.test.ts`
+
+**Test scenarios:**
+- Happy path: controller returns persistence readiness as a first-class contract payload.
+- Happy path: CLI reads indexed audit entries and persistence readiness from the same controller surfaces.
+- Happy path: Web overview and console render persistence readiness from the live controller contract.
+- Regression: generated contracts stay in sync with committed outputs.
+
 ## Verification Strategy
 - `pnpm exec node --experimental-strip-types --test tests/docs/*.test.mjs`
 - `corepack pnpm --dir docs-site --ignore-workspace run docs:generate`

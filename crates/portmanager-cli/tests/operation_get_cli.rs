@@ -920,3 +920,142 @@ fn operations_list_text_surfaces_result_summary_and_recovery_links() {
     assert!(stdout.contains("backup_alpha_002"));
     assert!(stdout.contains("rp_alpha_002"));
 }
+
+#[test]
+fn operations_persistence_readiness_json_reads_shared_controller_surface() {
+    let server = MockHttpServer::start(vec![(
+        "/persistence-readiness",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "backend": "sqlite",
+                "databasePath": "/var/lib/portmanager/controller.sqlite",
+                "status": "monitor",
+                "migrationTarget": "postgresql",
+                "summary": "SQLite remains the active default store, but measured persistence pressure now needs explicit migration-readiness tracking.",
+                "recommendedAction": "Keep SQLite as default, preserve schema parity, and rehearse PostgreSQL migration criteria before pressure crosses the next threshold.",
+                "metrics": {
+                    "operationRows": {
+                        "current": 512,
+                        "monitor": 500,
+                        "migrationReady": 2000,
+                        "status": "monitor"
+                    },
+                    "diagnosticRows": {
+                        "current": 12,
+                        "monitor": 200,
+                        "migrationReady": 750,
+                        "status": "healthy"
+                    },
+                    "backupRows": {
+                        "current": 8,
+                        "monitor": 200,
+                        "migrationReady": 750,
+                        "status": "healthy"
+                    },
+                    "rollbackPointRows": {
+                        "current": 4,
+                        "monitor": 200,
+                        "migrationReady": 750,
+                        "status": "healthy"
+                    },
+                    "hostRows": {
+                        "current": 3,
+                        "monitor": 25,
+                        "migrationReady": 100,
+                        "status": "healthy"
+                    }
+                }
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["operations", "persistence-readiness", "--json"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    let parsed: Value = serde_json::from_str(&stdout).expect("json stdout");
+
+    assert_eq!(parsed["status"], "monitor");
+    assert_eq!(parsed["migrationTarget"], "postgresql");
+    assert_eq!(parsed["metrics"]["operationRows"]["status"], "monitor");
+}
+
+#[test]
+fn operations_audit_index_text_surfaces_linked_evidence() {
+    let server = MockHttpServer::start(vec![(
+        "/event-audit-index?limit=2&hostId=host_alpha&ruleId=rule_alpha_https",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "items": [
+                    {
+                        "operation": {
+                            "id": "op_backup_required_001",
+                            "type": "backup",
+                            "state": "degraded",
+                            "hostId": "host_alpha",
+                            "ruleId": "rule_alpha_https",
+                            "startedAt": "2026-04-21T10:10:00.000Z",
+                            "finishedAt": "2026-04-21T10:11:00.000Z",
+                            "resultSummary": "required GitHub backup is not configured",
+                            "backupId": "backup_alpha_002",
+                            "rollbackPointId": "rp_alpha_002"
+                        },
+                        "latestEvent": {
+                            "id": "evt_002",
+                            "kind": "operation_state_changed",
+                            "operationId": "op_backup_required_001",
+                            "operationType": "backup",
+                            "state": "degraded",
+                            "level": "warn",
+                            "summary": "required GitHub backup is not configured",
+                            "hostId": "host_alpha",
+                            "ruleId": "rule_alpha_https",
+                            "emittedAt": "2026-04-21T10:11:00.000Z"
+                        },
+                        "eventCount": 2,
+                        "backup": {
+                            "id": "backup_alpha_002"
+                        },
+                        "rollbackPoint": {
+                            "id": "rp_alpha_002"
+                        },
+                        "linkedArtifacts": [
+                            "/var/lib/portmanager/backups/backup_alpha_002/manifest.json"
+                        ]
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &[
+            "operations",
+            "audit-index",
+            "--limit",
+            "2",
+            "--host-id",
+            "host_alpha",
+            "--rule-id",
+            "rule_alpha_https",
+        ],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("op_backup_required_001"));
+    assert!(stdout.contains("required GitHub backup is not configured"));
+    assert!(stdout.contains("backup_alpha_002"));
+    assert!(stdout.contains("rp_alpha_002"));
+    assert!(stdout.contains("/var/lib/portmanager/backups/backup_alpha_002/manifest.json"));
+}

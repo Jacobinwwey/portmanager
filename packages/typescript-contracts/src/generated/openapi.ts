@@ -357,6 +357,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/event-audit-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List indexed operation, event, and audit review entries */
+        get: {
+            parameters: {
+                query?: {
+                    hostId?: string;
+                    limit?: number;
+                    operationId?: string;
+                    parentOperationId?: string;
+                    ruleId?: string;
+                    state?: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
+                    type?: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "batch_apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Indexed event and audit review entries */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventAuditIndexResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events": {
         parameters: {
             query?: never;
@@ -809,6 +853,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/persistence-readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get controller persistence readiness */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Persistence readiness detail */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PersistenceReadiness"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/rollback-points": {
         parameters: {
             query?: never;
@@ -1004,6 +1084,22 @@ export interface components {
             name: string;
             ssh: components["schemas"]["SshConnection"];
         };
+        EventAuditIndexEntry: {
+            backup?: components["schemas"]["BackupSummary"];
+            eventCount: number;
+            /** Format: date-time */
+            firstEventAt?: string;
+            /** Format: date-time */
+            lastEventAt?: string;
+            latestDiagnostic?: components["schemas"]["OperationDetail"];
+            latestEvent?: components["schemas"]["OperationEvent"] | unknown;
+            linkedArtifacts: string[];
+            operation: components["schemas"]["OperationDetail"];
+            rollbackPoint?: components["schemas"]["RollbackPoint"];
+        };
+        EventAuditIndexResponse: {
+            items: components["schemas"]["EventAuditIndexEntry"][];
+        };
         EventListResponse: {
             items: components["schemas"]["OperationEvent"][];
         };
@@ -1110,6 +1206,32 @@ export interface components {
             /** @enum {string} */
             type: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "batch_apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
         };
+        PersistenceReadiness: {
+            /** @enum {string} */
+            backend: "sqlite";
+            databasePath: string;
+            metrics: components["schemas"]["PersistenceReadinessMetrics"];
+            /** @enum {string} */
+            migrationTarget: "postgresql";
+            recommendedAction: string;
+            /** @enum {string} */
+            status: "healthy" | "monitor" | "migration_ready";
+            summary: string;
+        };
+        PersistenceReadinessMetric: {
+            current: number;
+            migrationReady: number;
+            monitor: number;
+            /** @enum {string} */
+            status: "healthy" | "monitor" | "migration_ready";
+        };
+        PersistenceReadinessMetrics: {
+            backupRows: components["schemas"]["PersistenceReadinessMetric"];
+            diagnosticRows: components["schemas"]["PersistenceReadinessMetric"];
+            hostRows: components["schemas"]["PersistenceReadinessMetric"];
+            operationRows: components["schemas"]["PersistenceReadinessMetric"];
+            rollbackPointRows: components["schemas"]["PersistenceReadinessMetric"];
+        };
         PortDiagnosticResult: {
             /** Format: date-time */
             capturedAt: string;
@@ -1203,6 +1325,8 @@ export type BootstrapHostRequest = components['schemas']['BootstrapHostRequest']
 export type BridgeRule = components['schemas']['BridgeRule'];
 export type CreateBridgeRuleRequest = components['schemas']['CreateBridgeRuleRequest'];
 export type CreateHostRequest = components['schemas']['CreateHostRequest'];
+export type EventAuditIndexEntry = components['schemas']['EventAuditIndexEntry'];
+export type EventAuditIndexResponse = components['schemas']['EventAuditIndexResponse'];
 export type EventListResponse = components['schemas']['EventListResponse'];
 export type EventStreamEnvelope = components['schemas']['EventStreamEnvelope'];
 export type ExposurePolicy = components['schemas']['ExposurePolicy'];
@@ -1214,6 +1338,9 @@ export type OperationAccepted = components['schemas']['OperationAccepted'];
 export type OperationDetail = components['schemas']['OperationDetail'];
 export type OperationEvent = components['schemas']['OperationEvent'];
 export type OperationSummary = components['schemas']['OperationSummary'];
+export type PersistenceReadiness = components['schemas']['PersistenceReadiness'];
+export type PersistenceReadinessMetric = components['schemas']['PersistenceReadinessMetric'];
+export type PersistenceReadinessMetrics = components['schemas']['PersistenceReadinessMetrics'];
 export type PortDiagnosticResult = components['schemas']['PortDiagnosticResult'];
 export type ProbeHostRequest = components['schemas']['ProbeHostRequest'];
 export type RollbackPoint = components['schemas']['RollbackPoint'];

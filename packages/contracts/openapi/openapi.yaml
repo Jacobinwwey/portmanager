@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8710
 tags:
+  - name: controller
   - name: hosts
   - name: bridge-rules
   - name: exposure-policies
@@ -377,6 +378,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventListResponse'
+  /event-audit-index:
+    get:
+      tags: [events]
+      summary: List indexed operation, event, and audit review entries
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 20
+        - name: operationId
+          in: query
+          schema:
+            type: string
+        - name: hostId
+          in: query
+          schema:
+            type: string
+        - name: parentOperationId
+          in: query
+          schema:
+            type: string
+        - name: ruleId
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+            enum: [queued, running, succeeded, failed, degraded, cancelled]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, batch_apply_policy, verify_rule, backup, diagnostics, rollback]
+      responses:
+        '200':
+          description: Indexed event and audit review entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventAuditIndexResponse'
+  /persistence-readiness:
+    get:
+      tags: [controller]
+      summary: Get controller persistence readiness
+      responses:
+        '200':
+          description: Persistence readiness detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistenceReadiness'
   /rollback-points:
     get:
       tags: [rollback-points]
@@ -891,6 +948,95 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OperationEvent'
+    EventAuditIndexEntry:
+      type: object
+      required: [operation, eventCount, linkedArtifacts]
+      properties:
+        operation:
+          $ref: '#/components/schemas/OperationDetail'
+        latestEvent:
+          oneOf:
+            - $ref: '#/components/schemas/OperationEvent'
+            - type: 'null'
+        eventCount:
+          type: integer
+          minimum: 0
+        firstEventAt:
+          type: string
+          format: date-time
+        lastEventAt:
+          type: string
+          format: date-time
+        latestDiagnostic:
+          $ref: '#/components/schemas/OperationDetail'
+        backup:
+          $ref: '#/components/schemas/BackupSummary'
+        rollbackPoint:
+          $ref: '#/components/schemas/RollbackPoint'
+        linkedArtifacts:
+          type: array
+          items:
+            type: string
+    EventAuditIndexResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventAuditIndexEntry'
+    PersistenceReadinessMetric:
+      type: object
+      required: [current, monitor, migrationReady, status]
+      properties:
+        current:
+          type: integer
+          minimum: 0
+        monitor:
+          type: integer
+          minimum: 0
+        migrationReady:
+          type: integer
+          minimum: 0
+        status:
+          type: string
+          enum: [healthy, monitor, migration_ready]
+    PersistenceReadinessMetrics:
+      type: object
+      required: [operationRows, diagnosticRows, backupRows, rollbackPointRows, hostRows]
+      properties:
+        operationRows:
+          $ref: '#/components/schemas/PersistenceReadinessMetric'
+        diagnosticRows:
+          $ref: '#/components/schemas/PersistenceReadinessMetric'
+        backupRows:
+          $ref: '#/components/schemas/PersistenceReadinessMetric'
+        rollbackPointRows:
+          $ref: '#/components/schemas/PersistenceReadinessMetric'
+        hostRows:
+          $ref: '#/components/schemas/PersistenceReadinessMetric'
+    PersistenceReadiness:
+      type: object
+      required:
+        [backend, databasePath, status, migrationTarget, summary, recommendedAction, metrics]
+      properties:
+        backend:
+          type: string
+          enum: [sqlite]
+        databasePath:
+          type: string
+        status:
+          type: string
+          enum: [healthy, monitor, migration_ready]
+        migrationTarget:
+          type: string
+          enum: [postgresql]
+        summary:
+          type: string
+        recommendedAction:
+          type: string
+        metrics:
+          $ref: '#/components/schemas/PersistenceReadinessMetrics'
     RollbackPoint:
       type: object
       required: [id, hostId, operationId, createdAt, state]

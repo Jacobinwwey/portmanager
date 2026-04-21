@@ -71,6 +71,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Milestone 3 Unit 52: add gateway-ready batch exposure-policy envelope, parent-child operation linkage, CLI batch apply flow, and Web batch outcome rendering without broadening supported target claims.
 - [x] Milestone 3 Unit 53: land `/event-audit-index`, shared indexed event/audit review reads, and Web operations/console audit panels without changing the accepted evidence model.
 - [x] Milestone 3 Unit 54: add the SQLite-backed persistence adapter seam, measurable PostgreSQL readiness reporting, and keep store behavior unchanged behind the new adapter boundary.
+- [x] Milestone 3 Unit 55: publish `/event-audit-index` and `/persistence-readiness` as generated contract surfaces, add CLI parity for both reads, and surface persistence readiness in Web overview/console developer views.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -183,6 +184,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] 验收加固：当被忽略的本地 `.portmanager` 历史比已提交 docs-site progress data 更新、且尚未重跑 `docs:generate` 时，development-progress docs 校验仍保持 hermetic，不再误报失败。
 - [x] 里程碑 3 Unit 53：落地 `/event-audit-index`、共享的索引化 event/audit review read，以及 Web operations/console 审计面板，同时不改变已验收 evidence model。
 - [x] 里程碑 3 Unit 54：落地 SQLite-backed persistence adapter seam、可度量的 PostgreSQL readiness 报告，并保持新适配器边界后的 store 行为不变。
+- [x] 里程碑 3 Unit 55：把 `/event-audit-index` 与 `/persistence-readiness` 作为生成后的合同面发布，补齐 CLI 双读一致性，并在 Web overview/console 开发者视图公开 persistence readiness。
 - [x] 里程碑 3 Unit 51：抽出 `controller-domain-service` 与 `controller-read-model` seam，把 controller 编排与 host detail 组合收敛到显式模块后面，并保持现有 HTTP 契约与验收证据不变。
 
 ### 推荐推进顺序

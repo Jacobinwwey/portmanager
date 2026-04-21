@@ -136,8 +136,10 @@ enum OperationSubcommand {
 
 #[derive(Subcommand)]
 enum OperationsSubcommand {
+    AuditIndex(OperationsAuditIndexArgs),
     BatchApplyPolicy(OperationsBatchApplyPolicyArgs),
     List(OperationsListArgs),
+    PersistenceReadiness(OperationsPersistenceReadinessArgs),
 }
 
 #[derive(Args)]
@@ -492,6 +494,36 @@ struct OperationsListArgs {
 }
 
 #[derive(Args, Clone)]
+struct OperationsAuditIndexArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long, default_value_t = 20)]
+    limit: u16,
+    #[arg(long)]
+    operation_id: Option<String>,
+    #[arg(long)]
+    host_id: Option<String>,
+    #[arg(long)]
+    parent_operation_id: Option<String>,
+    #[arg(long)]
+    rule_id: Option<String>,
+    #[arg(long)]
+    state: Option<String>,
+    #[arg(long)]
+    r#type: Option<String>,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
+struct OperationsPersistenceReadinessArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
 struct OperationsBatchApplyPolicyArgs {
     #[arg(long = "host-id")]
     host_ids: Vec<String>,
@@ -646,10 +678,14 @@ async fn execute(cli: Cli) -> ExecutionResult {
             OperationSubcommand::Get(args) => run_operation_get(args).await,
         },
         Commands::Operations(command) => match command.command {
+            OperationsSubcommand::AuditIndex(args) => run_operations_audit_index(args).await,
             OperationsSubcommand::BatchApplyPolicy(args) => {
                 run_operations_batch_apply_policy(args).await
             }
             OperationsSubcommand::List(args) => run_operations_list(args).await,
+            OperationsSubcommand::PersistenceReadiness(args) => {
+                run_operations_persistence_readiness(args).await
+            }
         },
         Commands::RollbackPoints(command) => match command.command {
             RollbackPointsSubcommand::Apply(args) => run_rollback_points_apply(args).await,
@@ -1227,6 +1263,60 @@ async fn run_operations_list(args: OperationsListArgs) -> ExecutionResult {
     }
 }
 
+async fn run_operations_audit_index(args: OperationsAuditIndexArgs) -> ExecutionResult {
+    match fetch_operations_audit_index(
+        &Client::new(),
+        &args.controller_base_url,
+        args.limit,
+        args.operation_id.as_deref(),
+        args.host_id.as_deref(),
+        args.parent_operation_id.as_deref(),
+        args.rule_id.as_deref(),
+        args.state.as_deref(),
+        args.r#type.as_deref(),
+    )
+    .await
+    {
+        Ok(entries) => {
+            if args.json {
+                ExecutionResult::success_json(&entries)
+            } else {
+                let lines = entries["items"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(format_audit_index_entry_text)
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                ExecutionResult::success_text(lines)
+            }
+        }
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "audit index fetch failed".to_string())
+        }
+    }
+}
+
+async fn run_operations_persistence_readiness(
+    args: OperationsPersistenceReadinessArgs,
+) -> ExecutionResult {
+    match fetch_persistence_readiness(&Client::new(), &args.controller_base_url).await {
+        Ok(readiness) => {
+            if args.json {
+                ExecutionResult::success_json(&readiness)
+            } else {
+                ExecutionResult::success_text(format_persistence_readiness_text(&readiness))
+            }
+        }
+        Err(error) => json_or_text_error_flag(
+            args.json,
+            error,
+            "persistence readiness fetch failed".to_string(),
+        ),
+    }
+}
+
 async fn run_operations_batch_apply_policy(args: OperationsBatchApplyPolicyArgs) -> ExecutionResult {
     let client = Client::new();
     let wait_options = WaitOptions {
@@ -1640,6 +1730,62 @@ fn format_exposure_policy_text(policy: &Value, default_host_id: &str) -> String 
             .unwrap_or_else(|| "false".to_string()),
         policy["conflictPolicy"].as_str().unwrap_or("unknown"),
         policy["backupPolicy"].as_str().unwrap_or("unknown"),
+    )
+}
+
+fn format_audit_index_entry_text(entry: &Value) -> String {
+    let operation = &entry["operation"];
+
+    format!(
+        "{} {} {} events={} summary={} backup={} rollback={} artifacts={}",
+        operation["id"].as_str().unwrap_or("unknown"),
+        operation["type"].as_str().unwrap_or("unknown"),
+        operation["state"].as_str().unwrap_or("unknown"),
+        entry["eventCount"].as_u64().unwrap_or_default(),
+        entry["latestEvent"]["summary"]
+            .as_str()
+            .unwrap_or("no-indexed-event"),
+        entry["backup"]["id"].as_str().unwrap_or("backup-n/a"),
+        entry["rollbackPoint"]["id"]
+            .as_str()
+            .unwrap_or("rollback-n/a"),
+        join_scalar_values(entry["linkedArtifacts"].as_array()),
+    )
+}
+
+fn format_persistence_readiness_text(readiness: &Value) -> String {
+    let metrics = &readiness["metrics"];
+
+    format!(
+        "{} {} {} {}\noperations {} monitor {} migration {}\ndiagnostics {} monitor {} migration {}\nbackups {} monitor {} migration {}\nrollback_points {} monitor {} migration {}\nhosts {} monitor {} migration {}\naction {}",
+        readiness["backend"].as_str().unwrap_or("unknown"),
+        readiness["status"].as_str().unwrap_or("unknown"),
+        readiness["migrationTarget"].as_str().unwrap_or("unknown"),
+        readiness["databasePath"].as_str().unwrap_or("unknown"),
+        metrics["operationRows"]["current"].as_u64().unwrap_or_default(),
+        metrics["operationRows"]["monitor"].as_u64().unwrap_or_default(),
+        metrics["operationRows"]["migrationReady"]
+            .as_u64()
+            .unwrap_or_default(),
+        metrics["diagnosticRows"]["current"].as_u64().unwrap_or_default(),
+        metrics["diagnosticRows"]["monitor"].as_u64().unwrap_or_default(),
+        metrics["diagnosticRows"]["migrationReady"]
+            .as_u64()
+            .unwrap_or_default(),
+        metrics["backupRows"]["current"].as_u64().unwrap_or_default(),
+        metrics["backupRows"]["monitor"].as_u64().unwrap_or_default(),
+        metrics["backupRows"]["migrationReady"].as_u64().unwrap_or_default(),
+        metrics["rollbackPointRows"]["current"]
+            .as_u64()
+            .unwrap_or_default(),
+        metrics["rollbackPointRows"]["monitor"].as_u64().unwrap_or_default(),
+        metrics["rollbackPointRows"]["migrationReady"]
+            .as_u64()
+            .unwrap_or_default(),
+        metrics["hostRows"]["current"].as_u64().unwrap_or_default(),
+        metrics["hostRows"]["monitor"].as_u64().unwrap_or_default(),
+        metrics["hostRows"]["migrationReady"].as_u64().unwrap_or_default(),
+        readiness["recommendedAction"].as_str().unwrap_or("no action guidance"),
     )
 }
 
@@ -2235,6 +2381,82 @@ async fn fetch_operations(
         timeout_ms: None,
         status: Some(status.as_u16()),
     })
+}
+
+async fn fetch_operations_audit_index(
+    client: &Client,
+    controller_base_url: &str,
+    limit: u16,
+    operation_id: Option<&str>,
+    host_id: Option<&str>,
+    parent_operation_id: Option<&str>,
+    rule_id: Option<&str>,
+    state: Option<&str>,
+    operation_type: Option<&str>,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!("{}/event-audit-index", controller_base_url.trim_end_matches('/'));
+    let mut query = vec![("limit".to_string(), limit.to_string())];
+
+    if let Some(operation_id) = operation_id {
+        query.push(("operationId".to_string(), operation_id.to_string()));
+    }
+    if let Some(host_id) = host_id {
+        query.push(("hostId".to_string(), host_id.to_string()));
+    }
+    if let Some(parent_operation_id) = parent_operation_id {
+        query.push((
+            "parentOperationId".to_string(),
+            parent_operation_id.to_string(),
+        ));
+    }
+    if let Some(rule_id) = rule_id {
+        query.push(("ruleId".to_string(), rule_id.to_string()));
+    }
+    if let Some(state) = state {
+        query.push(("state".to_string(), state.to_string()));
+    }
+    if let Some(operation_type) = operation_type {
+        query.push(("type".to_string(), operation_type.to_string()));
+    }
+
+    let response = client
+        .get(url)
+        .query(&query)
+        .send()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: None,
+        })?;
+
+    let status = response.status();
+    if !status.is_success() {
+        return Err(unexpected_status_error(status, None));
+    }
+
+    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
+        error: "transport",
+        message: error.to_string(),
+        operation_id: None,
+        last_state: None,
+        timeout_ms: None,
+        status: Some(status.as_u16()),
+    })
+}
+
+async fn fetch_persistence_readiness(
+    client: &Client,
+    controller_base_url: &str,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!(
+        "{}/persistence-readiness",
+        controller_base_url.trim_end_matches('/')
+    );
+    request_json(client.get(url), None, None).await
 }
 
 async fn fetch_rollback_points(

@@ -667,6 +667,11 @@ export function createControllerServer(options: {
       return
     }
 
+    if (request.method === 'GET' && requestUrl.pathname === '/persistence-readiness') {
+      sendJson(response, 200, store.getPersistenceReadiness())
+      return
+    }
+
     if (request.method === 'GET' && requestUrl.pathname === '/backups') {
       sendJson(response, 200, {
         items: readModel.listBackups({

@@ -32,17 +32,8 @@ export interface EventStreamEntry {
 }
 
 export type OperationEventContract = components['schemas']['OperationEvent']
-export interface EventAuditIndexEntry {
-  operation: OperationDetailContract
-  latestEvent: OperationEventContract | null
-  eventCount: number
-  firstEventAt?: string
-  lastEventAt?: string
-  latestDiagnostic?: OperationDetailContract
-  backup?: BackupSummary
-  rollbackPoint?: RollbackPoint
-  linkedArtifacts: string[]
-}
+export type EventAuditIndexEntry = components['schemas']['EventAuditIndexEntry']
+export type PersistenceReadinessContract = components['schemas']['PersistenceReadiness']
 type FetchLike = typeof fetch
 
 interface ControllerListEnvelope<T> {
@@ -67,6 +58,7 @@ export interface HostDetailState {
 
 export interface OverviewState {
   controllerHealth: 'healthy' | 'degraded'
+  persistenceReadiness: PersistenceReadinessContract
   managedHosts: HostSummary[]
   selectedHost: HostDetailState | null
   activeOperations: number
@@ -116,6 +108,7 @@ export interface BackupsState {
 export interface ConsoleState {
   operations: OperationDetailContract[]
   auditIndex: EventAuditIndexEntry[]
+  persistenceReadiness: PersistenceReadinessContract
   selectedOperation: OperationDetailContract | null
   diagnostics: OperationDetailContract[]
   selectedDiagnostic: OperationDetailContract | null
@@ -366,7 +359,9 @@ function renderAuditIndexList(entries: EventAuditIndexEntry[], key: string) {
             h(
               'div',
               { key: 'line3' },
-              entry.latestEvent?.summary ?? entry.operation.resultSummary ?? 'No indexed summary'
+              indexedEventSummary(entry.latestEvent) ??
+                entry.operation.resultSummary ??
+                'No indexed summary'
             ),
             h(
               'div',
@@ -380,6 +375,19 @@ function renderAuditIndexList(entries: EventAuditIndexEntry[], key: string) {
         )
       )
     : emptyState('No indexed event and audit entries are available yet.', key)
+}
+
+function indexedEventSummary(event: EventAuditIndexEntry['latestEvent']) {
+  if (
+    event &&
+    typeof event === 'object' &&
+    'summary' in event &&
+    typeof event.summary === 'string'
+  ) {
+    return event.summary
+  }
+
+  return undefined
 }
 
 function readControllerBaseUrl(container?: Element | null) {
@@ -1181,6 +1189,51 @@ export function createMockHostDetailState(): HostDetailState {
   }
 }
 
+export function createMockPersistenceReadiness(): PersistenceReadinessContract {
+  return {
+    backend: 'sqlite',
+    databasePath: '/var/lib/portmanager/controller.sqlite',
+    status: 'monitor',
+    migrationTarget: 'postgresql',
+    summary:
+      'SQLite remains the active default store, but measured persistence pressure now needs explicit migration-readiness tracking.',
+    recommendedAction:
+      'Keep SQLite as default, preserve schema parity, and rehearse PostgreSQL migration criteria before pressure crosses the next threshold.',
+    metrics: {
+      operationRows: {
+        current: 512,
+        monitor: 500,
+        migrationReady: 2000,
+        status: 'monitor'
+      },
+      diagnosticRows: {
+        current: 12,
+        monitor: 200,
+        migrationReady: 750,
+        status: 'healthy'
+      },
+      backupRows: {
+        current: 8,
+        monitor: 200,
+        migrationReady: 750,
+        status: 'healthy'
+      },
+      rollbackPointRows: {
+        current: 4,
+        monitor: 200,
+        migrationReady: 750,
+        status: 'healthy'
+      },
+      hostRows: {
+        current: 3,
+        monitor: 25,
+        migrationReady: 100,
+        status: 'healthy'
+      }
+    }
+  }
+}
+
 export function createMockOverviewState(): OverviewState {
   const selectedHost = createMockHostDetailState()
 
@@ -1211,6 +1264,7 @@ export function createMockOverviewState(): OverviewState {
 
   return {
     controllerHealth: 'healthy',
+    persistenceReadiness: createMockPersistenceReadiness(),
     managedHosts: [selectedHost.host, secondaryHost, degradedHost],
     selectedHost,
     activeOperations: 2,
@@ -1456,6 +1510,7 @@ export function createMockConsoleState(): ConsoleState {
   return {
     operations: operationsState.operations.map((entry) => entry.operation),
     auditIndex: operationsState.auditIndex,
+    persistenceReadiness: createMockPersistenceReadiness(),
     selectedOperation: operationsState.operations[0]?.operation ?? null,
     diagnostics: hostDetailState.diagnostics,
     selectedDiagnostic: hostDetailState.diagnostics[0] ?? null,
@@ -1494,6 +1549,17 @@ async function loadEventAuditIndex(
   } = {}
 ) {
   return fetchControllerList<EventAuditIndexEntry>(baseUrl, '/event-audit-index', options)
+}
+
+async function loadPersistenceReadiness(
+  baseUrl: string,
+  options: {
+    fetchImpl?: FetchLike
+  } = {}
+) {
+  return fetchControllerJson<PersistenceReadinessContract>(baseUrl, '/persistence-readiness', {
+    fetchImpl: options.fetchImpl
+  })
 }
 
 export async function loadHostDetailState(
@@ -1548,7 +1614,7 @@ export async function loadOverviewState(
   }
 ): Promise<OverviewState> {
   const eventLimit = options.eventLimit ?? 20
-  const [managedHosts, operations, events] = await Promise.all([
+  const [managedHosts, operations, events, persistenceReadiness] = await Promise.all([
     fetchControllerList<HostSummary>(options.baseUrl, '/hosts', {
       fetchImpl: options.fetchImpl
     }),
@@ -1557,6 +1623,9 @@ export async function loadOverviewState(
     }),
     fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
       params: { limit: eventLimit },
+      fetchImpl: options.fetchImpl
+    }),
+    loadPersistenceReadiness(options.baseUrl, {
       fetchImpl: options.fetchImpl
     })
   ])
@@ -1580,6 +1649,7 @@ export async function loadOverviewState(
 
   return {
     controllerHealth: degradedCount > 0 ? 'degraded' : 'healthy',
+    persistenceReadiness,
     managedHosts,
     selectedHost,
     activeOperations,
@@ -1808,7 +1878,7 @@ export async function loadConsoleState(
   }
 ): Promise<ConsoleState> {
   const eventLimit = options.eventLimit ?? 20
-  const [operations, diagnostics, events, auditIndex] = await Promise.all([
+  const [operations, diagnostics, events, auditIndex, persistenceReadiness] = await Promise.all([
     loadOperationDetails(options.baseUrl, {
       params: { hostId: options.hostId },
       fetchImpl: options.fetchImpl
@@ -1830,6 +1900,9 @@ export async function loadConsoleState(
         limit: eventLimit
       },
       fetchImpl: options.fetchImpl
+    }),
+    loadPersistenceReadiness(options.baseUrl, {
+      fetchImpl: options.fetchImpl
     })
   ])
 
@@ -1841,6 +1914,7 @@ export async function loadConsoleState(
   return {
     operations,
     auditIndex,
+    persistenceReadiness,
     selectedOperation,
     diagnostics,
     selectedDiagnostic,
@@ -1862,6 +1936,11 @@ export function OverviewPage(props: { state: OverviewState }) {
         label: 'Controller Health',
         value: state.controllerHealth,
         tone: state.controllerHealth === 'healthy' ? 'success' : 'warn'
+      },
+      {
+        label: 'Persistence',
+        value: state.persistenceReadiness.status,
+        tone: toneFromState(state.persistenceReadiness.status)
       },
       {
         label: 'Managed Hosts',
@@ -2082,6 +2161,11 @@ export function ConsolePage(props: { state: ConsoleState }) {
         label: 'Recent Events',
         value: String(props.state.events.length),
         tone: props.state.events.length > 0 ? 'info' : 'warn'
+      },
+      {
+        label: 'Persistence',
+        value: props.state.persistenceReadiness.status,
+        tone: toneFromState(props.state.persistenceReadiness.status)
       },
       {
         label: 'Operations',
@@ -2494,6 +2578,53 @@ function OverviewMain(props: { state: OverviewState }) {
   ])
 }
 
+function PersistenceReadinessCard(props: {
+  readiness: PersistenceReadinessContract
+  title: string
+  detail?: string
+}) {
+  const metricLabels = [
+    ['operationRows', 'Operations'],
+    ['diagnosticRows', 'Diagnostics'],
+    ['backupRows', 'Backups'],
+    ['rollbackPointRows', 'Rollback Points'],
+    ['hostRows', 'Hosts']
+  ] as const
+
+  return h('section', { className: 'pm-card' }, [
+    h(SectionHeading, {
+      key: 'heading',
+      title: props.title,
+      detail: props.detail ?? props.readiness.status
+    }),
+    h('div', { className: 'pm-kv', key: 'kv' }, [
+      kvRow('Backend', props.readiness.backend),
+      kvRow('Status', h(StatusBadge, { state: props.readiness.status })),
+      kvRow('Migration Target', props.readiness.migrationTarget),
+      kvRow('Database', props.readiness.databasePath),
+      kvRow('Recommended Action', props.readiness.recommendedAction)
+    ]),
+    h('p', { className: 'pm-microcopy', key: 'summary' }, props.readiness.summary),
+    h(
+      'ul',
+      { className: 'pm-list', key: 'metrics' },
+      metricLabels.map(([key, label]) => {
+        const metric = props.readiness.metrics[key]
+
+        return h('li', { className: 'pm-list-item', key }, [
+          h('div', { key: 'line1' }, label),
+          h(
+            'div',
+            { className: 'pm-microcopy', key: 'line2' },
+            `current ${metric.current} · monitor ${metric.monitor} · migration ${metric.migrationReady}`
+          ),
+          h(StatusBadge, { key: 'badge', state: metric.status })
+        ])
+      })
+    )
+  ])
+}
+
 function OverviewRail(props: { state: OverviewState }) {
   const detailState = props.state.selectedHost
 
@@ -2506,7 +2637,12 @@ function OverviewRail(props: { state: OverviewState }) {
       h('section', { className: 'pm-card', key: 'policy' }, [
         h(SectionHeading, { key: 'heading', title: 'Effective Policy', detail: 'no host selected' }),
         emptyState('Effective exposure policy appears after one host is present.')
-      ])
+      ]),
+      h(PersistenceReadinessCard, {
+        key: 'persistence',
+        readiness: props.state.persistenceReadiness,
+        title: 'Persistence readiness'
+      })
     ])
   }
 
@@ -2535,7 +2671,12 @@ function OverviewRail(props: { state: OverviewState }) {
         kvRow('Conflict Policy', policy.conflictPolicy),
         kvRow('Same Port Mirror', policy.samePortMirror ? 'enabled' : 'disabled')
       ])
-    ])
+    ]),
+    h(PersistenceReadinessCard, {
+      key: 'persistence',
+      readiness: props.state.persistenceReadiness,
+      title: 'Persistence readiness'
+    })
   ])
 }
 
@@ -2937,7 +3078,7 @@ function OperationsRail(props: { state: OperationsState; selected: OperationInve
       selectedAuditEntry
         ? [
             h('div', { className: 'pm-kv', key: 'kv' }, [
-              kvRow('Latest Event', selectedAuditEntry.latestEvent?.summary ?? 'No indexed event'),
+              kvRow('Latest Event', indexedEventSummary(selectedAuditEntry.latestEvent) ?? 'No indexed event'),
               kvRow('Event Count', String(selectedAuditEntry.eventCount)),
               kvRow('First Seen', shortTime(selectedAuditEntry.firstEventAt)),
               kvRow('Last Seen', shortTime(selectedAuditEntry.lastEventAt)),
@@ -3441,7 +3582,7 @@ function ConsoleRail(props: { state: ConsoleState }) {
       selectedAuditEntry
         ? [
             h('div', { className: 'pm-kv', key: 'kv' }, [
-              kvRow('Latest Event', selectedAuditEntry.latestEvent?.summary ?? 'No indexed event'),
+              kvRow('Latest Event', indexedEventSummary(selectedAuditEntry.latestEvent) ?? 'No indexed event'),
               kvRow('Event Count', String(selectedAuditEntry.eventCount)),
               kvRow('Operation State', h(StatusBadge, { state: selectedAuditEntry.operation.state })),
               kvRow('Diagnostic', selectedAuditEntry.latestDiagnostic?.id ?? 'n/a'),
@@ -3462,6 +3603,12 @@ function ConsoleRail(props: { state: ConsoleState }) {
           ]
         : emptyState('No indexed audit evidence available yet.')
     ]),
+    h(PersistenceReadinessCard, {
+      key: 'persistence',
+      readiness: props.state.persistenceReadiness,
+      title: 'Persistence readiness',
+      detail: 'controller store'
+    }),
     h('section', { className: 'pm-card', key: 'diagnostics' }, [
       h(SectionHeading, {
         key: 'heading',
@@ -3534,12 +3681,18 @@ function emptyState(copy: string, key?: string) {
 type Tone = 'success' | 'info' | 'warn'
 
 function toneFromState(state: string): Tone {
-  if (state === 'ready' || state === 'active' || state === 'succeeded' || state === 'healthy') {
+  if (
+    state === 'ready' ||
+    state === 'active' ||
+    state === 'succeeded' ||
+    state === 'healthy'
+  ) {
     return 'success'
   }
   if (
     state === 'live' ||
-    state === 'unknown'
+    state === 'unknown' ||
+    state === 'monitor'
   ) {
     return state === 'live' ? 'success' : 'info'
   }
@@ -3549,7 +3702,8 @@ function toneFromState(state: string): Tone {
     state === 'stale' ||
     state === 'unreachable' ||
     state === 'bootstrapping' ||
-    state === 'applied_unverified'
+    state === 'applied_unverified' ||
+    state === 'migration_ready'
   ) {
     return 'warn'
   }
