@@ -137,13 +137,13 @@ export interface OperationStore {
   createBackup(input: CreateBackupInput): BackupSummary
   createBridgeRule(input: CreateBridgeRuleInput): BridgeRule
   createHealthCheck(input: CreateHealthCheckInput): HealthCheck
-  createHost(input: CreateHostInput): HostDetail
+  createHost(input: CreateHostInput): HostSummary
   createRollbackPoint(input: CreateRollbackPointInput): RollbackPoint
   findBackupByOperationId(operationId: string): BackupSummary | null
   getBridgeRule(id: string): BridgeRule | null
   getExposurePolicy(hostId: string): ExposurePolicy | null
   getHost(id: string): HostSummary | null
-  getHostDetail(id: string): HostDetail | null
+  getHostLabels(id: string): string[]
   getRollbackPoint(id: string): RollbackPoint | null
   listBackups(filters?: { hostId?: string; operationId?: string }): BackupSummary[]
   listBridgeRules(filters?: { hostId?: string }): BridgeRule[]
@@ -157,7 +157,7 @@ export interface OperationStore {
   markRollbackPointState(id: string, state: RollbackPoint['state']): RollbackPoint
   replaceExposurePolicy(input: ReplaceExposurePolicyInput): ExposurePolicy
   updateBridgeRule(id: string, input: UpdateBridgeRuleInput): BridgeRule
-  updateHostRuntime(id: string, input: UpdateHostRuntimeInput): HostDetail
+  updateHostRuntime(id: string, input: UpdateHostRuntimeInput): HostSummary
 }
 
 interface BackupRow {
@@ -1025,26 +1025,6 @@ export function createOperationStore(options: { databasePath: string }): Operati
     touchHostUpdated.run(updatedAt, hostId)
   }
 
-  function buildHostDetail(hostRow: HostRow): HostDetail {
-    const policyRow = getExposurePolicyQuery.get(hostRow.id) as ExposurePolicyRow | undefined
-    const rules = (listBridgeRulesQuery.all() as unknown as BridgeRuleRow[])
-      .filter((row) => row.host_id === hostRow.id)
-      .slice(0, 10)
-      .map((row) => rowToBridgeRule(row))
-    const operations = listOperationRows()
-      .filter((row) => row.host_id === hostRow.id)
-      .slice(0, 10)
-      .map((row) => rowToSummary(row))
-
-    return {
-      ...rowToHostSummary(hostRow),
-      labels: parseStringArray(hostRow.labels_json),
-      effectivePolicy: policyRow ? rowToExposurePolicy(policyRow) : defaultExposurePolicy(hostRow.id),
-      recentRules: rules,
-      recentOperations: operations
-    }
-  }
-
   return {
     close() {
       database.close()
@@ -1229,7 +1209,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
         updatedAt
       )
 
-      return buildHostDetail(requireHost(input.id))
+      return rowToHostSummary(requireHost(input.id))
     },
     createRollbackPoint(input) {
       const createdAt = input.createdAt ?? nowIso()
@@ -1268,9 +1248,8 @@ export function createOperationStore(options: { databasePath: string }): Operati
       const row = getHostQuery.get(id) as HostRow | undefined
       return row ? rowToHostSummary(row) : null
     },
-    getHostDetail(id) {
-      const row = getHostQuery.get(id) as HostRow | undefined
-      return row ? buildHostDetail(row) : null
+    getHostLabels(id) {
+      return parseStringArray(requireHost(id).labels_json)
     },
     getRollbackPoint(id) {
       const row = getRollbackPointQuery.get(id) as RollbackPointRow | undefined
@@ -1416,7 +1395,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
         id
       )
 
-      return buildHostDetail(requireHost(id))
+      return rowToHostSummary(requireHost(id))
     }
   }
 }

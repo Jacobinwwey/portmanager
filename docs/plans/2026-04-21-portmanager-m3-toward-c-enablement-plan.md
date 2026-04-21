@@ -102,7 +102,7 @@ flowchart LR
 - Publish the deep-compare gap map so roadmap pages show both progress and missing seams.
 - Keep public pages honest by linking directly to the new requirements/plan pair and preserving the existing review helper guidance.
 
-- [ ] **Unit 51: Controller Domain Seam Extraction Baseline**
+- [x] **Unit 51: Controller Domain Seam Extraction Baseline**
 
 **Goal:** Separate controller transport wiring from host/rule/policy/orchestration logic so later gateway and service-boundary work grows from explicit seams.
 

@@ -441,36 +441,38 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       en: [
         'The architectural direction is documented and reviewable.',
         'The entry gate is now credible enough for bounded execution, not just future narration.',
-        'Current docs now publish the explicit gap map: no gateway app, no event/audit split, no batch orchestration, no PostgreSQL readiness seam, and no broader target abstraction yet.'
+        'Controller transport now delegates baseline host-detail composition and host/rule/policy orchestration through explicit `controller-read-model` and `controller-domain-service` seams while preserving the current HTTP contract and acceptance evidence.',
+        'Current docs still publish the remaining gap map honestly: no gateway app, no indexed event/audit split, no batch orchestration, no PostgreSQL readiness seam, and no broader target abstraction yet.'
       ],
       zh: [
         '这个架构方向已经被文档化并可评审。',
         '进入门槛现在已经足以支撑有边界执行，而不再只是未来叙述。',
-        '当前文档已经明确公开缺口地图：还没有 gateway app、没有 event/audit 分层、没有 batch orchestration、没有 PostgreSQL readiness seam，也没有更广目标平台抽象。'
+        'Controller transport 现在已经通过显式的 `controller-read-model` 与 `controller-domain-service` seam 委托 host detail 组合与 host/rule/policy 编排，同时保持现有 HTTP 契约与验收证据不变。',
+        '当前文档仍然诚实公开剩余缺口地图：还没有 gateway app、没有索引化 event/audit 分层、没有 batch orchestration、没有 PostgreSQL readiness seam，也没有更广目标平台抽象。'
       ]
     },
     blockingGaps: {
       en: [
         'Web and CLI still consume the controller directly instead of a gateway-ready boundary.',
-        'Controller transport, policy, read-model, and audit/event wiring are not yet explicitly separated.',
+        'Controller seam extraction is only at the baseline stage; indexed event/audit separation and broader boundary hardening are still unfinished.',
         'Batch orchestration, persistence seams, and target abstractions are still missing.'
       ],
       zh: [
         'Web 与 CLI 仍然直接消费 controller，而不是 gateway-ready 的 boundary。',
-        'Controller 的 transport、policy、read model 与 audit/event wiring 还没有显式分层。',
+        'Controller seam extraction 目前还只是 baseline 阶段；索引化 event/audit 分层与更广的 boundary 加固仍未完成。',
         'Batch orchestration、persistence seam 与 target abstraction 仍然缺失。'
       ]
     },
     developerFocus: {
       en: [
-        'Use `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` as the active implementation map.',
-        'Start with controller seam extraction and gateway-ready contracts before debating deployment topology.',
+        'Use `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` as the active implementation map; Unit 51 seam extraction baseline is now landed on that path.',
+        'Move next to gateway-ready contracts, indexed event/audit reads, and bounded batch envelopes instead of reopening controller-transport concentration.',
         'Add bounded batch-operation primitives and event/audit indexing on the same evidence model.',
         'Keep Milestone 2 review helpers and public progress counters active while Milestone 3 work lands.'
       ],
       zh: [
-        '把 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 当作当前实现地图。',
-        '先做 controller seam extraction 与 gateway-ready 契约，再讨论部署拓扑。',
+        '把 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 当作当前实现地图；其中 Unit 51 seam extraction baseline 现已落地。',
+        '下一步转向 gateway-ready 契约、索引化 event/audit read model 与 bounded batch envelope，而不是重新把 controller transport 重新堆回去。',
         '在同一套 evidence model 上补齐 bounded batch-operation primitive 与 event/audit indexing。',
         '在 Milestone 3 落地时，继续让 Milestone 2 review helper 与公开 progress counter 保持为真相护栏。'
       ]

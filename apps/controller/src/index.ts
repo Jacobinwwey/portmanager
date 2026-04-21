@@ -8,6 +8,8 @@ export type ControllerContracts = {
 
 export { createControllerEventBus } from './controller-events.ts'
 export { AgentClientError, createAgentClient } from './agent-client.ts'
+export { createControllerDomainService } from './controller-domain-service.ts'
+export { createControllerReadModel } from './controller-read-model.ts'
 export { createOperationRunner } from './operation-runner.ts'
 export { createControllerServer } from './controller-server.ts'
 export { closeHttpServer } from './http-server-lifecycle.ts'
