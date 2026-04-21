@@ -68,6 +68,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
     milestoneConfidenceComponent,
     /sourceSurfaceStatus\('docs-site\/\.vitepress\/theme\/components\/RoadmapPage\.vue'\)/
   )
+  assert.match(
+    milestoneConfidenceComponent,
+    /sourceSurfaceInstruction\('docs-site\/\.vitepress\/theme\/components\/MilestoneConfidencePage\.vue'\)/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /sourceSurfaceInstruction\('docs-site\/\.vitepress\/theme\/components\/RoadmapPage\.vue'\)/
+  )
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
@@ -78,6 +86,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(
     roadmapComponent,
     /confidenceSurfaceStatus\('docs-site\/\.vitepress\/theme\/components\/MilestoneConfidencePage\.vue'\)/
+  )
+  assert.match(
+    roadmapComponent,
+    /confidenceSurfaceInstruction\('docs-site\/\.vitepress\/theme\/components\/MilestoneConfidencePage\.vue'\)/
+  )
+  assert.match(
+    roadmapComponent,
+    /confidenceSurfaceInstruction\('docs-site\/data\/milestone-confidence-progress\.ts'\)/
   )
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
@@ -112,6 +128,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.equal(
     milestoneConfidenceProgress.wordingReview.sourceSurfaces['docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue'].claimStatus,
     'development-progress-counter-surface'
+  )
+  assert.equal(
+    milestoneConfidenceProgress.wordingReview.sourceSurfaces['docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue'].reviewInstruction,
+    'This public page mirrors exact counters from the tracked confidence artifact and should keep developer review guidance visible.'
+  )
+  assert.equal(
+    milestoneConfidenceProgress.wordingReview.sourceSurfaces['docs-site/data/milestone-confidence-progress.ts'].reviewInstruction,
+    'Exact published counters belong here and on the development-progress page, not in root-doc prose.'
   )
   // The committed docs-site data is a publish artifact. An ignored local .portmanager
   // history may be newer than that artifact until docs:generate is rerun, so this

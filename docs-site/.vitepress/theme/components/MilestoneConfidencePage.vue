@@ -158,7 +158,9 @@
             <li>{{ copy.wordingReviewAllowed }} {{ yesNo(progress.wordingReview.wordingReviewAllowed) }}</li>
             <li>{{ copy.requiredNextAction }} {{ progress.wordingReview.requiredNextAction }}</li>
             <li>{{ copy.developmentProgressSurface }} <code>{{ sourceSurfaceStatus('docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue') }}</code></li>
+            <li>{{ copy.developmentProgressInstruction }} {{ sourceSurfaceInstruction('docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue') }}</li>
             <li>{{ copy.roadmapPreviewSurface }} <code>{{ sourceSurfaceStatus('docs-site/.vitepress/theme/components/RoadmapPage.vue') }}</code></li>
+            <li>{{ copy.roadmapPreviewInstruction }} {{ sourceSurfaceInstruction('docs-site/.vitepress/theme/components/RoadmapPage.vue') }}</li>
           </ul>
         </template>
         <p v-else class="pm-doc-note">{{ copy.noWordingReview }}</p>
@@ -268,7 +270,9 @@ const copy = computed(() => props.locale === 'zh'
       wordingReviewAllowed: 'Wording review allowed：',
       requiredNextAction: 'Required next action：',
       developmentProgressSurface: 'Development-progress surface：',
+      developmentProgressInstruction: 'Development-progress review instruction：',
       roadmapPreviewSurface: 'Roadmap preview surface：',
+      roadmapPreviewInstruction: 'Roadmap preview review instruction：',
       reviewHelperLabel: '默认复核 helper：',
       reviewCommandLabel: 'Review command：',
       publishedArtifact: 'Published artifact：',
@@ -348,7 +352,9 @@ const copy = computed(() => props.locale === 'zh'
       wordingReviewAllowed: 'Wording review allowed:',
       requiredNextAction: 'Required next action:',
       developmentProgressSurface: 'Development-progress surface:',
+      developmentProgressInstruction: 'Development-progress review instruction:',
       roadmapPreviewSurface: 'Roadmap preview surface:',
+      roadmapPreviewInstruction: 'Roadmap preview review instruction:',
       reviewHelperLabel: 'Default review helper:',
       reviewCommandLabel: 'Review command:',
       publishedArtifact: 'Published artifact:',
@@ -564,5 +570,9 @@ function failedStepLabel(value: string | null) {
 
 function sourceSurfaceStatus(surfacePath: string) {
   return progress.wordingReview?.sourceSurfaces[surfacePath]?.claimStatus ?? copy.value.none
+}
+
+function sourceSurfaceInstruction(surfacePath: string) {
+  return progress.wordingReview?.sourceSurfaces[surfacePath]?.reviewInstruction ?? copy.value.none
 }
 </script>

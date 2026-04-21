@@ -231,8 +231,11 @@
             <template v-if="confidenceProgress.wordingReview">
               <ul class="pm-progress-list">
                 <li>{{ copy.liveDevelopmentProgressSurface }} <code>{{ confidenceSurfaceStatus('docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue') }}</code></li>
+                <li>{{ copy.liveDevelopmentProgressInstruction }} {{ confidenceSurfaceInstruction('docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue') }}</li>
                 <li>{{ copy.liveRoadmapPreviewSurface }} <code>{{ confidenceSurfaceStatus('docs-site/.vitepress/theme/components/RoadmapPage.vue') }}</code></li>
+                <li>{{ copy.liveRoadmapPreviewInstruction }} {{ confidenceSurfaceInstruction('docs-site/.vitepress/theme/components/RoadmapPage.vue') }}</li>
                 <li>{{ copy.liveTrackedArtifactSurface }} <code>{{ confidenceSurfaceStatus('docs-site/data/milestone-confidence-progress.ts') }}</code></li>
+                <li>{{ copy.liveTrackedArtifactInstruction }} {{ confidenceSurfaceInstruction('docs-site/data/milestone-confidence-progress.ts') }}</li>
               </ul>
             </template>
             <p v-else class="pm-doc-note">{{ copy.liveNoWordingReview }}</p>
@@ -383,8 +386,11 @@ const copy = computed(() => props.locale === 'zh'
       liveRequiredNextAction: 'Required next action：',
       liveSurfaceStatus: 'Source surface status',
       liveDevelopmentProgressSurface: 'Development-progress surface：',
+      liveDevelopmentProgressInstruction: 'Development-progress review instruction：',
       liveRoadmapPreviewSurface: 'Roadmap preview surface：',
+      liveRoadmapPreviewInstruction: 'Roadmap preview review instruction：',
       liveTrackedArtifactSurface: 'Tracked artifact surface：',
+      liveTrackedArtifactInstruction: 'Tracked artifact review instruction：',
       liveNoWordingReview: '当前公开快照还没有携带 wording-review 姿态。',
       liveQualifiedMainlineRuns: 'Qualified mainline runs：',
       liveLocalVisibilityRuns: 'Local visibility-only runs：',
@@ -446,8 +452,11 @@ const copy = computed(() => props.locale === 'zh'
       liveRequiredNextAction: 'Required next action:',
       liveSurfaceStatus: 'Source surface status',
       liveDevelopmentProgressSurface: 'Development-progress surface:',
+      liveDevelopmentProgressInstruction: 'Development-progress review instruction:',
       liveRoadmapPreviewSurface: 'Roadmap preview surface:',
+      liveRoadmapPreviewInstruction: 'Roadmap preview review instruction:',
       liveTrackedArtifactSurface: 'Tracked artifact surface:',
+      liveTrackedArtifactInstruction: 'Tracked artifact review instruction:',
       liveNoWordingReview: 'No wording-review posture is published on this snapshot yet.',
       liveQualifiedMainlineRuns: 'Qualified mainline runs:',
       liveLocalVisibilityRuns: 'Local visibility-only runs:',
@@ -552,6 +561,10 @@ function yesNo(value: boolean) {
 
 function confidenceSurfaceStatus(surfacePath: string) {
   return confidenceProgress.wordingReview?.sourceSurfaces[surfacePath]?.claimStatus ?? 'none'
+}
+
+function confidenceSurfaceInstruction(surfacePath: string) {
+  return confidenceProgress.wordingReview?.sourceSurfaces[surfacePath]?.reviewInstruction ?? 'none'
 }
 
 function badgeTone(stage: string) {
