@@ -61,8 +61,8 @@ test('roadmap publishes a development-progress page backed by live milestone con
     milestoneConfidenceComponent,
     /\.portmanager\/reports\/milestone-wording-review\.md/
   )
-  assert.match(roadmapData, /Units 51 through 57/)
-  assert.match(roadmapData, /Units 58 through 59/)
+  assert.match(roadmapData, /Units 51 through 58/)
+  assert.match(roadmapData, /Unit 59 is the queued next step/)
   assert.match(roadmapData, /persistence promotion decision/)
   assert.match(milestoneConfidenceComponent, /--skip-sync/)
   assert.match(milestoneConfidenceComponent, /Public claim class/)

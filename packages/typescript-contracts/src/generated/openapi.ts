@@ -1083,6 +1083,7 @@ export interface components {
             labels?: string[];
             name: string;
             ssh: components["schemas"]["SshConnection"];
+            targetProfileId?: string;
         };
         EventAuditIndexEntry: {
             backup?: components["schemas"]["BackupSummary"];
@@ -1135,6 +1136,7 @@ export interface components {
             labels?: string[];
             recentOperations: components["schemas"]["OperationSummary"][];
             recentRules: components["schemas"]["BridgeRule"][];
+            targetProfile: components["schemas"]["TargetProfile"];
         };
         HostSummary: {
             /** Format: date-time */
@@ -1153,6 +1155,10 @@ export interface components {
             lifecycleState: "draft" | "probing" | "bootstrapping" | "ready" | "degraded" | "retired";
             name: string;
             tailscaleAddress: string;
+            targetProfileId: string;
+            targetProfileLabel: string;
+            /** @enum {string} */
+            targetProfileStatus: "supported" | "unsupported";
             /** Format: date-time */
             updatedAt: string;
         };
@@ -1282,6 +1288,19 @@ export interface components {
             host: string;
             port: number;
         };
+        TargetProfile: components["schemas"]["TargetProfileSummary"] & {
+            bootstrapTransport: string;
+            capabilities: ("probe-host" | "bootstrap-host" | "apply-desired-state" | "collect-diagnostics" | "rollback")[];
+            platform: string;
+            serviceManager: string;
+            steadyStateTransport: string;
+        };
+        TargetProfileSummary: {
+            id: string;
+            label: string;
+            /** @enum {string} */
+            status: "supported" | "unsupported";
+        };
         TlsSummary: {
             enabled?: boolean;
             /** Format: date-time */
@@ -1348,6 +1367,8 @@ export type RunBackupRequest = components['schemas']['RunBackupRequest'];
 export type RunDiagnosticsRequest = components['schemas']['RunDiagnosticsRequest'];
 export type RunDriftCheckRequest = components['schemas']['RunDriftCheckRequest'];
 export type SshConnection = components['schemas']['SshConnection'];
+export type TargetProfile = components['schemas']['TargetProfile'];
+export type TargetProfileSummary = components['schemas']['TargetProfileSummary'];
 export type TlsSummary = components['schemas']['TlsSummary'];
 export type UpdateBridgeRuleRequest = components['schemas']['UpdateBridgeRuleRequest'];
 export type WebSnapshotResult = components['schemas']['WebSnapshotResult'];

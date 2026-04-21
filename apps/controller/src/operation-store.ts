@@ -10,6 +10,7 @@ import {
   type PersistenceAdapterConfig,
   type PersistenceReadiness
 } from './persistence-adapter.ts'
+import { defaultTargetProfileId, summarizeTargetProfile } from './target-profile-registry.ts'
 
 export type BackupSummary = components['schemas']['BackupSummary']
 export type BatchOperationSummary = components['schemas']['BatchOperationSummary']
@@ -93,6 +94,7 @@ export interface CreateHostInput {
   id: string
   name: string
   labels?: string[]
+  targetProfileId?: string
   sshHost: string
   sshPort: number
   tailscaleAddress?: string
@@ -230,6 +232,7 @@ interface HostRow {
   last_heartbeat_at: string | null
   last_backup_at: string | null
   last_diagnostics_at: string | null
+  target_profile_id: string | null
   updated_at: string
   labels_json: string | null
   ssh_host: string
@@ -431,6 +434,8 @@ function heartbeatStateFromRow(row: HostRow): NonNullable<HostSummary['agentHear
 }
 
 function rowToHostSummary(row: HostRow): HostSummary {
+  const targetProfile = summarizeTargetProfile(row.target_profile_id ?? defaultTargetProfileId)
+
   return {
     id: row.id,
     name: row.name,
@@ -438,6 +443,9 @@ function rowToHostSummary(row: HostRow): HostSummary {
     tailscaleAddress: row.tailscale_address,
     agentState: row.agent_state,
     agentHeartbeatState: heartbeatStateFromRow(row),
+    targetProfileId: targetProfile.id,
+    targetProfileLabel: targetProfile.label,
+    targetProfileStatus: targetProfile.status,
     ...(row.agent_version ? { agentVersion: row.agent_version } : {}),
     ...(row.last_heartbeat_at ? { agentHeartbeatAt: row.last_heartbeat_at } : {}),
     ...(row.last_backup_at ? { lastBackupAt: row.last_backup_at } : {}),
@@ -588,6 +596,7 @@ export function createOperationStore(options: OperationStoreOptions): OperationS
       last_heartbeat_at TEXT,
       last_backup_at TEXT,
       last_diagnostics_at TEXT,
+      target_profile_id TEXT,
       updated_at TEXT NOT NULL,
       labels_json TEXT,
       ssh_host TEXT NOT NULL,
@@ -631,6 +640,14 @@ export function createOperationStore(options: OperationStoreOptions): OperationS
   try {
     database.exec(`ALTER TABLE hosts ADD COLUMN last_heartbeat_at TEXT`)
   } catch {}
+  try {
+    database.exec(`ALTER TABLE hosts ADD COLUMN target_profile_id TEXT`)
+  } catch {}
+  database.exec(`
+    UPDATE hosts
+    SET target_profile_id = '${defaultTargetProfileId}'
+    WHERE target_profile_id IS NULL OR TRIM(target_profile_id) = ''
+  `)
 
   const insertOperation = database.prepare(`
     INSERT INTO operations (
@@ -854,11 +871,12 @@ export function createOperationStore(options: OperationStoreOptions): OperationS
       last_heartbeat_at,
       last_backup_at,
       last_diagnostics_at,
+      target_profile_id,
       updated_at,
       labels_json,
       ssh_host,
       ssh_port
-    ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, ?, ?, ?, ?)
   `)
 
   const getHostQuery = database.prepare(`
@@ -872,6 +890,7 @@ export function createOperationStore(options: OperationStoreOptions): OperationS
       last_heartbeat_at,
       last_backup_at,
       last_diagnostics_at,
+      target_profile_id,
       updated_at,
       labels_json,
       ssh_host,
@@ -891,6 +910,7 @@ export function createOperationStore(options: OperationStoreOptions): OperationS
       last_heartbeat_at,
       last_backup_at,
       last_diagnostics_at,
+      target_profile_id,
       updated_at,
       labels_json,
       ssh_host,
@@ -1249,12 +1269,14 @@ export function createOperationStore(options: OperationStoreOptions): OperationS
     },
     createHost(input) {
       const updatedAt = nowIso()
+      const targetProfileId = input.targetProfileId ?? defaultTargetProfileId
       insertHost.run(
         input.id,
         input.name,
         'draft',
         input.tailscaleAddress ?? input.sshHost,
         'unknown',
+        targetProfileId,
         updatedAt,
         JSON.stringify(input.labels ?? []),
         input.sshHost,

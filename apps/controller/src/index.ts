@@ -19,6 +19,13 @@ export { closeHttpServer } from './http-server-lifecycle.ts'
 export { createLocalBackupPrimitive } from './local-backup-primitive.ts'
 export { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.ts'
 export { createOperationStore } from './operation-store.ts'
+export {
+  defaultTargetProfileId,
+  describeTargetProfile,
+  getTargetProfile,
+  listTargetProfiles,
+  summarizeTargetProfile
+} from './target-profile-registry.ts'
 
 export function controllerBootstrapMessage() {
   return 'PortManager controller skeleton'

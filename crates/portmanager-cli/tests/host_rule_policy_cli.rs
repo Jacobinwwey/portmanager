@@ -83,9 +83,17 @@ impl MockHttpServer {
                         }
 
                         let request = String::from_utf8(request_bytes).expect("request utf8");
-                        let (request_line, body) = request.split_once("\r\n\r\n").unwrap_or((&request, ""));
-                        let mut request_line_parts = request_line.lines().next().expect("request line").split_whitespace();
-                        let method = request_line_parts.next().expect("request method").to_string();
+                        let (request_line, body) =
+                            request.split_once("\r\n\r\n").unwrap_or((&request, ""));
+                        let mut request_line_parts = request_line
+                            .lines()
+                            .next()
+                            .expect("request line")
+                            .split_whitespace();
+                        let method = request_line_parts
+                            .next()
+                            .expect("request method")
+                            .to_string();
                         let path = request_line_parts.next().expect("request path").to_string();
                         let key = format!("{} {}", method, path);
 
@@ -226,7 +234,10 @@ fn read_full_request(stream: &mut std::net::TcpStream) -> Vec<u8> {
 }
 
 fn find_header_end(bytes: &[u8]) -> Option<usize> {
-    bytes.windows(4).position(|window| window == b"\r\n\r\n").map(|index| index + 4)
+    bytes
+        .windows(4)
+        .position(|window| window == b"\r\n\r\n")
+        .map(|index| index + 4)
 }
 
 fn parse_content_length(headers: &[u8]) -> usize {
@@ -302,7 +313,10 @@ fn hosts_list_json_reads_controller_host_inventory() {
                         "agentVersion": "0.1.0",
                         "agentHeartbeatAt": "2026-04-17T13:28:00.000Z",
                         "agentHeartbeatState": "live",
-                        "tailscaleAddress": "100.64.0.10"
+                        "tailscaleAddress": "100.64.0.10",
+                        "targetProfileId": "ubuntu-24.04-systemd-tailscale",
+                        "targetProfileLabel": "Ubuntu 24.04 + systemd + Tailscale",
+                        "targetProfileStatus": "supported"
                     }
                 ]
             }),
@@ -318,6 +332,11 @@ fn hosts_list_json_reads_controller_host_inventory() {
     assert_eq!(parsed["items"][0]["lifecycleState"], "ready");
     assert_eq!(parsed["items"][0]["agentHeartbeatState"], "live");
     assert_eq!(parsed["items"][0]["agentVersion"], "0.1.0");
+    assert_eq!(
+        parsed["items"][0]["targetProfileId"],
+        "ubuntu-24.04-systemd-tailscale"
+    );
+    assert_eq!(parsed["items"][0]["targetProfileStatus"], "supported");
 }
 
 #[test]
@@ -337,6 +356,25 @@ fn hosts_get_text_surfaces_detail_context() {
                 "agentHeartbeatAt": "2026-04-17T13:28:00.000Z",
                 "agentHeartbeatState": "live",
                 "tailscaleAddress": "100.64.0.10",
+                "targetProfileId": "ubuntu-24.04-systemd-tailscale",
+                "targetProfileLabel": "Ubuntu 24.04 + systemd + Tailscale",
+                "targetProfileStatus": "supported",
+                "targetProfile": {
+                    "id": "ubuntu-24.04-systemd-tailscale",
+                    "label": "Ubuntu 24.04 + systemd + Tailscale",
+                    "status": "supported",
+                    "platform": "Ubuntu 24.04",
+                    "serviceManager": "systemd",
+                    "steadyStateTransport": "http-over-tailscale",
+                    "bootstrapTransport": "ssh",
+                    "capabilities": [
+                        "probe-host",
+                        "bootstrap-host",
+                        "apply-desired-state",
+                        "collect-diagnostics",
+                        "rollback"
+                    ]
+                },
                 "sshPort": 22,
                 "effectivePolicy": {
                     "allowedSources": ["tailscale", "admin"],
@@ -373,6 +411,9 @@ fn hosts_get_text_surfaces_detail_context() {
     assert!(stdout.contains("bootstrap_host"));
     assert!(stdout.contains("0.1.0"));
     assert!(stdout.contains("live"));
+    assert!(stdout.contains("ubuntu-24.04-systemd-tailscale"));
+    assert!(stdout.contains("http-over-tailscale"));
+    assert!(stdout.contains("rollback"));
 }
 
 #[test]
@@ -386,7 +427,10 @@ fn hosts_get_json_reports_not_found_structurally() {
         }],
     }]);
 
-    let output = run_portmanager(&["hosts", "get", "host_missing", "--json"], &server.base_url());
+    let output = run_portmanager(
+        &["hosts", "get", "host_missing", "--json"],
+        &server.base_url(),
+    );
 
     assert!(!output.status.success());
     let parsed: Value = serde_json::from_slice(&output.stdout).expect("json stdout");
@@ -410,7 +454,13 @@ fn hosts_create_wait_json_submits_contract_body_and_returns_terminal_operation()
             path: "/operations/op_create_host_001",
             outcomes: vec![MockOutcome::Json {
                 status: 200,
-                body: terminal_operation("op_create_host_001", "create_host", "succeeded", "host_alpha", None),
+                body: terminal_operation(
+                    "op_create_host_001",
+                    "create_host",
+                    "succeeded",
+                    "host_alpha",
+                    None,
+                ),
             }],
         },
     ]);
@@ -475,7 +525,13 @@ fn hosts_probe_wait_json_submits_mode_and_returns_terminal_operation() {
             path: "/operations/op_probe_host_001",
             outcomes: vec![MockOutcome::Json {
                 status: 200,
-                body: terminal_operation("op_probe_host_001", "probe_host", "succeeded", "host_alpha", None),
+                body: terminal_operation(
+                    "op_probe_host_001",
+                    "probe_host",
+                    "succeeded",
+                    "host_alpha",
+                    None,
+                ),
             }],
         },
     ]);
@@ -621,7 +677,10 @@ fn bridge_rules_get_text_surfaces_target_and_lifecycle() {
         }],
     }]);
 
-    let output = run_portmanager(&["bridge-rules", "get", "rule_alpha_https"], &server.base_url());
+    let output = run_portmanager(
+        &["bridge-rules", "get", "rule_alpha_https"],
+        &server.base_url(),
+    );
 
     assert!(output.status.success());
     let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
@@ -648,7 +707,13 @@ fn bridge_rules_create_wait_json_submits_contract_body() {
             path: "/operations/op_create_rule_001",
             outcomes: vec![MockOutcome::Json {
                 status: 200,
-                body: terminal_operation("op_create_rule_001", "create_rule", "succeeded", "host_alpha", None),
+                body: terminal_operation(
+                    "op_create_rule_001",
+                    "create_rule",
+                    "succeeded",
+                    "host_alpha",
+                    None,
+                ),
             }],
         },
     ]);

@@ -974,10 +974,29 @@ export function createMockHostDetailState(): HostDetailState {
     agentHeartbeatAt: '2026-04-16T18:01:00.000Z',
     agentHeartbeatState: 'live',
     tailscaleAddress: '100.64.0.10',
+    targetProfileId: 'ubuntu-24.04-systemd-tailscale',
+    targetProfileLabel: 'Ubuntu 24.04 + systemd + Tailscale',
+    targetProfileStatus: 'supported',
     updatedAt: '2026-04-16T18:02:00.000Z',
     lastBackupAt: '2026-04-16T17:45:00.000Z',
     lastDiagnosticsAt: '2026-04-16T17:52:00.000Z',
     labels: ['prod-edge', 'ubuntu-24.04'],
+    targetProfile: {
+      id: 'ubuntu-24.04-systemd-tailscale',
+      label: 'Ubuntu 24.04 + systemd + Tailscale',
+      status: 'supported',
+      platform: 'Ubuntu 24.04',
+      serviceManager: 'systemd',
+      steadyStateTransport: 'http-over-tailscale',
+      bootstrapTransport: 'ssh',
+      capabilities: [
+        'probe-host',
+        'bootstrap-host',
+        'apply-desired-state',
+        'collect-diagnostics',
+        'rollback'
+      ]
+    },
     effectivePolicy: {
       hostId: 'host_alpha',
       allowedSources: ['tailscale', 'corp-vpn'],
@@ -1269,6 +1288,9 @@ export function createMockOverviewState(): OverviewState {
     agentState: 'unknown',
     agentHeartbeatState: 'unknown',
     tailscaleAddress: '100.64.0.27',
+    targetProfileId: 'ubuntu-24.04-systemd-tailscale',
+    targetProfileLabel: 'Ubuntu 24.04 + systemd + Tailscale',
+    targetProfileStatus: 'supported',
     updatedAt: '2026-04-16T17:58:00.000Z',
     lastBackupAt: '2026-04-16T16:30:00.000Z'
   }
@@ -1282,6 +1304,9 @@ export function createMockOverviewState(): OverviewState {
     agentHeartbeatAt: '2026-04-16T17:20:00.000Z',
     agentHeartbeatState: 'stale',
     tailscaleAddress: '100.64.0.38',
+    targetProfileId: 'ubuntu-24.04-systemd-tailscale',
+    targetProfileLabel: 'Ubuntu 24.04 + systemd + Tailscale',
+    targetProfileStatus: 'supported',
     updatedAt: '2026-04-16T17:51:00.000Z',
     lastBackupAt: '2026-04-16T16:14:00.000Z',
     lastDiagnosticsAt: '2026-04-16T17:44:00.000Z'
@@ -2586,7 +2611,8 @@ function OverviewMain(props: { state: OverviewState }) {
                 [
                   h('td', { key: 'host' }, [
                     h('div', { key: 'name' }, host.name),
-                    h('div', { className: 'pm-microcopy', key: 'id' }, host.id)
+                    h('div', { className: 'pm-microcopy', key: 'id' }, host.id),
+                    h('div', { className: 'pm-microcopy', key: 'profile' }, host.targetProfileId)
                   ]),
                   h('td', { key: 'tailscale' }, host.tailscaleAddress),
                   h('td', { key: 'lifecycle' }, h(StatusBadge, { state: host.lifecycleState })),
@@ -2681,6 +2707,7 @@ function OverviewRail(props: { state: OverviewState }) {
         kvRow('Lifecycle', h(StatusBadge, { state: detailState.host.lifecycleState })),
         kvRow('Agent', h(StatusBadge, { state: detailState.host.agentState })),
         kvRow('Tailscale', detailState.host.tailscaleAddress),
+        kvRow('Target Profile', detailState.host.targetProfileLabel),
         kvRow('Diagnostics', shortTime(detailState.host.lastDiagnosticsAt))
       ])
     ]),
@@ -2722,6 +2749,22 @@ function HostDetailMain(props: { state: HostDetailState }) {
         kvRow('Heartbeat At', shortTime(props.state.host.agentHeartbeatAt)),
         kvRow('Labels', (props.state.host.labels ?? []).join(', ')),
         kvRow('Updated', shortTime(props.state.host.updatedAt))
+      ])
+    ]),
+    h('section', { className: 'pm-card', key: 'target-profile' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Target profile and capability contract',
+        detail: props.state.host.targetProfileId
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Profile Label', props.state.host.targetProfile.label),
+        kvRow('Status', h(StatusBadge, { state: props.state.host.targetProfile.status })),
+        kvRow('Platform', props.state.host.targetProfile.platform),
+        kvRow('Service Manager', props.state.host.targetProfile.serviceManager),
+        kvRow('Steady Transport', props.state.host.targetProfile.steadyStateTransport),
+        kvRow('Bootstrap Transport', props.state.host.targetProfile.bootstrapTransport),
+        kvRow('Capabilities', props.state.host.targetProfile.capabilities.join(', ') || 'none')
       ])
     ]),
     h('section', { className: 'pm-card', key: 'policy' }, [
@@ -3190,7 +3233,8 @@ function HostsMain(props: { state: HostsState }) {
                     [
                       h('td', { key: 'host' }, [
                         h('div', { key: 'name' }, host.name),
-                        h('div', { className: 'pm-microcopy', key: 'id' }, host.id)
+                        h('div', { className: 'pm-microcopy', key: 'id' }, host.id),
+                        h('div', { className: 'pm-microcopy', key: 'profile' }, host.targetProfileId)
                       ]),
                       h('td', { key: 'tailscale' }, host.tailscaleAddress),
                       h('td', { key: 'lifecycle' }, h(StatusBadge, { state: host.lifecycleState })),
@@ -3243,6 +3287,7 @@ function HostsRail(props: { state: HostsState }) {
               kvRow('Lifecycle', h(StatusBadge, { state: props.state.selectedHost.host.lifecycleState })),
               kvRow('Agent', h(StatusBadge, { state: props.state.selectedHost.host.agentState })),
               kvRow('Tailscale', props.state.selectedHost.host.tailscaleAddress),
+              kvRow('Target Profile', props.state.selectedHost.host.targetProfileId),
               kvRow('Last Backup', shortTime(props.state.selectedHost.host.lastBackupAt)),
               kvRow('Last Diagnostics', shortTime(props.state.selectedHost.host.lastDiagnosticsAt))
             ])

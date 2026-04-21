@@ -13,6 +13,7 @@ import { createLocalBackupPrimitive } from './local-backup-primitive.ts'
 import { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.ts'
 import type { OperationStore } from './operation-store.ts'
 import { createOperationRunner } from './operation-runner.ts'
+import { defaultTargetProfileId, getTargetProfile } from './target-profile-registry.ts'
 
 export interface ControllerServer {
   close(): Promise<void>
@@ -187,6 +188,12 @@ export function createControllerServer(options: {
       const payload = await readJsonBody(request)
       const name = typeof payload.name === 'string' ? payload.name.trim() : ''
       const labels = payload.labels === undefined ? [] : parseStringArray(payload.labels)
+      const requestedTargetProfileId =
+        payload.targetProfileId === undefined
+          ? defaultTargetProfileId
+          : typeof payload.targetProfileId === 'string'
+            ? payload.targetProfileId.trim()
+            : ''
       const ssh = payload.ssh && typeof payload.ssh === 'object'
         ? (payload.ssh as Record<string, unknown>)
         : undefined
@@ -195,6 +202,11 @@ export function createControllerServer(options: {
 
       if (!name || !labels || !sshHost || !sshPort || sshPort < 1 || sshPort > 65_535) {
         sendJson(response, 400, { error: 'invalid_host_request' })
+        return
+      }
+
+      if (!requestedTargetProfileId || !getTargetProfile(requestedTargetProfileId)) {
+        sendJson(response, 400, { error: 'invalid_target_profile' })
         return
       }
 
@@ -215,6 +227,7 @@ export function createControllerServer(options: {
             hostId,
             name,
             labels,
+            targetProfileId: requestedTargetProfileId,
             sshHost,
             sshPort
           })

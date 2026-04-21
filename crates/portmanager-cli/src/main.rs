@@ -272,6 +272,8 @@ struct HostsCreateArgs {
     #[arg(long = "label")]
     labels: Vec<String>,
     #[arg(long)]
+    target_profile_id: Option<String>,
+    #[arg(long)]
     ssh_host: String,
     #[arg(long)]
     ssh_port: u16,
@@ -859,12 +861,15 @@ async fn run_hosts_create(args: HostsCreateArgs) -> ExecutionResult {
         &args.controller_base_url,
         &args.name,
         &args.labels,
+        args.target_profile_id.as_deref(),
         &args.ssh_host,
         args.ssh_port,
     )
     .await
     {
-        Ok(accepted) => complete_enqueued_operation(&client, &wait_options, accepted, "host create").await,
+        Ok(accepted) => {
+            complete_enqueued_operation(&client, &wait_options, accepted, "host create").await
+        }
         Err(error) => json_or_text_error_flag(args.json, error, "host create failed".to_string()),
     }
 }
@@ -879,15 +884,10 @@ async fn run_hosts_probe(args: HostsProbeArgs) -> ExecutionResult {
         controller_base_url: args.controller_base_url.clone(),
     };
 
-    match probe_host(
-        &client,
-        &args.controller_base_url,
-        &args.host_id,
-        args.mode,
-    )
-    .await
-    {
-        Ok(accepted) => complete_enqueued_operation(&client, &wait_options, accepted, "host probe").await,
+    match probe_host(&client, &args.controller_base_url, &args.host_id, args.mode).await {
+        Ok(accepted) => {
+            complete_enqueued_operation(&client, &wait_options, accepted, "host probe").await
+        }
         Err(error) => json_or_text_error_flag(args.json, error, "host probe failed".to_string()),
     }
 }
@@ -915,11 +915,9 @@ async fn run_hosts_bootstrap(args: HostsBootstrapArgs) -> ExecutionResult {
         Ok(accepted) => {
             complete_enqueued_operation(&client, &wait_options, accepted, "host bootstrap").await
         }
-        Err(error) => json_or_text_error_flag(
-            args.json,
-            error,
-            "host bootstrap failed".to_string(),
-        ),
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "host bootstrap failed".to_string())
+        }
     }
 }
 
@@ -984,13 +982,12 @@ async fn run_bridge_rules_create(args: BridgeRulesCreateArgs) -> ExecutionResult
     .await
     {
         Ok(accepted) => {
-            complete_enqueued_operation(&client, &wait_options, accepted, "bridge rule create").await
+            complete_enqueued_operation(&client, &wait_options, accepted, "bridge rule create")
+                .await
         }
-        Err(error) => json_or_text_error_flag(
-            args.json,
-            error,
-            "bridge rule create failed".to_string(),
-        ),
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "bridge rule create failed".to_string())
+        }
     }
 }
 
@@ -1016,13 +1013,12 @@ async fn run_bridge_rules_update(args: BridgeRulesUpdateArgs) -> ExecutionResult
     .await
     {
         Ok(accepted) => {
-            complete_enqueued_operation(&client, &wait_options, accepted, "bridge rule update").await
+            complete_enqueued_operation(&client, &wait_options, accepted, "bridge rule update")
+                .await
         }
-        Err(error) => json_or_text_error_flag(
-            args.json,
-            error,
-            "bridge rule update failed".to_string(),
-        ),
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "bridge rule update failed".to_string())
+        }
     }
 }
 
@@ -1038,13 +1034,12 @@ async fn run_bridge_rules_delete(args: BridgeRulesDeleteArgs) -> ExecutionResult
 
     match delete_bridge_rule(&client, &args.controller_base_url, &args.rule_id).await {
         Ok(accepted) => {
-            complete_enqueued_operation(&client, &wait_options, accepted, "bridge rule delete").await
+            complete_enqueued_operation(&client, &wait_options, accepted, "bridge rule delete")
+                .await
         }
-        Err(error) => json_or_text_error_flag(
-            args.json,
-            error,
-            "bridge rule delete failed".to_string(),
-        ),
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "bridge rule delete failed".to_string())
+        }
     }
 }
 
@@ -1057,11 +1052,9 @@ async fn run_exposure_policies_get(args: ExposurePoliciesGetArgs) -> ExecutionRe
                 ExecutionResult::success_text(format_exposure_policy_text(&policy, &args.host_id))
             }
         }
-        Err(error) => json_or_text_error_flag(
-            args.json,
-            error,
-            "exposure policy fetch failed".to_string(),
-        ),
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "exposure policy fetch failed".to_string())
+        }
     }
 }
 
@@ -1087,18 +1080,13 @@ async fn run_exposure_policies_set(args: ExposurePoliciesSetArgs) -> ExecutionRe
     )
     .await
     {
-        Ok(accepted) => complete_enqueued_operation(
-            &client,
-            &wait_options,
-            accepted,
-            "exposure policy apply",
-        )
-        .await,
-        Err(error) => json_or_text_error_flag(
-            args.json,
-            error,
-            "exposure policy apply failed".to_string(),
-        ),
+        Ok(accepted) => {
+            complete_enqueued_operation(&client, &wait_options, accepted, "exposure policy apply")
+                .await
+        }
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "exposure policy apply failed".to_string())
+        }
     }
 }
 
@@ -1213,11 +1201,9 @@ async fn run_health_checks_list(args: HealthChecksListArgs) -> ExecutionResult {
                 ExecutionResult::success_text(lines)
             }
         }
-        Err(error) => json_or_text_error_flag(
-            args.json,
-            error,
-            "health check fetch failed".to_string(),
-        ),
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "health check fetch failed".to_string())
+        }
     }
 }
 
@@ -1329,7 +1315,9 @@ async fn run_operations_persistence_readiness(
     }
 }
 
-async fn run_operations_batch_apply_policy(args: OperationsBatchApplyPolicyArgs) -> ExecutionResult {
+async fn run_operations_batch_apply_policy(
+    args: OperationsBatchApplyPolicyArgs,
+) -> ExecutionResult {
     let client = Client::new();
     let wait_options = WaitOptions {
         json: args.json,
@@ -1351,13 +1339,15 @@ async fn run_operations_batch_apply_policy(args: OperationsBatchApplyPolicyArgs)
     )
     .await
     {
-        Ok(accepted) => complete_enqueued_operation(
-            &client,
-            &wait_options,
-            accepted,
-            "batch exposure policy apply",
-        )
-        .await,
+        Ok(accepted) => {
+            complete_enqueued_operation(
+                &client,
+                &wait_options,
+                accepted,
+                "batch exposure policy apply",
+            )
+            .await
+        }
         Err(error) => json_or_text_error_flag(
             args.json,
             error,
@@ -1450,7 +1440,9 @@ async fn run_rollback_points_apply(args: RollbackPointsApplyArgs) -> ExecutionRe
                 }
             }
         }
-        Err(error) => json_or_text_error_flag(args.json, error, "rollback apply failed".to_string()),
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "rollback apply failed".to_string())
+        }
     }
 }
 
@@ -1485,11 +1477,9 @@ async fn run_rollback_points_list(args: RollbackPointsListArgs) -> ExecutionResu
                 ExecutionResult::success_text(lines)
             }
         }
-        Err(error) => json_or_text_error_flag(
-            args.json,
-            error,
-            "rollback point fetch failed".to_string(),
-        ),
+        Err(error) => {
+            json_or_text_error_flag(args.json, error, "rollback point fetch failed".to_string())
+        }
     }
 }
 
@@ -1632,8 +1622,10 @@ fn format_accepted_operation_text(accepted: &Value) -> String {
 fn format_host_summary_text(host: &Value) -> String {
     let heartbeat_state = host["agentHeartbeatState"].as_str().unwrap_or("unknown");
     let agent_version = host["agentVersion"].as_str().unwrap_or("unknown");
+    let target_profile_id = host["targetProfileId"].as_str().unwrap_or("profile-n/a");
+    let target_profile_status = host["targetProfileStatus"].as_str().unwrap_or("unknown");
     format!(
-        "{} {} {} {} {} {} {}",
+        "{} {} {} {} {} {} {} {} {}",
         host["id"].as_str().unwrap_or("unknown"),
         host["lifecycleState"].as_str().unwrap_or("unknown"),
         host["agentState"].as_str().unwrap_or("unknown"),
@@ -1641,6 +1633,8 @@ fn format_host_summary_text(host: &Value) -> String {
         agent_version,
         host["name"].as_str().unwrap_or("unknown"),
         host["tailscaleAddress"].as_str().unwrap_or("n/a"),
+        target_profile_id,
+        target_profile_status,
     )
 }
 
@@ -1649,10 +1643,13 @@ fn format_host_detail_text(host: &Value, default_host_id: &str) -> String {
     let heartbeat_state = host["agentHeartbeatState"].as_str().unwrap_or("unknown");
     let heartbeat_at = host["agentHeartbeatAt"].as_str().unwrap_or("n/a");
     let labels = join_scalar_values(host["labels"].as_array());
+    let target_profile = &host["targetProfile"];
+    let target_profile_capabilities = join_scalar_values(target_profile["capabilities"].as_array());
     let recent_rules = host["recentRules"]
         .as_array()
         .map(|rules| {
-            rules.iter()
+            rules
+                .iter()
                 .map(|rule| {
                     format!(
                         "{}:{}",
@@ -1676,7 +1673,7 @@ fn format_host_detail_text(host: &Value, default_host_id: &str) -> String {
         .unwrap_or_else(|| "none".to_string());
 
     format!(
-        "{} {} {} {}\nheartbeat {} version {} at {}\nlabels {}\npolicy allowed={} excluded={} mirror={} conflict={} backup={}\nrules {}\noperations {}",
+        "{} {} {} {}\nheartbeat {} version {} at {}\nlabels {}\ntarget-profile {} {} {} steady={} bootstrap={} capabilities {}\npolicy allowed={} excluded={} mirror={} conflict={} backup={}\nrules {}\noperations {}",
         host["id"].as_str().unwrap_or(default_host_id),
         host["name"].as_str().unwrap_or("unknown"),
         host["lifecycleState"].as_str().unwrap_or("unknown"),
@@ -1685,6 +1682,12 @@ fn format_host_detail_text(host: &Value, default_host_id: &str) -> String {
         agent_version,
         heartbeat_at,
         labels,
+        host["targetProfileId"].as_str().unwrap_or("profile-n/a"),
+        host["targetProfileLabel"].as_str().unwrap_or("Unsupported target profile"),
+        host["targetProfileStatus"].as_str().unwrap_or("unknown"),
+        target_profile["steadyStateTransport"].as_str().unwrap_or("unsupported"),
+        target_profile["bootstrapTransport"].as_str().unwrap_or("unsupported"),
+        target_profile_capabilities,
         join_scalar_values(host["effectivePolicy"]["allowedSources"].as_array()),
         join_scalar_values(host["effectivePolicy"]["excludedPorts"].as_array()),
         host["effectivePolicy"]["samePortMirror"]
@@ -1726,7 +1729,9 @@ fn format_bridge_rule_detail_text(rule: &Value, default_rule_id: &str) -> String
         rule["targetHost"].as_str().unwrap_or("unknown"),
         rule["targetPort"].as_u64().unwrap_or_default(),
         rule["lifecycleState"].as_str().unwrap_or("unknown"),
-        rule["lastRollbackPointId"].as_str().unwrap_or("rollback-n/a"),
+        rule["lastRollbackPointId"]
+            .as_str()
+            .unwrap_or("rollback-n/a"),
     )
 }
 
@@ -1879,20 +1884,20 @@ async fn fetch_events(
         return Err(unexpected_status_error(status, None));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
-async fn fetch_hosts(
-    client: &Client,
-    controller_base_url: &str,
-) -> Result<Value, JsonErrorOutput> {
+async fn fetch_hosts(client: &Client, controller_base_url: &str) -> Result<Value, JsonErrorOutput> {
     let url = format!("{}/hosts", controller_base_url.trim_end_matches('/'));
     request_json(client.get(url), None, None).await
 }
@@ -1920,23 +1925,29 @@ async fn create_host(
     controller_base_url: &str,
     name: &str,
     labels: &[String],
+    target_profile_id: Option<&str>,
     ssh_host: &str,
     ssh_port: u16,
 ) -> Result<Value, JsonErrorOutput> {
     let url = format!("{}/hosts", controller_base_url.trim_end_matches('/'));
-    request_json(
-        client.post(url).json(&json!({
-            "name": name,
-            "labels": labels,
-            "ssh": {
-                "host": ssh_host,
-                "port": ssh_port
-            }
-        })),
-        None,
-        None,
-    )
-    .await
+    let mut payload = Map::new();
+    payload.insert("name".to_string(), Value::String(name.to_string()));
+    payload.insert("labels".to_string(), json!(labels));
+    payload.insert(
+        "ssh".to_string(),
+        json!({
+            "host": ssh_host,
+            "port": ssh_port
+        }),
+    );
+    if let Some(target_profile_id) = target_profile_id {
+        payload.insert(
+            "targetProfileId".to_string(),
+            Value::String(target_profile_id.to_string()),
+        );
+    }
+
+    request_json(client.post(url).json(&Value::Object(payload)), None, None).await
 }
 
 async fn probe_host(
@@ -2046,18 +2057,12 @@ async fn create_bridge_rule(
         "protocol".to_string(),
         Value::String(protocol.as_controller_value().to_string()),
     );
-    payload.insert(
-        "listenPort".to_string(),
-        Value::Number(listen_port.into()),
-    );
+    payload.insert("listenPort".to_string(), Value::Number(listen_port.into()));
     payload.insert(
         "targetHost".to_string(),
         Value::String(target_host.to_string()),
     );
-    payload.insert(
-        "targetPort".to_string(),
-        Value::Number(target_port.into()),
-    );
+    payload.insert("targetPort".to_string(), Value::Number(target_port.into()));
 
     request_json(
         client.post(url).json(&payload),
@@ -2086,10 +2091,7 @@ async fn update_bridge_rule(
         payload.insert("name".to_string(), Value::String(name.to_string()));
     }
     if let Some(listen_port) = listen_port {
-        payload.insert(
-            "listenPort".to_string(),
-            Value::Number(listen_port.into()),
-        );
+        payload.insert("listenPort".to_string(), Value::Number(listen_port.into()));
     }
     if let Some(target_host) = target_host {
         payload.insert(
@@ -2098,10 +2100,7 @@ async fn update_bridge_rule(
         );
     }
     if let Some(target_port) = target_port {
-        payload.insert(
-            "targetPort".to_string(),
-            Value::Number(target_port.into()),
-        );
+        payload.insert("targetPort".to_string(), Value::Number(target_port.into()));
     }
 
     request_json(
@@ -2213,7 +2212,10 @@ async fn fetch_health_checks(
     host_id: Option<&str>,
     rule_id: Option<&str>,
 ) -> Result<Value, JsonErrorOutput> {
-    let url = format!("{}/health-checks", controller_base_url.trim_end_matches('/'));
+    let url = format!(
+        "{}/health-checks",
+        controller_base_url.trim_end_matches('/')
+    );
     let mut query: Vec<(&str, &str)> = Vec::new();
     if let Some(host_id) = host_id {
         query.push(("hostId", host_id));
@@ -2241,14 +2243,17 @@ async fn fetch_health_checks(
         return Err(unexpected_status_error(status, None));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
 async fn fetch_backups(
@@ -2285,14 +2290,17 @@ async fn fetch_backups(
         return Err(unexpected_status_error(status, None));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
 async fn fetch_diagnostics(
@@ -2329,14 +2337,17 @@ async fn fetch_diagnostics(
         return Err(unexpected_status_error(status, None));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
 async fn fetch_operations(
@@ -2385,14 +2396,17 @@ async fn fetch_operations(
         return Err(unexpected_status_error(status, None));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
 async fn fetch_operations_audit_index(
@@ -2406,7 +2420,10 @@ async fn fetch_operations_audit_index(
     state: Option<&str>,
     operation_type: Option<&str>,
 ) -> Result<Value, JsonErrorOutput> {
-    let url = format!("{}/event-audit-index", controller_base_url.trim_end_matches('/'));
+    let url = format!(
+        "{}/event-audit-index",
+        controller_base_url.trim_end_matches('/')
+    );
     let mut query = vec![("limit".to_string(), limit.to_string())];
 
     if let Some(operation_id) = operation_id {
@@ -2450,14 +2467,17 @@ async fn fetch_operations_audit_index(
         return Err(unexpected_status_error(status, None));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
 async fn fetch_persistence_readiness(
@@ -2477,7 +2497,10 @@ async fn fetch_rollback_points(
     host_id: Option<&str>,
     state: Option<&str>,
 ) -> Result<Value, JsonErrorOutput> {
-    let url = format!("{}/rollback-points", controller_base_url.trim_end_matches('/'));
+    let url = format!(
+        "{}/rollback-points",
+        controller_base_url.trim_end_matches('/')
+    );
     let mut query: Vec<(&str, &str)> = Vec::new();
     if let Some(host_id) = host_id {
         query.push(("hostId", host_id));
@@ -2505,14 +2528,17 @@ async fn fetch_rollback_points(
         return Err(unexpected_status_error(status, None));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
 async fn apply_rollback_point(
@@ -2526,14 +2552,18 @@ async fn apply_rollback_point(
         rollback_point_id
     );
 
-    let response = client.post(url).send().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: None,
-    })?;
+    let response = client
+        .post(url)
+        .send()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: None,
+        })?;
 
     let status = response.status();
     if status == StatusCode::NOT_FOUND {
@@ -2551,14 +2581,17 @@ async fn apply_rollback_point(
         return Err(unexpected_status_error(status, None));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id: None,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id: None,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
 async fn request_json(
@@ -2579,7 +2612,8 @@ async fn request_json(
     if status == StatusCode::NOT_FOUND {
         return Err(JsonErrorOutput {
             error: "not_found",
-            message: not_found_message.unwrap_or_else(|| "requested resource not found".to_string()),
+            message: not_found_message
+                .unwrap_or_else(|| "requested resource not found".to_string()),
             operation_id,
             last_state: None,
             timeout_ms: None,
@@ -2591,14 +2625,17 @@ async fn request_json(
         return Err(unexpected_status_error(status, operation_id.as_deref()));
     }
 
-    response.json::<Value>().await.map_err(|error| JsonErrorOutput {
-        error: "transport",
-        message: error.to_string(),
-        operation_id,
-        last_state: None,
-        timeout_ms: None,
-        status: Some(status.as_u16()),
-    })
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| JsonErrorOutput {
+            error: "transport",
+            message: error.to_string(),
+            operation_id,
+            last_state: None,
+            timeout_ms: None,
+            status: Some(status.as_u16()),
+        })
 }
 
 fn operation_state(operation: &Value) -> Result<&str, CliError> {

@@ -43,6 +43,7 @@ test('host detail shell renders required milestone sections', () => {
   const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
 
   assert.match(html, /identity and readiness summary/i)
+  assert.match(html, /target profile and capability contract/i)
   assert.match(html, /effective exposure policy/i)
   assert.match(html, /bridge rules/i)
   assert.match(html, /recent health checks/i)
@@ -86,6 +87,16 @@ test('host detail shell surfaces agent heartbeat and version semantics', () => {
   assert.match(html, /agent heartbeat/i)
   assert.match(html, /live/i)
   assert.match(html, /0\.1\.0/i)
+})
+
+test('host detail shell surfaces locked target profile contract and capabilities', () => {
+  const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
+
+  assert.match(html, /ubuntu-24\.04-systemd-tailscale/i)
+  assert.match(html, /ubuntu 24\.04 \+ systemd \+ tailscale/i)
+  assert.match(html, /http-over-tailscale/i)
+  assert.match(html, /bootstrap-host/i)
+  assert.match(html, /collect-diagnostics/i)
 })
 
 test('host detail shell surfaces operation summaries and linked recovery evidence', () => {
@@ -159,6 +170,7 @@ test('hosts shell renders live-parity inventory and selected host rollout eviden
   assert.match(html, /selected host rollout/i)
   assert.match(html, /recent host health checks/i)
   assert.match(html, /alpha-gateway/i)
+  assert.match(html, /ubuntu-24\.04-systemd-tailscale/i)
   assert.match(html, /host_probe/i)
 })
 

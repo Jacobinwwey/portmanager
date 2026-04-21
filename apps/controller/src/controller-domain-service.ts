@@ -10,6 +10,7 @@ import type {
   OperationDetail,
   OperationStore
 } from './operation-store.ts'
+import { defaultTargetProfileId, getTargetProfile } from './target-profile-registry.ts'
 
 export interface ControllerDomainService {
   applyExposurePolicyBatch(input: {
@@ -42,6 +43,7 @@ export interface ControllerDomainService {
     hostId: string
     name: string
     labels: string[]
+    targetProfileId?: string
     sshHost: string
     sshPort: number
   }): OperationExecutionResult
@@ -103,7 +105,29 @@ export function createControllerDomainService(options: {
 }): ControllerDomainService {
   const { store, agentClient, agentEndpoints, backupPrimitive, operationRunner } = options
 
+  function ensureSupportedTargetProfileId(targetProfileId?: string) {
+    const resolvedId = targetProfileId ?? defaultTargetProfileId
+    if (!getTargetProfile(resolvedId)) {
+      throw new Error(`Unsupported target profile: ${resolvedId}`)
+    }
+    return resolvedId
+  }
+
+  function ensureSupportedHostProfile(hostId: string) {
+    const host = store.getHost(hostId)
+    if (!host) {
+      throw new Error(`Host not found: ${hostId}`)
+    }
+
+    if (!getTargetProfile(host.targetProfileId)) {
+      throw new Error(`Unsupported target profile for host ${hostId}: ${host.targetProfileId}`)
+    }
+
+    return host
+  }
+
   function buildDesiredState(hostId: string): ApplyDesiredStateSchema {
+    ensureSupportedHostProfile(hostId)
     const policy = store.getExposurePolicy(hostId)
     if (!policy) {
       throw new Error(`Exposure policy missing for host ${hostId}`)
@@ -317,6 +341,8 @@ export function createControllerDomainService(options: {
     conflictPolicy: ExposurePolicy['conflictPolicy']
     backupPolicy: ExposurePolicy['backupPolicy']
   }) {
+    ensureSupportedHostProfile(input.hostId)
+
     store.replaceExposurePolicy({
       hostId: input.hostId,
       allowedSources: input.allowedSources,
@@ -394,10 +420,7 @@ export function createControllerDomainService(options: {
       return applyExposurePolicyInternal(input)
     },
     async bootstrapHost(input) {
-      const host = store.getHost(input.hostId)
-      if (!host) {
-        throw new Error(`Host not found: ${input.hostId}`)
-      }
+      const host = ensureSupportedHostProfile(input.hostId)
 
       if (input.backupPolicy) {
         const currentPolicy = store.getExposurePolicy(input.hostId)
@@ -430,6 +453,8 @@ export function createControllerDomainService(options: {
       }
     },
     async createBridgeRule(input) {
+      ensureSupportedHostProfile(input.hostId)
+
       store.createBridgeRule({
         id: input.id,
         hostId: input.hostId,
@@ -454,10 +479,12 @@ export function createControllerDomainService(options: {
       }
     },
     createHost(input) {
+      const targetProfileId = ensureSupportedTargetProfileId(input.targetProfileId)
       store.createHost({
         id: input.hostId,
         name: input.name,
         labels: input.labels,
+        targetProfileId,
         sshHost: input.sshHost,
         sshPort: input.sshPort
       })
@@ -467,6 +494,8 @@ export function createControllerDomainService(options: {
       }
     },
     probeHost(input) {
+      ensureSupportedHostProfile(input.hostId)
+
       store.createHealthCheck({
         id: `hc_${input.hostId}_${input.operationId}`,
         hostId: input.hostId,
@@ -484,6 +513,7 @@ export function createControllerDomainService(options: {
       if (!rule) {
         throw new Error(`Bridge rule not found: ${input.ruleId}`)
       }
+      ensureSupportedHostProfile(rule.hostId)
 
       const policy = store.getExposurePolicy(rule.hostId)
       const backup = await backupPrimitive.runBackup({
@@ -516,6 +546,7 @@ export function createControllerDomainService(options: {
       if (!rule) {
         throw new Error(`Bridge rule not found: ${input.ruleId}`)
       }
+      ensureSupportedHostProfile(rule.hostId)
 
       const policy = store.getExposurePolicy(rule.hostId)
       const hasAgentEndpoint = agentEndpoints.has(rule.hostId)

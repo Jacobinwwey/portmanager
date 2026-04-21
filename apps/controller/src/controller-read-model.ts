@@ -12,6 +12,7 @@ import type {
   OperationSummary,
   RollbackPoint
 } from './operation-store.ts'
+import { describeTargetProfile } from './target-profile-registry.ts'
 
 export interface ControllerReadModel {
   getBridgeRule(id: string): BridgeRule | null
@@ -112,6 +113,7 @@ export function createControllerReadModel(options: {
       return {
         ...host,
         labels: store.getHostLabels(id),
+        targetProfile: describeTargetProfile(host.targetProfileId),
         effectivePolicy: store.getExposurePolicy(id) ?? defaultExposurePolicy(id),
         recentRules: store.listBridgeRules({ hostId: id }).slice(0, 10),
         recentOperations: store.listOperations({ hostId: id }).slice(0, 10)

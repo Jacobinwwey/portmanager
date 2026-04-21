@@ -604,9 +604,65 @@ components:
         state:
           type: string
           enum: [queued, running]
+    TargetProfileSummary:
+      type: object
+      required: [id, label, status]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        status:
+          type: string
+          enum: [supported, unsupported]
+    TargetProfile:
+      allOf:
+        - $ref: '#/components/schemas/TargetProfileSummary'
+        - type: object
+          required:
+            [
+              platform,
+              serviceManager,
+              steadyStateTransport,
+              bootstrapTransport,
+              capabilities
+            ]
+          properties:
+            platform:
+              type: string
+            serviceManager:
+              type: string
+            steadyStateTransport:
+              type: string
+            bootstrapTransport:
+              type: string
+            capabilities:
+              type: array
+              items:
+                type: string
+                enum:
+                  [
+                    probe-host,
+                    bootstrap-host,
+                    apply-desired-state,
+                    collect-diagnostics,
+                    rollback
+                  ]
     HostSummary:
       type: object
-      required: [id, name, lifecycleState, tailscaleAddress, agentState, agentHeartbeatState, updatedAt]
+      required:
+        [
+          id,
+          name,
+          lifecycleState,
+          tailscaleAddress,
+          agentState,
+          agentHeartbeatState,
+          targetProfileId,
+          targetProfileLabel,
+          targetProfileStatus,
+          updatedAt
+        ]
       properties:
         id:
           type: string
@@ -628,6 +684,13 @@ components:
         agentHeartbeatState:
           type: string
           enum: [unknown, live, stale, unreachable]
+        targetProfileId:
+          type: string
+        targetProfileLabel:
+          type: string
+        targetProfileStatus:
+          type: string
+          enum: [supported, unsupported]
         lastBackupAt:
           type: string
           format: date-time
@@ -641,12 +704,14 @@ components:
       allOf:
         - $ref: '#/components/schemas/HostSummary'
         - type: object
-          required: [effectivePolicy, recentRules, recentOperations]
+          required: [effectivePolicy, recentRules, recentOperations, targetProfile]
           properties:
             labels:
               type: array
               items:
                 type: string
+            targetProfile:
+              $ref: '#/components/schemas/TargetProfile'
             effectivePolicy:
               $ref: '#/components/schemas/ExposurePolicy'
             recentRules:
@@ -662,6 +727,8 @@ components:
       required: [name, ssh]
       properties:
         name:
+          type: string
+        targetProfileId:
           type: string
         labels:
           type: array

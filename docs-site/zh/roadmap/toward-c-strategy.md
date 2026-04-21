@@ -89,7 +89,7 @@ Milestone 3 现在不是重新做一遍已落地 seam，而是在其上继续推
 
 - 保持已落地的 `/api/controller` consumer boundary 稳定，同时定义未来 split criteria
 - Unit 57：建立在当前 replay 与 indexed review surface 之上的独立 audit/event boundary 决策
-- Unit 58：在第二目标画像出现前先落地显式 target-profile registry 与 target-abstraction rule
+- Unit 58：已完成。显式 target-profile registry 与 target-abstraction rule 现在已经先锁定 Ubuntu 24.04 + systemd + Tailscale 契约，再拒绝任何第二目标声明
 - Unit 59：建立在已测量 readiness criteria 之上的 persistence promotion decision surface
 - 继续让 bounded batch work 留在同一套 evidence model 上，而不是再发明第二条 orchestration 路径
 
