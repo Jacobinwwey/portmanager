@@ -439,7 +439,7 @@ fn hosts_get_json_reports_not_found_structurally() {
 }
 
 #[test]
-fn hosts_create_wait_json_submits_contract_body_and_returns_terminal_operation() {
+fn hosts_create_wait_json_submits_target_profile_contract_body_and_returns_terminal_operation() {
     let server = MockHttpServer::start(vec![
         MockRoute {
             method: "POST",
@@ -475,6 +475,8 @@ fn hosts_create_wait_json_submits_contract_body_and_returns_terminal_operation()
             "edge",
             "--label",
             "prod",
+            "--target-profile-id",
+            "debian-12-systemd-tailscale",
             "--ssh-host",
             "100.64.0.10",
             "--ssh-port",
@@ -501,6 +503,7 @@ fn hosts_create_wait_json_submits_contract_body_and_returns_terminal_operation()
         json!({
             "name": "Alpha Relay",
             "labels": ["edge", "prod"],
+            "targetProfileId": "debian-12-systemd-tailscale",
             "ssh": {
                 "host": "100.64.0.10",
                 "port": 22

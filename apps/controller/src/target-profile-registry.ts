@@ -85,6 +85,25 @@ export function isSupportedTargetProfileId(id: string | null | undefined) {
   return getTargetProfile(resolvedId)?.status === 'supported'
 }
 
+export function isReviewPrepTargetProfileId(id: string | null | undefined) {
+  const resolvedId = id?.trim()
+  if (!resolvedId) {
+    return false
+  }
+
+  return getTargetProfile(resolvedId)?.status === 'candidate'
+}
+
+export function isDeclaredTargetProfileId(id: string | null | undefined) {
+  const resolvedId = id?.trim()
+  if (!resolvedId) {
+    return false
+  }
+
+  const status = getTargetProfile(resolvedId)?.status
+  return status === 'supported' || status === 'candidate'
+}
+
 export function summarizeTargetProfile(id: string | null | undefined): TargetProfileSummary {
   const resolvedId = id?.trim() || defaultTargetProfileId
   const profile = getTargetProfile(resolvedId)

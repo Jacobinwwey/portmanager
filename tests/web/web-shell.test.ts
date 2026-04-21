@@ -481,9 +481,13 @@ test('overview loader keeps consumer boundary base path when building controller
             {
               criterionId: 'bootstrap_transport_parity',
               label: 'Bootstrap transport parity',
-              state: 'planned',
-              summary: 'bootstrap parity proof not landed yet',
-              sources: ['docs/operations/portmanager-debian-12-acceptance-recipe.md']
+              state: 'review_prep',
+              summary: 'candidate bootstrap review-prep lane landed, but parity proof is not captured yet',
+              sources: [
+                'apps/controller/src/controller-server.ts',
+                'tests/controller/host-rule-policy.test.ts',
+                'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+              ]
             }
           ],
           satisfiedCriteria: [
@@ -691,9 +695,13 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
             {
               criterionId: 'bootstrap_transport_parity',
               label: 'Bootstrap transport parity',
-              state: 'planned',
-              summary: 'bootstrap parity proof not landed yet',
-              sources: ['docs/operations/portmanager-debian-12-acceptance-recipe.md']
+              state: 'review_prep',
+              summary: 'candidate bootstrap review-prep lane landed, but parity proof is not captured yet',
+              sources: [
+                'apps/controller/src/controller-server.ts',
+                'tests/controller/host-rule-policy.test.ts',
+                'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+              ]
             }
           ],
           satisfiedCriteria: [],

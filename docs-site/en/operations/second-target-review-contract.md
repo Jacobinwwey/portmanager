@@ -42,5 +42,6 @@ Freeze the public wording and maintainer wording for the declared review-prep ca
 ### Current review boundary
 - Review owner: `controller`
 - Candidate target: `debian-12-systemd-tailscale`
+- Partial technical slice now landed: candidate-host create, probe, and bootstrap review-prep lane
 - Blocking evidence today: bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity
 - Landed governance artifacts today: docs contract, acceptance recipe, operator ownership definition

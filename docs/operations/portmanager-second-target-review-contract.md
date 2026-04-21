@@ -34,6 +34,7 @@ Freeze the public wording and maintainer wording for the declared review-prep ca
 ### Current review boundary
 - Review owner: `controller`
 - Candidate target: `debian-12-systemd-tailscale`
+- Partial technical slice now landed: candidate-host create, probe, and bootstrap review-prep lane
 - Blocking evidence today: bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity
 - Landed governance artifacts today: docs contract, acceptance recipe, operator ownership definition
 
@@ -68,5 +69,6 @@ Freeze the public wording and maintainer wording for the declared review-prep ca
 ### 当前复核边界
 - Review owner：`controller`
 - 候选目标：`debian-12-systemd-tailscale`
+- 当前已经落地的局部技术切片：candidate host 注册、probe 与 bootstrap review-prep lane
 - 当前阻塞证据：bootstrap transport parity、steady-state transport parity、backup/restore parity、diagnostics parity、rollback parity
 - 当前已落地治理产物：docs contract、acceptance recipe、operator ownership definition

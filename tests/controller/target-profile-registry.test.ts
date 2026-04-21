@@ -81,7 +81,7 @@ test('target profile registry exposes locked Ubuntu profile and marks unknown id
   assert.equal(unsupportedSummary.status, 'unsupported')
 })
 
-test('controller server defaults locked target profile and rejects unknown profile ids', async () => {
+test('controller server defaults locked target profile, allows declared candidate profile, and rejects unknown ids', async () => {
   const { directory, databasePath, artifactRoot } = tempPaths()
 
   try {
@@ -126,10 +126,9 @@ test('controller server defaults locked target profile and rejects unknown profi
         })
       })
 
-      assert.equal(candidateProfileResponse.status, 400)
-      assert.deepEqual(await candidateProfileResponse.json(), {
-        error: 'invalid_target_profile'
-      })
+      assert.equal(candidateProfileResponse.status, 202)
+      const candidateAccepted = (await candidateProfileResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, candidateAccepted.operationId)
 
       const createHostResponse = await fetch(`${listening.baseUrl}/hosts`, {
         method: 'POST',
@@ -156,14 +155,22 @@ test('controller server defaults locked target profile and rejects unknown profi
         items: Array<Record<string, unknown>>
       }
 
-      assert.equal(hostsPayload.items[0]?.targetProfileId, defaultTargetProfileId)
+      const candidateHost = hostsPayload.items.find((entry) => entry.name === 'Candidate Relay')
+      assert.ok(candidateHost)
+      assert.equal(candidateHost.targetProfileId, candidateTargetProfileId)
+      assert.equal(candidateHost.targetProfileLabel, 'Debian 12 + systemd + Tailscale')
+      assert.equal(candidateHost.targetProfileStatus, 'candidate')
+
+      const defaultHost = hostsPayload.items.find((entry) => entry.name === 'Alpha Relay')
+      assert.ok(defaultHost)
+      assert.equal(defaultHost.targetProfileId, defaultTargetProfileId)
       assert.equal(
-        hostsPayload.items[0]?.targetProfileLabel,
+        defaultHost.targetProfileLabel,
         'Ubuntu 24.04 + systemd + Tailscale'
       )
-      assert.equal(hostsPayload.items[0]?.targetProfileStatus, 'supported')
+      assert.equal(defaultHost.targetProfileStatus, 'supported')
 
-      const hostId = String(hostsPayload.items[0]?.id)
+      const hostId = String(defaultHost.id)
       const hostDetailResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}`)
       assert.equal(hostDetailResponse.status, 200)
       const hostDetail = (await hostDetailResponse.json()) as {

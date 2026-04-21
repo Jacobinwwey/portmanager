@@ -1550,9 +1550,14 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
       {
         criterionId: 'bootstrap_transport_parity',
         label: 'Bootstrap transport parity',
-        state: 'planned',
-        summary: 'Bootstrap parity proof is still pending for Debian 12 and remains blocked until review-prep runs are captured.',
-        sources: ['docs/operations/portmanager-debian-12-acceptance-recipe.md']
+        state: 'review_prep',
+        summary:
+          'Candidate host enrollment, probe, and bootstrap now run through the bounded review-prep lane, but parity proof stays false until one Debian 12 review packet preserves the bootstrap evidence bundle.',
+        sources: [
+          'apps/controller/src/controller-server.ts',
+          'tests/controller/host-rule-policy.test.ts',
+          'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+        ]
       }
     ],
     blockingCriteria: [

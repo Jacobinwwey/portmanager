@@ -26,7 +26,7 @@ import {
   buildSecondTargetPolicyPack,
   createDefaultSecondTargetPolicySnapshot
 } from './second-target-policy-pack.ts'
-import { defaultTargetProfileId, isSupportedTargetProfileId } from './target-profile-registry.ts'
+import { defaultTargetProfileId, isDeclaredTargetProfileId } from './target-profile-registry.ts'
 
 export interface ControllerServer {
   close(): Promise<void>
@@ -218,7 +218,7 @@ export function createControllerServer(options: {
         return
       }
 
-      if (!requestedTargetProfileId || !isSupportedTargetProfileId(requestedTargetProfileId)) {
+      if (!requestedTargetProfileId || !isDeclaredTargetProfileId(requestedTargetProfileId)) {
         sendJson(response, 400, { error: 'invalid_target_profile' })
         return
       }
@@ -244,7 +244,7 @@ export function createControllerServer(options: {
             sshHost,
             sshPort
           })
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -297,7 +297,7 @@ export function createControllerServer(options: {
             operationId,
             mode
           })
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -341,7 +341,7 @@ export function createControllerServer(options: {
             backupPolicy,
             desiredAgentPort
           })
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -398,7 +398,7 @@ export function createControllerServer(options: {
             lifecycleState: 'desired',
             operationId
           })
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -468,7 +468,7 @@ export function createControllerServer(options: {
             ...(targetHost !== undefined ? { targetHost } : {}),
             ...(targetPort !== undefined ? { targetPort } : {})
           })
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -498,7 +498,7 @@ export function createControllerServer(options: {
             ruleId,
             operationId
           })
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -576,7 +576,7 @@ export function createControllerServer(options: {
             conflictPolicy,
             backupPolicy
           })
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -638,7 +638,7 @@ export function createControllerServer(options: {
             backupPolicy,
             initiator: 'web'
           })
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -803,7 +803,7 @@ export function createControllerServer(options: {
             state: driftDetected ? 'degraded' : 'succeeded',
             resultSummary: summary
           }
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -836,7 +836,7 @@ export function createControllerServer(options: {
             backupId: backup.id,
             rollbackPointId: rollbackPoint.id
           }
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -893,7 +893,7 @@ export function createControllerServer(options: {
             diagnosticResult: result.diagnosticResult,
             snapshotResult: result.snapshotResult
           }
-        })
+        }).catch(() => {})
       })
       return
     }
@@ -946,7 +946,7 @@ export function createControllerServer(options: {
             resultSummary: `rollback ${result.rollbackPoint.id} applied from ${path.basename(result.rollbackResultPath)}`,
             rollbackPointId: result.rollbackPoint.id
           }
-        })
+        }).catch(() => {})
       })
       return
     }

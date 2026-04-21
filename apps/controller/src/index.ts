@@ -37,6 +37,8 @@ export {
   defaultTargetProfileId,
   describeTargetProfile,
   getTargetProfile,
+  isDeclaredTargetProfileId,
+  isReviewPrepTargetProfileId,
   isSupportedTargetProfileId,
   listCandidateTargetProfiles,
   listSupportedTargetProfiles,

@@ -95,7 +95,7 @@ Milestone 3 now continues from landed seams instead of restarting them:
 - Unit 61: complete. deployment-boundary decision pack now publishes `/deployment-boundary-decision-pack`, keeping `/api/controller` controller-embedded until deployable artifact, edge runtime controls, replay parity, observability ownership, and external pressure justify standalone deployment review
 - Unit 62: complete. second-target policy pack now publishes `/second-target-policy-pack`, keeping support locked to Ubuntu until candidate-target declaration, parity evidence, docs contract, acceptance recipe, and operator ownership justify review
 - Governance slice: complete. Debian review-prep docs now freeze second-target contract wording, acceptance recipe, and operator ownership without widening support claims
-- Next queue: transport parity and recovery parity for declared candidate `debian-12-systemd-tailscale` under `/second-target-policy-pack`, not a PostgreSQL default-store claim or a fake standalone deployment push
+- Next queue: keep the candidate-host create/probe/bootstrap review-prep lane honest, then capture bootstrap proof plus the remaining transport parity and recovery parity for declared candidate `debian-12-systemd-tailscale` under `/second-target-policy-pack`, not a PostgreSQL default-store claim or a fake standalone deployment push
 - keep bounded batch work on the same evidence model instead of inventing a second orchestration path
 
 ### Language and boundary decisions carried into C

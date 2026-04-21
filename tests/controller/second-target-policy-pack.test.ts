@@ -140,7 +140,7 @@ test('default second target policy pack lands governance artifacts while transpo
     pack.evidenceItems.some(
       (item) =>
         item.criterionId === 'bootstrap_transport_parity' &&
-        item.state === 'planned' &&
+        item.state === 'review_prep' &&
         item.sources.some((source) =>
           source.endsWith('docs/operations/portmanager-debian-12-acceptance-recipe.md')
         )

@@ -10,7 +10,12 @@ import type {
   OperationDetail,
   OperationStore
 } from './operation-store.ts'
-import { defaultTargetProfileId, isSupportedTargetProfileId } from './target-profile-registry.ts'
+import {
+  defaultTargetProfileId,
+  isDeclaredTargetProfileId,
+  isReviewPrepTargetProfileId,
+  isSupportedTargetProfileId
+} from './target-profile-registry.ts'
 
 export interface ControllerDomainService {
   applyExposurePolicyBatch(input: {
@@ -105,32 +110,67 @@ export function createControllerDomainService(options: {
 }): ControllerDomainService {
   const { store, agentClient, agentEndpoints, backupPrimitive, operationRunner } = options
 
-  function ensureSupportedTargetProfileId(targetProfileId?: string) {
+  function ensureDeclaredTargetProfileId(targetProfileId?: string) {
     const resolvedId = targetProfileId ?? defaultTargetProfileId
-    if (!isSupportedTargetProfileId(resolvedId)) {
+    if (!isDeclaredTargetProfileId(resolvedId)) {
       throw new Error(`Unsupported target profile: ${resolvedId}`)
     }
     return resolvedId
   }
 
-  function ensureSupportedHostProfile(hostId: string) {
+  function ensureDeclaredHostProfile(hostId: string) {
     const host = store.getHost(hostId)
     if (!host) {
       throw new Error(`Host not found: ${hostId}`)
     }
 
-    if (!isSupportedTargetProfileId(host.targetProfileId)) {
+    if (!isDeclaredTargetProfileId(host.targetProfileId)) {
       throw new Error(`Unsupported target profile for host ${hostId}: ${host.targetProfileId}`)
     }
 
     return host
   }
 
-  function buildDesiredState(hostId: string): ApplyDesiredStateSchema {
-    ensureSupportedHostProfile(hostId)
+  function reviewPrepOnlyMessage(hostId: string, targetProfileId: string) {
+    return `Target profile ${targetProfileId} for host ${hostId} stays review-prep only; only create, probe, and bootstrap are allowed until steady-state, backup, diagnostics, and rollback parity land.`
+  }
+
+  function ensureSupportedHostProfile(hostId: string) {
+    const host = ensureDeclaredHostProfile(hostId)
+
+    if (!isSupportedTargetProfileId(host.targetProfileId)) {
+      if (isReviewPrepTargetProfileId(host.targetProfileId)) {
+        throw new Error(reviewPrepOnlyMessage(hostId, host.targetProfileId))
+      }
+
+      throw new Error(`Unsupported target profile for host ${hostId}: ${host.targetProfileId}`)
+    }
+
+    return host
+  }
+
+  function buildDesiredState(
+    hostId: string,
+    options?: { allowReviewPrepCandidate?: boolean }
+  ): ApplyDesiredStateSchema {
+    const host = ensureDeclaredHostProfile(hostId)
     const policy = store.getExposurePolicy(hostId)
     if (!policy) {
       throw new Error(`Exposure policy missing for host ${hostId}`)
+    }
+
+    if (!isSupportedTargetProfileId(host.targetProfileId)) {
+      if (!isReviewPrepTargetProfileId(host.targetProfileId)) {
+        throw new Error(`Unsupported target profile for host ${hostId}: ${host.targetProfileId}`)
+      }
+
+      const activeRules = store
+        .listBridgeRules({ hostId })
+        .filter((rule) => rule.lifecycleState !== 'removed')
+
+      if (!options?.allowReviewPrepCandidate || activeRules.length > 0) {
+        throw new Error(reviewPrepOnlyMessage(hostId, host.targetProfileId))
+      }
     }
 
     return {
@@ -298,6 +338,7 @@ export function createControllerDomainService(options: {
     ruleId?: string
     backupPolicy?: 'best_effort' | 'required'
     dropEndpointOnFailure?: boolean
+    allowReviewPrepCandidate?: boolean
   }): Promise<OperationExecutionResult & { runtimeState?: RuntimeStateSchema }> {
     const baseUrl = agentEndpoints.get(input.hostId)
     if (!baseUrl) {
@@ -310,7 +351,9 @@ export function createControllerDomainService(options: {
     try {
       await agentClient.applyDesiredState(baseUrl, {
         operationId: input.operationId,
-        desiredState: buildDesiredState(input.hostId)
+        desiredState: buildDesiredState(input.hostId, {
+          allowReviewPrepCandidate: input.allowReviewPrepCandidate
+        })
       })
     } catch (error) {
       return markAgentSyncFailure({
@@ -420,7 +463,7 @@ export function createControllerDomainService(options: {
       return applyExposurePolicyInternal(input)
     },
     async bootstrapHost(input) {
-      const host = ensureSupportedHostProfile(input.hostId)
+      const host = ensureDeclaredHostProfile(input.hostId)
 
       if (input.backupPolicy) {
         const currentPolicy = store.getExposurePolicy(input.hostId)
@@ -444,7 +487,8 @@ export function createControllerDomainService(options: {
         operationId: input.operationId,
         category: 'host_probe',
         backupPolicy: input.backupPolicy,
-        dropEndpointOnFailure: true
+        dropEndpointOnFailure: true,
+        allowReviewPrepCandidate: true
       })
 
       return {
@@ -479,7 +523,7 @@ export function createControllerDomainService(options: {
       }
     },
     createHost(input) {
-      const targetProfileId = ensureSupportedTargetProfileId(input.targetProfileId)
+      const targetProfileId = ensureDeclaredTargetProfileId(input.targetProfileId)
       store.createHost({
         id: input.hostId,
         name: input.name,
@@ -494,7 +538,7 @@ export function createControllerDomainService(options: {
       }
     },
     probeHost(input) {
-      ensureSupportedHostProfile(input.hostId)
+      ensureDeclaredHostProfile(input.hostId)
 
       store.createHealthCheck({
         id: `hc_${input.hostId}_${input.operationId}`,

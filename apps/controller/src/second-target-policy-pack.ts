@@ -217,9 +217,13 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     ),
     evidenceItem(
       'bootstrap_transport_parity',
-      'planned',
-      'Bootstrap parity proof is still pending for Debian 12 and remains blocked until review-prep runs are captured.',
+      'review_prep',
+      'Candidate host enrollment, probe, and bootstrap now run through the bounded review-prep lane, but parity proof stays false until one Debian 12 review packet preserves the bootstrap evidence bundle.',
       [
+        'apps/controller/src/controller-server.ts',
+        'apps/controller/src/controller-domain-service.ts',
+        'tests/controller/target-profile-registry.test.ts',
+        'tests/controller/host-rule-policy.test.ts',
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
       ]

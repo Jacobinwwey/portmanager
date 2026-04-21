@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os'
 import { setTimeout as delay } from 'node:timers/promises'
 
 import {
+  candidateTargetProfileId,
   createControllerEventBus,
   createControllerServer,
   createOperationStore
@@ -253,6 +254,135 @@ test('controller server probes hosts and marks bootstrap degraded when no live a
           (hostDetail.recentOperations as Array<Record<string, unknown>>).some(
             (entry) => entry.type === 'bootstrap_host'
           ),
+        true
+      )
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('controller server allows candidate host bootstrap review-prep but keeps rule mutation blocked', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, artifactRoot })
+    const listening = await server.listen(0)
+
+    try {
+      const createHostResponse = await fetch(`${listening.baseUrl}/hosts`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: 'Candidate Bootstrap Alpha',
+          targetProfileId: candidateTargetProfileId,
+          ssh: {
+            host: '100.64.0.13',
+            port: 22
+          }
+        })
+      })
+
+      assert.equal(createHostResponse.status, 202)
+      const createHostAccepted = (await createHostResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, createHostAccepted.operationId)
+
+      const hostsResponse = await fetch(`${listening.baseUrl}/hosts`)
+      assert.equal(hostsResponse.status, 200)
+      const hostsPayload = (await hostsResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+      const host = hostsPayload.items.find(
+        (entry) => entry.name === 'Candidate Bootstrap Alpha'
+      )
+      assert.ok(host)
+      const hostId = String(host.id)
+      assert.equal(host.targetProfileId, candidateTargetProfileId)
+      assert.equal(host.targetProfileStatus, 'candidate')
+
+      const probeResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}/probe`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          mode: 'read_only'
+        })
+      })
+
+      assert.equal(probeResponse.status, 202)
+      const probeAccepted = (await probeResponse.json()) as { operationId: string }
+      const probeOperation = await waitForTerminalOperation(listening.baseUrl, probeAccepted.operationId)
+      assert.equal(probeOperation.type, 'probe_host')
+      assert.equal(probeOperation.state, 'succeeded')
+
+      const bootstrapResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}/bootstrap`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          sshUser: 'debian',
+          desiredAgentPort: 8711,
+          backupPolicy: 'best_effort'
+        })
+      })
+
+      assert.equal(bootstrapResponse.status, 202)
+      const bootstrapAccepted = (await bootstrapResponse.json()) as { operationId: string }
+      const bootstrapOperation = await waitForTerminalOperation(
+        listening.baseUrl,
+        bootstrapAccepted.operationId
+      )
+      assert.equal(bootstrapOperation.type, 'bootstrap_host')
+      assert.equal(bootstrapOperation.state, 'degraded')
+      assert.match(String(bootstrapOperation.resultSummary), /bootstrapped via/i)
+
+      const createRuleResponse = await fetch(`${listening.baseUrl}/bridge-rules`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId,
+          name: 'Candidate HTTPS Relay',
+          protocol: 'tcp',
+          listenPort: 443,
+          targetHost: '127.0.0.1',
+          targetPort: 3000
+        })
+      })
+
+      assert.equal(createRuleResponse.status, 202)
+      const createRuleAccepted = (await createRuleResponse.json()) as { operationId: string }
+      const createRuleOperation = await waitForTerminalOperation(
+        listening.baseUrl,
+        createRuleAccepted.operationId
+      )
+      assert.equal(createRuleOperation.type, 'create_rule')
+      assert.equal(createRuleOperation.state, 'failed')
+      assert.match(String(createRuleOperation.resultSummary), /review-prep only/i)
+
+      const candidateHostDetailResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}`)
+      assert.equal(candidateHostDetailResponse.status, 200)
+      const candidateHostDetail = (await candidateHostDetailResponse.json()) as {
+        targetProfileStatus: string
+        recentRules: Array<Record<string, unknown>>
+        recentOperations: Array<Record<string, unknown>>
+      }
+      assert.equal(candidateHostDetail.targetProfileStatus, 'candidate')
+      assert.equal(candidateHostDetail.recentRules.length, 0)
+      assert.equal(
+        candidateHostDetail.recentOperations.some(
+          (entry) => entry.type === 'create_rule' && entry.state === 'failed'
+        ),
         true
       )
     } finally {

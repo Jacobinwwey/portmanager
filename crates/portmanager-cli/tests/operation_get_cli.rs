@@ -1432,9 +1432,13 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                     {
                         "criterionId": "bootstrap_transport_parity",
                         "label": "Bootstrap transport parity",
-                        "state": "planned",
-                        "summary": "bootstrap parity proof not landed yet",
-                        "sources": ["docs/operations/portmanager-debian-12-acceptance-recipe.md"]
+                        "state": "review_prep",
+                        "summary": "candidate bootstrap review-prep lane landed, but parity proof is not captured yet",
+                        "sources": [
+                            "apps/controller/src/controller-server.ts",
+                            "tests/controller/host-rule-policy.test.ts",
+                            "docs/operations/portmanager-debian-12-acceptance-recipe.md"
+                        ]
                     }
                 ],
                 "satisfiedCriteria": [

@@ -17,6 +17,8 @@ status: active
 Define the bounded review-prep recipe for `debian-12-systemd-tailscale`.
 This document does not claim that parity proof already passed.
 It freezes the exact proof sequence and artifact bundle required before second-target review can open.
+Current repo baseline now supports candidate-host enrollment, probe, and bootstrap rehearsal only.
+It still does not claim bootstrap parity passed, and it still does not claim steady-state, backup, diagnostics, or rollback parity.
 
 ### Preconditions
 - `pnpm acceptance:verify` stays green on the current mainline slice.

@@ -17,6 +17,8 @@ status: active
 定义 `debian-12-systemd-tailscale` 的有边界 review-prep recipe。
 本文档不宣称等价证明已经通过。
 它只冻结在第二目标 review 能开启前必须完成的证明顺序与产物包。
+当前仓库基线现在只支持 candidate host 的注册、probe 与 bootstrap 预演。
+它仍然不宣称 bootstrap parity 已通过，也不宣称 steady-state、backup、diagnostics 或 rollback parity 已通过。
 
 ### 前置条件
 - 当前主线切片上的 `pnpm acceptance:verify` 持续为绿。
