@@ -10,6 +10,7 @@ Define the bounded review-prep recipe for `debian-12-systemd-tailscale`.
 This document does not claim that parity proof already passed.
 It freezes the exact proof sequence and artifact bundle required before second-target review can open.
 The companion review-packet template at `docs/operations/portmanager-debian-12-review-packet-template.md` freezes how those artifacts are recorded.
+The companion capture guides at `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md` and `docs/operations/portmanager-debian-12-steady-state-proof-capture.md` freeze how bootstrap and steady-state evidence are gathered.
 Current repo baseline now supports candidate-host enrollment, probe, and bootstrap rehearsal only.
 It still does not claim bootstrap parity passed, and it still does not claim steady-state, backup, diagnostics, or rollback parity.
 
@@ -45,6 +46,8 @@ It still does not claim bootstrap parity passed, and it still does not claim ste
 - host target-profile id and Debian 12 runtime notes
 - summary of any drift or parity mismatch
 - review-packet template path: `docs/operations/portmanager-debian-12-review-packet-template.md`
+- bootstrap-proof guide path: `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`
+- steady-state-proof guide path: `docs/operations/portmanager-debian-12-steady-state-proof-capture.md`
 
 ### Exit rule
 Only mark parity criteria true after the exact evidence bundle exists and is linked in the review packet.
@@ -56,6 +59,7 @@ Only mark parity criteria true after the exact evidence bundle exists and is lin
 本文档不宣称等价证明已经通过。
 它只冻结在第二目标 review 能开启前必须完成的证明顺序与产物包。
 配套的 `docs/operations/portmanager-debian-12-review-packet-template.md` 会冻结这些产物该如何落盘记录。
+配套的 `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md` 与 `docs/operations/portmanager-debian-12-steady-state-proof-capture.md` 会冻结 bootstrap 与 steady-state 证据该如何采集。
 当前仓库基线现在只支持 candidate host 的注册、probe 与 bootstrap 预演。
 它仍然不宣称 bootstrap parity 已通过，也不宣称 steady-state、backup、diagnostics 或 rollback parity 已通过。
 
@@ -91,6 +95,8 @@ Only mark parity criteria true after the exact evidence bundle exists and is lin
 - host target-profile id 与 Debian 12 运行时备注
 - 任意 drift 或 parity mismatch 的摘要
 - review-packet template 路径：`docs/operations/portmanager-debian-12-review-packet-template.md`
+- bootstrap proof 指南路径：`docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`
+- steady-state proof 指南路径：`docs/operations/portmanager-debian-12-steady-state-proof-capture.md`
 
 ### 退出规则
 只有在完整证据包真实存在且已经链接进 review packet 之后，才能把等价 criteria 标为 true。

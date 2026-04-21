@@ -72,6 +72,26 @@ export interface SecondTargetBootstrapProofCapture {
   sources: string[]
 }
 
+export type SecondTargetSteadyStateProofArtifactId =
+  | 'post_mutation_operation_id'
+  | 'health_capture'
+  | 'runtime_state_capture'
+  | 'controller_audit_reference'
+
+export interface SecondTargetSteadyStateProofArtifact {
+  id: SecondTargetSteadyStateProofArtifactId
+  label: string
+  summary: string
+}
+
+export interface SecondTargetSteadyStateProofCapture {
+  candidateTargetProfileId: string
+  guidePath: string
+  summary: string
+  requiredArtifacts: SecondTargetSteadyStateProofArtifact[]
+  sources: string[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -102,6 +122,7 @@ export interface SecondTargetPolicyPack {
   nextActions: string[]
   reviewPacketTemplate: SecondTargetReviewPacketTemplate
   bootstrapProofCapture: SecondTargetBootstrapProofCapture
+  steadyStateProofCapture: SecondTargetSteadyStateProofCapture
   satisfiedCriteria: SecondTargetPolicyCriterion[]
   blockingCriteria: SecondTargetPolicyCriterion[]
   evidenceItems: SecondTargetPolicyEvidenceItem[]
@@ -110,6 +131,8 @@ export interface SecondTargetPolicyPack {
 const reviewPacketTemplatePath = 'docs/operations/portmanager-debian-12-review-packet-template.md'
 const bootstrapProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md'
+const steadyStateProofCaptureGuidePath =
+  'docs/operations/portmanager-debian-12-steady-state-proof-capture.md'
 
 const bootstrapProofArtifactMetadata: Record<
   SecondTargetBootstrapProofArtifactId,
@@ -134,6 +157,32 @@ const bootstrapProofArtifactMetadata: Record<
     label: 'Target profile confirmation',
     summary:
       'Capture confirmation that the candidate host stayed on debian-12-systemd-tailscale for the same bootstrap proof.'
+  }
+}
+
+const steadyStateProofArtifactMetadata: Record<
+  SecondTargetSteadyStateProofArtifactId,
+  { label: string; summary: string }
+> = {
+  post_mutation_operation_id: {
+    label: 'Post-mutation operation id',
+    summary:
+      'Capture one normal controller-driven mutation id after bootstrap so steady-state proof stays anchored to real controller traffic.'
+  },
+  health_capture: {
+    label: 'Health capture',
+    summary:
+      'Capture the steady-state `/health` response after the post-bootstrap mutation completes.'
+  },
+  runtime_state_capture: {
+    label: 'Runtime-state capture',
+    summary:
+      'Capture the steady-state `/runtime-state` response from the same candidate host after the mutation.'
+  },
+  controller_audit_reference: {
+    label: 'Controller audit reference',
+    summary:
+      'Capture one linked controller event replay or audit-index reference that ties the mutation and steady-state captures together.'
   }
 }
 
@@ -240,6 +289,18 @@ function bootstrapProofArtifact(
   }
 }
 
+function steadyStateProofArtifact(
+  id: SecondTargetSteadyStateProofArtifactId
+): SecondTargetSteadyStateProofArtifact {
+  const metadata = steadyStateProofArtifactMetadata[id]
+
+  return {
+    id,
+    label: metadata.label,
+    summary: metadata.summary
+  }
+}
+
 function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceItem[] {
   return [
     evidenceItem(
@@ -323,8 +384,9 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     evidenceItem(
       'steady_state_transport_parity',
       'planned',
-      'Steady-state transport parity is still pending for Debian 12.',
+      'Steady-state transport parity is still pending for Debian 12 until one post-bootstrap health and runtime bundle is captured.',
       [
+        steadyStateProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
         'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
@@ -541,6 +603,7 @@ function buildReviewPacketTemplate(
         'steady_state_transport_parity',
         'Capture steady-state `/health` and `/runtime-state` evidence after one normal controller-driven mutation.',
         [
+          steadyStateProofCaptureGuidePath,
           reviewPacketTemplatePath,
           'docs/operations/portmanager-debian-12-acceptance-recipe.md',
           'apps/controller/src/controller-server.ts'
@@ -603,6 +666,32 @@ function buildBootstrapProofCapture(
   }
 }
 
+function buildSteadyStateProofCapture(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetSteadyStateProofCapture {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+
+  return {
+    candidateTargetProfileId,
+    guidePath: steadyStateProofCaptureGuidePath,
+    summary:
+      `Steady-state proof capture stays explicit for ${candidateTargetProfileId}: preserve one post-bootstrap health and runtime bundle before steady-state parity can move.`,
+    requiredArtifacts: [
+      steadyStateProofArtifact('post_mutation_operation_id'),
+      steadyStateProofArtifact('health_capture'),
+      steadyStateProofArtifact('runtime_state_capture'),
+      steadyStateProofArtifact('controller_audit_reference')
+    ],
+    sources: [
+      steadyStateProofCaptureGuidePath,
+      reviewPacketTemplatePath,
+      'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+      'apps/controller/src/controller-server.ts',
+      'apps/controller/src/controller-domain-service.ts'
+    ]
+  }
+}
+
 export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySnapshot {
   const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
     summarizeTargetProfile(profile.id)
@@ -653,6 +742,7 @@ export function buildSecondTargetPolicyPack(
     nextActions: buildNextActions(snapshot, decisionState),
     reviewPacketTemplate: buildReviewPacketTemplate(snapshot),
     bootstrapProofCapture: buildBootstrapProofCapture(snapshot),
+    steadyStateProofCapture: buildSteadyStateProofCapture(snapshot),
     satisfiedCriteria,
     blockingCriteria,
     evidenceItems: (snapshot.evidenceItems ?? []).map((item) => ({

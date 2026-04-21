@@ -260,6 +260,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'debian-12-steady-state-proof-capture',
+    sourcePath: 'docs/operations/portmanager-debian-12-steady-state-proof-capture.md',
+    route: 'operations/debian-12-steady-state-proof-capture',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Debian 12 Steady-State Proof Capture',
+      zh: 'Debian 12 稳态证明采集'
+    }
+  },
+  {
     id: 'overview-design-baseline',
     sourcePath: 'docs/design/portmanager-overview-design-baseline.md',
     route: 'architecture/overview-design-baseline',

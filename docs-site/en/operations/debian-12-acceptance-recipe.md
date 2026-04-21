@@ -18,6 +18,7 @@ Define the bounded review-prep recipe for `debian-12-systemd-tailscale`.
 This document does not claim that parity proof already passed.
 It freezes the exact proof sequence and artifact bundle required before second-target review can open.
 The companion review-packet template at `docs/operations/portmanager-debian-12-review-packet-template.md` freezes how those artifacts are recorded.
+The companion capture guides at `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md` and `docs/operations/portmanager-debian-12-steady-state-proof-capture.md` freeze how bootstrap and steady-state evidence are gathered.
 Current repo baseline now supports candidate-host enrollment, probe, and bootstrap rehearsal only.
 It still does not claim bootstrap parity passed, and it still does not claim steady-state, backup, diagnostics, or rollback parity.
 
@@ -53,6 +54,8 @@ It still does not claim bootstrap parity passed, and it still does not claim ste
 - host target-profile id and Debian 12 runtime notes
 - summary of any drift or parity mismatch
 - review-packet template path: `docs/operations/portmanager-debian-12-review-packet-template.md`
+- bootstrap-proof guide path: `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`
+- steady-state-proof guide path: `docs/operations/portmanager-debian-12-steady-state-proof-capture.md`
 
 ### Exit rule
 Only mark parity criteria true after the exact evidence bundle exists and is linked in the review packet.

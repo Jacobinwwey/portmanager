@@ -1567,6 +1567,43 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         'docs/operations/portmanager-debian-12-acceptance-recipe.md'
       ]
     },
+    steadyStateProofCapture: {
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      guidePath: 'docs/operations/portmanager-debian-12-steady-state-proof-capture.md',
+      summary:
+        'Steady-state proof capture stays explicit for debian-12-systemd-tailscale before steady-state parity can move.',
+      requiredArtifacts: [
+        {
+          id: 'post_mutation_operation_id',
+          label: 'Post-mutation operation id',
+          summary:
+            'Capture one normal controller-driven mutation id after bootstrap so steady-state proof stays anchored to real traffic.'
+        },
+        {
+          id: 'health_capture',
+          label: 'Health capture',
+          summary:
+            'Capture the steady-state /health response after the post-bootstrap mutation completes.'
+        },
+        {
+          id: 'runtime_state_capture',
+          label: 'Runtime-state capture',
+          summary:
+            'Capture the steady-state /runtime-state response from the same candidate host after the mutation.'
+        },
+        {
+          id: 'controller_audit_reference',
+          label: 'Controller audit reference',
+          summary:
+            'Capture one linked controller event replay or audit-index reference that ties the mutation and steady-state captures together.'
+        }
+      ],
+      sources: [
+        'docs/operations/portmanager-debian-12-steady-state-proof-capture.md',
+        'docs/operations/portmanager-debian-12-review-packet-template.md',
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+      ]
+    },
     satisfiedCriteria: [
       {
         id: 'locked_target_registry',
@@ -3541,6 +3578,40 @@ function SecondTargetPolicyCard(props: {
         { className: 'pm-microcopy', key: 'sources' },
         props.pack.bootstrapProofCapture.sources.length > 0
           ? `Sources: ${props.pack.bootstrapProofCapture.sources.join(', ')}`
+          : 'Sources: none'
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'steady-state-proof-capture' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Steady-state proof capture',
+        detail: props.pack.steadyStateProofCapture.candidateTargetProfileId
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Guide Path', props.pack.steadyStateProofCapture.guidePath),
+        kvRow(
+          'Required Artifacts',
+          String(props.pack.steadyStateProofCapture.requiredArtifacts.length)
+        )
+      ]),
+      h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.steadyStateProofCapture.summary),
+      props.pack.steadyStateProofCapture.requiredArtifacts.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.steadyStateProofCapture.requiredArtifacts.map((item) =>
+              h('li', { className: 'pm-list-item', key: item.id }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, item.summary)
+              ])
+            )
+          )
+        : emptyState('No steady-state-proof artifacts recorded yet.', 'empty'),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'sources' },
+        props.pack.steadyStateProofCapture.sources.length > 0
+          ? `Sources: ${props.pack.steadyStateProofCapture.sources.join(', ')}`
           : 'Sources: none'
       )
     ]),

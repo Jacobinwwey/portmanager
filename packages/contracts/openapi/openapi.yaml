@@ -1379,6 +1379,7 @@ components:
           nextActions,
           reviewPacketTemplate,
           bootstrapProofCapture,
+          steadyStateProofCapture,
           satisfiedCriteria,
           blockingCriteria,
           evidenceItems
@@ -1416,6 +1417,8 @@ components:
           $ref: '#/components/schemas/SecondTargetReviewPacketTemplate'
         bootstrapProofCapture:
           $ref: '#/components/schemas/SecondTargetBootstrapProofCapture'
+        steadyStateProofCapture:
+          $ref: '#/components/schemas/SecondTargetSteadyStateProofCapture'
         satisfiedCriteria:
           type: array
           items:
@@ -1508,6 +1511,43 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetBootstrapProofArtifact'
+        sources:
+          type: array
+          items:
+            type: string
+    SecondTargetSteadyStateProofArtifactId:
+      type: string
+      enum:
+        [
+          post_mutation_operation_id,
+          health_capture,
+          runtime_state_capture,
+          controller_audit_reference
+        ]
+    SecondTargetSteadyStateProofArtifact:
+      type: object
+      required: [id, label, summary]
+      properties:
+        id:
+          $ref: '#/components/schemas/SecondTargetSteadyStateProofArtifactId'
+        label:
+          type: string
+        summary:
+          type: string
+    SecondTargetSteadyStateProofCapture:
+      type: object
+      required: [candidateTargetProfileId, guidePath, summary, requiredArtifacts, sources]
+      properties:
+        candidateTargetProfileId:
+          type: string
+        guidePath:
+          type: string
+        summary:
+          type: string
+        requiredArtifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetSteadyStateProofArtifact'
         sources:
           type: array
           items:

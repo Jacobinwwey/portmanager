@@ -1443,6 +1443,22 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                         "docs/operations/portmanager-debian-12-acceptance-recipe.md"
                     ]
                 },
+                "steadyStateProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+                    "summary": "steady-state proof capture guide exists",
+                    "requiredArtifacts": [
+                        {
+                            "id": "health_capture",
+                            "label": "Health capture",
+                            "summary": "capture steady-state /health output"
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+                        "docs/operations/portmanager-debian-12-acceptance-recipe.md"
+                    ]
+                },
                 "evidenceItems": [
                     {
                         "criterionId": "docs_contract_ready",
@@ -1510,11 +1526,14 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("Evidence Ledger"));
     assert!(stdout.contains("Review Packet Template"));
     assert!(stdout.contains("Bootstrap Proof Capture"));
+    assert!(stdout.contains("Steady-State Proof Capture"));
     assert!(stdout.contains("portmanager-debian-12-bootstrap-proof-capture.md"));
+    assert!(stdout.contains("portmanager-debian-12-steady-state-proof-capture.md"));
     assert!(stdout.contains("portmanager-debian-12-review-packet-template.md"));
     assert!(stdout.contains("portmanager-debian-12-acceptance-recipe.md"));
     assert!(stdout.contains("bootstrap_transport_parity"));
     assert!(stdout.contains("bootstrap_operation_id"));
+    assert!(stdout.contains("health_capture"));
 }
 
 #[test]
@@ -1571,6 +1590,21 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                     ],
                     "sources": [
                         "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md"
+                    ]
+                },
+                "steadyStateProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+                    "summary": "steady-state proof capture guide exists",
+                    "requiredArtifacts": [
+                        {
+                            "id": "health_capture",
+                            "label": "Health capture",
+                            "summary": "capture steady-state /health output"
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-debian-12-steady-state-proof-capture.md"
                     ]
                 },
                 "evidenceItems": [

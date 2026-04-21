@@ -1544,6 +1544,7 @@ export interface components {
             reviewOwner: "controller";
             reviewPacketTemplate: components["schemas"]["SecondTargetReviewPacketTemplate"];
             satisfiedCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
+            steadyStateProofCapture: components["schemas"]["SecondTargetSteadyStateProofCapture"];
             summary: string;
             supportedTargetProfiles: components["schemas"]["TargetProfileSummary"][];
         };
@@ -1558,6 +1559,20 @@ export interface components {
             requiredEvidence: components["schemas"]["SecondTargetReviewPacketRequirement"][];
             summary: string;
             templatePath: string;
+        };
+        SecondTargetSteadyStateProofArtifact: {
+            id: components["schemas"]["SecondTargetSteadyStateProofArtifactId"];
+            label: string;
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetSteadyStateProofArtifactId: "post_mutation_operation_id" | "health_capture" | "runtime_state_capture" | "controller_audit_reference";
+        SecondTargetSteadyStateProofCapture: {
+            candidateTargetProfileId: string;
+            guidePath: string;
+            requiredArtifacts: components["schemas"]["SecondTargetSteadyStateProofArtifact"][];
+            sources: string[];
+            summary: string;
         };
         SshConnection: {
             host: string;
@@ -1661,6 +1676,9 @@ export type SecondTargetPolicyEvidenceState = components['schemas']['SecondTarge
 export type SecondTargetPolicyPack = components['schemas']['SecondTargetPolicyPack'];
 export type SecondTargetReviewPacketRequirement = components['schemas']['SecondTargetReviewPacketRequirement'];
 export type SecondTargetReviewPacketTemplate = components['schemas']['SecondTargetReviewPacketTemplate'];
+export type SecondTargetSteadyStateProofArtifact = components['schemas']['SecondTargetSteadyStateProofArtifact'];
+export type SecondTargetSteadyStateProofArtifactId = components['schemas']['SecondTargetSteadyStateProofArtifactId'];
+export type SecondTargetSteadyStateProofCapture = components['schemas']['SecondTargetSteadyStateProofCapture'];
 export type SshConnection = components['schemas']['SshConnection'];
 export type TargetProfile = components['schemas']['TargetProfile'];
 export type TargetProfileSummary = components['schemas']['TargetProfileSummary'];

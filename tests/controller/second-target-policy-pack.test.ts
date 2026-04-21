@@ -135,6 +135,25 @@ test('default second target policy pack lands governance artifacts while transpo
     ),
     true
   )
+  assert.equal(pack.steadyStateProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+  assert.match(
+    pack.steadyStateProofCapture.guidePath,
+    /docs\/operations\/portmanager-debian-12-steady-state-proof-capture\.md/u
+  )
+  assert.equal(pack.steadyStateProofCapture.requiredArtifacts.length >= 4, true)
+  assert.equal(
+    pack.steadyStateProofCapture.requiredArtifacts.some(
+      (item) =>
+        item.id === 'health_capture' && item.summary.includes('/health')
+    ),
+    true
+  )
+  assert.equal(
+    pack.steadyStateProofCapture.sources.some((source) =>
+      source.endsWith('docs/operations/portmanager-debian-12-steady-state-proof-capture.md')
+    ),
+    true
+  )
   assert.equal(
     pack.reviewPacketTemplate.requiredEvidence.some(
       (item) =>
@@ -232,6 +251,17 @@ test('controller server exposes second target policy pack as explicit controller
           }>
           sources: string[]
         }
+        steadyStateProofCapture: {
+          candidateTargetProfileId: string
+          guidePath: string
+          summary: string
+          requiredArtifacts: Array<{
+            id: string
+            label: string
+            summary: string
+          }>
+          sources: string[]
+        }
         satisfiedCriteria: Array<{ id: string; label: string }>
         blockingCriteria: Array<{ id: string; label: string }>
         evidenceItems: Array<{
@@ -275,6 +305,24 @@ test('controller server exposes second target policy pack as explicit controller
       assert.equal(
         payload.bootstrapProofCapture.sources.some((source) =>
           source.endsWith('docs/operations/portmanager-debian-12-bootstrap-proof-capture.md')
+        ),
+        true
+      )
+      assert.equal(payload.steadyStateProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+      assert.match(
+        payload.steadyStateProofCapture.guidePath,
+        /docs\/operations\/portmanager-debian-12-steady-state-proof-capture\.md/u
+      )
+      assert.equal(payload.steadyStateProofCapture.requiredArtifacts.length >= 4, true)
+      assert.equal(
+        payload.steadyStateProofCapture.requiredArtifacts.some(
+          (item) => item.id === 'health_capture'
+        ),
+        true
+      )
+      assert.equal(
+        payload.steadyStateProofCapture.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-steady-state-proof-capture.md')
         ),
         true
       )
