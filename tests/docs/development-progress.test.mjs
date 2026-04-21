@@ -58,11 +58,27 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /--skip-sync/)
   assert.match(milestoneConfidenceComponent, /Public claim class/)
   assert.match(milestoneConfidenceComponent, /Source surface status/)
+  assert.match(milestoneConfidenceComponent, /Required next action/)
+  assert.match(milestoneConfidenceComponent, /Wording review allowed/)
+  assert.match(
+    milestoneConfidenceComponent,
+    /sourceSurfaceStatus\('docs-site\/\.vitepress\/theme\/components\/MilestoneConfidencePage\.vue'\)/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /sourceSurfaceStatus\('docs-site\/\.vitepress\/theme\/components\/RoadmapPage\.vue'\)/
+  )
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
   assert.match(roadmapComponent, /2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan\.md/)
   assert.match(roadmapComponent, /milestone-confidence-bundle-\*/)
+  assert.match(roadmapComponent, /Required next action/)
+  assert.match(roadmapComponent, /Public claim class/)
+  assert.match(
+    roadmapComponent,
+    /confidenceSurfaceStatus\('docs-site\/\.vitepress\/theme\/components\/MilestoneConfidencePage\.vue'\)/
+  )
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
 
@@ -89,6 +105,13 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.equal(
     milestoneConfidenceProgress.publication.refreshCommand,
     'pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence'
+  )
+  assert.equal(typeof milestoneConfidenceProgress.wordingReview.publicClaimClass, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.wordingReview.wordingReviewAllowed, 'boolean')
+  assert.equal(typeof milestoneConfidenceProgress.wordingReview.requiredNextAction, 'string')
+  assert.equal(
+    milestoneConfidenceProgress.wordingReview.sourceSurfaces['docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue'].claimStatus,
+    'development-progress-counter-surface'
   )
   // The committed docs-site data is a publish artifact. An ignored local .portmanager
   // history may be newer than that artifact until docs:generate is rerun, so this

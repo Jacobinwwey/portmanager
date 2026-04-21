@@ -207,6 +207,38 @@
           </section>
         </div>
 
+        <div class="pm-docs-grid two">
+          <section class="pm-progress-card">
+            <div class="pm-progress-header">
+              <h4>{{ copy.liveWordingReview }}</h4>
+              <span class="pm-badge" :class="confidenceWordingTone">{{ confidenceWordingBadge }}</span>
+            </div>
+            <template v-if="confidenceProgress.wordingReview">
+              <ul class="pm-progress-list">
+                <li>{{ copy.livePublicClaimClass }} <code>{{ confidenceProgress.wordingReview.publicClaimClass }}</code></li>
+                <li>{{ copy.liveWordingAllowed }} {{ yesNo(confidenceProgress.wordingReview.wordingReviewAllowed) }}</li>
+                <li>{{ copy.liveRequiredNextAction }} {{ confidenceProgress.wordingReview.requiredNextAction }}</li>
+              </ul>
+            </template>
+            <p v-else class="pm-doc-note">{{ copy.liveNoWordingReview }}</p>
+          </section>
+
+          <section class="pm-progress-card">
+            <div class="pm-progress-header">
+              <h4>{{ copy.liveSurfaceStatus }}</h4>
+              <span class="pm-badge next">{{ copy.liveConfidenceReview }}</span>
+            </div>
+            <template v-if="confidenceProgress.wordingReview">
+              <ul class="pm-progress-list">
+                <li>{{ copy.liveDevelopmentProgressSurface }} <code>{{ confidenceSurfaceStatus('docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue') }}</code></li>
+                <li>{{ copy.liveRoadmapPreviewSurface }} <code>{{ confidenceSurfaceStatus('docs-site/.vitepress/theme/components/RoadmapPage.vue') }}</code></li>
+                <li>{{ copy.liveTrackedArtifactSurface }} <code>{{ confidenceSurfaceStatus('docs-site/data/milestone-confidence-progress.ts') }}</code></li>
+              </ul>
+            </template>
+            <p v-else class="pm-doc-note">{{ copy.liveNoWordingReview }}</p>
+          </section>
+        </div>
+
         <div class="pm-doc-links">
           <VPLink class="pm-doc-link" :href="`/${props.locale}/roadmap/development-progress`">{{ copy.liveConfidenceLink }}</VPLink>
           <VPLink class="pm-doc-link" :href="docMeta(locale, 'milestones').link">{{ copy.liveConfidenceMilestonesLink }}</VPLink>
@@ -345,6 +377,15 @@ const copy = computed(() => props.locale === 'zh'
       liveLatestVisibleRun: 'Latest visible run：',
       liveConfidenceNoise: 'Visibility Breakdown',
       liveConfidenceReview: 'Review signal',
+      liveWordingReview: 'Wording Review',
+      livePublicClaimClass: 'Public claim class：',
+      liveWordingAllowed: 'Wording review allowed：',
+      liveRequiredNextAction: 'Required next action：',
+      liveSurfaceStatus: 'Source surface status',
+      liveDevelopmentProgressSurface: 'Development-progress surface：',
+      liveRoadmapPreviewSurface: 'Roadmap preview surface：',
+      liveTrackedArtifactSurface: 'Tracked artifact surface：',
+      liveNoWordingReview: '当前公开快照还没有携带 wording-review 姿态。',
       liveQualifiedMainlineRuns: 'Qualified mainline runs：',
       liveLocalVisibilityRuns: 'Local visibility-only runs：',
       liveRemoteNoiseRuns: 'Non-qualified remote runs：',
@@ -399,6 +440,15 @@ const copy = computed(() => props.locale === 'zh'
       liveLatestVisibleRun: 'Latest visible run:',
       liveConfidenceNoise: 'Visibility Breakdown',
       liveConfidenceReview: 'Review signal',
+      liveWordingReview: 'Wording Review',
+      livePublicClaimClass: 'Public claim class:',
+      liveWordingAllowed: 'Wording review allowed:',
+      liveRequiredNextAction: 'Required next action:',
+      liveSurfaceStatus: 'Source surface status',
+      liveDevelopmentProgressSurface: 'Development-progress surface:',
+      liveRoadmapPreviewSurface: 'Roadmap preview surface:',
+      liveTrackedArtifactSurface: 'Tracked artifact surface:',
+      liveNoWordingReview: 'No wording-review posture is published on this snapshot yet.',
       liveQualifiedMainlineRuns: 'Qualified mainline runs:',
       liveLocalVisibilityRuns: 'Local visibility-only runs:',
       liveRemoteNoiseRuns: 'Non-qualified remote runs:',
@@ -461,6 +511,13 @@ const confidenceUpdatedAt = computed(() => formatTimestamp(confidenceProgress.up
 const confidenceLatestQualifiedRun = computed(() => formatRun(confidenceProgress.latestQualifiedRun))
 const confidenceLatestQualifiedSha = computed(() => formatSha(confidenceProgress.latestQualifiedRun))
 const confidenceLatestVisibleRun = computed(() => formatRun(confidenceProgress.latestRun))
+const confidenceWordingTone = computed(() => {
+  if (!confidenceProgress.wordingReview) return 'planned'
+  return confidenceProgress.wordingReview.publicClaimClass === 'promotion-ready-refresh-required' ? 'next' : 'safe'
+})
+const confidenceWordingBadge = computed(
+  () => confidenceProgress.wordingReview?.publicClaimClass ?? 'unavailable'
+)
 const reviewDigestPlanSourceLink = githubSourceLink(
   'docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md'
 )
@@ -483,6 +540,18 @@ function formatRun(run: (typeof confidenceProgress.latestRun)) {
 
 function formatSha(run: (typeof confidenceProgress.latestRun)) {
   return run?.context.sha ? run.context.sha.slice(0, 12) : 'local'
+}
+
+function yesNo(value: boolean) {
+  if (props.locale === 'zh') {
+    return value ? 'yes' : 'no'
+  }
+
+  return value ? 'yes' : 'no'
+}
+
+function confidenceSurfaceStatus(surfacePath: string) {
+  return confidenceProgress.wordingReview?.sourceSurfaces[surfacePath]?.claimStatus ?? 'none'
 }
 
 function badgeTone(stage: string) {

@@ -147,6 +147,26 @@
       <article class="pm-callout-card">
         <div class="pm-card-header">
           <div>
+            <span class="pm-kicker">{{ copy.wordingReviewKicker }}</span>
+            <h3>{{ copy.wordingReviewTitle }}</h3>
+          </div>
+          <span class="pm-badge" :class="wordingReviewTone">{{ wordingReviewBadge }}</span>
+        </div>
+        <template v-if="progress.wordingReview">
+          <ul class="pm-progress-list">
+            <li>{{ copy.publicClaimClass }} <code>{{ progress.wordingReview.publicClaimClass }}</code></li>
+            <li>{{ copy.wordingReviewAllowed }} {{ yesNo(progress.wordingReview.wordingReviewAllowed) }}</li>
+            <li>{{ copy.requiredNextAction }} {{ progress.wordingReview.requiredNextAction }}</li>
+            <li>{{ copy.developmentProgressSurface }} <code>{{ sourceSurfaceStatus('docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue') }}</code></li>
+            <li>{{ copy.roadmapPreviewSurface }} <code>{{ sourceSurfaceStatus('docs-site/.vitepress/theme/components/RoadmapPage.vue') }}</code></li>
+          </ul>
+        </template>
+        <p v-else class="pm-doc-note">{{ copy.noWordingReview }}</p>
+      </article>
+
+      <article class="pm-callout-card">
+        <div class="pm-card-header">
+          <div>
             <span class="pm-kicker">{{ copy.reviewChecklistKicker }}</span>
             <h3>{{ copy.reviewChecklistTitle }}</h3>
           </div>
@@ -227,6 +247,8 @@ const copy = computed(() => props.locale === 'zh'
       latestQualifiedTitle: '最新 qualified 主线运行',
       recentRunsKicker: 'Recent Runs',
       recentRunsTitle: '最近运行',
+      wordingReviewKicker: 'Wording Review',
+      wordingReviewTitle: '当前文案复核姿态',
       reviewChecklistKicker: 'Developer Review',
       reviewChecklistTitle: '开发者复核动作',
       currentDirectionKicker: 'Current Direction',
@@ -242,6 +264,11 @@ const copy = computed(() => props.locale === 'zh'
       reportFile: 'Report：',
       reviewDigestFile: 'Review digest：',
       wordingReviewFile: 'Wording review：',
+      publicClaimClass: 'Public claim class：',
+      wordingReviewAllowed: 'Wording review allowed：',
+      requiredNextAction: 'Required next action：',
+      developmentProgressSurface: 'Development-progress surface：',
+      roadmapPreviewSurface: 'Roadmap preview surface：',
       reviewHelperLabel: '默认复核 helper：',
       reviewCommandLabel: 'Review command：',
       publishedArtifact: 'Published artifact：',
@@ -269,6 +296,7 @@ const copy = computed(() => props.locale === 'zh'
       workflow: 'Workflow：',
       completed: 'Completed',
       failedStep: 'Failed step',
+      noWordingReview: '当前公开 artifact 还没有携带 wording-review 快照。',
       noQualifiedRun: '当前还没有 qualified 主线运行可公开显示。',
       none: 'none',
       yes: 'yes',
@@ -299,6 +327,8 @@ const copy = computed(() => props.locale === 'zh'
       latestQualifiedTitle: 'Latest qualified mainline run',
       recentRunsKicker: 'Recent Runs',
       recentRunsTitle: 'Recent runs',
+      wordingReviewKicker: 'Wording Review',
+      wordingReviewTitle: 'Current wording-review posture',
       reviewChecklistKicker: 'Developer Review',
       reviewChecklistTitle: 'Developer review actions',
       currentDirectionKicker: 'Current Direction',
@@ -314,6 +344,11 @@ const copy = computed(() => props.locale === 'zh'
       reportFile: 'Report:',
       reviewDigestFile: 'Review digest:',
       wordingReviewFile: 'Wording review:',
+      publicClaimClass: 'Public claim class:',
+      wordingReviewAllowed: 'Wording review allowed:',
+      requiredNextAction: 'Required next action:',
+      developmentProgressSurface: 'Development-progress surface:',
+      roadmapPreviewSurface: 'Roadmap preview surface:',
       reviewHelperLabel: 'Default review helper:',
       reviewCommandLabel: 'Review command:',
       publishedArtifact: 'Published artifact:',
@@ -341,6 +376,7 @@ const copy = computed(() => props.locale === 'zh'
       workflow: 'Workflow:',
       completed: 'Completed',
       failedStep: 'Failed step',
+      noWordingReview: 'No wording-review snapshot is published on this artifact yet.',
       noQualifiedRun: 'No qualified mainline run is available yet.',
       none: 'none',
       yes: 'yes',
@@ -378,6 +414,13 @@ const consecutivePassesLabel = computed(
 const qualifiedScopeLabel = computed(
   () => `${progress.readiness.qualifiedEvents.join(', ')} on ${progress.readiness.requiredRef}`
 )
+
+const wordingReviewTone = computed(() => {
+  if (!progress.wordingReview) return 'planned'
+  return progress.wordingReview.publicClaimClass === 'promotion-ready-refresh-required' ? 'next' : 'safe'
+})
+
+const wordingReviewBadge = computed(() => progress.wordingReview?.publicClaimClass ?? copy.value.unknown)
 
 const latestQualifiedRunLabel = computed(() => {
   if (!progress.latestQualifiedRun) {
@@ -517,5 +560,9 @@ function workflowLabel(run: NonNullable<ProgressRun>) {
 
 function failedStepLabel(value: string | null) {
   return value ?? copy.value.none
+}
+
+function sourceSurfaceStatus(surfacePath: string) {
+  return progress.wordingReview?.sourceSurfaces[surfacePath]?.claimStatus ?? copy.value.none
 }
 </script>

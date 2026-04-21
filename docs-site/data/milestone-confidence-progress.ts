@@ -165,6 +165,53 @@ export const milestoneConfidenceProgress = {
     "summaryPath": ".portmanager/reports/milestone-confidence-summary.md",
     "reportPath": ".portmanager/reports/milestone-confidence-report.json"
   },
+  "wordingReview": {
+    "publicClaimClass": "promotion-ready-reviewed",
+    "wordingReviewAllowed": true,
+    "requiredNextAction": "Review milestone wording against the verification report and helper outputs before merging public wording changes.",
+    "sourceSurfaces": {
+      "README.md": {
+        "claimStatus": "promotion-ready-wording-only",
+        "reviewInstruction": "Keep public wording at promotion-ready or below on this surface; exact counters stay on the development-progress page and tracked confidence artifact."
+      },
+      "TODO.md": {
+        "claimStatus": "helper-review-pack",
+        "reviewInstruction": "Keep helper-first review steps plus `Public claim class` and `Source surface status` visible for developers."
+      },
+      "Interface Document.md": {
+        "claimStatus": "helper-contract",
+        "reviewInstruction": "Keep helper and publication rules exact on this surface; latest counters stay on the tracked confidence artifact instead of this interface summary."
+      },
+      "docs/specs/portmanager-milestones.md": {
+        "claimStatus": "promotion-ready-wording-only",
+        "reviewInstruction": "Keep threshold-met milestone wording deliberate on this surface; exact counters stay on the development-progress page and tracked confidence artifact."
+      },
+      "docs/specs/portmanager-v1-product-spec.md": {
+        "claimStatus": "stable-product-boundary",
+        "reviewInstruction": "Keep the product boundary stable on this surface; do not introduce live readiness counters here."
+      },
+      "docs/operations/portmanager-real-machine-verification-report.md": {
+        "claimStatus": "published-evidence",
+        "reviewInstruction": "Freeze the reviewed published snapshot here and keep it aligned with the tracked confidence artifact."
+      },
+      "docs-site/data/milestone-confidence-progress.ts": {
+        "claimStatus": "tracked-counter-source",
+        "reviewInstruction": "Exact published counters belong here and on the development-progress page, not in root-doc prose."
+      },
+      "docs-site/data/roadmap.ts": {
+        "claimStatus": "roadmap-copy-review-pack",
+        "reviewInstruction": "Keep roadmap prose pointing developers to `Public claim class`, `Source surface status`, and the development-progress page instead of hard-coded counters."
+      },
+      "docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue": {
+        "claimStatus": "development-progress-counter-surface",
+        "reviewInstruction": "This public page mirrors exact counters from the tracked confidence artifact and should keep developer review guidance visible."
+      },
+      "docs-site/.vitepress/theme/components/RoadmapPage.vue": {
+        "claimStatus": "roadmap-preview-surface",
+        "reviewInstruction": "This roadmap preview should mirror the tracked confidence artifact and link reviewers to the development-progress page plus review pack."
+      }
+    }
+  },
   "publication": {
     "trackedDataPath": "docs-site/data/milestone-confidence-progress.ts",
     "defaultMode": "reuse-committed-artifact",

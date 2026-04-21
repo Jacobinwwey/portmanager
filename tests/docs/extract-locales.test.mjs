@@ -78,11 +78,12 @@ async function createSandbox(t) {
   })
 
   const historyPath = path.join(sandboxRoot, 'reports', 'milestone-confidence-history.json')
+  const wordingReviewPath = path.join(sandboxRoot, 'reports', 'milestone-wording-review.md')
   const generatedDataPath = path.join(sandboxRoot, 'docs-site', 'data', 'milestone-confidence-progress.ts')
   await mkdir(path.dirname(historyPath), { recursive: true })
   await mkdir(path.dirname(generatedDataPath), { recursive: true })
 
-  return { historyPath, generatedDataPath }
+  return { historyPath, wordingReviewPath, generatedDataPath }
 }
 
 test('default docs generation reuses the committed confidence artifact even when local history exists', async (t) => {
@@ -103,7 +104,7 @@ test('default docs generation reuses the committed confidence artifact even when
 })
 
 test('explicit confidence refresh regenerates the committed artifact from local history', async (t) => {
-  const { historyPath, generatedDataPath } = await createSandbox(t)
+  const { historyPath, wordingReviewPath, generatedDataPath } = await createSandbox(t)
 
   await writeFile(generatedDataPath, '/* stale artifact */\n', 'utf8')
   await writeFile(
@@ -111,10 +112,32 @@ test('explicit confidence refresh regenerates the committed artifact from local 
     JSON.stringify(buildHistoryFixture('2026-04-18T08:08:08.000Z'), null, 2),
     'utf8'
   )
+  await writeFile(
+    wordingReviewPath,
+    [
+      '# Milestone Wording Review Checklist',
+      '',
+      '## Confidence Gate',
+      '- Wording review allowed: yes',
+      '',
+      '## Claim Posture',
+      '- Public claim class: promotion-ready-reviewed',
+      '- Required next action: Review milestone wording against helper outputs.',
+      '',
+      '## Source Surface Status',
+      '| Surface | Claim status | Review instruction |',
+      '| --- | --- | --- |',
+      '| docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue | development-progress-counter-surface | Keep developer review guidance visible. |',
+      '| docs-site/.vitepress/theme/components/RoadmapPage.vue | roadmap-preview-surface | Keep roadmap preview aligned. |',
+      ''
+    ].join('\n'),
+    'utf8'
+  )
 
   const status = await generateMilestoneConfidenceProgressData({
     refreshConfidenceProgress: true,
     confidenceHistorySourcePath: historyPath,
+    wordingReviewSourcePath: wordingReviewPath,
     generatedDataPath
   })
 
@@ -127,6 +150,32 @@ test('explicit confidence refresh regenerates the committed artifact from local 
     refreshedArtifact,
     /"refreshCommand": "pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence"/
   )
+  assert.match(refreshedArtifact, /"publicClaimClass": "promotion-ready-reviewed"/)
+  assert.match(refreshedArtifact, /"wordingReviewAllowed": true/)
+  assert.match(refreshedArtifact, /"requiredNextAction": "Review milestone wording against helper outputs\."/)
+  assert.match(refreshedArtifact, /"development-progress-counter-surface"/)
+})
+
+test('explicit confidence refresh still succeeds when wording-review artifact is unavailable', async (t) => {
+  const { historyPath, wordingReviewPath, generatedDataPath } = await createSandbox(t)
+
+  await writeFile(
+    historyPath,
+    JSON.stringify(buildHistoryFixture('2026-04-18T08:08:08.000Z'), null, 2),
+    'utf8'
+  )
+
+  const status = await generateMilestoneConfidenceProgressData({
+    refreshConfidenceProgress: true,
+    confidenceHistorySourcePath: historyPath,
+    wordingReviewSourcePath: wordingReviewPath,
+    generatedDataPath
+  })
+
+  const refreshedArtifact = await readFile(generatedDataPath, 'utf8')
+
+  assert.equal(status, 'refreshed')
+  assert.match(refreshedArtifact, /"wordingReview": null/)
 })
 
 test('explicit confidence refresh fails when local history is unavailable', async (t) => {
