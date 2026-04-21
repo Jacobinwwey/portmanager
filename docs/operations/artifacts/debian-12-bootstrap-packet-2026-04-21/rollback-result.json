@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "0.1.0",
+  "rollbackPointId": "rp_op_backup_1776807481139_825",
+  "operationId": "op_rollback_1776809568474_70",
+  "status": "rolled_back",
+  "verifiedAt": "2026-04-21T22:12:48.480Z",
+  "restoredArtifacts": [
+    "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/desired-state.snapshot.json",
+    "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/runtime-state.snapshot.json",
+    "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/operation-result.json",
+    "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/health-summary.json"
+  ],
+  "notes": "rollback restored 4 managed artifacts"
+}

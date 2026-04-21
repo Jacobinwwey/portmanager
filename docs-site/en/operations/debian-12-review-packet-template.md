@@ -25,10 +25,10 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 - controller commit or release under review
 - short drift summary, including any still-blocking mismatch
 
-### Preserved bootstrap and steady-state packet on 2026-04-21
+### Preserved full bounded packet on 2026-04-21
 - packet artifact root: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
 - review date: `2026-04-21`
-- controller commit: `ce19f8b6572171896e2bdb42cdb184eeab845454`
+- controller commit: `b4b648fd4a2b694df1892ea2b6fe610e5d387516`
 - candidate target profile id: `debian-12-systemd-tailscale`
 - candidate host id: `host_debian_12_review_packet_1776805736172_558`
 - recorded address for this bounded rehearsal: `172.17.0.2`
@@ -40,7 +40,22 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 - steady-state `/health` capture: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-health.json`
 - steady-state `/runtime-state` capture: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-runtime-state.json`
 - steady-state audit reference: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-audit-index.json`
-- drift summary: local Debian 12 Docker bridge replaced live Tailscale for this preserved review packet, so broader support claims remain locked.
+- backup operation id: `op_backup_1776807481139_825`
+- backup result summary: `backup backup_op_backup_1776807481139_825 created with rollback point rp_op_backup_1776807481139_825; GitHub backup uploaded to Jacobinwwey/portmanager-backups:portmanager-backups/host_debian_12_review_packet_1776805736172_558/backup_op_backup_1776807481139_825.bundle.json`
+- backup manifest path: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/manifest.json`
+- backup summary: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backup-summary.json`
+- remote-backup upload record: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backup-github-upload.json`
+- restore-readiness reference: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backup-rollback-points.json`
+- diagnostics operation id: `op_diag_1776809568435_848`
+- diagnostics artifact bundle: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics-artifacts.json`
+- diagnostics audit reference: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics-audit-index.json`
+- diagnostics drift note: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics-capture-summary.json`
+- rollback-point id: `rp_op_backup_1776807481139_825`
+- rollback operation id: `op_rollback_1776809568474_70`
+- rollback result summary: `rollback rp_op_backup_1776807481139_825 applied from rp_op_backup_1776807481139_825-result.json`
+- rollback result artifact: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback/rp_op_backup_1776807481139_825-result.json`
+- post-rollback diagnostics linkage: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-post-diagnostics.json`
+- drift summary: local Debian 12 Docker bridge replaced live Tailscale for this preserved review packet, so broader support claims remain locked until bounded second-target review closes.
 
 ### Required evidence sections
 1. Bootstrap transport parity
@@ -54,7 +69,7 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
    - resulting `/runtime-state` capture
    - linked controller operation or audit reference
 3. Backup and restore parity
-   - backup-bearing mutation id
+   - bounded backup operation id
    - backup manifest path
    - remote-backup result if configured
    - restore or restore-readiness note for the same packet
@@ -70,6 +85,6 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
    - post-rollback diagnostics linkage
 
 ### Publication rule
-- Keep the packet in review-prep until every required section has real artifact links.
+- Keep the packet in bounded review until every required section stays linked to real artifact evidence and review closes.
 - If any section regresses, update `/second-target-policy-pack` first and keep support claims locked to Ubuntu.
 - Link this packet back into the acceptance recipe, bootstrap-proof guide, steady-state-proof guide, backup-restore-proof guide, diagnostics-proof guide, rollback-proof guide, and operator ownership note when evidence changes.

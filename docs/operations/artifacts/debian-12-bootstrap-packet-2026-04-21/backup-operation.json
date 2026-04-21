@@ -1,0 +1,13 @@
+{
+  "id": "op_backup_1776807481139_825",
+  "type": "backup",
+  "state": "succeeded",
+  "initiator": "web",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "startedAt": "2026-04-21T21:38:01.139Z",
+  "finishedAt": "2026-04-21T21:38:01.162Z",
+  "eventStreamUrl": "/operations/events?operationId=op_backup_1776807481139_825",
+  "backupId": "backup_op_backup_1776807481139_825",
+  "rollbackPointId": "rp_op_backup_1776807481139_825",
+  "resultSummary": "backup backup_op_backup_1776807481139_825 created with rollback point rp_op_backup_1776807481139_825; GitHub backup uploaded to Jacobinwwey/portmanager-backups:portmanager-backups/host_debian_12_review_packet_1776805736172_558/backup_op_backup_1776807481139_825.bundle.json"
+}

@@ -33,7 +33,7 @@ status: active
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md` 与 `docs/operations/portmanager-debian-12-review-packet-template.md` 继续作为配套真相面。
 
 ### 采集流程
-1. 先读取 `portmanager operations second-target-policy-pack`，确认 steady-state parity 仍然是阻塞项。
+1. 先读取 `portmanager operations second-target-policy-pack`，确认 steady-state parity 已经由保留 packet 支撑，但更广支持声明仍然在 bounded review 完成前保持锁定。
 2. 在 bootstrap 之后执行一次正常 controller-driven mutation：
    - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
    - 只有在保持同一套有边界证据模型时，才可以改用等价 exposure-policy 或 rule mutation。

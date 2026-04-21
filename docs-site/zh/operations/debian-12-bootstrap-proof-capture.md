@@ -24,7 +24,7 @@ status: active
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md` 与 `docs/operations/portmanager-debian-12-review-packet-template.md` 继续作为配套真相面。
 
 ### 采集流程
-1. 先读取 `portmanager operations second-target-policy-pack`，确认已保留的 bootstrap 与 steady-state packet 已落地，但 backup、diagnostics、rollback 与 second-target review 仍然阻塞更广复核。
+1. 先读取 `portmanager operations second-target-policy-pack`，确认已保留的 bootstrap 切片仍然链接在完整 bounded packet 里，而更广支持声明仍然在 bounded review 完成前保持锁定。
 2. 使用 `--target-profile-id debian-12-systemd-tailscale` 创建或确认一台候选主机。
 3. 通过正常 controller 路径执行一次有边界 bootstrap 预演：
    - `portmanager hosts probe <host-id> --wait`
@@ -43,9 +43,9 @@ status: active
 - bootstrap operation detail：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-operation.json`
 - bootstrap audit index：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-audit-index.json`
 - bootstrap host detail：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-host-detail.json`
-- 已保留 bootstrap operation id：`op_bootstrap_host_1776803574305_379`
-- 已保留结果摘要：`host host_debian_12_bootstrap_review_1776803574142_396 bootstrapped via http://172.17.0.3:8711; 0 rule(s) staged with backup policy best_effort`
-- 已保留 target-profile 确认：host `host_debian_12_bootstrap_review_1776803574142_396` 保持 `debian-12-systemd-tailscale`，并进入 `ready`
+- 已保留 bootstrap operation id：`op_bootstrap_host_1776805736313_817`
+- 已保留结果摘要：`host host_debian_12_review_packet_1776805736172_558 bootstrapped via http://172.17.0.2:8711; 0 rule(s) staged with backup policy best_effort`
+- 已保留 target-profile 确认：host `host_debian_12_review_packet_1776805736172_558` 保持 `debian-12-systemd-tailscale`，并进入 `ready`
 - drift 备注：这份有边界 packet 使用本地 Debian 12 Docker bridge 地址替代 live Tailscale tailnet，因此支持声明继续保持锁定
 
 ### 必需产物
@@ -55,4 +55,4 @@ status: active
 - 证明 host target profile 仍然是 `debian-12-systemd-tailscale` 的记录
 
 ### 退出规则
-只有当同一份 review packet 持续把四类产物都链接回同一次 bootstrap 预演时，bootstrap transport parity 才能继续保持为已落地切片；steady-state、backup、diagnostics、rollback 与 review closeout 仍然阻塞。
+只有当同一份 review packet 持续把四类产物都链接回同一次 bootstrap 预演时，bootstrap transport parity 才能继续保持为已落地切片；更广支持声明仍然要等 bounded second-target review 关闭后才能前进。

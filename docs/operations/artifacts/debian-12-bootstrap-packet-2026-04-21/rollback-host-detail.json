@@ -1,0 +1,94 @@
+{
+  "id": "host_debian_12_review_packet_1776805736172_558",
+  "name": "Debian 12 Review Packet",
+  "lifecycleState": "ready",
+  "tailscaleAddress": "172.17.0.2",
+  "agentState": "ready",
+  "agentHeartbeatState": "live",
+  "targetProfileId": "debian-12-systemd-tailscale",
+  "targetProfileLabel": "Debian 12 + systemd + Tailscale",
+  "targetProfileStatus": "candidate",
+  "agentVersion": "0.1.0",
+  "agentHeartbeatAt": "2026-04-21T22:12:48.372Z",
+  "lastBackupAt": "2026-04-21T21:38:01.149Z",
+  "lastDiagnosticsAt": "2026-04-21T22:12:48.506Z",
+  "updatedAt": "2026-04-21T22:12:48.506Z",
+  "labels": [
+    "review-packet",
+    "debian-12"
+  ],
+  "targetProfile": {
+    "id": "debian-12-systemd-tailscale",
+    "label": "Debian 12 + systemd + Tailscale",
+    "status": "candidate",
+    "platform": "Debian 12",
+    "serviceManager": "systemd",
+    "steadyStateTransport": "http-over-tailscale",
+    "bootstrapTransport": "ssh",
+    "capabilities": [
+      "probe-host",
+      "bootstrap-host",
+      "apply-desired-state",
+      "collect-diagnostics",
+      "rollback"
+    ]
+  },
+  "effectivePolicy": {
+    "hostId": "host_debian_12_review_packet_1776805736172_558",
+    "allowedSources": [
+      "tailscale"
+    ],
+    "excludedPorts": [
+      22
+    ],
+    "samePortMirror": false,
+    "conflictPolicy": "reject",
+    "backupPolicy": "best_effort"
+  },
+  "recentRules": [
+    {
+      "id": "rule_steady_state_review_rule_1776805736384_967",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "protocol": "tcp",
+      "listenPort": 18081,
+      "targetHost": "127.0.0.1",
+      "targetPort": 8080,
+      "lifecycleState": "active",
+      "name": "Steady-State Review Rule",
+      "lastVerifiedAt": "2026-04-21T22:12:48.497Z",
+      "lastRollbackPointId": "rp_op_backup_1776807481139_825"
+    }
+  ],
+  "recentOperations": [
+    {
+      "id": "op_diag_1776809568491_240",
+      "type": "diagnostics",
+      "state": "succeeded",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "ruleId": "rule_steady_state_review_rule_1776805736384_967",
+      "startedAt": "2026-04-21T22:12:48.491Z",
+      "finishedAt": "2026-04-21T22:12:48.506Z",
+      "resultSummary": "diagnostics captured for host_debian_12_review_packet_1776805736172_558:40753"
+    },
+    {
+      "id": "op_rollback_1776809568474_70",
+      "type": "rollback",
+      "state": "succeeded",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "startedAt": "2026-04-21T22:12:48.474Z",
+      "finishedAt": "2026-04-21T22:12:48.483Z",
+      "resultSummary": "rollback rp_op_backup_1776807481139_825 applied from rp_op_backup_1776807481139_825-result.json",
+      "rollbackPointId": "rp_op_backup_1776807481139_825"
+    },
+    {
+      "id": "op_diag_1776809568435_848",
+      "type": "diagnostics",
+      "state": "succeeded",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "ruleId": "rule_steady_state_review_rule_1776805736384_967",
+      "startedAt": "2026-04-21T22:12:48.435Z",
+      "finishedAt": "2026-04-21T22:12:48.452Z",
+      "resultSummary": "diagnostics captured for host_debian_12_review_packet_1776805736172_558:40753"
+    }
+  ]
+}

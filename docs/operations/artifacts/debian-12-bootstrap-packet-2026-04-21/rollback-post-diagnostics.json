@@ -1,0 +1,40 @@
+{
+  "id": "op_diag_1776809568491_240",
+  "type": "diagnostics",
+  "state": "succeeded",
+  "initiator": "web",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "ruleId": "rule_steady_state_review_rule_1776805736384_967",
+  "startedAt": "2026-04-21T22:12:48.491Z",
+  "finishedAt": "2026-04-21T22:12:48.506Z",
+  "eventStreamUrl": "/operations/events?operationId=op_diag_1776809568491_240",
+  "diagnosticResult": {
+    "schemaVersion": "0.1.0",
+    "hostId": "host_debian_12_review_packet_1776805736172_558",
+    "ruleId": "rule_steady_state_review_rule_1776805736384_967",
+    "port": 40753,
+    "tcpReachable": true,
+    "httpStatus": 200,
+    "pageTitle": "Debian 12 Review Relay Restored",
+    "finalUrl": "http://127.0.0.1:40753/status",
+    "tls": {
+      "enabled": false
+    },
+    "capturedAt": "2026-04-21T22:12:48.497Z"
+  },
+  "snapshotResult": {
+    "schemaVersion": "0.1.0",
+    "hostId": "host_debian_12_review_packet_1776805736172_558",
+    "ruleId": "rule_steady_state_review_rule_1776805736384_967",
+    "port": 40753,
+    "artifactPath": "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics/op_diag_1776809568491_240/page-snapshot.svg",
+    "pageTitle": "Debian 12 Review Relay Restored",
+    "httpStatus": 200,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "capturedAt": "2026-04-21T22:12:48.497Z"
+  },
+  "resultSummary": "diagnostics captured for host_debian_12_review_packet_1776805736172_558:40753"
+}

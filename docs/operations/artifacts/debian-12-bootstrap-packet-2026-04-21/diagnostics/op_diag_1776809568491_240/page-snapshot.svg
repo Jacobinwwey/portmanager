@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#172126" />
+      <stop offset="100%" stop-color="#3d4a52" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)" />
+  <rect x="40" y="40" width="1200" height="640" rx="28" fill="#f7f2e8" opacity="0.96" />
+  <text x="84" y="118" fill="#7b4a24" font-family="IBM Plex Mono, monospace" font-size="22">PORTMANAGER SNAPSHOT</text>
+  <text x="84" y="188" fill="#172126" font-family="Iowan Old Style, serif" font-size="44">Debian 12 Review Relay Restored</text>
+  <text x="84" y="256" fill="#4e5d65" font-family="IBM Plex Sans, sans-serif" font-size="24">host host_debian_12_review_packet_1776805736172_558 · rule rule_steady_state_review_rule_1776805736384_967</text>
+  <text x="84" y="308" fill="#4e5d65" font-family="IBM Plex Sans, sans-serif" font-size="24">status 200</text>
+  <text x="84" y="380" fill="#172126" font-family="IBM Plex Mono, monospace" font-size="20">http://127.0.0.1:40753/status</text>
+  <text x="84" y="620" fill="#4e5d65" font-family="IBM Plex Mono, monospace" font-size="18">captured 2026-04-21T22:12:48.497Z</text>
+</svg>

@@ -1,0 +1,29 @@
+{
+  "capturedAt": "2026-04-21T22:12:48.528Z",
+  "controllerBaseUrl": "http://127.0.0.1:36805",
+  "packetArtifactRoot": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21",
+  "candidateTargetProfileId": "debian-12-systemd-tailscale",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "ruleId": "rule_steady_state_review_rule_1776805736384_967",
+  "rollbackPointId": "rp_op_backup_1776807481139_825",
+  "preCaptureArtifactCoverage": {
+    "available": 16,
+    "expected": 20,
+    "missingArtifactIds": [
+      "rollback_point_id",
+      "rollback_operation_id",
+      "rollback_result_summary",
+      "post_rollback_diagnostics_linkage"
+    ]
+  },
+  "rollbackOperationId": "op_rollback_1776809568474_70",
+  "rollbackOperationState": "succeeded",
+  "rollbackResultSummary": "rollback rp_op_backup_1776807481139_825 applied from rp_op_backup_1776807481139_825-result.json",
+  "rollbackResultPath": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback/rp_op_backup_1776807481139_825-result.json",
+  "rollbackPointState": "applied",
+  "postRollbackDiagnosticsOperationId": "op_diag_1776809568491_240",
+  "postRollbackDiagnosticsArtifactPath": "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics/op_diag_1776809568491_240/page-snapshot.svg",
+  "postRollbackDiagnosticsPageTitle": "Debian 12 Review Relay Restored",
+  "postRollbackAuditReferenceCount": 1,
+  "driftOperatorNote": "Diagnostics and rollback rehearsal stayed healthy on local Debian 12 Docker bridge evidence; live Tailscale parity still requires bounded review, not broader support claims."
+}

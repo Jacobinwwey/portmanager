@@ -19,8 +19,8 @@ This document does not claim that parity proof already passed.
 It freezes the exact proof sequence and artifact bundle required before second-target review can open.
 The companion review-packet template at `docs/operations/portmanager-debian-12-review-packet-template.md` freezes how those artifacts are recorded.
 The companion capture guides at `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`, `docs/operations/portmanager-debian-12-steady-state-proof-capture.md`, `docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`, `docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`, and `docs/operations/portmanager-debian-12-rollback-proof-capture.md` freeze how bootstrap, steady-state, backup, diagnostics, and rollback evidence are gathered.
-Current repo baseline now supports candidate-host enrollment, probe, and one preserved Debian 12 review packet with bounded bootstrap plus steady-state evidence.
-It still does not claim backup, diagnostics, or rollback parity, and it still keeps broader support claims locked to Ubuntu.
+Current repo baseline now supports candidate-host enrollment, probe, and one preserved complete Debian 12 review packet with bounded bootstrap, steady-state, backup, diagnostics, and rollback evidence.
+It still does not widen broader support claims automatically, and it still keeps broader support claims locked to Ubuntu until bounded review closes.
 
 ### Preconditions
 - `pnpm acceptance:verify` stays green on the current mainline slice.
@@ -34,8 +34,8 @@ It still does not claim backup, diagnostics, or rollback parity, and it still ke
 - Optional local rehearsal: `incus launch images:debian/12 portmanager-debian12-review`
   - If `incus` is unavailable, use any equivalent Debian 12 environment.
   - This command is a staging suggestion, not proof by itself.
-- Preserved Units 64-65 example: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
-  - This bounded example used a local Debian 12 Docker container and recorded the drift note instead of pretending live Tailscale parity already exists.
+- Preserved Units 64-69 example: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
+  - This bounded example used a local Debian 12 Docker container, preserved bootstrap, steady-state, backup, diagnostics, and rollback evidence, and recorded the drift note instead of pretending live Tailscale parity already exists.
 
 ### Review-prep proof sequence
 1. Enroll one Debian 12 host with target profile `debian-12-systemd-tailscale`.
@@ -43,7 +43,7 @@ It still does not claim backup, diagnostics, or rollback parity, and it still ke
 3. Capture bootstrap transport result plus controller operation evidence.
 4. Apply one bridge rule or exposure policy through the normal controller path.
 5. Capture steady-state runtime evidence from agent `/health` and `/runtime-state`.
-6. Trigger one backup-bearing mutation and record backup manifest plus remote-backup result if configured.
+6. Trigger one bounded backup operation and record backup manifest plus remote-backup result if configured.
 7. Run diagnostics and preserve diagnostics artifacts plus controller event linkage.
 8. Rehearse rollback and record rollback-point linkage, result summary, and post-rollback diagnostics.
 9. Publish one review packet from `docs/operations/portmanager-debian-12-review-packet-template.md` that links every artifact back to `/second-target-policy-pack`.
@@ -63,4 +63,4 @@ It still does not claim backup, diagnostics, or rollback parity, and it still ke
 - rollback-proof guide path: `docs/operations/portmanager-debian-12-rollback-proof-capture.md`
 
 ### Exit rule
-Only mark parity criteria true after the exact evidence bundle exists and is linked in the review packet.
+Only mark parity criteria true after the exact evidence bundle exists and is linked in the review packet. The current preserved packet now satisfies that bundle, so the next action is bounded second-target review instead of inventing more capture work.

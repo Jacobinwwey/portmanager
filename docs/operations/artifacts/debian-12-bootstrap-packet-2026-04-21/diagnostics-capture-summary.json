@@ -1,0 +1,32 @@
+{
+  "capturedAt": "2026-04-21T22:12:48.473Z",
+  "controllerBaseUrl": "http://127.0.0.1:36805",
+  "packetArtifactRoot": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21",
+  "candidateTargetProfileId": "debian-12-systemd-tailscale",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "ruleId": "rule_steady_state_review_rule_1776805736384_967",
+  "targetPort": 40753,
+  "preCaptureReadinessState": "capture_in_progress",
+  "preCaptureArtifactCoverage": {
+    "available": 12,
+    "expected": 20,
+    "missingArtifactIds": [
+      "diagnostics_operation_id",
+      "diagnostics_artifact_paths",
+      "controller_event_reference",
+      "drift_operator_note",
+      "rollback_point_id",
+      "rollback_operation_id",
+      "rollback_result_summary",
+      "post_rollback_diagnostics_linkage"
+    ]
+  },
+  "diagnosticsOperationId": "op_diag_1776809568435_848",
+  "diagnosticsOperationState": "succeeded",
+  "diagnosticsResultSummary": "diagnostics captured for host_debian_12_review_packet_1776805736172_558:40753",
+  "diagnosticsArtifactPath": "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics/op_diag_1776809568435_848/page-snapshot.svg",
+  "diagnosticsPageTitle": "Debian 12 Review Relay Healthy",
+  "diagnosticsFinalUrl": "http://127.0.0.1:40753/status",
+  "controllerAuditReferenceCount": 1,
+  "driftOperatorNote": "Diagnostics and rollback rehearsal stayed healthy on local Debian 12 Docker bridge evidence; live Tailscale parity still requires bounded review, not broader support claims."
+}

@@ -15,8 +15,15 @@ status: active
 > Updated: 2026-04-21 | Version: v0.1.0
 ### Purpose
 Freeze one concrete rollback proof-capture guide for `debian-12-systemd-tailscale`.
-This document does not mark rollback parity as passed.
-It defines the minimum rollback rehearsal bundle that must exist before `/second-target-policy-pack` can move rollback parity beyond review-prep.
+This document does not widen supported-target claims by itself.
+It now points at the preserved rollback rehearsal bundle that `/second-target-policy-pack` treats as landed rollback evidence inside the complete bounded review packet.
+
+### Preserved bounded packet on 2026-04-21
+- packet artifact root: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
+- rollback-point id: `rp_op_backup_1776807481139_825`
+- rollback operation id: `op_rollback_1776809568474_70`
+- rollback result summary and artifact: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-capture-summary.json`, `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback/rp_op_backup_1776807481139_825-result.json`
+- post-rollback diagnostics linkage: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-post-diagnostics.json`
 
 ### Inputs
 - Candidate host already completed one bounded backup-bearing mutation capture and one diagnostics capture.
@@ -25,7 +32,7 @@ It defines the minimum rollback rehearsal bundle that must exist before `/second
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md`, `docs/operations/portmanager-debian-12-review-packet-template.md`, and `docs/operations/portmanager-backup-rollback-policy.md` stay the companion truth surfaces.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm rollback parity still blocks review.
+1. Read `portmanager operations second-target-policy-pack` and confirm rollback parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
 2. List rollback points for the candidate host and choose one point tied to the same bounded review packet:
    - `portmanager rollback-points --host-id <host-id> --json`
 3. Rehearse one bounded rollback:
@@ -47,4 +54,4 @@ It defines the minimum rollback rehearsal bundle that must exist before `/second
 - post-rollback diagnostics artifact or audit linkage from the same rehearsal
 
 ### Exit rule
-Keep rollback parity blocked until one review packet links all four artifacts back to the same bounded rollback rehearsal.
+Keep rollback parity tied to one preserved rollback rehearsal, and refresh `/second-target-policy-pack` first if any of the four linked artifacts drift while bounded review remains open.

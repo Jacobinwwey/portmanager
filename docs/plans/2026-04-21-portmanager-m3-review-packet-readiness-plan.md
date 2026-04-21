@@ -13,10 +13,10 @@ Version: v0.1.0
 
 ## Status Note
 Late `2026-04-21` progress now moves this plan past initial readiness publication.
-Units 63 through 65 are landed.
-`/second-target-policy-pack` now reports guide coverage `6/6`, artifact coverage `8/20`, and landed bootstrap plus steady-state packet parity for declared candidate `debian-12-systemd-tailscale`.
+Units 63 through 69 are landed.
+`/second-target-policy-pack` now reports guide coverage `6/6`, artifact coverage `20/20`, readiness state `packet_ready`, and decision state `review_required` for declared candidate `debian-12-systemd-tailscale`.
 One bounded Debian 12 review packet is preserved at `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`.
-The active remaining queue is now Units 66 through 69: backup-and-restore packet execution, diagnostics packet execution, rollback packet execution, and second-target review closeout.
+The active next move is no longer packet capture; it is bounded second-target review adjudication while broader supported-target claims stay locked to Ubuntu.
 The implementation units below stay preserved as the original execution map so developers can trace why the current remaining queue exists.
 
 ## Overview
@@ -178,9 +178,9 @@ flowchart LR
 - Happy path: readiness surface shows the steady-state artifacts captured alongside bootstrap artifacts.
 - Regression: no wider support claim changes until the full packet exists.
 
-- [ ] **Unit 66: Backup-And-Restore Packet Execution**
+- [x] **Unit 66: Backup-And-Restore Packet Execution**
 
-**Goal:** Add backup-bearing mutation, manifest lineage, remote-backup result, and restore-readiness linkage to the same packet.
+**Goal:** Add one bounded backup operation, manifest lineage, remote-backup result, and restore-readiness linkage to the same packet.
 
 **Requirements:** R4-R9
 
@@ -200,7 +200,7 @@ flowchart LR
 - Happy path: readiness surface advances artifact coverage for backup-and-restore slots.
 - Regression: packet still stays incomplete until diagnostics and rollback artifacts are present.
 
-- [ ] **Unit 67: Diagnostics Packet Execution**
+- [x] **Unit 67: Diagnostics Packet Execution**
 
 **Goal:** Add diagnostics artifact paths, controller event linkage, and operator drift note to the same packet.
 
@@ -222,7 +222,7 @@ flowchart LR
 - Happy path: diagnostics artifact coverage becomes explicit in `/second-target-policy-pack`.
 - Regression: no wording widens while rollback evidence remains missing.
 
-- [ ] **Unit 68: Rollback Packet Execution**
+- [x] **Unit 68: Rollback Packet Execution**
 
 **Goal:** Add rollback rehearsal evidence and post-rollback diagnostics linkage to complete the bounded Debian 12 packet.
 
@@ -244,9 +244,9 @@ flowchart LR
 - Happy path: readiness surface reaches `packet_ready` after rollback evidence completes the full artifact set.
 - Regression: support claim still does not move until closeout review confirms the packet.
 
-- [ ] **Unit 69: Second-Target Review Closeout**
+- [x] **Unit 69: Second-Target Review Closeout**
 
-**Goal:** Open the bounded second-target review only after the full packet exists and all public docs still match the hold-or-review truth.
+**Goal:** Open the bounded second-target review after the full packet exists, public docs match `packet_ready` plus `review_required`, and broader supported-target claims still stay locked to Ubuntu.
 
 **Requirements:** R1-R10
 
@@ -268,9 +268,10 @@ flowchart LR
 **Approach:**
 - Re-read the complete Debian 12 packet, then update `/second-target-policy-pack` and public docs only if every criterion remains justified.
 - Keep support claims locked if any packet artifact regresses or becomes stale.
+- Publish review-open wording as bounded adjudication only; do not turn packet readiness into supported-target expansion.
 
 **Test scenarios:**
-- Happy path: public docs move from `capture_required` or `capture_in_progress` to review-ready wording without claiming supported-target expansion yet.
+- Happy path: public docs move from `capture_required` or `capture_in_progress` to `packet_ready` plus `review_required` wording without claiming supported-target expansion.
 - Regression: any missing artifact or wording drift keeps the candidate on hold.
 
 ## Verification Strategy

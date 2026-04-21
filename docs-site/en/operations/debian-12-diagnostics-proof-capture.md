@@ -15,8 +15,15 @@ status: active
 > Updated: 2026-04-21 | Version: v0.1.0
 ### Purpose
 Freeze one concrete diagnostics proof-capture guide for `debian-12-systemd-tailscale`.
-This document does not mark diagnostics parity as passed.
-It defines the minimum diagnostics artifact bundle that must exist before `/second-target-policy-pack` can move diagnostics parity beyond review-prep.
+This document does not widen supported-target claims by itself.
+It now points at the preserved diagnostics artifact bundle that `/second-target-policy-pack` treats as landed diagnostics evidence inside the complete bounded review packet.
+
+### Preserved bounded packet on 2026-04-21
+- packet artifact root: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
+- diagnostics operation id: `op_diag_1776809568435_848`
+- diagnostics artifact bundle: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics-artifacts.json`
+- diagnostics audit reference: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics-audit-index.json`
+- operator drift note and summary: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics-capture-summary.json`
 
 ### Inputs
 - Candidate host already completed one bounded bootstrap rehearsal and one steady-state mutation capture.
@@ -25,7 +32,7 @@ It defines the minimum diagnostics artifact bundle that must exist before `/seco
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md`, `docs/operations/portmanager-debian-12-review-packet-template.md`, and `docs/operations/portmanager-backup-rollback-policy.md` stay the companion truth surfaces.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm diagnostics parity still blocks review.
+1. Read `portmanager operations second-target-policy-pack` and confirm diagnostics parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
 2. Trigger one bounded controller-side diagnostics run for the candidate host and rule:
    - `curl -fsS -X POST http://<controller-host>:<controller-port>/snapshots/diagnostics -H 'content-type: application/json' -d '{"hostId":"<host-id>","ruleId":"<rule-id>","port":<listen-port>,"scheme":"http","captureSnapshot":true}'`
    - Use any equivalent bounded controller-driven diagnostics trigger only if it preserves the same controller artifact and event model.
@@ -47,4 +54,4 @@ It defines the minimum diagnostics artifact bundle that must exist before `/seco
 - short operator note for any drift or verified no-drift outcome
 
 ### Exit rule
-Keep diagnostics parity blocked until one review packet links all four artifacts back to the same diagnostics run.
+Keep diagnostics parity tied to one preserved diagnostics run, and refresh `/second-target-policy-pack` first if any of the four linked artifacts drift while bounded review remains open.

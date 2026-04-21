@@ -1,0 +1,56 @@
+{
+  "capturedAt": "2026-04-21T21:38:01.183Z",
+  "controllerCommit": "b4b648fd4a2b694df1892ea2b6fe610e5d387516",
+  "controllerBaseUrl": "http://127.0.0.1:35445",
+  "packetArtifactRoot": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21",
+  "candidateTargetProfileId": "debian-12-systemd-tailscale",
+  "environment": {
+    "platform": "docker",
+    "osRelease": "debian 12",
+    "containerName": "portmanager-unit65-refresh-2158663",
+    "containerIp": "172.17.0.2",
+    "agentPort": 8711,
+    "note": "Bounded local Debian 12 container rehearsal. Container bridge address replaces live Tailscale in this preserved backup packet, so broader support claims remain locked."
+  },
+  "preCaptureReadinessState": "capture_in_progress",
+  "preCaptureArtifactCoverage": {
+    "available": 8,
+    "expected": 20,
+    "missingArtifactIds": [
+      "backup_bearing_mutation_id",
+      "backup_manifest_path",
+      "remote_backup_result",
+      "restore_readiness_reference",
+      "diagnostics_operation_id",
+      "diagnostics_artifact_paths",
+      "controller_event_reference",
+      "drift_operator_note",
+      "rollback_point_id",
+      "rollback_operation_id",
+      "rollback_result_summary",
+      "post_rollback_diagnostics_linkage"
+    ]
+  },
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "backupOperationId": "op_backup_1776807481139_825",
+  "backupOperationState": "succeeded",
+  "backupResultSummary": "backup backup_op_backup_1776807481139_825 created with rollback point rp_op_backup_1776807481139_825; GitHub backup uploaded to Jacobinwwey/portmanager-backups:portmanager-backups/host_debian_12_review_packet_1776805736172_558/backup_op_backup_1776807481139_825.bundle.json",
+  "backupId": "backup_op_backup_1776807481139_825",
+  "backupMode": "required",
+  "backupManifestPath": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/manifest.json",
+  "remoteBackupStatus": "succeeded",
+  "remoteConfigured": true,
+  "remoteTarget": "github",
+  "remoteStatusSummary": "GitHub backup succeeded; remote redundancy is available for this snapshot.",
+  "remoteAction": "No remote action required.",
+  "remoteUploadPath": "portmanager-backups/host_debian_12_review_packet_1776805736172_558/backup_op_backup_1776807481139_825.bundle.json",
+  "rollbackPointId": "rp_op_backup_1776807481139_825",
+  "readyRollbackPointCount": 1,
+  "targetProfileConfirmation": {
+    "targetProfileId": "debian-12-systemd-tailscale",
+    "targetProfileStatus": "candidate",
+    "lifecycleState": "ready",
+    "tailscaleAddress": "172.17.0.2",
+    "agentHeartbeatState": "live"
+  }
+}

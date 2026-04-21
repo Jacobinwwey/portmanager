@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "0.1.0",
+  "operationId": "op_backup_1776807481139_825",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "createdAt": "2026-04-21T21:38:01.149Z",
+  "artifactVersion": "0.1.0",
+  "backupMode": "required",
+  "bundleFiles": [
+    "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/desired-state.snapshot.json",
+    "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/runtime-state.snapshot.json",
+    "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/operation-result.json",
+    "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/health-summary.json"
+  ],
+  "checksums": [
+    {
+      "path": "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/desired-state.snapshot.json",
+      "sha256": "3e5bd21e9f0175ad68890e1b5f7afd859aefb2f0ccf6d6f43e88718552575317"
+    },
+    {
+      "path": "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/runtime-state.snapshot.json",
+      "sha256": "201fc2e4ce2d399334b18eccefd36f47d73e0aff41204cab673422c27352ec7c"
+    },
+    {
+      "path": "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/operation-result.json",
+      "sha256": "97e3ce1bd189fc9207a4b1572b466ddb032871159634c3e3e3619f471a03d927"
+    },
+    {
+      "path": "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/health-summary.json",
+      "sha256": "e6efbfc339d25550ab234f37dcb996df6f78576e861aa9cf61d8e407e815e3e6"
+    }
+  ]
+}

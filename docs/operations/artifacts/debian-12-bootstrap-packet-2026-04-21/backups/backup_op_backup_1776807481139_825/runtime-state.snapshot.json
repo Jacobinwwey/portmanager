@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "0.1.0",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "agentState": "ready",
+  "agentVersion": "0.1.0",
+  "effectiveStateHash": "c86e75589c5feb8382e48717810283b7af9207a6e95d59ad1e8e1a1f59a772e9",
+  "updatedAt": "2026-04-21T21:38:01.149Z",
+  "appliedRules": [],
+  "health": {
+    "summary": "local backup primitive captured runtime state before mutation",
+    "signals": [
+      {
+        "code": "local_backup",
+        "status": "healthy",
+        "message": "backup policy required"
+      }
+    ]
+  }
+}

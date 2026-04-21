@@ -260,6 +260,29 @@ const steadyStateCaptureRuntimeStatePath =
   `${bootstrapCaptureArtifactRoot}/steady-state-runtime-state.json`
 const steadyStateCaptureAuditIndexPath = `${bootstrapCaptureArtifactRoot}/steady-state-audit-index.json`
 const steadyStateCaptureHostDetailPath = `${bootstrapCaptureArtifactRoot}/steady-state-host-detail.json`
+const backupCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/backup-capture-summary.json`
+const backupCaptureOperationPath = `${bootstrapCaptureArtifactRoot}/backup-operation.json`
+const backupCaptureSummaryDetailPath = `${bootstrapCaptureArtifactRoot}/backup-summary.json`
+const backupCaptureRollbackPointsPath = `${bootstrapCaptureArtifactRoot}/backup-rollback-points.json`
+const backupCaptureHostDetailPath = `${bootstrapCaptureArtifactRoot}/backup-host-detail.json`
+const backupCaptureGitHubUploadPath = `${bootstrapCaptureArtifactRoot}/backup-github-upload.json`
+const backupCaptureManifestPath =
+  `${bootstrapCaptureArtifactRoot}/backups/backup_op_backup_1776807481139_825/manifest.json`
+const diagnosticsCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/diagnostics-capture-summary.json`
+const diagnosticsCaptureOperationPath = `${bootstrapCaptureArtifactRoot}/diagnostics-operation.json`
+const diagnosticsCaptureArtifactsPath = `${bootstrapCaptureArtifactRoot}/diagnostics-artifacts.json`
+const diagnosticsCaptureAuditIndexPath = `${bootstrapCaptureArtifactRoot}/diagnostics-audit-index.json`
+const diagnosticsCaptureHostDetailPath = `${bootstrapCaptureArtifactRoot}/diagnostics-host-detail.json`
+const rollbackCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/rollback-capture-summary.json`
+const rollbackCaptureOperationPath = `${bootstrapCaptureArtifactRoot}/rollback-operation.json`
+const rollbackCaptureResultSummaryPath = `${bootstrapCaptureArtifactRoot}/rollback-result.json`
+const rollbackCaptureResultPath =
+  `${bootstrapCaptureArtifactRoot}/rollback/rp_op_backup_1776807481139_825-result.json`
+const rollbackCapturePostDiagnosticsPath =
+  `${bootstrapCaptureArtifactRoot}/rollback-post-diagnostics.json`
+const rollbackCapturePostDiagnosticsAuditIndexPath =
+  `${bootstrapCaptureArtifactRoot}/rollback-post-diagnostics-audit-index.json`
+const rollbackCaptureHostDetailPath = `${bootstrapCaptureArtifactRoot}/rollback-host-detail.json`
 const bootstrapCapturedArtifactIds: SecondTargetReviewArtifactId[] = [
   'bootstrap_operation_id',
   'bootstrap_result_summary',
@@ -271,6 +294,24 @@ const steadyStateCapturedArtifactIds: SecondTargetReviewArtifactId[] = [
   'health_capture',
   'runtime_state_capture',
   'controller_audit_reference'
+]
+const backupCapturedArtifactIds: SecondTargetReviewArtifactId[] = [
+  'backup_bearing_mutation_id',
+  'backup_manifest_path',
+  'remote_backup_result',
+  'restore_readiness_reference'
+]
+const diagnosticsCapturedArtifactIds: SecondTargetReviewArtifactId[] = [
+  'diagnostics_operation_id',
+  'diagnostics_artifact_paths',
+  'controller_event_reference',
+  'drift_operator_note'
+]
+const rollbackCapturedArtifactIds: SecondTargetReviewArtifactId[] = [
+  'rollback_point_id',
+  'rollback_operation_id',
+  'rollback_result_summary',
+  'post_rollback_diagnostics_linkage'
 ]
 const reviewPacketGuidePaths = [
   reviewPacketTemplatePath,
@@ -325,7 +366,7 @@ const executionUnits: SecondTargetNextExecutionUnit[] = [
     id: 'unit_66',
     title: 'Backup-and-restore packet execution',
     summary:
-      'Capture one backup-bearing mutation, backup manifest lineage, remote-backup result, and restore-readiness linkage.'
+      'Capture one bounded backup operation, backup manifest lineage, remote-backup result, and restore-readiness linkage.'
   },
   {
     id: 'unit_67',
@@ -404,9 +445,9 @@ const backupRestoreProofArtifactMetadata: Record<
   { label: string; summary: string }
 > = {
   backup_bearing_mutation_id: {
-    label: 'Backup-bearing mutation id',
+    label: 'Backup-bearing operation id',
     summary:
-      'Capture one controller-driven mutation id that produced the backup bundle used for the Debian 12 review packet.'
+      'Capture one bounded backup operation id that produced the preserved backup bundle used for the Debian 12 review packet.'
   },
   backup_manifest_path: {
     label: 'Backup manifest path',
@@ -731,35 +772,55 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     ),
     evidenceItem(
       'backup_restore_parity',
-      'planned',
-      'Backup and restore parity is still pending for Debian 12 until one backup-bearing mutation bundle and restore-readiness reference are captured.',
+      'landed',
+      'One bounded Debian 12 backup bundle is now preserved with backup operation, manifest lineage, GitHub remote result, and ready rollback-point evidence while broader support claims stay locked.',
       [
         backupRestoreProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
-        'docs/operations/portmanager-backup-rollback-policy.md'
+        'docs/operations/portmanager-backup-rollback-policy.md',
+        backupCaptureSummaryPath,
+        backupCaptureOperationPath,
+        backupCaptureSummaryDetailPath,
+        backupCaptureRollbackPointsPath,
+        backupCaptureHostDetailPath,
+        backupCaptureGitHubUploadPath,
+        backupCaptureManifestPath,
+        'docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md'
       ]
     ),
     evidenceItem(
       'diagnostics_parity',
-      'planned',
-      'Diagnostics parity is still pending for Debian 12 until one diagnostics artifact bundle and controller event reference are captured.',
+      'landed',
+      'One bounded Debian 12 diagnostics bundle is now preserved with operation detail, artifact paths, controller event linkage, and an operator drift note while broader support claims stay locked until review.',
       [
         diagnosticsProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
+        diagnosticsCaptureSummaryPath,
+        diagnosticsCaptureOperationPath,
+        diagnosticsCaptureArtifactsPath,
+        diagnosticsCaptureAuditIndexPath,
+        diagnosticsCaptureHostDetailPath,
         'docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md'
       ]
     ),
     evidenceItem(
       'rollback_parity',
-      'planned',
-      'Rollback parity is still pending for Debian 12 until one rollback rehearsal bundle links rollback-point, rollback result, and post-rollback diagnostics evidence together.',
+      'landed',
+      'One bounded Debian 12 rollback rehearsal is now preserved with rollback-point linkage, rollback result summary, and post-rollback diagnostics evidence while broader support claims stay locked until review.',
       [
         rollbackProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
-        'docs/operations/portmanager-backup-rollback-policy.md'
+        'docs/operations/portmanager-backup-rollback-policy.md',
+        rollbackCaptureSummaryPath,
+        rollbackCaptureOperationPath,
+        rollbackCaptureResultSummaryPath,
+        rollbackCaptureResultPath,
+        rollbackCapturePostDiagnosticsPath,
+        rollbackCapturePostDiagnosticsAuditIndexPath,
+        rollbackCaptureHostDetailPath
       ]
     )
   ]
@@ -1073,6 +1134,24 @@ function buildReviewPacketReadiness(
   }
 
   if (state === 'capture_in_progress') {
+    if (
+      snapshot.bootstrapTransportParity &&
+      snapshot.steadyStateTransportParity &&
+      snapshot.backupRestoreParity
+    ) {
+      return {
+        candidateTargetProfileId,
+        state,
+        summary:
+          `Bootstrap, steady-state, and backup packet capture are preserved for ${candidateTargetProfileId}; diagnostics and rollback artifacts are still missing from the bounded Debian 12 packet.`,
+        requiredNextAction:
+          'Execute Units 67 through 69 so the remaining Debian 12 packet sections are preserved before any broader review or support claim moves.',
+        guideCoverage,
+        artifactCoverage,
+        nextExecutionUnits
+      }
+    }
+
     if (snapshot.bootstrapTransportParity && snapshot.steadyStateTransportParity) {
       return {
         candidateTargetProfileId,
@@ -1262,12 +1341,14 @@ function buildBackupRestoreProofCapture(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetBackupRestoreProofCapture {
   const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+  const summary = snapshot.backupRestoreParity
+    ? `Backup-and-restore proof capture is already preserved for ${candidateTargetProfileId}: keep the bounded backup operation, manifest lineage, remote-backup result, and restore-readiness bundle linked while diagnostics and rollback sections are completed.`
+    : `Backup-and-restore proof capture stays explicit for ${candidateTargetProfileId}: preserve one bounded backup operation bundle before backup parity can move.`
 
   return {
     candidateTargetProfileId,
     guidePath: backupRestoreProofCaptureGuidePath,
-    summary:
-      `Backup-and-restore proof capture stays explicit for ${candidateTargetProfileId}: preserve one backup-bearing mutation bundle before backup parity can move.`,
+    summary,
     requiredArtifacts: [
       backupRestoreProofArtifact('backup_bearing_mutation_id'),
       backupRestoreProofArtifact('backup_manifest_path'),
@@ -1278,7 +1359,16 @@ function buildBackupRestoreProofCapture(
       backupRestoreProofCaptureGuidePath,
       reviewPacketTemplatePath,
       'docs/operations/portmanager-debian-12-acceptance-recipe.md',
-      'docs/operations/portmanager-backup-rollback-policy.md'
+      'docs/operations/portmanager-backup-rollback-policy.md',
+      backupCaptureSummaryPath,
+      backupCaptureOperationPath,
+      backupCaptureSummaryDetailPath,
+      backupCaptureRollbackPointsPath,
+      backupCaptureHostDetailPath,
+      backupCaptureGitHubUploadPath,
+      backupCaptureManifestPath,
+      'apps/controller/src/controller-server.ts',
+      'apps/controller/src/local-backup-primitive.ts'
     ]
   }
 }
@@ -1287,12 +1377,14 @@ function buildDiagnosticsProofCapture(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetDiagnosticsProofCapture {
   const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+  const summary = snapshot.diagnosticsParity
+    ? `Diagnostics proof capture is already preserved for ${candidateTargetProfileId}: keep the bounded diagnostics artifact bundle, controller event linkage, and operator drift note linked while second-target review validates the full Debian 12 packet.`
+    : `Diagnostics proof capture stays explicit for ${candidateTargetProfileId}: preserve one diagnostics artifact bundle before diagnostics parity can move.`
 
   return {
     candidateTargetProfileId,
     guidePath: diagnosticsProofCaptureGuidePath,
-    summary:
-      `Diagnostics proof capture stays explicit for ${candidateTargetProfileId}: preserve one diagnostics artifact bundle before diagnostics parity can move.`,
+    summary,
     requiredArtifacts: [
       diagnosticsProofArtifact('diagnostics_operation_id'),
       diagnosticsProofArtifact('diagnostics_artifact_paths'),
@@ -1304,6 +1396,11 @@ function buildDiagnosticsProofCapture(
       reviewPacketTemplatePath,
       'docs/operations/portmanager-debian-12-acceptance-recipe.md',
       'docs/operations/portmanager-backup-rollback-policy.md',
+      diagnosticsCaptureSummaryPath,
+      diagnosticsCaptureOperationPath,
+      diagnosticsCaptureArtifactsPath,
+      diagnosticsCaptureAuditIndexPath,
+      diagnosticsCaptureHostDetailPath,
       'apps/controller/src/controller-server.ts',
       'apps/controller/src/controller-domain-service.ts'
     ]
@@ -1314,12 +1411,14 @@ function buildRollbackProofCapture(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetRollbackProofCapture {
   const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+  const summary = snapshot.rollbackParity
+    ? `Rollback proof capture is already preserved for ${candidateTargetProfileId}: keep the bounded rollback rehearsal, rollback result, and post-rollback diagnostics linkage tied to the same Debian 12 packet while second-target review stays bounded.`
+    : `Rollback proof capture stays explicit for ${candidateTargetProfileId}: preserve one bounded rollback rehearsal bundle before rollback parity can move.`
 
   return {
     candidateTargetProfileId,
     guidePath: rollbackProofCaptureGuidePath,
-    summary:
-      `Rollback proof capture stays explicit for ${candidateTargetProfileId}: preserve one bounded rollback rehearsal bundle before rollback parity can move.`,
+    summary,
     requiredArtifacts: [
       rollbackProofArtifact('rollback_point_id'),
       rollbackProofArtifact('rollback_operation_id'),
@@ -1331,6 +1430,13 @@ function buildRollbackProofCapture(
       reviewPacketTemplatePath,
       'docs/operations/portmanager-debian-12-acceptance-recipe.md',
       'docs/operations/portmanager-backup-rollback-policy.md',
+      rollbackCaptureSummaryPath,
+      rollbackCaptureOperationPath,
+      rollbackCaptureResultSummaryPath,
+      rollbackCaptureResultPath,
+      rollbackCapturePostDiagnosticsPath,
+      rollbackCapturePostDiagnosticsAuditIndexPath,
+      rollbackCaptureHostDetailPath,
       'apps/controller/src/controller-server.ts',
       'apps/controller/src/controller-domain-service.ts'
     ]
@@ -1354,14 +1460,20 @@ export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySna
     targetRegistryPublished: true,
     bootstrapTransportParity: true,
     steadyStateTransportParity: true,
-    backupRestoreParity: false,
-    diagnosticsParity: false,
-    rollbackParity: false,
+    backupRestoreParity: true,
+    diagnosticsParity: true,
+    rollbackParity: true,
     docsContractReady: true,
     acceptanceRecipeReady: true,
     operatorOwnershipDefined: true,
     reviewPacketGuidePaths: [...reviewPacketGuidePaths],
-    capturedReviewArtifactIds: [...bootstrapCapturedArtifactIds, ...steadyStateCapturedArtifactIds],
+    capturedReviewArtifactIds: [
+      ...bootstrapCapturedArtifactIds,
+      ...steadyStateCapturedArtifactIds,
+      ...backupCapturedArtifactIds,
+      ...diagnosticsCapturedArtifactIds,
+      ...rollbackCapturedArtifactIds
+    ],
     evidenceItems
   }
 }

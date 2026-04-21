@@ -33,7 +33,7 @@ It defines the minimum post-bootstrap artifact bundle that must exist before `/s
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md` and `docs/operations/portmanager-debian-12-review-packet-template.md` stay the companion truth surfaces.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm steady-state parity still blocks review.
+1. Read `portmanager operations second-target-policy-pack` and confirm steady-state parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
 2. Run one normal controller-driven mutation after bootstrap:
    - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
    - Use any equivalent exposure-policy or rule mutation only if it preserves the same bounded evidence model.

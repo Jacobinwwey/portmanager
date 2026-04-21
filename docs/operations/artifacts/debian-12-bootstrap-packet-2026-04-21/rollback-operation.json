@@ -1,0 +1,12 @@
+{
+  "id": "op_rollback_1776809568474_70",
+  "type": "rollback",
+  "state": "succeeded",
+  "initiator": "web",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "startedAt": "2026-04-21T22:12:48.474Z",
+  "finishedAt": "2026-04-21T22:12:48.483Z",
+  "eventStreamUrl": "/operations/events?operationId=op_rollback_1776809568474_70",
+  "rollbackPointId": "rp_op_backup_1776807481139_825",
+  "resultSummary": "rollback rp_op_backup_1776807481139_825 applied from rp_op_backup_1776807481139_825-result.json"
+}

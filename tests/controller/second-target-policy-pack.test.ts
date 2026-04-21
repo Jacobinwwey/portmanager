@@ -104,42 +104,24 @@ test('second target policy pack requires expansion review when candidate, parity
   )
 })
 
-test('default second target policy pack preserves bootstrap and steady-state packet evidence while wider parity stays pending', () => {
+test('default second target policy pack preserves a complete review packet and opens bounded second-target review', () => {
   const pack = buildSecondTargetPolicyPack(createDefaultSecondTargetPolicySnapshot())
 
-  assert.equal(pack.decisionState, 'hold')
-  assert.equal(pack.expansionReviewRequired, false)
-  assert.equal(pack.reviewPacketReadiness.state, 'capture_in_progress')
+  assert.equal(pack.decisionState, 'review_required')
+  assert.equal(pack.expansionReviewRequired, true)
+  assert.equal(pack.reviewPacketReadiness.state, 'packet_ready')
   assert.equal(pack.reviewPacketReadiness.guideCoverage.available, 6)
   assert.equal(pack.reviewPacketReadiness.guideCoverage.expected, 6)
   assert.deepEqual(pack.reviewPacketReadiness.guideCoverage.missingPaths, [])
-  assert.equal(pack.reviewPacketReadiness.artifactCoverage.available, 8)
+  assert.equal(pack.reviewPacketReadiness.artifactCoverage.available, 20)
   assert.equal(pack.reviewPacketReadiness.artifactCoverage.expected, 20)
-  assert.equal(pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes('health_capture'), false)
-  assert.equal(
-    pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes(
-      'rollback_operation_id'
-    ),
-    true
-  )
+  assert.deepEqual(pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds, [])
   assert.match(
     pack.reviewPacketReadiness.summary,
-    /bootstrap and steady-state packet capture are preserved/i
+    /artifact coverage is complete/i
   )
-  assert.match(pack.reviewPacketReadiness.requiredNextAction, /Units 66 through 69/i)
-  assert.equal(pack.reviewPacketReadiness.nextExecutionUnits.length >= 4, true)
-  assert.equal(
-    pack.reviewPacketReadiness.nextExecutionUnits.some(
-      (unit) => unit.id === 'unit_66' && /backup/i.test(unit.title)
-    ),
-    true
-  )
-  assert.equal(
-    pack.reviewPacketReadiness.nextExecutionUnits.some(
-      (unit) => unit.id === 'unit_69' && /review closeout/i.test(unit.title)
-    ),
-    true
-  )
+  assert.match(pack.reviewPacketReadiness.requiredNextAction, /Open bounded second-target review/i)
+  assert.equal(pack.reviewPacketReadiness.nextExecutionUnits.length, 0)
   assert.equal(pack.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
   assert.match(
     pack.reviewPacketTemplate.templatePath,
@@ -273,7 +255,15 @@ test('default second target policy pack preserves bootstrap and steady-state pac
     true
   )
   assert.equal(
-    pack.blockingCriteria.some((criterion) => criterion.id === 'backup_restore_parity'),
+    pack.satisfiedCriteria.some((criterion) => criterion.id === 'backup_restore_parity'),
+    true
+  )
+  assert.equal(
+    pack.satisfiedCriteria.some((criterion) => criterion.id === 'diagnostics_parity'),
+    true
+  )
+  assert.equal(
+    pack.satisfiedCriteria.some((criterion) => criterion.id === 'rollback_parity'),
     true
   )
   assert.equal(
@@ -300,31 +290,73 @@ test('default second target policy pack preserves bootstrap and steady-state pac
     ),
     true
   )
-  assert.match(pack.summary, /backup and restore parity/i)
-  assert.doesNotMatch(pack.summary, /docs contract ready/i)
+  assert.equal(
+    pack.evidenceItems.some(
+      (item) =>
+        item.criterionId === 'diagnostics_parity' &&
+        item.state === 'landed' &&
+        item.sources.some((source) =>
+          source.endsWith(
+            'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics-capture-summary.json'
+          )
+        )
+    ),
+    true
+  )
+  assert.equal(
+    pack.evidenceItems.some(
+      (item) =>
+        item.criterionId === 'rollback_parity' &&
+        item.state === 'landed' &&
+        item.sources.some((source) =>
+          source.endsWith(
+            'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-capture-summary.json'
+          )
+        )
+    ),
+    true
+  )
+  assert.match(pack.summary, /review required now/i)
+  assert.match(pack.nextActions[0] ?? '', /Open second-target review/i)
 })
 
-test('second target review packet readiness keeps partial capture in progress before steady-state packet lands', () => {
+test('second target review packet readiness stays in progress until diagnostics and rollback packet sections land', () => {
   const pack = buildSecondTargetPolicyPack({
     ...createDefaultSecondTargetPolicySnapshot(),
-    steadyStateTransportParity: false,
+    diagnosticsParity: false,
+    rollbackParity: false,
     capturedReviewArtifactIds: [
       'bootstrap_operation_id',
       'bootstrap_result_summary',
       'audit_reference',
       'target_profile_confirmation',
-      'post_mutation_operation_id'
+      'post_mutation_operation_id',
+      'health_capture',
+      'runtime_state_capture',
+      'controller_audit_reference',
+      'backup_bearing_mutation_id',
+      'backup_manifest_path',
+      'remote_backup_result',
+      'restore_readiness_reference'
     ]
   })
 
   assert.equal(pack.reviewPacketReadiness.state, 'capture_in_progress')
-  assert.equal(pack.reviewPacketReadiness.artifactCoverage.available, 5)
+  assert.equal(pack.reviewPacketReadiness.artifactCoverage.available, 12)
   assert.equal(pack.reviewPacketReadiness.artifactCoverage.expected, 20)
   assert.equal(
-    pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes('audit_reference'),
-    false
+    pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes('diagnostics_operation_id'),
+    true
   )
-  assert.match(pack.reviewPacketReadiness.summary, /bootstrap packet capture is preserved/i)
+  assert.equal(
+    pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes('rollback_operation_id'),
+    true
+  )
+  assert.match(
+    pack.reviewPacketReadiness.summary,
+    /diagnostics and rollback artifacts are still missing/i
+  )
+  assert.match(pack.reviewPacketReadiness.requiredNextAction, /Execute Units 67 through 69/i)
 })
 
 test('controller server exposes second target policy pack as explicit controller contract', async () => {
@@ -456,22 +488,15 @@ test('controller server exposes second target policy pack as explicit controller
       assert.equal(payload.candidateTargetProfiles[0]?.id, 'debian-12-systemd-tailscale')
       assert.equal(payload.candidateTargetProfiles[0]?.status, 'candidate')
       assert.deepEqual(payload.candidateTargetProfileIds, ['debian-12-systemd-tailscale'])
-      assert.equal(payload.decisionState, 'hold')
-      assert.equal(payload.expansionReviewRequired, false)
-      assert.equal(payload.reviewPacketReadiness.state, 'capture_in_progress')
+      assert.equal(payload.decisionState, 'review_required')
+      assert.equal(payload.expansionReviewRequired, true)
+      assert.equal(payload.reviewPacketReadiness.state, 'packet_ready')
       assert.equal(payload.reviewPacketReadiness.guideCoverage.available, 6)
       assert.equal(payload.reviewPacketReadiness.guideCoverage.expected, 6)
-      assert.equal(payload.reviewPacketReadiness.artifactCoverage.available, 8)
+      assert.equal(payload.reviewPacketReadiness.artifactCoverage.available, 20)
       assert.equal(payload.reviewPacketReadiness.artifactCoverage.expected, 20)
-      assert.equal(
-        payload.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes('health_capture'),
-        false
-      )
-      assert.equal(payload.reviewPacketReadiness.nextExecutionUnits.length >= 4, true)
-      assert.equal(
-        payload.reviewPacketReadiness.nextExecutionUnits.some((unit) => unit.id === 'unit_66'),
-        true
-      )
+      assert.deepEqual(payload.reviewPacketReadiness.artifactCoverage.missingArtifactIds, [])
+      assert.equal(payload.reviewPacketReadiness.nextExecutionUnits.length, 0)
       assert.equal(payload.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
       assert.match(
         payload.reviewPacketTemplate.templatePath,
@@ -568,8 +593,9 @@ test('controller server exposes second target policy pack as explicit controller
         ),
         true
       )
-      assert.match(payload.summary, /stay on hold/i)
+      assert.match(payload.summary, /review required now/i)
       assert.equal(payload.nextActions.length >= 2, true)
+      assert.match(payload.nextActions[0] ?? '', /Open second-target review/i)
       assert.equal(
         payload.satisfiedCriteria.some((criterion) => criterion.id === 'locked_target_registry'),
         true
@@ -599,7 +625,15 @@ test('controller server exposes second target policy pack as explicit controller
         true
       )
       assert.equal(
-        payload.blockingCriteria.some((criterion) => criterion.id === 'backup_restore_parity'),
+        payload.satisfiedCriteria.some((criterion) => criterion.id === 'backup_restore_parity'),
+        true
+      )
+      assert.equal(
+        payload.satisfiedCriteria.some((criterion) => criterion.id === 'diagnostics_parity'),
+        true
+      )
+      assert.equal(
+        payload.satisfiedCriteria.some((criterion) => criterion.id === 'rollback_parity'),
         true
       )
       assert.equal(payload.evidenceItems.length >= 8, true)
@@ -629,6 +663,32 @@ test('controller server exposes second target policy pack as explicit controller
           source.endsWith(
             'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-capture-summary.json'
           )
+        ),
+        true
+      )
+      assert.equal(
+        payload.evidenceItems.some(
+          (item) =>
+            item.criterionId === 'diagnostics_parity' &&
+            item.state === 'landed' &&
+            item.sources.some((source) =>
+              source.endsWith(
+                'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/diagnostics-capture-summary.json'
+              )
+            )
+        ),
+        true
+      )
+      assert.equal(
+        payload.evidenceItems.some(
+          (item) =>
+            item.criterionId === 'rollback_parity' &&
+            item.state === 'landed' &&
+            item.sources.some((source) =>
+              source.endsWith(
+                'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-capture-summary.json'
+              )
+            )
         ),
         true
       )

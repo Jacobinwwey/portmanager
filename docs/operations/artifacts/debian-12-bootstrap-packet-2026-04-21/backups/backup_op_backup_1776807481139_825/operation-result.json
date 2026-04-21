@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "0.1.0",
+  "operationId": "op_backup_1776807481139_825",
+  "type": "backup",
+  "state": "succeeded",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "startedAt": "2026-04-21T21:38:01.149Z",
+  "finishedAt": "2026-04-21T21:38:01.149Z",
+  "resultSummary": "local backup backup_op_backup_1776807481139_825 completed"
+}

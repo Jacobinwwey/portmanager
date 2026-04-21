@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "id": "backup_op_backup_1776807481139_825",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "operationId": "op_backup_1776807481139_825",
+      "createdAt": "2026-04-21T21:38:01.149Z",
+      "backupMode": "required",
+      "localStatus": "succeeded",
+      "githubStatus": "succeeded",
+      "manifestPath": "/tmp/portmanager_analysis_20260416/portmanager/docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backups/backup_op_backup_1776807481139_825/manifest.json",
+      "remoteTarget": "github",
+      "remoteConfigured": true,
+      "remoteStatusSummary": "GitHub backup succeeded; remote redundancy is available for this snapshot.",
+      "remoteAction": "No remote action required."
+    }
+  ]
+}
