@@ -242,7 +242,11 @@
                   <li>{{ copy.liveCurrentReviewPackStatus }} {{ confidenceProgress.currentReviewPack.sourceRun.conclusion ?? confidenceProgress.currentReviewPack.sourceRun.status ?? 'none' }}</li>
                   <li>{{ copy.liveCurrentReviewPackSha }} <code>{{ confidenceProgress.currentReviewPack.sourceRun.headSha?.slice(0, 12) ?? 'none' }}</code></li>
                   <li v-if="confidenceProgress.currentReviewPack.sourceRun.htmlUrl">{{ copy.liveCurrentReviewPackRunLink }} <VPLink class="pm-doc-link" :href="confidenceProgress.currentReviewPack.sourceRun.htmlUrl">{{ currentReviewPackRunLabel }}</VPLink></li>
+                  <li>{{ copy.liveCurrentReviewPackSourceRepo }} <code>{{ confidenceProgress.currentReviewPack.repo ?? 'none' }}</code></li>
+                  <li>{{ copy.liveCurrentReviewPackSourceBranch }} <code>{{ confidenceProgress.currentReviewPack.branch ?? 'none' }}</code></li>
+                  <li>{{ copy.liveCurrentReviewPackArtifactPattern }} <code>{{ confidenceProgress.currentReviewPack.artifactPattern ?? 'none' }}</code></li>
                   <li>{{ copy.liveCurrentReviewPackWorkflowRef }} <code>{{ confidenceProgress.currentReviewPack.workflowRef ?? 'none' }}</code></li>
+                  <li v-if="currentReviewPackWorkflowPageUrl">{{ copy.liveCurrentReviewPackWorkflowPage }} <VPLink class="pm-doc-link" :href="currentReviewPackWorkflowPageUrl">{{ confidenceProgress.currentReviewPack.workflowRef ?? 'none' }}</VPLink></li>
                   <li>{{ copy.liveCurrentReviewPackSourceStartedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.sourceRun.createdAt) }}</li>
                   <li>{{ copy.liveCurrentReviewPackSourceUpdatedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.sourceRun.updatedAt) }}</li>
                   <li>{{ copy.liveCurrentReviewPackFetchedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.fetchedAt) }}</li>
@@ -360,7 +364,7 @@ import { computed } from 'vue'
 import { VPLink } from 'vitepress/theme'
 import { roadmapDeveloperProgress as developerProgress, roadmapMilestones, roadmapPrinciples as principles, roadmapProgression as progression, roadmapTracks as tracks, schemeCProfile as schemeC } from '../../../data/roadmap'
 import { milestoneConfidenceProgress as confidenceProgress } from '../../../data/milestone-confidence-progress'
-import { reviewPackOptionalFiles, reviewPackRequiredFiles, summarizeReviewPackFiles } from '../../../data/review-pack'
+import { buildReviewPackWorkflowPageUrl, reviewPackOptionalFiles, reviewPackRequiredFiles, summarizeReviewPackFiles } from '../../../data/review-pack'
 import { docMeta, githubSourceLink, type LocaleCode } from '../../../data/docs'
 
 const props = defineProps<{ locale: LocaleCode }>()
@@ -419,7 +423,11 @@ const copy = computed(() => props.locale === 'zh'
       liveCurrentReviewPackStatus: 'Current CI review-pack status：',
       liveCurrentReviewPackSha: 'Current CI review-pack SHA：',
       liveCurrentReviewPackRunLink: 'Current CI review-pack run link：',
+      liveCurrentReviewPackSourceRepo: 'Current CI source repo：',
+      liveCurrentReviewPackSourceBranch: 'Current CI source branch：',
+      liveCurrentReviewPackArtifactPattern: 'Current CI artifact pattern：',
       liveCurrentReviewPackWorkflowRef: 'Current CI workflow ref：',
+      liveCurrentReviewPackWorkflowPage: 'Current CI workflow page：',
       liveCurrentReviewPackSourceStartedAt: 'Current CI source created：',
       liveCurrentReviewPackSourceUpdatedAt: 'Current CI source updated：',
       liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched：',
@@ -503,7 +511,11 @@ const copy = computed(() => props.locale === 'zh'
       liveCurrentReviewPackStatus: 'Current CI review-pack status:',
       liveCurrentReviewPackSha: 'Current CI review-pack SHA:',
       liveCurrentReviewPackRunLink: 'Current CI review-pack run link:',
+      liveCurrentReviewPackSourceRepo: 'Current CI source repo:',
+      liveCurrentReviewPackSourceBranch: 'Current CI source branch:',
+      liveCurrentReviewPackArtifactPattern: 'Current CI artifact pattern:',
       liveCurrentReviewPackWorkflowRef: 'Current CI workflow ref:',
+      liveCurrentReviewPackWorkflowPage: 'Current CI workflow page:',
       liveCurrentReviewPackSourceStartedAt: 'Current CI source created:',
       liveCurrentReviewPackSourceUpdatedAt: 'Current CI source updated:',
       liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched:',
@@ -582,6 +594,7 @@ const currentReviewPackRunLabel = computed(() => {
   if (!confidenceProgress.currentReviewPack?.sourceRun?.id) return 'none'
   return `${confidenceProgress.currentReviewPack.sourceRun.id}/${confidenceProgress.currentReviewPack.sourceRun.attempt ?? '1'}`
 })
+const currentReviewPackWorkflowPageUrl = computed(() => buildReviewPackWorkflowPageUrl(confidenceProgress.currentReviewPack?.repo, confidenceProgress.currentReviewPack?.workflowRef))
 const currentReviewPackRequiredSummary = computed(() => summarizeReviewPackFiles(confidenceProgress.currentReviewPack?.files.required, reviewPackRequiredFiles))
 const currentReviewPackOptionalSummary = computed(() => summarizeReviewPackFiles(confidenceProgress.currentReviewPack?.files.optional, reviewPackOptionalFiles))
 const confidenceWordingTone = computed(() => {

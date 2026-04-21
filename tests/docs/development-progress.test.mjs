@@ -103,6 +103,18 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     milestoneConfidenceComponent,
+    /progress\.currentReviewPack\.repo/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /progress\.currentReviewPack\.branch/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /progress\.currentReviewPack\.artifactPattern/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
     /progress\.currentReviewPack\.sourceRun\.headSha/
   )
   assert.match(
@@ -117,6 +129,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /Current CI optional file coverage/)
   assert.match(milestoneConfidenceComponent, /Current CI missing required files/)
   assert.match(milestoneConfidenceComponent, /Current CI missing optional files/)
+  assert.match(milestoneConfidenceComponent, /Current CI source repo/)
+  assert.match(milestoneConfidenceComponent, /Current CI source branch/)
+  assert.match(milestoneConfidenceComponent, /Current CI artifact pattern/)
+  assert.match(milestoneConfidenceComponent, /Current CI workflow page/)
+  assert.match(
+    milestoneConfidenceComponent,
+    /buildReviewPackWorkflowPageUrl\(progress\.currentReviewPack\?\.repo, progress\.currentReviewPack\?\.workflowRef\)/
+  )
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
@@ -163,6 +183,18 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     roadmapComponent,
+    /confidenceProgress\.currentReviewPack\.repo/
+  )
+  assert.match(
+    roadmapComponent,
+    /confidenceProgress\.currentReviewPack\.branch/
+  )
+  assert.match(
+    roadmapComponent,
+    /confidenceProgress\.currentReviewPack\.artifactPattern/
+  )
+  assert.match(
+    roadmapComponent,
     /confidenceProgress\.currentReviewPack\.sourceRun\.headSha/
   )
   assert.match(
@@ -177,6 +209,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(roadmapComponent, /Current CI optional file coverage/)
   assert.match(roadmapComponent, /Current CI missing required files/)
   assert.match(roadmapComponent, /Current CI missing optional files/)
+  assert.match(roadmapComponent, /Current CI source repo/)
+  assert.match(roadmapComponent, /Current CI source branch/)
+  assert.match(roadmapComponent, /Current CI artifact pattern/)
+  assert.match(roadmapComponent, /Current CI workflow page/)
+  assert.match(
+    roadmapComponent,
+    /buildReviewPackWorkflowPageUrl\(confidenceProgress\.currentReviewPack\?\.repo, confidenceProgress\.currentReviewPack\?\.workflowRef\)/
+  )
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
 
@@ -224,6 +264,9 @@ test('roadmap publishes a development-progress page backed by live milestone con
     milestoneConfidenceProgress.currentReviewPack.helperCommand,
     'pnpm milestone:fetch:review-pack'
   )
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.repo, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.branch, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.artifactPattern, 'string')
   assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.id, 'number')
   assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.event, 'string')
   assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.conclusion, 'string')

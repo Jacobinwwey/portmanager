@@ -50,4 +50,14 @@ test('review-pack completeness helper keeps required and optional file expectati
       missing: []
     }
   )
+
+  assert.equal(
+    reviewPackData.buildReviewPackWorkflowPageUrl(
+      'Jacobinwwey/portmanager',
+      'mainline-acceptance.yml'
+    ),
+    'https://github.com/Jacobinwwey/portmanager/actions/workflows/mainline-acceptance.yml'
+  )
+  assert.equal(reviewPackData.buildReviewPackWorkflowPageUrl(null, 'mainline-acceptance.yml'), null)
+  assert.equal(reviewPackData.buildReviewPackWorkflowPageUrl('Jacobinwwey/portmanager', null), null)
 })

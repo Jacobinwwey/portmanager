@@ -22,3 +22,14 @@ export function summarizeReviewPackFiles(
     missing
   }
 }
+
+export function buildReviewPackWorkflowPageUrl(
+  repo: string | null | undefined,
+  workflowRef: string | null | undefined
+) {
+  if (!repo || !workflowRef) {
+    return null
+  }
+
+  return `https://github.com/${repo}/actions/workflows/${workflowRef}`
+}

@@ -222,7 +222,11 @@
             <li>{{ copy.currentReviewPackStatus }} {{ progress.currentReviewPack.sourceRun.conclusion ?? progress.currentReviewPack.sourceRun.status ?? copy.none }}</li>
             <li>{{ copy.currentReviewPackSha }} <code>{{ progress.currentReviewPack.sourceRun.headSha?.slice(0, 12) ?? copy.none }}</code></li>
             <li v-if="progress.currentReviewPack.sourceRun.htmlUrl">{{ copy.currentReviewPackRunLink }} <VPLink class="pm-doc-link" :href="progress.currentReviewPack.sourceRun.htmlUrl">{{ currentReviewPackRunLabel }}</VPLink></li>
+            <li>{{ copy.currentReviewPackSourceRepo }} <code>{{ progress.currentReviewPack.repo ?? copy.none }}</code></li>
+            <li>{{ copy.currentReviewPackSourceBranch }} <code>{{ progress.currentReviewPack.branch ?? copy.none }}</code></li>
+            <li>{{ copy.currentReviewPackArtifactPattern }} <code>{{ progress.currentReviewPack.artifactPattern ?? copy.none }}</code></li>
             <li>{{ copy.currentReviewPackWorkflowRef }} <code>{{ progress.currentReviewPack.workflowRef ?? copy.none }}</code></li>
+            <li v-if="currentReviewPackWorkflowPageUrl">{{ copy.currentReviewPackWorkflowPage }} <VPLink class="pm-doc-link" :href="currentReviewPackWorkflowPageUrl">{{ progress.currentReviewPack.workflowRef ?? copy.none }}</VPLink></li>
             <li>{{ copy.currentReviewPackSourceStartedAt }} {{ formatTimestamp(progress.currentReviewPack.sourceRun.createdAt) }}</li>
             <li>{{ copy.currentReviewPackSourceUpdatedAt }} {{ formatTimestamp(progress.currentReviewPack.sourceRun.updatedAt) }}</li>
             <li>{{ copy.currentReviewPackFetchedAt }} {{ formatTimestamp(progress.currentReviewPack.fetchedAt) }}</li>
@@ -246,7 +250,7 @@ import { computed } from 'vue'
 import { VPLink } from 'vitepress/theme'
 
 import { milestoneConfidenceProgress as progress } from '../../../data/milestone-confidence-progress'
-import { reviewPackOptionalFiles, reviewPackRequiredFiles, summarizeReviewPackFiles } from '../../../data/review-pack'
+import { buildReviewPackWorkflowPageUrl, reviewPackOptionalFiles, reviewPackRequiredFiles, summarizeReviewPackFiles } from '../../../data/review-pack'
 import { docMeta, githubSourceLink, type LocaleCode } from '../../../data/docs'
 
 type ProgressRun = (typeof progress.latestRun)
@@ -309,7 +313,11 @@ const copy = computed(() => props.locale === 'zh'
       currentReviewPackStatus: 'Current CI review-pack status：',
       currentReviewPackSha: 'Current CI review-pack SHA：',
       currentReviewPackRunLink: 'Current CI review-pack run link：',
+      currentReviewPackSourceRepo: 'Current CI source repo：',
+      currentReviewPackSourceBranch: 'Current CI source branch：',
+      currentReviewPackArtifactPattern: 'Current CI artifact pattern：',
       currentReviewPackWorkflowRef: 'Current CI workflow ref：',
+      currentReviewPackWorkflowPage: 'Current CI workflow page：',
       currentReviewPackSourceStartedAt: 'Current CI source created：',
       currentReviewPackSourceUpdatedAt: 'Current CI source updated：',
       currentReviewPackFetchedAt: 'Current CI review-pack fetched：',
@@ -411,7 +419,11 @@ const copy = computed(() => props.locale === 'zh'
       currentReviewPackStatus: 'Current CI review-pack status:',
       currentReviewPackSha: 'Current CI review-pack SHA:',
       currentReviewPackRunLink: 'Current CI review-pack run link:',
+      currentReviewPackSourceRepo: 'Current CI source repo:',
+      currentReviewPackSourceBranch: 'Current CI source branch:',
+      currentReviewPackArtifactPattern: 'Current CI artifact pattern:',
       currentReviewPackWorkflowRef: 'Current CI workflow ref:',
+      currentReviewPackWorkflowPage: 'Current CI workflow page:',
       currentReviewPackSourceStartedAt: 'Current CI source created:',
       currentReviewPackSourceUpdatedAt: 'Current CI source updated:',
       currentReviewPackFetchedAt: 'Current CI review-pack fetched:',
@@ -507,6 +519,7 @@ const currentReviewPackRunLabel = computed(() => {
 
   return `${progress.currentReviewPack.sourceRun.id}/${progress.currentReviewPack.sourceRun.attempt ?? '1'}`
 })
+const currentReviewPackWorkflowPageUrl = computed(() => buildReviewPackWorkflowPageUrl(progress.currentReviewPack?.repo, progress.currentReviewPack?.workflowRef))
 const currentReviewPackRequiredSummary = computed(() => summarizeReviewPackFiles(progress.currentReviewPack?.files.required, reviewPackRequiredFiles))
 const currentReviewPackOptionalSummary = computed(() => summarizeReviewPackFiles(progress.currentReviewPack?.files.optional, reviewPackOptionalFiles))
 
