@@ -79,6 +79,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /progress\.currentReviewPack/)
   assert.match(
     milestoneConfidenceComponent,
+    /summarizeReviewPackFiles\(progress\.currentReviewPack\?\.files\.required, reviewPackRequiredFiles\)/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /summarizeReviewPackFiles\(progress\.currentReviewPack\?\.files\.optional, reviewPackOptionalFiles\)/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
     /currentReviewPackRequiredFile\('milestone-confidence-review\.md'\)/
   )
   assert.match(
@@ -105,6 +113,10 @@ test('roadmap publishes a development-progress page backed by live milestone con
     milestoneConfidenceComponent,
     /progress\.currentReviewPack\.sourceRun\.updatedAt/
   )
+  assert.match(milestoneConfidenceComponent, /Current CI required file coverage/)
+  assert.match(milestoneConfidenceComponent, /Current CI optional file coverage/)
+  assert.match(milestoneConfidenceComponent, /Current CI missing required files/)
+  assert.match(milestoneConfidenceComponent, /Current CI missing optional files/)
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
@@ -125,6 +137,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
     /confidenceSurfaceInstruction\('docs-site\/data\/milestone-confidence-progress\.ts'\)/
   )
   assert.match(roadmapComponent, /confidenceProgress\.currentReviewPack/)
+  assert.match(
+    roadmapComponent,
+    /summarizeReviewPackFiles\(confidenceProgress\.currentReviewPack\?\.files\.required, reviewPackRequiredFiles\)/
+  )
+  assert.match(
+    roadmapComponent,
+    /summarizeReviewPackFiles\(confidenceProgress\.currentReviewPack\?\.files\.optional, reviewPackOptionalFiles\)/
+  )
   assert.match(
     roadmapComponent,
     /currentReviewPackRequiredFile\('milestone-wording-review\.md'\)/
@@ -153,6 +173,10 @@ test('roadmap publishes a development-progress page backed by live milestone con
     roadmapComponent,
     /confidenceProgress\.currentReviewPack\.sourceRun\.updatedAt/
   )
+  assert.match(roadmapComponent, /Current CI required file coverage/)
+  assert.match(roadmapComponent, /Current CI optional file coverage/)
+  assert.match(roadmapComponent, /Current CI missing required files/)
+  assert.match(roadmapComponent, /Current CI missing optional files/)
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
 

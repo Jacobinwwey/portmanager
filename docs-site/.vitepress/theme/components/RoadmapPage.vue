@@ -246,6 +246,10 @@
                   <li>{{ copy.liveCurrentReviewPackSourceStartedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.sourceRun.createdAt) }}</li>
                   <li>{{ copy.liveCurrentReviewPackSourceUpdatedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.sourceRun.updatedAt) }}</li>
                   <li>{{ copy.liveCurrentReviewPackFetchedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.fetchedAt) }}</li>
+                  <li>{{ copy.liveCurrentReviewPackRequiredCoverage }} {{ reviewPackCoverageLabel(currentReviewPackRequiredSummary) }}</li>
+                  <li>{{ copy.liveCurrentReviewPackMissingRequiredFiles }} <code>{{ missingReviewPackFilesLabel(currentReviewPackRequiredSummary.missing) }}</code></li>
+                  <li>{{ copy.liveCurrentReviewPackOptionalCoverage }} {{ reviewPackCoverageLabel(currentReviewPackOptionalSummary) }}</li>
+                  <li>{{ copy.liveCurrentReviewPackMissingOptionalFiles }} <code>{{ missingReviewPackFilesLabel(currentReviewPackOptionalSummary.missing) }}</code></li>
                   <li>{{ copy.liveCurrentReviewPackManifest }} <code>{{ confidenceProgress.currentReviewPack.manifestPath }}</code></li>
                   <li>{{ copy.liveCurrentReviewPackDigest }} <code>{{ currentReviewPackRequiredFile('milestone-confidence-review.md') }}</code></li>
                   <li>{{ copy.liveCurrentReviewPackWording }} <code>{{ currentReviewPackRequiredFile('milestone-wording-review.md') }}</code></li>
@@ -356,11 +360,13 @@ import { computed } from 'vue'
 import { VPLink } from 'vitepress/theme'
 import { roadmapDeveloperProgress as developerProgress, roadmapMilestones, roadmapPrinciples as principles, roadmapProgression as progression, roadmapTracks as tracks, schemeCProfile as schemeC } from '../../../data/roadmap'
 import { milestoneConfidenceProgress as confidenceProgress } from '../../../data/milestone-confidence-progress'
+import { reviewPackOptionalFiles, reviewPackRequiredFiles, summarizeReviewPackFiles } from '../../../data/review-pack'
 import { docMeta, githubSourceLink, type LocaleCode } from '../../../data/docs'
 
 const props = defineProps<{ locale: LocaleCode }>()
 const locale = computed(() => props.locale)
 const milestones = roadmapMilestones
+type ReviewPackFileSummary = ReturnType<typeof summarizeReviewPackFiles>
 
 const copy = computed(() => props.locale === 'zh'
   ? {
@@ -417,6 +423,10 @@ const copy = computed(() => props.locale === 'zh'
       liveCurrentReviewPackSourceStartedAt: 'Current CI source created：',
       liveCurrentReviewPackSourceUpdatedAt: 'Current CI source updated：',
       liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched：',
+      liveCurrentReviewPackRequiredCoverage: 'Current CI required file coverage：',
+      liveCurrentReviewPackMissingRequiredFiles: 'Current CI missing required files：',
+      liveCurrentReviewPackOptionalCoverage: 'Current CI optional file coverage：',
+      liveCurrentReviewPackMissingOptionalFiles: 'Current CI missing optional files：',
       liveCurrentReviewPackManifest: 'Current CI review-pack manifest：',
       liveCurrentReviewPackDigest: 'Current CI review digest：',
       liveCurrentReviewPackWording: 'Current CI wording review：',
@@ -497,6 +507,10 @@ const copy = computed(() => props.locale === 'zh'
       liveCurrentReviewPackSourceStartedAt: 'Current CI source created:',
       liveCurrentReviewPackSourceUpdatedAt: 'Current CI source updated:',
       liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched:',
+      liveCurrentReviewPackRequiredCoverage: 'Current CI required file coverage:',
+      liveCurrentReviewPackMissingRequiredFiles: 'Current CI missing required files:',
+      liveCurrentReviewPackOptionalCoverage: 'Current CI optional file coverage:',
+      liveCurrentReviewPackMissingOptionalFiles: 'Current CI missing optional files:',
       liveCurrentReviewPackManifest: 'Current CI review-pack manifest:',
       liveCurrentReviewPackDigest: 'Current CI review digest:',
       liveCurrentReviewPackWording: 'Current CI wording review:',
@@ -568,6 +582,8 @@ const currentReviewPackRunLabel = computed(() => {
   if (!confidenceProgress.currentReviewPack?.sourceRun?.id) return 'none'
   return `${confidenceProgress.currentReviewPack.sourceRun.id}/${confidenceProgress.currentReviewPack.sourceRun.attempt ?? '1'}`
 })
+const currentReviewPackRequiredSummary = computed(() => summarizeReviewPackFiles(confidenceProgress.currentReviewPack?.files.required, reviewPackRequiredFiles))
+const currentReviewPackOptionalSummary = computed(() => summarizeReviewPackFiles(confidenceProgress.currentReviewPack?.files.optional, reviewPackOptionalFiles))
 const confidenceWordingTone = computed(() => {
   if (!confidenceProgress.wordingReview) return 'planned'
   return confidenceProgress.wordingReview.publicClaimClass === 'promotion-ready-refresh-required' ? 'next' : 'safe'
@@ -621,6 +637,14 @@ function currentReviewPackRequiredFile(fileName: string) {
 
 function currentReviewPackOptionalFile(fileName: string) {
   return confidenceProgress.currentReviewPack?.files.optional[fileName] ?? 'none'
+}
+
+function reviewPackCoverageLabel(summary: ReviewPackFileSummary) {
+  return `${summary.available}/${summary.expected}`
+}
+
+function missingReviewPackFilesLabel(files: string[]) {
+  return files.length > 0 ? files.join(', ') : 'none'
 }
 
 function badgeTone(stage: string) {

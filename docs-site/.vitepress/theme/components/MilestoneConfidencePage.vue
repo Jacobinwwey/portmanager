@@ -226,6 +226,10 @@
             <li>{{ copy.currentReviewPackSourceStartedAt }} {{ formatTimestamp(progress.currentReviewPack.sourceRun.createdAt) }}</li>
             <li>{{ copy.currentReviewPackSourceUpdatedAt }} {{ formatTimestamp(progress.currentReviewPack.sourceRun.updatedAt) }}</li>
             <li>{{ copy.currentReviewPackFetchedAt }} {{ formatTimestamp(progress.currentReviewPack.fetchedAt) }}</li>
+            <li>{{ copy.currentReviewPackRequiredCoverage }} {{ reviewPackCoverageLabel(currentReviewPackRequiredSummary) }}</li>
+            <li>{{ copy.currentReviewPackMissingRequiredFiles }} <code>{{ missingReviewPackFilesLabel(currentReviewPackRequiredSummary.missing) }}</code></li>
+            <li>{{ copy.currentReviewPackOptionalCoverage }} {{ reviewPackCoverageLabel(currentReviewPackOptionalSummary) }}</li>
+            <li>{{ copy.currentReviewPackMissingOptionalFiles }} <code>{{ missingReviewPackFilesLabel(currentReviewPackOptionalSummary.missing) }}</code></li>
             <li>{{ copy.currentReviewPackReviewDigest }} <code>{{ currentReviewPackRequiredFile('milestone-confidence-review.md') }}</code></li>
             <li>{{ copy.currentReviewPackWordingReview }} <code>{{ currentReviewPackRequiredFile('milestone-wording-review.md') }}</code></li>
             <li>{{ copy.currentReviewPackSummary }} <code>{{ currentReviewPackOptionalFile('milestone-confidence-summary.md') }}</code></li>
@@ -242,9 +246,11 @@ import { computed } from 'vue'
 import { VPLink } from 'vitepress/theme'
 
 import { milestoneConfidenceProgress as progress } from '../../../data/milestone-confidence-progress'
+import { reviewPackOptionalFiles, reviewPackRequiredFiles, summarizeReviewPackFiles } from '../../../data/review-pack'
 import { docMeta, githubSourceLink, type LocaleCode } from '../../../data/docs'
 
 type ProgressRun = (typeof progress.latestRun)
+type ReviewPackFileSummary = ReturnType<typeof summarizeReviewPackFiles>
 
 const props = defineProps<{ locale: LocaleCode }>()
 
@@ -307,6 +313,10 @@ const copy = computed(() => props.locale === 'zh'
       currentReviewPackSourceStartedAt: 'Current CI source created：',
       currentReviewPackSourceUpdatedAt: 'Current CI source updated：',
       currentReviewPackFetchedAt: 'Current CI review-pack fetched：',
+      currentReviewPackRequiredCoverage: 'Current CI required file coverage：',
+      currentReviewPackMissingRequiredFiles: 'Current CI missing required files：',
+      currentReviewPackOptionalCoverage: 'Current CI optional file coverage：',
+      currentReviewPackMissingOptionalFiles: 'Current CI missing optional files：',
       currentReviewPackReviewDigest: 'Current CI review digest：',
       currentReviewPackWordingReview: 'Current CI wording review：',
       currentReviewPackSummary: 'Current CI summary：',
@@ -405,6 +415,10 @@ const copy = computed(() => props.locale === 'zh'
       currentReviewPackSourceStartedAt: 'Current CI source created:',
       currentReviewPackSourceUpdatedAt: 'Current CI source updated:',
       currentReviewPackFetchedAt: 'Current CI review-pack fetched:',
+      currentReviewPackRequiredCoverage: 'Current CI required file coverage:',
+      currentReviewPackMissingRequiredFiles: 'Current CI missing required files:',
+      currentReviewPackOptionalCoverage: 'Current CI optional file coverage:',
+      currentReviewPackMissingOptionalFiles: 'Current CI missing optional files:',
       currentReviewPackReviewDigest: 'Current CI review digest:',
       currentReviewPackWordingReview: 'Current CI wording review:',
       currentReviewPackSummary: 'Current CI summary:',
@@ -493,6 +507,8 @@ const currentReviewPackRunLabel = computed(() => {
 
   return `${progress.currentReviewPack.sourceRun.id}/${progress.currentReviewPack.sourceRun.attempt ?? '1'}`
 })
+const currentReviewPackRequiredSummary = computed(() => summarizeReviewPackFiles(progress.currentReviewPack?.files.required, reviewPackRequiredFiles))
+const currentReviewPackOptionalSummary = computed(() => summarizeReviewPackFiles(progress.currentReviewPack?.files.optional, reviewPackOptionalFiles))
 
 const reviewChecklist = computed(() => props.locale === 'zh'
   ? progress.readiness.status === 'promotion-ready'
@@ -640,5 +656,13 @@ function currentReviewPackRequiredFile(fileName: string) {
 
 function currentReviewPackOptionalFile(fileName: string) {
   return progress.currentReviewPack?.files.optional[fileName] ?? copy.value.none
+}
+
+function reviewPackCoverageLabel(summary: ReviewPackFileSummary) {
+  return `${summary.available}/${summary.expected}`
+}
+
+function missingReviewPackFilesLabel(files: string[]) {
+  return files.length > 0 ? files.join(', ') : copy.value.none
 }
 </script>
