@@ -39,6 +39,8 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /Guide coverage/i)
   assert.match(html, /Artifact coverage/i)
   assert.match(html, /unit_63/i)
+  assert.match(html, /Review adjudication/i)
+  assert.match(html, /No review verdicts pending until packet-ready review opens/i)
   assert.match(html, /Review packet template/i)
   assert.match(html, /portmanager-debian-12-review-packet-template\.md/i)
   assert.match(html, /Bootstrap proof capture/i)
@@ -473,11 +475,12 @@ test('overview loader keeps consumer boundary base path when building controller
             'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
           ],
           reviewPacketReadiness: {
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
             state: 'capture_required',
             summary:
-              'Review-packet guide set is complete, but no Debian 12 execution artifacts are captured yet.',
+              'Review-packet guide set is complete for debian-12-systemd-tailscale, but no Debian 12 execution artifacts are captured yet. Current truth is template-ready, not packet-ready.',
             requiredNextAction:
-              'Execute one Debian 12 review packet before changing any parity claim.',
+              'Execute one bounded Debian 12 review packet before changing any bootstrap, steady-state, backup, diagnostics, or rollback parity claim.',
             guideCoverage: {
               available: 6,
               expected: 6,
@@ -499,6 +502,20 @@ test('overview loader keeps consumer boundary base path when building controller
                 title: 'Review-packet readiness pack',
                 summary: 'Publish capture state, artifact coverage, and next-unit truth.'
               }
+            ]
+          },
+          reviewAdjudication: {
+            state: 'not_open',
+            reviewOwner: 'controller',
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
+            contractPath: 'docs/operations/portmanager-second-target-review-contract.md',
+            packetRoot: 'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21',
+            summary:
+              'Bounded second-target review is not open for debian-12-systemd-tailscale; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.',
+            pendingVerdicts: [],
+            sources: [
+              'docs/operations/portmanager-second-target-review-contract.md',
+              'docs/operations/portmanager-debian-12-operator-ownership.md'
             ]
           },
           reviewPacketTemplate: {
@@ -791,9 +808,12 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
           summary: 'second target policy pack is alive',
           nextActions: ['keep supported targets locked'],
           reviewPacketReadiness: {
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
             state: 'capture_required',
-            summary: 'guides complete, artifact capture pending',
-            requiredNextAction: 'execute one review packet',
+            summary:
+              'Review-packet guide set is complete for debian-12-systemd-tailscale, but no Debian 12 execution artifacts are captured yet. Current truth is template-ready, not packet-ready.',
+            requiredNextAction:
+              'execute one bounded Debian 12 review packet before changing any bootstrap, steady-state, backup, diagnostics, or rollback parity claim.',
             guideCoverage: {
               available: 6,
               expected: 6,
@@ -811,6 +831,17 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
                 summary: 'publish coverage truth'
               }
             ]
+          },
+          reviewAdjudication: {
+            state: 'not_open',
+            reviewOwner: 'controller',
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
+            contractPath: 'docs/operations/portmanager-second-target-review-contract.md',
+            packetRoot: 'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21',
+            summary:
+              'Bounded second-target review is not open for debian-12-systemd-tailscale; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.',
+            pendingVerdicts: [],
+            sources: ['docs/operations/portmanager-second-target-review-contract.md']
           },
           reviewPacketTemplate: {
             candidateTargetProfileId: 'debian-12-systemd-tailscale',

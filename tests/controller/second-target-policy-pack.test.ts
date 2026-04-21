@@ -96,7 +96,7 @@ test('second target policy pack requires expansion review when candidate, parity
 
   assert.equal(pack.decisionState, 'review_required')
   assert.equal(pack.expansionReviewRequired, true)
-  assert.match(pack.summary, /review required/i)
+  assert.match(pack.summary, /bounded second-target review is open now/i)
   assert.equal(pack.blockingCriteria.length, 0)
   assert.equal(
     pack.satisfiedCriteria.some((criterion) => criterion.id === 'operator_ownership_defined'),
@@ -120,8 +120,40 @@ test('default second target policy pack preserves a complete review packet and o
     pack.reviewPacketReadiness.summary,
     /artifact coverage is complete/i
   )
-  assert.match(pack.reviewPacketReadiness.requiredNextAction, /Open bounded second-target review/i)
+  assert.match(
+    pack.reviewPacketReadiness.requiredNextAction,
+    /Adjudicate bounded second-target review/i
+  )
   assert.equal(pack.reviewPacketReadiness.nextExecutionUnits.length, 0)
+  assert.equal(pack.reviewAdjudication.state, 'review_open')
+  assert.equal(pack.reviewAdjudication.reviewOwner, 'controller')
+  assert.equal(pack.reviewAdjudication.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+  assert.match(
+    pack.reviewAdjudication.contractPath,
+    /docs\/operations\/portmanager-second-target-review-contract\.md/u
+  )
+  assert.match(
+    pack.reviewAdjudication.packetRoot,
+    /docs\/operations\/artifacts\/debian-12-bootstrap-packet-2026-04-21/u
+  )
+  assert.match(pack.reviewAdjudication.summary, /bounded second-target review is open/i)
+  assert.equal(pack.reviewAdjudication.pendingVerdicts.length, 5)
+  assert.equal(
+    pack.reviewAdjudication.pendingVerdicts.some(
+      (item) =>
+        item.id === 'operator_signoff' &&
+        item.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-operator-ownership.md')
+        )
+    ),
+    true
+  )
+  assert.equal(
+    pack.reviewAdjudication.sources.some((source) =>
+      source.endsWith('docs/operations/portmanager-second-target-review-contract.md')
+    ),
+    true
+  )
   assert.equal(pack.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
   assert.match(
     pack.reviewPacketTemplate.templatePath,
@@ -316,8 +348,8 @@ test('default second target policy pack preserves a complete review packet and o
     ),
     true
   )
-  assert.match(pack.summary, /review required now/i)
-  assert.match(pack.nextActions[0] ?? '', /Open second-target review/i)
+  assert.match(pack.summary, /bounded second-target review is open now/i)
+  assert.match(pack.nextActions[0] ?? '', /Work through bounded second-target review/i)
 })
 
 test('second target review packet readiness stays in progress until diagnostics and rollback packet sections land', () => {
@@ -357,6 +389,8 @@ test('second target review packet readiness stays in progress until diagnostics 
     /diagnostics and rollback artifacts are still missing/i
   )
   assert.match(pack.reviewPacketReadiness.requiredNextAction, /Execute Units 67 through 69/i)
+  assert.equal(pack.reviewAdjudication.state, 'not_open')
+  assert.deepEqual(pack.reviewAdjudication.pendingVerdicts, [])
 })
 
 test('controller server exposes second target policy pack as explicit controller contract', async () => {
@@ -401,6 +435,21 @@ test('controller server exposes second target policy pack as explicit controller
             title: string
             summary: string
           }>
+        }
+        reviewAdjudication: {
+          state: string
+          reviewOwner: string
+          candidateTargetProfileId: string
+          contractPath: string
+          packetRoot: string
+          summary: string
+          pendingVerdicts: Array<{
+            id: string
+            label: string
+            summary: string
+            sources: string[]
+          }>
+          sources: string[]
         }
         reviewPacketTemplate: {
           candidateTargetProfileId: string
@@ -497,6 +546,13 @@ test('controller server exposes second target policy pack as explicit controller
       assert.equal(payload.reviewPacketReadiness.artifactCoverage.expected, 20)
       assert.deepEqual(payload.reviewPacketReadiness.artifactCoverage.missingArtifactIds, [])
       assert.equal(payload.reviewPacketReadiness.nextExecutionUnits.length, 0)
+      assert.equal(payload.reviewAdjudication.state, 'review_open')
+      assert.equal(payload.reviewAdjudication.reviewOwner, 'controller')
+      assert.equal(payload.reviewAdjudication.pendingVerdicts.length, 5)
+      assert.match(
+        payload.reviewAdjudication.contractPath,
+        /docs\/operations\/portmanager-second-target-review-contract\.md/u
+      )
       assert.equal(payload.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
       assert.match(
         payload.reviewPacketTemplate.templatePath,
@@ -593,9 +649,9 @@ test('controller server exposes second target policy pack as explicit controller
         ),
         true
       )
-      assert.match(payload.summary, /review required now/i)
+      assert.match(payload.summary, /bounded second-target review is open now/i)
       assert.equal(payload.nextActions.length >= 2, true)
-      assert.match(payload.nextActions[0] ?? '', /Open second-target review/i)
+      assert.match(payload.nextActions[0] ?? '', /Work through bounded second-target review/i)
       assert.equal(
         payload.satisfiedCriteria.some((criterion) => criterion.id === 'locked_target_registry'),
         true

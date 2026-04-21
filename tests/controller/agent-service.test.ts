@@ -509,7 +509,7 @@ test('candidate review-prep host allows one live steady-state create-rule after 
         secondCreateRuleAccepted.operationId
       )
       assert.equal(secondCreateRuleOperation.state, 'failed')
-      assert.match(String(secondCreateRuleOperation.resultSummary), /review-prep only/i)
+      assert.match(String(secondCreateRuleOperation.resultSummary), /bounded-review only/i)
     } finally {
       if (agent) {
         agent.kill()

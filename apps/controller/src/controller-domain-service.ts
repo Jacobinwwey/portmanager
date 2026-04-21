@@ -132,7 +132,7 @@ export function createControllerDomainService(options: {
   }
 
   function reviewPrepOnlyMessage(hostId: string, targetProfileId: string) {
-    return `Target profile ${targetProfileId} for host ${hostId} stays review-prep only; only create, probe, bootstrap, and one bounded live steady-state mutation are allowed until steady-state, backup, diagnostics, and rollback parity land.`
+    return `Target profile ${targetProfileId} for host ${hostId} stays bounded-review only; only create, probe, bootstrap, and one bounded live steady-state mutation are allowed while second-target review stays open and broader support stays locked to Ubuntu.`
   }
 
   function ensureSupportedHostProfile(hostId: string) {

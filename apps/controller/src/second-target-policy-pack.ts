@@ -194,6 +194,33 @@ export interface SecondTargetReviewPacketReadiness {
   nextExecutionUnits: SecondTargetNextExecutionUnit[]
 }
 
+export type SecondTargetReviewAdjudicationState = 'not_open' | 'review_open'
+
+export type SecondTargetReviewVerdictId =
+  | 'packet_integrity'
+  | 'drift_acknowledged'
+  | 'support_lock_confirmed'
+  | 'operator_signoff'
+  | 'follow_up_scope_bounded'
+
+export interface SecondTargetReviewVerdict {
+  id: SecondTargetReviewVerdictId
+  label: string
+  summary: string
+  sources: string[]
+}
+
+export interface SecondTargetReviewAdjudication {
+  state: SecondTargetReviewAdjudicationState
+  reviewOwner: SecondTargetPolicySnapshot['reviewOwner']
+  candidateTargetProfileId: string
+  contractPath: string
+  packetRoot: string
+  summary: string
+  pendingVerdicts: SecondTargetReviewVerdict[]
+  sources: string[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -225,6 +252,7 @@ export interface SecondTargetPolicyPack {
   summary: string
   nextActions: string[]
   reviewPacketReadiness: SecondTargetReviewPacketReadiness
+  reviewAdjudication: SecondTargetReviewAdjudication
   reviewPacketTemplate: SecondTargetReviewPacketTemplate
   bootstrapProofCapture: SecondTargetBootstrapProofCapture
   steadyStateProofCapture: SecondTargetSteadyStateProofCapture
@@ -236,6 +264,9 @@ export interface SecondTargetPolicyPack {
   evidenceItems: SecondTargetPolicyEvidenceItem[]
 }
 
+const secondTargetReviewContractPath = 'docs/operations/portmanager-second-target-review-contract.md'
+const secondTargetOperatorOwnershipPath =
+  'docs/operations/portmanager-debian-12-operator-ownership.md'
 const reviewPacketTemplatePath = 'docs/operations/portmanager-debian-12-review-packet-template.md'
 const bootstrapProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md'
@@ -283,6 +314,8 @@ const rollbackCapturePostDiagnosticsPath =
 const rollbackCapturePostDiagnosticsAuditIndexPath =
   `${bootstrapCaptureArtifactRoot}/rollback-post-diagnostics-audit-index.json`
 const rollbackCaptureHostDetailPath = `${bootstrapCaptureArtifactRoot}/rollback-host-detail.json`
+const packetReadyPolicyPackPath = `${bootstrapCaptureArtifactRoot}/packet-ready-policy-pack.json`
+const packetReadmePath = `${bootstrapCaptureArtifactRoot}/README.md`
 const bootstrapCapturedArtifactIds: SecondTargetReviewArtifactId[] = [
   'bootstrap_operation_id',
   'bootstrap_result_summary',
@@ -384,7 +417,7 @@ const executionUnits: SecondTargetNextExecutionUnit[] = [
     id: 'unit_69',
     title: 'Second-target review closeout',
     summary:
-      'Re-read /second-target-policy-pack, confirm parity truth, and open review only after the complete Debian 12 packet is preserved.'
+      'Re-read /second-target-policy-pack, confirm parity truth, and adjudicate bounded review only after the complete Debian 12 packet is preserved.'
   }
 ]
 
@@ -515,6 +548,42 @@ const rollbackProofArtifactMetadata: Record<
     label: 'Post-rollback diagnostics linkage',
     summary:
       'Capture one linked post-rollback diagnostics artifact path or audit reference from the same rollback rehearsal packet.'
+  }
+}
+
+const reviewVerdictMetadata: Record<
+  SecondTargetReviewVerdictId,
+  { label: string; summary: string; sources: string[] }
+> = {
+  packet_integrity: {
+    label: 'Packet integrity',
+    summary:
+      'Confirm the preserved Debian 12 packet still links bootstrap, steady-state, backup, diagnostics, and rollback evidence to one bounded review bundle.',
+    sources: [packetReadmePath, packetReadyPolicyPackPath, reviewPacketTemplatePath]
+  },
+  drift_acknowledged: {
+    label: 'Drift acknowledged',
+    summary:
+      'Acknowledge the preserved drift note for the current packet and confirm the same note stays visible before any broader support claim moves.',
+    sources: [packetReadmePath, reviewPacketTemplatePath, secondTargetReviewContractPath]
+  },
+  support_lock_confirmed: {
+    label: 'Support lock confirmed',
+    summary:
+      'Confirm broader support claims still stay locked to ubuntu-24.04-systemd-tailscale while bounded second-target review remains open.',
+    sources: [secondTargetReviewContractPath, secondTargetOperatorOwnershipPath, 'docs-site/data/roadmap.ts']
+  },
+  operator_signoff: {
+    label: 'Operator sign-off',
+    summary:
+      'Capture controller-owner sign-off that the preserved packet is still reviewable, evidence retention still holds, and no hidden parity gap is being waived.',
+    sources: [secondTargetOperatorOwnershipPath, packetReadmePath]
+  },
+  follow_up_scope_bounded: {
+    label: 'Follow-up scope bounded',
+    summary:
+      'Bound any review-found delta to explicit follow-up work instead of widening target support or platform claims by implication.',
+    sources: [secondTargetReviewContractPath, packetReadyPolicyPackPath, 'docs/architecture/portmanager-v1-architecture.md']
   }
 }
 
@@ -696,7 +765,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     evidenceItem(
       'candidate_target_declared',
       'review_prep',
-      'debian-12-systemd-tailscale is declared as the only review-prep candidate, not a supported target.',
+      'debian-12-systemd-tailscale is declared as the only bounded-review candidate, not a supported target.',
       [
         'apps/controller/src/second-target-policy-pack.ts',
         'tests/controller/second-target-policy-pack.test.ts',
@@ -707,7 +776,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     evidenceItem(
       'docs_contract_ready',
       'landed',
-      'Docs contract now freezes candidate-only wording plus review-prep guardrails for Debian 12.',
+      'Docs contract now freezes candidate-only wording plus review-open guardrails for the preserved Debian 12 packet.',
       [
         'docs/operations/portmanager-second-target-review-contract.md',
         'README.md',
@@ -728,7 +797,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     evidenceItem(
       'operator_ownership_defined',
       'landed',
-      'Operator ownership document now names who stages hosts, records evidence, and decides whether review stays on hold.',
+      'Operator ownership document now names who stages hosts, records evidence, signs off the bounded review, and keeps broader support locked.',
       [
         'docs/operations/portmanager-debian-12-operator-ownership.md',
         'README.md',
@@ -926,7 +995,7 @@ function buildSummary(
   blockingCriteria: SecondTargetPolicyCriterion[]
 ) {
   if (decisionState === 'review_required') {
-    return 'Second-target review required now because candidate target, transport parity, backup parity, diagnostics parity, rollback parity, docs contract, acceptance recipe, and operator ownership are all present.'
+    return 'Bounded second-target review is open now because candidate target, transport parity, backup parity, diagnostics parity, rollback parity, docs contract, acceptance recipe, and operator ownership are all present while broader support still stays locked to Ubuntu.'
   }
 
   if (decisionState === 'prepare_review') {
@@ -972,9 +1041,9 @@ function buildNextActions(
 
   if (decisionState === 'review_required') {
     return [
-      `Open second-target review for ${candidateTargets} before widening supported-target claims beyond ${lockedTarget}.`,
-      'Keep controller, CLI, Web, and docs contract wording aligned while review validates parity evidence.',
-      'Gate any support claim on acceptance proof, operator ownership, and rollback rehearsal evidence.'
+      `Work through bounded second-target review for ${candidateTargets} before widening supported-target claims beyond ${lockedTarget}.`,
+      'Keep controller, CLI, Web, and docs contract wording aligned while review adjudication validates the preserved parity packet.',
+      'Record packet verdicts, operator sign-off, and any follow-up delta before any broader support claim moves.'
     ]
   }
 
@@ -1124,9 +1193,9 @@ function buildReviewPacketReadiness(
       candidateTargetProfileId,
       state,
       summary:
-        `Review-packet artifact coverage is complete for ${candidateTargetProfileId}; re-read /second-target-policy-pack and open second-target review instead of inventing new guide work.`,
+        `Review-packet artifact coverage is complete for ${candidateTargetProfileId}; bounded second-target review is open, so adjudicate the preserved packet instead of inventing new guide work.`,
       requiredNextAction:
-        'Open bounded second-target review and confirm every parity criterion against the preserved Debian 12 packet.',
+        'Adjudicate bounded second-target review and record packet verdicts against the preserved Debian 12 packet.',
       guideCoverage,
       artifactCoverage,
       nextExecutionUnits
@@ -1203,6 +1272,68 @@ function buildReviewPacketReadiness(
     guideCoverage,
     artifactCoverage,
     nextExecutionUnits
+  }
+}
+
+function reviewVerdict(id: SecondTargetReviewVerdictId): SecondTargetReviewVerdict {
+  const metadata = reviewVerdictMetadata[id]
+
+  return {
+    id,
+    label: metadata.label,
+    summary: metadata.summary,
+    sources: [...metadata.sources]
+  }
+}
+
+function buildReviewAdjudication(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetReviewAdjudication {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+  const decisionState = decisionStateFrom(snapshot)
+  const readinessState = reviewPacketReadinessStateFrom(snapshot)
+  const state: SecondTargetReviewAdjudicationState =
+    decisionState === 'review_required' && readinessState === 'packet_ready'
+      ? 'review_open'
+      : 'not_open'
+  const sources = [
+    secondTargetReviewContractPath,
+    secondTargetOperatorOwnershipPath,
+    packetReadmePath,
+    packetReadyPolicyPackPath,
+    reviewPacketTemplatePath
+  ]
+
+  if (state === 'review_open') {
+    return {
+      state,
+      reviewOwner: snapshot.reviewOwner,
+      candidateTargetProfileId,
+      contractPath: secondTargetReviewContractPath,
+      packetRoot: bootstrapCaptureArtifactRoot,
+      summary:
+        `Bounded second-target review is open for ${candidateTargetProfileId}; adjudicate packet integrity, drift acknowledgement, support lock, operator sign-off, and follow-up scope before any broader support claim moves.`,
+      pendingVerdicts: [
+        reviewVerdict('packet_integrity'),
+        reviewVerdict('drift_acknowledged'),
+        reviewVerdict('support_lock_confirmed'),
+        reviewVerdict('operator_signoff'),
+        reviewVerdict('follow_up_scope_bounded')
+      ],
+      sources
+    }
+  }
+
+  return {
+    state,
+    reviewOwner: snapshot.reviewOwner,
+    candidateTargetProfileId,
+    contractPath: secondTargetReviewContractPath,
+    packetRoot: bootstrapCaptureArtifactRoot,
+    summary:
+      `Bounded second-target review is not open for ${candidateTargetProfileId}; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.`,
+    pendingVerdicts: [],
+    sources
   }
 }
 
@@ -1500,6 +1631,7 @@ export function buildSecondTargetPolicyPack(
     summary: buildSummary(decisionState, blockingCriteria),
     nextActions: buildNextActions(snapshot, decisionState),
     reviewPacketReadiness: buildReviewPacketReadiness(snapshot),
+    reviewAdjudication: buildReviewAdjudication(snapshot),
     reviewPacketTemplate: buildReviewPacketTemplate(snapshot),
     bootstrapProofCapture: buildBootstrapProofCapture(snapshot),
     steadyStateProofCapture: buildSteadyStateProofCapture(snapshot),

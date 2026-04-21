@@ -368,7 +368,7 @@ test('controller server keeps degraded candidate host rule mutation blocked duri
       )
       assert.equal(createRuleOperation.type, 'create_rule')
       assert.equal(createRuleOperation.state, 'failed')
-      assert.match(String(createRuleOperation.resultSummary), /review-prep only/i)
+      assert.match(String(createRuleOperation.resultSummary), /bounded-review only/i)
 
       const candidateHostDetailResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}`)
       assert.equal(candidateHostDetailResponse.status, 200)

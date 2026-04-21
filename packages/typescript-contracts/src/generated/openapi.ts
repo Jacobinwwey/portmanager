@@ -1575,6 +1575,7 @@ export interface components {
             /** @enum {string} */
             lockedTargetProfileId: "ubuntu-24.04-systemd-tailscale";
             nextActions: string[];
+            reviewAdjudication: components["schemas"]["SecondTargetReviewAdjudication"];
             /** @enum {string} */
             reviewOwner: "controller";
             reviewPacketReadiness: components["schemas"]["SecondTargetReviewPacketReadiness"];
@@ -1585,6 +1586,19 @@ export interface components {
             summary: string;
             supportedTargetProfiles: components["schemas"]["TargetProfileSummary"][];
         };
+        SecondTargetReviewAdjudication: {
+            candidateTargetProfileId: string;
+            contractPath: string;
+            packetRoot: string;
+            pendingVerdicts: components["schemas"]["SecondTargetReviewVerdict"][];
+            /** @enum {string} */
+            reviewOwner: "controller";
+            sources: string[];
+            state: components["schemas"]["SecondTargetReviewAdjudicationState"];
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetReviewAdjudicationState: "not_open" | "review_open";
         /** @enum {string} */
         SecondTargetReviewArtifactId: "bootstrap_operation_id" | "bootstrap_result_summary" | "audit_reference" | "target_profile_confirmation" | "post_mutation_operation_id" | "health_capture" | "runtime_state_capture" | "controller_audit_reference" | "backup_bearing_mutation_id" | "backup_manifest_path" | "remote_backup_result" | "restore_readiness_reference" | "diagnostics_operation_id" | "diagnostics_artifact_paths" | "controller_event_reference" | "drift_operator_note" | "rollback_point_id" | "rollback_operation_id" | "rollback_result_summary" | "post_rollback_diagnostics_linkage";
         SecondTargetReviewPacketArtifactCoverage: components["schemas"]["SecondTargetReviewPacketCoverage"] & {
@@ -1620,6 +1634,14 @@ export interface components {
             summary: string;
             templatePath: string;
         };
+        SecondTargetReviewVerdict: {
+            id: components["schemas"]["SecondTargetReviewVerdictId"];
+            label: string;
+            sources: string[];
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetReviewVerdictId: "packet_integrity" | "drift_acknowledged" | "support_lock_confirmed" | "operator_signoff" | "follow_up_scope_bounded";
         SecondTargetRollbackProofArtifact: {
             id: components["schemas"]["SecondTargetRollbackProofArtifactId"];
             label: string;
@@ -1755,6 +1777,8 @@ export type SecondTargetPolicyDecisionState = components['schemas']['SecondTarge
 export type SecondTargetPolicyEvidenceItem = components['schemas']['SecondTargetPolicyEvidenceItem'];
 export type SecondTargetPolicyEvidenceState = components['schemas']['SecondTargetPolicyEvidenceState'];
 export type SecondTargetPolicyPack = components['schemas']['SecondTargetPolicyPack'];
+export type SecondTargetReviewAdjudication = components['schemas']['SecondTargetReviewAdjudication'];
+export type SecondTargetReviewAdjudicationState = components['schemas']['SecondTargetReviewAdjudicationState'];
 export type SecondTargetReviewArtifactId = components['schemas']['SecondTargetReviewArtifactId'];
 export type SecondTargetReviewPacketArtifactCoverage = components['schemas']['SecondTargetReviewPacketArtifactCoverage'];
 export type SecondTargetReviewPacketCoverage = components['schemas']['SecondTargetReviewPacketCoverage'];
@@ -1763,6 +1787,8 @@ export type SecondTargetReviewPacketReadiness = components['schemas']['SecondTar
 export type SecondTargetReviewPacketReadinessState = components['schemas']['SecondTargetReviewPacketReadinessState'];
 export type SecondTargetReviewPacketRequirement = components['schemas']['SecondTargetReviewPacketRequirement'];
 export type SecondTargetReviewPacketTemplate = components['schemas']['SecondTargetReviewPacketTemplate'];
+export type SecondTargetReviewVerdict = components['schemas']['SecondTargetReviewVerdict'];
+export type SecondTargetReviewVerdictId = components['schemas']['SecondTargetReviewVerdictId'];
 export type SecondTargetRollbackProofArtifact = components['schemas']['SecondTargetRollbackProofArtifact'];
 export type SecondTargetRollbackProofArtifactId = components['schemas']['SecondTargetRollbackProofArtifactId'];
 export type SecondTargetRollbackProofCapture = components['schemas']['SecondTargetRollbackProofCapture'];

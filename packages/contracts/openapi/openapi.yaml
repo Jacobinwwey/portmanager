@@ -1378,6 +1378,7 @@ components:
           summary,
           nextActions,
           reviewPacketReadiness,
+          reviewAdjudication,
           reviewPacketTemplate,
           bootstrapProofCapture,
           steadyStateProofCapture,
@@ -1419,6 +1420,8 @@ components:
             type: string
         reviewPacketReadiness:
           $ref: '#/components/schemas/SecondTargetReviewPacketReadiness'
+        reviewAdjudication:
+          $ref: '#/components/schemas/SecondTargetReviewAdjudication'
         reviewPacketTemplate:
           $ref: '#/components/schemas/SecondTargetReviewPacketTemplate'
         bootstrapProofCapture:
@@ -1573,6 +1576,68 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetNextExecutionUnit'
+    SecondTargetReviewAdjudicationState:
+      type: string
+      enum: [not_open, review_open]
+    SecondTargetReviewVerdictId:
+      type: string
+      enum:
+        [
+          packet_integrity,
+          drift_acknowledged,
+          support_lock_confirmed,
+          operator_signoff,
+          follow_up_scope_bounded
+        ]
+    SecondTargetReviewVerdict:
+      type: object
+      required: [id, label, summary, sources]
+      properties:
+        id:
+          $ref: '#/components/schemas/SecondTargetReviewVerdictId'
+        label:
+          type: string
+        summary:
+          type: string
+        sources:
+          type: array
+          items:
+            type: string
+    SecondTargetReviewAdjudication:
+      type: object
+      required:
+        [
+          state,
+          reviewOwner,
+          candidateTargetProfileId,
+          contractPath,
+          packetRoot,
+          summary,
+          pendingVerdicts,
+          sources
+        ]
+      properties:
+        state:
+          $ref: '#/components/schemas/SecondTargetReviewAdjudicationState'
+        reviewOwner:
+          type: string
+          enum: [controller]
+        candidateTargetProfileId:
+          type: string
+        contractPath:
+          type: string
+        packetRoot:
+          type: string
+        summary:
+          type: string
+        pendingVerdicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetReviewVerdict'
+        sources:
+          type: array
+          items:
+            type: string
     SecondTargetReviewPacketTemplate:
       type: object
       required: [candidateTargetProfileId, templatePath, summary, requiredEvidence]

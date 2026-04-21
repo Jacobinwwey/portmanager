@@ -1555,6 +1555,23 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         }
       ]
     },
+    reviewAdjudication: {
+      state: 'not_open',
+      reviewOwner: 'controller',
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      contractPath: 'docs/operations/portmanager-second-target-review-contract.md',
+      packetRoot: 'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21',
+      summary:
+        'Bounded second-target review is not open for debian-12-systemd-tailscale; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.',
+      pendingVerdicts: [],
+      sources: [
+        'docs/operations/portmanager-second-target-review-contract.md',
+        'docs/operations/portmanager-debian-12-operator-ownership.md',
+        'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/README.md',
+        'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/packet-ready-policy-pack.json',
+        'docs/operations/portmanager-debian-12-review-packet-template.md'
+      ]
+    },
     reviewPacketTemplate: {
       candidateTargetProfileId: 'debian-12-systemd-tailscale',
       templatePath: 'docs/operations/portmanager-debian-12-review-packet-template.md',
@@ -3782,6 +3799,46 @@ function SecondTargetPolicyCard(props: {
             )
           )
         : emptyState('No next execution units recorded yet.', 'empty')
+    ]),
+    h('section', { className: 'pm-card', key: 'review-adjudication' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Review adjudication',
+        detail: props.pack.reviewAdjudication.state
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Review Owner', props.pack.reviewAdjudication.reviewOwner),
+        kvRow('Candidate Target', props.pack.reviewAdjudication.candidateTargetProfileId),
+        kvRow('Contract Path', props.pack.reviewAdjudication.contractPath),
+        kvRow('Packet Root', props.pack.reviewAdjudication.packetRoot)
+      ]),
+      h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.reviewAdjudication.summary),
+      props.pack.reviewAdjudication.pendingVerdicts.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'verdicts' },
+            props.pack.reviewAdjudication.pendingVerdicts.map((item) =>
+              h('li', { className: 'pm-list-item', key: item.id }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, [
+                  `${item.summary}`,
+                  h(
+                    'span',
+                    { key: 'sources' },
+                    item.sources.length > 0 ? ` Sources: ${item.sources.join(', ')}` : ''
+                  )
+                ])
+              ])
+            )
+          )
+        : emptyState('No review verdicts pending until packet-ready review opens.', 'empty'),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'sources' },
+        props.pack.reviewAdjudication.sources.length > 0
+          ? `Sources: ${props.pack.reviewAdjudication.sources.join(', ')}`
+          : 'Sources: none'
+      )
     ]),
     h('section', { className: 'pm-card', key: 'review-packet-template' }, [
       h(SectionHeading, {

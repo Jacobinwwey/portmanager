@@ -126,11 +126,11 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-review-packet-readiness-requirements\.md/
+    /2026-04-21-portmanager-m3-review-adjudication-requirements\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-review-packet-readiness-plan\.md/
+    /2026-04-21-portmanager-m3-review-adjudication-plan\.md/
   )
   assert.match(milestoneConfidenceComponent, /Phase 0 enablement/)
   assert.match(milestoneConfidenceComponent, /Units 63 through 69/)
@@ -150,6 +150,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(roadmapData, /Units 51 through 62/)
   assert.match(roadmapData, /Units 63 through 69/)
+  assert.match(roadmapData, /review_open/)
   assert.match(roadmapData, /debian-12-systemd-tailscale/)
   assert.match(roadmapData, /review-packet readiness/i)
   assert.match(roadmapData, /guide coverage/i)
@@ -249,7 +250,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
-  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-review-packet-readiness-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-review-adjudication-plan\.md/)
   assert.match(roadmapComponent, /lane\.items\.length > 0/)
   assert.match(roadmapComponent, /milestone-confidence-bundle-\*/)
   assert.match(roadmapComponent, /Required next action/)

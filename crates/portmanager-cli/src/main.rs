@@ -2196,6 +2196,72 @@ fn format_second_target_review_packet_readiness_block(review_packet_readiness: &
     )
 }
 
+fn format_second_target_review_adjudication_block(review_adjudication: &Value) -> String {
+    let verdict_lines = review_adjudication["pendingVerdicts"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|item| {
+            let sources = item["sources"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|source| source.as_str())
+                .collect::<Vec<_>>();
+            let sources_suffix = if sources.is_empty() {
+                String::new()
+            } else {
+                format!(" :: sources {}", sources.join(", "))
+            };
+
+            format!(
+                "- {} :: {} :: {}{}",
+                item["id"].as_str().unwrap_or("unknown"),
+                item["label"].as_str().unwrap_or("unknown"),
+                item["summary"].as_str().unwrap_or("no summary"),
+                sources_suffix
+            )
+        })
+        .collect::<Vec<_>>();
+    let verdict_block = if verdict_lines.is_empty() {
+        "Pending Verdicts:\n- none".to_string()
+    } else {
+        format!("Pending Verdicts:\n{}", verdict_lines.join("\n"))
+    };
+    let source_lines = review_adjudication["sources"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|source| source.as_str())
+        .map(|source| format!("- {}", source))
+        .collect::<Vec<_>>();
+    let source_block = if source_lines.is_empty() {
+        "Sources:\n- none".to_string()
+    } else {
+        format!("Sources:\n{}", source_lines.join("\n"))
+    };
+
+    format!(
+        "Review Adjudication:\nState: {}\nReview Owner: {}\nCandidate Target: {}\nContract Path: {}\nPacket Root: {}\nSummary: {}\n{}\n{}",
+        review_adjudication["state"].as_str().unwrap_or("unknown"),
+        review_adjudication["reviewOwner"].as_str().unwrap_or("unknown"),
+        review_adjudication["candidateTargetProfileId"]
+            .as_str()
+            .unwrap_or("unknown"),
+        review_adjudication["contractPath"]
+            .as_str()
+            .unwrap_or("unknown"),
+        review_adjudication["packetRoot"]
+            .as_str()
+            .unwrap_or("unknown"),
+        review_adjudication["summary"]
+            .as_str()
+            .unwrap_or("no summary"),
+        verdict_block,
+        source_block
+    )
+}
+
 fn format_second_target_bootstrap_proof_capture_block(bootstrap_proof_capture: &Value) -> String {
     let required_lines = bootstrap_proof_capture["requiredArtifacts"]
         .as_array()
@@ -2498,7 +2564,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
     };
 
     format!(
-        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}",
+        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}",
         pack["lockedTargetProfileId"].as_str().unwrap_or("unknown"),
         pack["reviewOwner"].as_str().unwrap_or("unknown"),
         pack["decisionState"].as_str().unwrap_or("unknown"),
@@ -2513,6 +2579,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
         format_target_profile_summaries("Candidate Targets", &pack["candidateTargetProfiles"]),
         format_second_target_evidence_block("Evidence Ledger", &pack["evidenceItems"]),
         format_second_target_review_packet_readiness_block(&pack["reviewPacketReadiness"]),
+        format_second_target_review_adjudication_block(&pack["reviewAdjudication"]),
         format_second_target_review_packet_block(&pack["reviewPacketTemplate"]),
         format_second_target_bootstrap_proof_capture_block(&pack["bootstrapProofCapture"]),
         format_second_target_steady_state_proof_capture_block(&pack["steadyStateProofCapture"]),
