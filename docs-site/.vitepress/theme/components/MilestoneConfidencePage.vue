@@ -218,6 +218,10 @@
             <li>{{ copy.currentReviewPackDir }} <code>{{ progress.currentReviewPack.outputDir }}</code></li>
             <li>{{ copy.currentReviewPackManifest }} <code>{{ progress.currentReviewPack.manifestPath }}</code></li>
             <li>{{ copy.currentReviewPackRun }} {{ currentReviewPackRunLabel }}</li>
+            <li>{{ copy.currentReviewPackEvent }} {{ progress.currentReviewPack.sourceRun.event ?? copy.none }}</li>
+            <li>{{ copy.currentReviewPackStatus }} {{ progress.currentReviewPack.sourceRun.conclusion ?? progress.currentReviewPack.sourceRun.status ?? copy.none }}</li>
+            <li>{{ copy.currentReviewPackSha }} <code>{{ progress.currentReviewPack.sourceRun.headSha?.slice(0, 12) ?? copy.none }}</code></li>
+            <li v-if="progress.currentReviewPack.sourceRun.htmlUrl">{{ copy.currentReviewPackRunLink }} <VPLink class="pm-doc-link" :href="progress.currentReviewPack.sourceRun.htmlUrl">{{ currentReviewPackRunLabel }}</VPLink></li>
             <li>{{ copy.currentReviewPackFetchedAt }} {{ formatTimestamp(progress.currentReviewPack.fetchedAt) }}</li>
             <li>{{ copy.currentReviewPackReviewDigest }} <code>{{ currentReviewPackRequiredFile('milestone-confidence-review.md') }}</code></li>
             <li>{{ copy.currentReviewPackWordingReview }} <code>{{ currentReviewPackRequiredFile('milestone-wording-review.md') }}</code></li>
@@ -292,6 +296,10 @@ const copy = computed(() => props.locale === 'zh'
       currentReviewPackDir: 'Current CI review-pack dir：',
       currentReviewPackManifest: 'Current CI review-pack manifest：',
       currentReviewPackRun: 'Current CI review-pack run：',
+      currentReviewPackEvent: 'Current CI review-pack event：',
+      currentReviewPackStatus: 'Current CI review-pack status：',
+      currentReviewPackSha: 'Current CI review-pack SHA：',
+      currentReviewPackRunLink: 'Current CI review-pack run link：',
       currentReviewPackFetchedAt: 'Current CI review-pack fetched：',
       currentReviewPackReviewDigest: 'Current CI review digest：',
       currentReviewPackWordingReview: 'Current CI wording review：',
@@ -383,6 +391,10 @@ const copy = computed(() => props.locale === 'zh'
       currentReviewPackDir: 'Current CI review-pack dir:',
       currentReviewPackManifest: 'Current CI review-pack manifest:',
       currentReviewPackRun: 'Current CI review-pack run:',
+      currentReviewPackEvent: 'Current CI review-pack event:',
+      currentReviewPackStatus: 'Current CI review-pack status:',
+      currentReviewPackSha: 'Current CI review-pack SHA:',
+      currentReviewPackRunLink: 'Current CI review-pack run link:',
       currentReviewPackFetchedAt: 'Current CI review-pack fetched:',
       currentReviewPackReviewDigest: 'Current CI review digest:',
       currentReviewPackWordingReview: 'Current CI wording review:',

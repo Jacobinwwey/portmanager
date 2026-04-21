@@ -238,6 +238,10 @@
                 <li>{{ copy.liveTrackedArtifactInstruction }} {{ confidenceSurfaceInstruction('docs-site/data/milestone-confidence-progress.ts') }}</li>
                 <template v-if="confidenceProgress.currentReviewPack">
                   <li>{{ copy.liveCurrentReviewPackRun }} {{ currentReviewPackRunLabel }}</li>
+                  <li>{{ copy.liveCurrentReviewPackEvent }} {{ confidenceProgress.currentReviewPack.sourceRun.event ?? 'none' }}</li>
+                  <li>{{ copy.liveCurrentReviewPackStatus }} {{ confidenceProgress.currentReviewPack.sourceRun.conclusion ?? confidenceProgress.currentReviewPack.sourceRun.status ?? 'none' }}</li>
+                  <li>{{ copy.liveCurrentReviewPackSha }} <code>{{ confidenceProgress.currentReviewPack.sourceRun.headSha?.slice(0, 12) ?? 'none' }}</code></li>
+                  <li v-if="confidenceProgress.currentReviewPack.sourceRun.htmlUrl">{{ copy.liveCurrentReviewPackRunLink }} <VPLink class="pm-doc-link" :href="confidenceProgress.currentReviewPack.sourceRun.htmlUrl">{{ currentReviewPackRunLabel }}</VPLink></li>
                   <li>{{ copy.liveCurrentReviewPackFetchedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.fetchedAt) }}</li>
                   <li>{{ copy.liveCurrentReviewPackManifest }} <code>{{ confidenceProgress.currentReviewPack.manifestPath }}</code></li>
                   <li>{{ copy.liveCurrentReviewPackDigest }} <code>{{ currentReviewPackRequiredFile('milestone-confidence-review.md') }}</code></li>
@@ -402,6 +406,10 @@ const copy = computed(() => props.locale === 'zh'
       liveTrackedArtifactInstruction: 'Tracked artifact review instruction：',
       liveNoWordingReview: '当前公开快照还没有携带 wording-review 姿态。',
       liveCurrentReviewPackRun: 'Current CI review-pack run：',
+      liveCurrentReviewPackEvent: 'Current CI review-pack event：',
+      liveCurrentReviewPackStatus: 'Current CI review-pack status：',
+      liveCurrentReviewPackSha: 'Current CI review-pack SHA：',
+      liveCurrentReviewPackRunLink: 'Current CI review-pack run link：',
       liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched：',
       liveCurrentReviewPackManifest: 'Current CI review-pack manifest：',
       liveCurrentReviewPackDigest: 'Current CI review digest：',
@@ -475,6 +483,10 @@ const copy = computed(() => props.locale === 'zh'
       liveTrackedArtifactInstruction: 'Tracked artifact review instruction:',
       liveNoWordingReview: 'No wording-review posture is published on this snapshot yet.',
       liveCurrentReviewPackRun: 'Current CI review-pack run:',
+      liveCurrentReviewPackEvent: 'Current CI review-pack event:',
+      liveCurrentReviewPackStatus: 'Current CI review-pack status:',
+      liveCurrentReviewPackSha: 'Current CI review-pack SHA:',
+      liveCurrentReviewPackRunLink: 'Current CI review-pack run link:',
       liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched:',
       liveCurrentReviewPackManifest: 'Current CI review-pack manifest:',
       liveCurrentReviewPackDigest: 'Current CI review digest:',

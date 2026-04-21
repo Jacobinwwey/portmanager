@@ -85,6 +85,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
     milestoneConfidenceComponent,
     /currentReviewPackOptionalFile\('milestone-confidence-summary\.md'\)/
   )
+  assert.match(
+    milestoneConfidenceComponent,
+    /progress\.currentReviewPack\.sourceRun\.htmlUrl/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /progress\.currentReviewPack\.sourceRun\.headSha/
+  )
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
@@ -112,6 +120,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(
     roadmapComponent,
     /currentReviewPackOptionalFile\('milestone-confidence-summary\.md'\)/
+  )
+  assert.match(
+    roadmapComponent,
+    /confidenceProgress\.currentReviewPack\.sourceRun\.htmlUrl/
+  )
+  assert.match(
+    roadmapComponent,
+    /confidenceProgress\.currentReviewPack\.sourceRun\.headSha/
   )
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
@@ -161,6 +177,10 @@ test('roadmap publishes a development-progress page backed by live milestone con
     'pnpm milestone:fetch:review-pack'
   )
   assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.id, 'number')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.event, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.conclusion, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.headSha, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.htmlUrl, 'string')
   assert.equal(
     milestoneConfidenceProgress.currentReviewPack.files.required['milestone-confidence-review.md'],
     '.portmanager/reports/current-ci-review-pack/milestone-confidence-review.md'
