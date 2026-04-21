@@ -247,6 +247,31 @@ const diagnosticsProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-diagnostics-proof-capture.md'
 const rollbackProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-rollback-proof-capture.md'
+const bootstrapCaptureArtifactRoot =
+  'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21'
+const bootstrapCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/bootstrap-capture-summary.json`
+const bootstrapCaptureOperationPath = `${bootstrapCaptureArtifactRoot}/bootstrap-operation.json`
+const bootstrapCaptureAuditIndexPath = `${bootstrapCaptureArtifactRoot}/bootstrap-audit-index.json`
+const bootstrapCaptureHostDetailPath = `${bootstrapCaptureArtifactRoot}/bootstrap-host-detail.json`
+const steadyStateCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/steady-state-capture-summary.json`
+const steadyStateCaptureOperationPath = `${bootstrapCaptureArtifactRoot}/steady-state-operation.json`
+const steadyStateCaptureHealthPath = `${bootstrapCaptureArtifactRoot}/steady-state-health.json`
+const steadyStateCaptureRuntimeStatePath =
+  `${bootstrapCaptureArtifactRoot}/steady-state-runtime-state.json`
+const steadyStateCaptureAuditIndexPath = `${bootstrapCaptureArtifactRoot}/steady-state-audit-index.json`
+const steadyStateCaptureHostDetailPath = `${bootstrapCaptureArtifactRoot}/steady-state-host-detail.json`
+const bootstrapCapturedArtifactIds: SecondTargetReviewArtifactId[] = [
+  'bootstrap_operation_id',
+  'bootstrap_result_summary',
+  'audit_reference',
+  'target_profile_confirmation'
+]
+const steadyStateCapturedArtifactIds: SecondTargetReviewArtifactId[] = [
+  'post_mutation_operation_id',
+  'health_capture',
+  'runtime_state_capture',
+  'controller_audit_reference'
+]
 const reviewPacketGuidePaths = [
   reviewPacketTemplatePath,
   bootstrapProofCaptureGuidePath,
@@ -277,7 +302,7 @@ const allReviewPacketArtifactIds: SecondTargetReviewArtifactId[] = [
   'rollback_result_summary',
   'post_rollback_diagnostics_linkage'
 ]
-const nextExecutionUnits: SecondTargetNextExecutionUnit[] = [
+const executionUnits: SecondTargetNextExecutionUnit[] = [
   {
     id: 'unit_63',
     title: 'Review-packet readiness pack',
@@ -671,8 +696,8 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     ),
     evidenceItem(
       'bootstrap_transport_parity',
-      'review_prep',
-      'Candidate host enrollment, probe, and bootstrap now run through the bounded review-prep lane, but parity proof stays false until one Debian 12 review packet preserves the bootstrap evidence bundle.',
+      'landed',
+      'One bounded Debian 12 bootstrap review packet is now preserved with operation, audit, and target-profile evidence while broader support claims stay locked.',
       [
         'apps/controller/src/controller-server.ts',
         'apps/controller/src/controller-domain-service.ts',
@@ -680,17 +705,27 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
         'tests/controller/host-rule-policy.test.ts',
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
+        bootstrapCaptureSummaryPath,
+        bootstrapCaptureOperationPath,
+        bootstrapCaptureAuditIndexPath,
+        bootstrapCaptureHostDetailPath,
         'docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md'
       ]
     ),
     evidenceItem(
       'steady_state_transport_parity',
-      'planned',
-      'Steady-state transport parity is still pending for Debian 12 until one post-bootstrap health and runtime bundle is captured.',
+      'landed',
+      'One bounded Debian 12 steady-state bundle is now preserved with post-bootstrap mutation, /health, /runtime-state, and controller audit evidence while broader support claims stay locked.',
       [
         steadyStateProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
+        steadyStateCaptureSummaryPath,
+        steadyStateCaptureOperationPath,
+        steadyStateCaptureHealthPath,
+        steadyStateCaptureRuntimeStatePath,
+        steadyStateCaptureAuditIndexPath,
+        steadyStateCaptureHostDetailPath,
         'docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md'
       ]
     ),
@@ -840,6 +875,32 @@ function buildSummary(
   return `Second-target support must stay on hold because ${joinCriterionLabels(blockingCriteria)} are still missing.`
 }
 
+function remainingParityCriterionIds(snapshot: SecondTargetPolicySnapshot) {
+  const remaining: SecondTargetPolicyCriterionId[] = []
+
+  if (!snapshot.bootstrapTransportParity) {
+    remaining.push('bootstrap_transport_parity')
+  }
+  if (!snapshot.steadyStateTransportParity) {
+    remaining.push('steady_state_transport_parity')
+  }
+  if (!snapshot.backupRestoreParity) {
+    remaining.push('backup_restore_parity')
+  }
+  if (!snapshot.diagnosticsParity) {
+    remaining.push('diagnostics_parity')
+  }
+  if (!snapshot.rollbackParity) {
+    remaining.push('rollback_parity')
+  }
+
+  return remaining
+}
+
+function remainingParityLabelText(snapshot: SecondTargetPolicySnapshot) {
+  return joinCriterionLabels(remainingParityCriterionIds(snapshot).map((id) => criterionFrom(id, false)))
+}
+
 function buildNextActions(
   snapshot: SecondTargetPolicySnapshot,
   decisionState: SecondTargetPolicyDecisionState
@@ -866,9 +927,11 @@ function buildNextActions(
 
   if (candidateTargetDeclared(snapshot)) {
     if (governanceReady(snapshot)) {
+      const remainingParityLabels = remainingParityLabelText(snapshot)
+
       return [
         `Keep supported targets locked to ${lockedTarget}.`,
-        `Keep ${candidateTargets} in review-prep until bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity are all real.`,
+        `Keep ${candidateTargets} in review-prep until ${remainingParityLabels} are all real.`,
         'Keep docs contract, acceptance recipe, and operator ownership artifacts aligned with parity evidence while the candidate stays on hold.'
       ]
     }
@@ -925,6 +988,32 @@ function buildReviewPacketArtifactCoverage(
   }
 }
 
+function nextExecutionUnitsFrom(snapshot: SecondTargetPolicySnapshot) {
+  const skipIds = new Set<SecondTargetNextExecutionUnit['id']>(['unit_63'])
+  if (snapshot.bootstrapTransportParity) {
+    skipIds.add('unit_64')
+  }
+  if (snapshot.steadyStateTransportParity) {
+    skipIds.add('unit_65')
+  }
+  if (snapshot.backupRestoreParity) {
+    skipIds.add('unit_66')
+  }
+  if (snapshot.diagnosticsParity) {
+    skipIds.add('unit_67')
+  }
+  if (snapshot.rollbackParity) {
+    skipIds.add('unit_68')
+  }
+  if (decisionStateFrom(snapshot) === 'review_required') {
+    skipIds.add('unit_69')
+  }
+
+  return executionUnits
+    .filter((unit) => !skipIds.has(unit.id))
+    .map((unit) => ({ ...unit }))
+}
+
 function reviewPacketReadinessStateFrom(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetReviewPacketReadinessState {
@@ -953,6 +1042,7 @@ function buildReviewPacketReadiness(
   const guideCoverage = buildReviewPacketGuideCoverage(snapshot)
   const artifactCoverage = buildReviewPacketArtifactCoverage(snapshot)
   const state = reviewPacketReadinessStateFrom(snapshot)
+  const nextExecutionUnits = nextExecutionUnitsFrom(snapshot)
 
   if (state === 'guide_set_incomplete') {
     return {
@@ -964,7 +1054,7 @@ function buildReviewPacketReadiness(
         'Finish the missing review-packet guide paths before starting any Debian 12 parity execution.',
       guideCoverage,
       artifactCoverage,
-      nextExecutionUnits: nextExecutionUnits.map((unit) => ({ ...unit }))
+      nextExecutionUnits
     }
   }
 
@@ -978,11 +1068,39 @@ function buildReviewPacketReadiness(
         'Open bounded second-target review and confirm every parity criterion against the preserved Debian 12 packet.',
       guideCoverage,
       artifactCoverage,
-      nextExecutionUnits: nextExecutionUnits.map((unit) => ({ ...unit }))
+      nextExecutionUnits
     }
   }
 
   if (state === 'capture_in_progress') {
+    if (snapshot.bootstrapTransportParity && snapshot.steadyStateTransportParity) {
+      return {
+        candidateTargetProfileId,
+        state,
+        summary:
+          `Bootstrap and steady-state packet capture are preserved for ${candidateTargetProfileId}; backup-and-restore, diagnostics, and rollback artifacts are still missing from the bounded Debian 12 packet.`,
+        requiredNextAction:
+          'Execute Units 66 through 69 so the remaining Debian 12 packet sections are preserved before any broader review or support claim moves.',
+        guideCoverage,
+        artifactCoverage,
+        nextExecutionUnits
+      }
+    }
+
+    if (snapshot.bootstrapTransportParity) {
+      return {
+        candidateTargetProfileId,
+        state,
+        summary:
+          `Bootstrap packet capture is preserved for ${candidateTargetProfileId}; steady-state, backup-and-restore, diagnostics, and rollback artifacts are still missing from the bounded Debian 12 packet.`,
+        requiredNextAction:
+          'Execute Units 65 through 69 so the remaining Debian 12 packet sections are preserved before any broader review or support claim moves.',
+        guideCoverage,
+        artifactCoverage,
+        nextExecutionUnits
+      }
+    }
+
     return {
       candidateTargetProfileId,
       state,
@@ -992,7 +1110,7 @@ function buildReviewPacketReadiness(
         'Finish the remaining Debian 12 packet artifacts before moving any parity criterion or support claim.',
       guideCoverage,
       artifactCoverage,
-      nextExecutionUnits: nextExecutionUnits.map((unit) => ({ ...unit }))
+      nextExecutionUnits
     }
   }
 
@@ -1005,7 +1123,7 @@ function buildReviewPacketReadiness(
       'Execute one bounded Debian 12 review packet before changing any bootstrap, steady-state, backup, diagnostics, or rollback parity claim.',
     guideCoverage,
     artifactCoverage,
-    nextExecutionUnits: nextExecutionUnits.map((unit) => ({ ...unit }))
+    nextExecutionUnits
   }
 }
 
@@ -1078,12 +1196,14 @@ function buildBootstrapProofCapture(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetBootstrapProofCapture {
   const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+  const summary = snapshot.bootstrapTransportParity
+    ? `Bootstrap-proof capture is already preserved for ${candidateTargetProfileId}: keep the captured Debian 12 bundle linked while the remaining packet sections are completed.`
+    : `Bootstrap-proof capture stays explicit for ${candidateTargetProfileId}: use one bounded guide before bootstrap parity can move beyond review-prep.`
 
   return {
     candidateTargetProfileId,
     guidePath: bootstrapProofCaptureGuidePath,
-    summary:
-      `Bootstrap-proof capture stays explicit for ${candidateTargetProfileId}: use one bounded guide before bootstrap parity can move beyond review-prep.`,
+    summary,
     requiredArtifacts: [
       bootstrapProofArtifact('bootstrap_operation_id'),
       bootstrapProofArtifact('bootstrap_result_summary'),
@@ -1094,6 +1214,10 @@ function buildBootstrapProofCapture(
       bootstrapProofCaptureGuidePath,
       reviewPacketTemplatePath,
       'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+      bootstrapCaptureSummaryPath,
+      bootstrapCaptureOperationPath,
+      bootstrapCaptureAuditIndexPath,
+      bootstrapCaptureHostDetailPath,
       'apps/controller/src/controller-server.ts',
       'apps/controller/src/controller-domain-service.ts'
     ]
@@ -1104,12 +1228,14 @@ function buildSteadyStateProofCapture(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetSteadyStateProofCapture {
   const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+  const summary = snapshot.steadyStateTransportParity
+    ? `Steady-state proof capture is already preserved for ${candidateTargetProfileId}: keep the captured Debian 12 post-bootstrap mutation, /health, /runtime-state, and audit bundle linked while the remaining packet sections are completed.`
+    : `Steady-state proof capture stays explicit for ${candidateTargetProfileId}: preserve one post-bootstrap health and runtime bundle before steady-state parity can move.`
 
   return {
     candidateTargetProfileId,
     guidePath: steadyStateProofCaptureGuidePath,
-    summary:
-      `Steady-state proof capture stays explicit for ${candidateTargetProfileId}: preserve one post-bootstrap health and runtime bundle before steady-state parity can move.`,
+    summary,
     requiredArtifacts: [
       steadyStateProofArtifact('post_mutation_operation_id'),
       steadyStateProofArtifact('health_capture'),
@@ -1120,6 +1246,12 @@ function buildSteadyStateProofCapture(
       steadyStateProofCaptureGuidePath,
       reviewPacketTemplatePath,
       'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+      steadyStateCaptureSummaryPath,
+      steadyStateCaptureOperationPath,
+      steadyStateCaptureHealthPath,
+      steadyStateCaptureRuntimeStatePath,
+      steadyStateCaptureAuditIndexPath,
+      steadyStateCaptureHostDetailPath,
       'apps/controller/src/controller-server.ts',
       'apps/controller/src/controller-domain-service.ts'
     ]
@@ -1220,8 +1352,8 @@ export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySna
     candidateTargetProfiles,
     candidateTargetProfileIds: candidateTargetProfiles.map((profile) => profile.id),
     targetRegistryPublished: true,
-    bootstrapTransportParity: false,
-    steadyStateTransportParity: false,
+    bootstrapTransportParity: true,
+    steadyStateTransportParity: true,
     backupRestoreParity: false,
     diagnosticsParity: false,
     rollbackParity: false,
@@ -1229,7 +1361,7 @@ export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySna
     acceptanceRecipeReady: true,
     operatorOwnershipDefined: true,
     reviewPacketGuidePaths: [...reviewPacketGuidePaths],
-    capturedReviewArtifactIds: [],
+    capturedReviewArtifactIds: [...bootstrapCapturedArtifactIds, ...steadyStateCapturedArtifactIds],
     evidenceItems
   }
 }

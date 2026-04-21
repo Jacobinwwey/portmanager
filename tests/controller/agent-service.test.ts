@@ -9,6 +9,7 @@ import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from 'node:chil
 import { setTimeout as delay } from 'node:timers/promises'
 
 import {
+  candidateTargetProfileId,
   createControllerEventBus,
   createControllerServer,
   createOperationStore
@@ -358,6 +359,164 @@ test('controller marks host degraded when steady-state agent is unreachable duri
       assert.equal(hostDetail.agentState, 'unreachable')
       assert.equal(hostDetail.agentHeartbeatState, 'unreachable')
     } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('candidate review-prep host allows one live steady-state create-rule after bootstrap', async () => {
+  const { directory, configDir, stateDir, databasePath, artifactRoot } = tempPaths()
+  const binaryPath = agentBinaryPath()
+  let agent: ChildProcessWithoutNullStreams | undefined
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, artifactRoot })
+    const listening = await server.listen(0)
+
+    try {
+      const createHostResponse = await fetch(`${listening.baseUrl}/hosts`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: 'Candidate Alpha',
+          targetProfileId: candidateTargetProfileId,
+          ssh: {
+            host: '127.0.0.1',
+            port: 22
+          }
+        })
+      })
+
+      const createHostAccepted = (await createHostResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, createHostAccepted.operationId)
+
+      const hostsResponse = await fetch(`${listening.baseUrl}/hosts`)
+      const hostsPayload = (await hostsResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+      const hostId = String(hostsPayload.items[0]?.id)
+
+      runAgent(binaryPath, [
+        'bootstrap',
+        '--operation-id',
+        'op_agent_bootstrap_candidate_001',
+        '--host-id',
+        hostId,
+        '--hostname',
+        'candidate-alpha',
+        '--tailscale-address',
+        '127.0.0.1',
+        '--config-dir',
+        configDir,
+        '--state-dir',
+        stateDir,
+        '--json'
+      ])
+
+      const agentPort = await reservePort()
+      agent = await spawnAgentService(binaryPath, configDir, stateDir, agentPort)
+
+      const bootstrapResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}/bootstrap`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          sshUser: 'debian',
+          desiredAgentPort: agentPort,
+          backupPolicy: 'best_effort'
+        })
+      })
+
+      const bootstrapAccepted = (await bootstrapResponse.json()) as { operationId: string }
+      const bootstrapOperation = await waitForTerminalOperation(
+        listening.baseUrl,
+        bootstrapAccepted.operationId
+      )
+      assert.equal(bootstrapOperation.state, 'succeeded')
+
+      const createRuleResponse = await fetch(`${listening.baseUrl}/bridge-rules`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId,
+          name: 'Candidate HTTPS Relay',
+          protocol: 'tcp',
+          listenPort: 443,
+          targetHost: '127.0.0.1',
+          targetPort: 3000
+        })
+      })
+
+      const createRuleAccepted = (await createRuleResponse.json()) as { operationId: string }
+      const createRuleOperation = await waitForTerminalOperation(
+        listening.baseUrl,
+        createRuleAccepted.operationId
+      )
+      assert.equal(createRuleOperation.type, 'create_rule')
+      assert.equal(createRuleOperation.state, 'succeeded')
+
+      const hostDetailResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}`)
+      const hostDetail = (await hostDetailResponse.json()) as Record<string, unknown>
+      assert.equal(hostDetail.targetProfileStatus, 'candidate')
+      assert.equal(
+        Array.isArray(hostDetail.recentRules) && (hostDetail.recentRules as Array<unknown>).length,
+        1
+      )
+
+      const runtimeResponse = await fetch(`http://127.0.0.1:${agentPort}/runtime-state`)
+      assert.equal(runtimeResponse.status, 200)
+      const runtimeState = (await runtimeResponse.json()) as Record<string, unknown>
+      assert.equal(
+        Array.isArray(runtimeState.appliedRules) &&
+          (runtimeState.appliedRules as Array<Record<string, unknown>>).length,
+        1
+      )
+      assert.equal(
+        ((runtimeState.appliedRules as Array<Record<string, unknown>>) ?? [])[0]?.listenPort,
+        443
+      )
+
+      const secondCreateRuleResponse = await fetch(`${listening.baseUrl}/bridge-rules`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          hostId,
+          name: 'Candidate HTTPS Relay 2',
+          protocol: 'tcp',
+          listenPort: 8443,
+          targetHost: '127.0.0.1',
+          targetPort: 3001
+        })
+      })
+
+      const secondCreateRuleAccepted = (await secondCreateRuleResponse.json()) as {
+        operationId: string
+      }
+      const secondCreateRuleOperation = await waitForTerminalOperation(
+        listening.baseUrl,
+        secondCreateRuleAccepted.operationId
+      )
+      assert.equal(secondCreateRuleOperation.state, 'failed')
+      assert.match(String(secondCreateRuleOperation.resultSummary), /review-prep only/i)
+    } finally {
+      if (agent) {
+        agent.kill()
+        await new Promise<void>((resolve) => {
+          agent?.once('close', () => resolve())
+        })
+      }
       await server.close()
       store.close()
     }

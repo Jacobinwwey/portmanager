@@ -1,0 +1,94 @@
+{
+  "id": "host_debian_12_review_packet_1776805736172_558",
+  "name": "Debian 12 Review Packet",
+  "lifecycleState": "ready",
+  "tailscaleAddress": "172.17.0.2",
+  "agentState": "ready",
+  "agentHeartbeatState": "live",
+  "targetProfileId": "debian-12-systemd-tailscale",
+  "targetProfileLabel": "Debian 12 + systemd + Tailscale",
+  "targetProfileStatus": "candidate",
+  "agentVersion": "0.1.0",
+  "agentHeartbeatAt": "2026-04-21T21:08:56.396Z",
+  "updatedAt": "2026-04-21T21:08:56.409Z",
+  "labels": [],
+  "targetProfile": {
+    "id": "debian-12-systemd-tailscale",
+    "label": "Debian 12 + systemd + Tailscale",
+    "status": "candidate",
+    "platform": "Debian 12",
+    "serviceManager": "systemd",
+    "steadyStateTransport": "http-over-tailscale",
+    "bootstrapTransport": "ssh",
+    "capabilities": [
+      "probe-host",
+      "bootstrap-host",
+      "apply-desired-state",
+      "collect-diagnostics",
+      "rollback"
+    ]
+  },
+  "effectivePolicy": {
+    "hostId": "host_debian_12_review_packet_1776805736172_558",
+    "allowedSources": [
+      "tailscale"
+    ],
+    "excludedPorts": [
+      22
+    ],
+    "samePortMirror": false,
+    "conflictPolicy": "reject",
+    "backupPolicy": "best_effort"
+  },
+  "recentRules": [
+    {
+      "id": "rule_steady_state_review_rule_1776805736384_967",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "protocol": "tcp",
+      "listenPort": 18081,
+      "targetHost": "127.0.0.1",
+      "targetPort": 8080,
+      "lifecycleState": "applied_unverified",
+      "name": "Steady-State Review Rule"
+    }
+  ],
+  "recentOperations": [
+    {
+      "id": "op_create_rule_1776805736384_555",
+      "type": "create_rule",
+      "state": "succeeded",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "ruleId": "rule_steady_state_review_rule_1776805736384_967",
+      "startedAt": "2026-04-21T21:08:56.384Z",
+      "finishedAt": "2026-04-21T21:08:56.409Z",
+      "resultSummary": "rule rule_steady_state_review_rule_1776805736384_967 created for host host_debian_12_review_packet_1776805736172_558; 1 rule(s) staged with backup policy best_effort"
+    },
+    {
+      "id": "op_bootstrap_host_1776805736313_817",
+      "type": "bootstrap_host",
+      "state": "succeeded",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "startedAt": "2026-04-21T21:08:56.313Z",
+      "finishedAt": "2026-04-21T21:08:56.338Z",
+      "resultSummary": "host host_debian_12_review_packet_1776805736172_558 bootstrapped via http://172.17.0.2:8711; 0 rule(s) staged with backup policy best_effort"
+    },
+    {
+      "id": "op_probe_host_1776805736296_177",
+      "type": "probe_host",
+      "state": "succeeded",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "startedAt": "2026-04-21T21:08:56.296Z",
+      "finishedAt": "2026-04-21T21:08:56.306Z",
+      "resultSummary": "host host_debian_12_review_packet_1776805736172_558 probe completed"
+    },
+    {
+      "id": "op_create_host_1776805736172_142",
+      "type": "create_host",
+      "state": "succeeded",
+      "hostId": "host_debian_12_review_packet_1776805736172_558",
+      "startedAt": "2026-04-21T21:08:56.172Z",
+      "finishedAt": "2026-04-21T21:08:56.185Z",
+      "resultSummary": "host host_debian_12_review_packet_1776805736172_558 created as draft"
+    }
+  ]
+}

@@ -260,6 +260,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'debian-12-bootstrap-packet-2026-04-21',
+    sourcePath: 'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/README.md',
+    route: 'operations/debian-12-bootstrap-packet-2026-04-21',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Debian 12 Bootstrap Packet 2026-04-21',
+      zh: 'Debian 12 Bootstrap Packet 2026-04-21'
+    }
+  },
+  {
     id: 'debian-12-steady-state-proof-capture',
     sourcePath: 'docs/operations/portmanager-debian-12-steady-state-proof-capture.md',
     route: 'operations/debian-12-steady-state-proof-capture',

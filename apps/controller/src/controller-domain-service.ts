@@ -132,7 +132,7 @@ export function createControllerDomainService(options: {
   }
 
   function reviewPrepOnlyMessage(hostId: string, targetProfileId: string) {
-    return `Target profile ${targetProfileId} for host ${hostId} stays review-prep only; only create, probe, and bootstrap are allowed until steady-state, backup, diagnostics, and rollback parity land.`
+    return `Target profile ${targetProfileId} for host ${hostId} stays review-prep only; only create, probe, bootstrap, and one bounded live steady-state mutation are allowed until steady-state, backup, diagnostics, and rollback parity land.`
   }
 
   function ensureSupportedHostProfile(hostId: string) {
@@ -149,9 +149,42 @@ export function createControllerDomainService(options: {
     return host
   }
 
+  function ensureReviewPrepCreateBridgeRuleHost(hostId: string) {
+    const host = ensureDeclaredHostProfile(hostId)
+
+    if (isSupportedTargetProfileId(host.targetProfileId)) {
+      return {
+        host,
+        allowReviewPrepCandidate: false
+      }
+    }
+
+    if (!isReviewPrepTargetProfileId(host.targetProfileId)) {
+      throw new Error(`Unsupported target profile for host ${hostId}: ${host.targetProfileId}`)
+    }
+
+    const activeRules = store
+      .listBridgeRules({ hostId })
+      .filter((rule) => rule.lifecycleState !== 'removed')
+
+    if (
+      host.lifecycleState !== 'ready' ||
+      host.agentState !== 'ready' ||
+      !agentEndpoints.has(hostId) ||
+      activeRules.length > 0
+    ) {
+      throw new Error(reviewPrepOnlyMessage(hostId, host.targetProfileId))
+    }
+
+    return {
+      host,
+      allowReviewPrepCandidate: true
+    }
+  }
+
   function buildDesiredState(
     hostId: string,
-    options?: { allowReviewPrepCandidate?: boolean }
+    options?: { allowReviewPrepCandidate?: boolean; reviewPrepRuleLimit?: number }
   ): ApplyDesiredStateSchema {
     const host = ensureDeclaredHostProfile(hostId)
     const policy = store.getExposurePolicy(hostId)
@@ -167,8 +200,9 @@ export function createControllerDomainService(options: {
       const activeRules = store
         .listBridgeRules({ hostId })
         .filter((rule) => rule.lifecycleState !== 'removed')
+      const reviewPrepRuleLimit = options?.reviewPrepRuleLimit ?? 0
 
-      if (!options?.allowReviewPrepCandidate || activeRules.length > 0) {
+      if (!options?.allowReviewPrepCandidate || activeRules.length > reviewPrepRuleLimit) {
         throw new Error(reviewPrepOnlyMessage(hostId, host.targetProfileId))
       }
     }
@@ -339,6 +373,7 @@ export function createControllerDomainService(options: {
     backupPolicy?: 'best_effort' | 'required'
     dropEndpointOnFailure?: boolean
     allowReviewPrepCandidate?: boolean
+    reviewPrepRuleLimit?: number
   }): Promise<OperationExecutionResult & { runtimeState?: RuntimeStateSchema }> {
     const baseUrl = agentEndpoints.get(input.hostId)
     if (!baseUrl) {
@@ -352,7 +387,8 @@ export function createControllerDomainService(options: {
       await agentClient.applyDesiredState(baseUrl, {
         operationId: input.operationId,
         desiredState: buildDesiredState(input.hostId, {
-          allowReviewPrepCandidate: input.allowReviewPrepCandidate
+          allowReviewPrepCandidate: input.allowReviewPrepCandidate,
+          reviewPrepRuleLimit: input.reviewPrepRuleLimit
         })
       })
     } catch (error) {
@@ -497,7 +533,7 @@ export function createControllerDomainService(options: {
       }
     },
     async createBridgeRule(input) {
-      ensureSupportedHostProfile(input.hostId)
+      const { allowReviewPrepCandidate } = ensureReviewPrepCreateBridgeRuleHost(input.hostId)
 
       store.createBridgeRule({
         id: input.id,
@@ -514,7 +550,9 @@ export function createControllerDomainService(options: {
         hostId: input.hostId,
         operationId: input.operationId,
         ruleId: input.id,
-        category: 'bridge_verify'
+        category: 'bridge_verify',
+        allowReviewPrepCandidate,
+        reviewPrepRuleLimit: allowReviewPrepCandidate ? 1 : undefined
       })
 
       return {

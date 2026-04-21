@@ -19,14 +19,14 @@ status: active
 它只冻结在第二目标 review 能开启前必须完成的证明顺序与产物包。
 配套的 `docs/operations/portmanager-debian-12-review-packet-template.md` 会冻结这些产物该如何落盘记录。
 配套的 `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`、`docs/operations/portmanager-debian-12-steady-state-proof-capture.md`、`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`、`docs/operations/portmanager-debian-12-diagnostics-proof-capture.md` 与 `docs/operations/portmanager-debian-12-rollback-proof-capture.md` 会冻结 bootstrap、steady-state、backup、diagnostics 与 rollback 证据该如何采集。
-当前仓库基线现在只支持 candidate host 的注册、probe 与 bootstrap 预演。
-它仍然不宣称 bootstrap parity 已通过，也不宣称 steady-state、backup、diagnostics 或 rollback parity 已通过。
+当前仓库基线现在已经支持 candidate host 的注册、probe，以及一份已保留、同时带有 bootstrap 与 steady-state 证据的 Debian 12 review packet。
+它仍然不宣称 backup、diagnostics 或 rollback parity 已通过，也继续把更广支持声明锁在 Ubuntu 上。
 
 ### 前置条件
 - 当前主线切片上的 `pnpm acceptance:verify` 持续为绿。
 - `pnpm milestone:review:promotion-ready -- --limit 20` 已完成文案真相复核。
 - 候选主机运行 Debian 12 且带 `systemd`。
-- 候选主机已经通过 Tailscale 可达。
+- 候选主机优先通过 Tailscale 可达；若是有边界本地预演，也可以使用等价 Debian 12 环境，但必须保留 drift 备注。
 - 操作员能够保留 backup、diagnostics、rollback 产物，供 review packet 使用。
 
 ### 推荐布置方式
@@ -34,6 +34,8 @@ status: active
 - 可选本地预演：`incus launch images:debian/12 portmanager-debian12-review`
   - 如果没有 `incus`，可以改用任何等价 Debian 12 环境。
   - 这条命令只是布置建议，不构成证明本身。
+- 已保留的 Unit 64-65 示例：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
+  - 这份有边界示例使用本地 Debian 12 Docker 容器，并显式记录 drift 备注，而不是假装 live Tailscale 等价已经成立。
 
 ### Review-prep 证明顺序
 1. 用 target profile `debian-12-systemd-tailscale` 注册一台 Debian 12 主机。

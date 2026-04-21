@@ -49,6 +49,10 @@ coverage/
 artifacts/
 playwright-report/
 test-results/
+!docs/operations/artifacts/
+!docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/
+!docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/README.md
+!docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/*.json
 
 # Docs site generated output
 docs-site/node_modules/

@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "operation": {
+        "id": "op_bootstrap_host_1776805736313_817",
+        "type": "bootstrap_host",
+        "state": "succeeded",
+        "initiator": "web",
+        "hostId": "host_debian_12_review_packet_1776805736172_558",
+        "startedAt": "2026-04-21T21:08:56.313Z",
+        "finishedAt": "2026-04-21T21:08:56.338Z",
+        "eventStreamUrl": "/operations/events?operationId=op_bootstrap_host_1776805736313_817",
+        "resultSummary": "host host_debian_12_review_packet_1776805736172_558 bootstrapped via http://172.17.0.2:8711; 0 rule(s) staged with backup policy best_effort"
+      },
+      "latestEvent": {
+        "id": "evt_op_bootstrap_host_1776805736313_817_succeeded_1776805736343",
+        "kind": "operation_state_changed",
+        "operationId": "op_bootstrap_host_1776805736313_817",
+        "operationType": "bootstrap_host",
+        "state": "succeeded",
+        "level": "success",
+        "summary": "host host_debian_12_review_packet_1776805736172_558 bootstrapped via http://172.17.0.2:8711; 0 rule(s) staged with backup policy best_effort",
+        "hostId": "host_debian_12_review_packet_1776805736172_558",
+        "emittedAt": "2026-04-21T21:08:56.343Z"
+      },
+      "eventCount": 2,
+      "firstEventAt": "2026-04-21T21:08:56.319Z",
+      "lastEventAt": "2026-04-21T21:08:56.343Z",
+      "linkedArtifacts": []
+    }
+  ]
+}

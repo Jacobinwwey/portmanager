@@ -1,0 +1,530 @@
+{
+  "lockedTargetProfileId": "ubuntu-24.04-systemd-tailscale",
+  "reviewOwner": "controller",
+  "supportedTargetProfiles": [
+    {
+      "id": "ubuntu-24.04-systemd-tailscale",
+      "label": "Ubuntu 24.04 + systemd + Tailscale",
+      "status": "supported"
+    }
+  ],
+  "candidateTargetProfiles": [
+    {
+      "id": "debian-12-systemd-tailscale",
+      "label": "Debian 12 + systemd + Tailscale",
+      "status": "candidate"
+    }
+  ],
+  "candidateTargetProfileIds": [
+    "debian-12-systemd-tailscale"
+  ],
+  "decisionState": "hold",
+  "expansionReviewRequired": false,
+  "summary": "Second-target support must stay on hold because bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity are still missing.",
+  "nextActions": [
+    "Keep supported targets locked to ubuntu-24.04-systemd-tailscale.",
+    "Keep debian-12-systemd-tailscale in review-prep until bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity are all real.",
+    "Keep docs contract, acceptance recipe, and operator ownership artifacts aligned with parity evidence while the candidate stays on hold."
+  ],
+  "reviewPacketReadiness": {
+    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+    "state": "capture_required",
+    "summary": "Review-packet guide set is complete for debian-12-systemd-tailscale, but no Debian 12 execution artifacts are captured yet. Current truth is template-ready, not packet-ready.",
+    "requiredNextAction": "Execute one bounded Debian 12 review packet before changing any bootstrap, steady-state, backup, diagnostics, or rollback parity claim.",
+    "guideCoverage": {
+      "available": 6,
+      "expected": 6,
+      "missingPaths": []
+    },
+    "artifactCoverage": {
+      "available": 0,
+      "expected": 20,
+      "missingArtifactIds": [
+        "bootstrap_operation_id",
+        "bootstrap_result_summary",
+        "audit_reference",
+        "target_profile_confirmation",
+        "post_mutation_operation_id",
+        "health_capture",
+        "runtime_state_capture",
+        "controller_audit_reference",
+        "backup_bearing_mutation_id",
+        "backup_manifest_path",
+        "remote_backup_result",
+        "restore_readiness_reference",
+        "diagnostics_operation_id",
+        "diagnostics_artifact_paths",
+        "controller_event_reference",
+        "drift_operator_note",
+        "rollback_point_id",
+        "rollback_operation_id",
+        "rollback_result_summary",
+        "post_rollback_diagnostics_linkage"
+      ]
+    },
+    "nextExecutionUnits": [
+      {
+        "id": "unit_63",
+        "title": "Review-packet readiness pack",
+        "summary": "Publish guide coverage, artifact coverage, required next action, and next-unit truth across controller, CLI, web, and roadmap surfaces."
+      },
+      {
+        "id": "unit_64",
+        "title": "Bootstrap packet execution",
+        "summary": "Capture bootstrap operation id, result summary, audit linkage, and target-profile confirmation in one Debian 12 review packet."
+      },
+      {
+        "id": "unit_65",
+        "title": "Steady-state packet execution",
+        "summary": "Capture one post-bootstrap mutation plus linked /health, /runtime-state, and controller audit evidence."
+      },
+      {
+        "id": "unit_66",
+        "title": "Backup-and-restore packet execution",
+        "summary": "Capture one backup-bearing mutation, backup manifest lineage, remote-backup result, and restore-readiness linkage."
+      },
+      {
+        "id": "unit_67",
+        "title": "Diagnostics packet execution",
+        "summary": "Capture one diagnostics operation id, artifact bundle, controller event linkage, and operator drift note."
+      },
+      {
+        "id": "unit_68",
+        "title": "Rollback packet execution",
+        "summary": "Capture rollback-point linkage, rollback result summary, and post-rollback diagnostics evidence in the same bounded packet."
+      },
+      {
+        "id": "unit_69",
+        "title": "Second-target review closeout",
+        "summary": "Re-read /second-target-policy-pack, confirm parity truth, and open review only after the complete Debian 12 packet is preserved."
+      }
+    ]
+  },
+  "reviewPacketTemplate": {
+    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+    "templatePath": "docs/operations/portmanager-debian-12-review-packet-template.md",
+    "summary": "Review-packet capture stays explicit for debian-12-systemd-tailscale: preserve one bounded evidence bundle before widening support claims.",
+    "requiredEvidence": [
+      {
+        "criterionId": "bootstrap_transport_parity",
+        "label": "Bootstrap transport parity",
+        "summary": "Capture one bootstrap operation id, result summary, and linked audit/event reference for the Debian 12 candidate host.",
+        "sources": [
+          "docs/operations/portmanager-debian-12-review-packet-template.md",
+          "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+          "apps/controller/src/controller-server.ts",
+          "apps/controller/src/controller-domain-service.ts"
+        ]
+      },
+      {
+        "criterionId": "steady_state_transport_parity",
+        "label": "Steady-state transport parity",
+        "summary": "Capture steady-state `/health` and `/runtime-state` evidence after one normal controller-driven mutation.",
+        "sources": [
+          "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+          "docs/operations/portmanager-debian-12-review-packet-template.md",
+          "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+          "apps/controller/src/controller-server.ts"
+        ]
+      },
+      {
+        "criterionId": "backup_restore_parity",
+        "label": "Backup and restore parity",
+        "summary": "Capture backup manifest linkage, remote-backup result if configured, and restore outcome notes from the same review packet.",
+        "sources": [
+          "docs/operations/portmanager-debian-12-backup-restore-proof-capture.md",
+          "docs/operations/portmanager-debian-12-review-packet-template.md",
+          "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+          "docs/operations/portmanager-backup-rollback-policy.md"
+        ]
+      },
+      {
+        "criterionId": "diagnostics_parity",
+        "label": "Diagnostics parity",
+        "summary": "Capture diagnostics artifact paths plus linked controller event references for the candidate host after transport rehearsal.",
+        "sources": [
+          "docs/operations/portmanager-debian-12-diagnostics-proof-capture.md",
+          "docs/operations/portmanager-debian-12-review-packet-template.md",
+          "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+          "docs/operations/portmanager-backup-rollback-policy.md"
+        ]
+      },
+      {
+        "criterionId": "rollback_parity",
+        "label": "Rollback parity",
+        "summary": "Capture rollback-point linkage, rollback result summary, and post-rollback diagnostics in the same packet.",
+        "sources": [
+          "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+          "docs/operations/portmanager-debian-12-review-packet-template.md",
+          "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+          "docs/operations/portmanager-backup-rollback-policy.md"
+        ]
+      }
+    ]
+  },
+  "bootstrapProofCapture": {
+    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+    "guidePath": "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md",
+    "summary": "Bootstrap-proof capture stays explicit for debian-12-systemd-tailscale: use one bounded guide before bootstrap parity can move beyond review-prep.",
+    "requiredArtifacts": [
+      {
+        "id": "bootstrap_operation_id",
+        "label": "Bootstrap operation id",
+        "summary": "Capture the bootstrap operation id so every later proof reference points to one bounded controller record."
+      },
+      {
+        "id": "bootstrap_result_summary",
+        "label": "Bootstrap result summary",
+        "summary": "Capture the terminal bootstrap result summary that states whether the candidate host reached ready or stayed degraded."
+      },
+      {
+        "id": "audit_reference",
+        "label": "Audit or replay reference",
+        "summary": "Capture one linked event replay or audit-index reference that preserves the bootstrap evidence bundle."
+      },
+      {
+        "id": "target_profile_confirmation",
+        "label": "Target profile confirmation",
+        "summary": "Capture confirmation that the candidate host stayed on debian-12-systemd-tailscale for the same bootstrap proof."
+      }
+    ],
+    "sources": [
+      "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md",
+      "docs/operations/portmanager-debian-12-review-packet-template.md",
+      "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+      "apps/controller/src/controller-server.ts",
+      "apps/controller/src/controller-domain-service.ts"
+    ]
+  },
+  "steadyStateProofCapture": {
+    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+    "guidePath": "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+    "summary": "Steady-state proof capture stays explicit for debian-12-systemd-tailscale: preserve one post-bootstrap health and runtime bundle before steady-state parity can move.",
+    "requiredArtifacts": [
+      {
+        "id": "post_mutation_operation_id",
+        "label": "Post-mutation operation id",
+        "summary": "Capture one normal controller-driven mutation id after bootstrap so steady-state proof stays anchored to real controller traffic."
+      },
+      {
+        "id": "health_capture",
+        "label": "Health capture",
+        "summary": "Capture the steady-state `/health` response after the post-bootstrap mutation completes."
+      },
+      {
+        "id": "runtime_state_capture",
+        "label": "Runtime-state capture",
+        "summary": "Capture the steady-state `/runtime-state` response from the same candidate host after the mutation."
+      },
+      {
+        "id": "controller_audit_reference",
+        "label": "Controller audit reference",
+        "summary": "Capture one linked controller event replay or audit-index reference that ties the mutation and steady-state captures together."
+      }
+    ],
+    "sources": [
+      "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+      "docs/operations/portmanager-debian-12-review-packet-template.md",
+      "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+      "apps/controller/src/controller-server.ts",
+      "apps/controller/src/controller-domain-service.ts"
+    ]
+  },
+  "backupRestoreProofCapture": {
+    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+    "guidePath": "docs/operations/portmanager-debian-12-backup-restore-proof-capture.md",
+    "summary": "Backup-and-restore proof capture stays explicit for debian-12-systemd-tailscale: preserve one backup-bearing mutation bundle before backup parity can move.",
+    "requiredArtifacts": [
+      {
+        "id": "backup_bearing_mutation_id",
+        "label": "Backup-bearing mutation id",
+        "summary": "Capture one controller-driven mutation id that produced the backup bundle used for the Debian 12 review packet."
+      },
+      {
+        "id": "backup_manifest_path",
+        "label": "Backup manifest path",
+        "summary": "Capture the backup manifest path linked to the same mutation so artifact lineage stays explicit."
+      },
+      {
+        "id": "remote_backup_result",
+        "label": "Remote-backup result",
+        "summary": "Capture the remote-backup result from the same bundle, or the explicit not-configured state if remote backup is still absent."
+      },
+      {
+        "id": "restore_readiness_reference",
+        "label": "Restore-readiness reference",
+        "summary": "Capture one rollback-point or restore-readiness reference tied to the same backup-bearing mutation without widening support claims."
+      }
+    ],
+    "sources": [
+      "docs/operations/portmanager-debian-12-backup-restore-proof-capture.md",
+      "docs/operations/portmanager-debian-12-review-packet-template.md",
+      "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+      "docs/operations/portmanager-backup-rollback-policy.md"
+    ]
+  },
+  "diagnosticsProofCapture": {
+    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+    "guidePath": "docs/operations/portmanager-debian-12-diagnostics-proof-capture.md",
+    "summary": "Diagnostics proof capture stays explicit for debian-12-systemd-tailscale: preserve one diagnostics artifact bundle before diagnostics parity can move.",
+    "requiredArtifacts": [
+      {
+        "id": "diagnostics_operation_id",
+        "label": "Diagnostics operation id",
+        "summary": "Capture one bounded diagnostics operation id so the Debian 12 proof stays anchored to one controller verification run."
+      },
+      {
+        "id": "diagnostics_artifact_paths",
+        "label": "Diagnostics artifact paths",
+        "summary": "Capture the diagnostics artifact paths from the same run so webpage snapshots and machine-readable evidence stay linked."
+      },
+      {
+        "id": "controller_event_reference",
+        "label": "Controller event reference",
+        "summary": "Capture one linked controller event replay or audit-index reference that ties the diagnostics run back to controller truth."
+      },
+      {
+        "id": "drift_operator_note",
+        "label": "Drift operator note",
+        "summary": "Capture one short operator note for any drift, degraded verification, or no-drift conclusion from the same diagnostics packet."
+      }
+    ],
+    "sources": [
+      "docs/operations/portmanager-debian-12-diagnostics-proof-capture.md",
+      "docs/operations/portmanager-debian-12-review-packet-template.md",
+      "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+      "docs/operations/portmanager-backup-rollback-policy.md",
+      "apps/controller/src/controller-server.ts",
+      "apps/controller/src/controller-domain-service.ts"
+    ]
+  },
+  "rollbackProofCapture": {
+    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+    "guidePath": "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+    "summary": "Rollback proof capture stays explicit for debian-12-systemd-tailscale: preserve one bounded rollback rehearsal bundle before rollback parity can move.",
+    "requiredArtifacts": [
+      {
+        "id": "rollback_point_id",
+        "label": "Rollback-point id",
+        "summary": "Capture one rollback-point id selected for the Debian 12 rehearsal so the packet records exactly which recovery anchor was exercised."
+      },
+      {
+        "id": "rollback_operation_id",
+        "label": "Rollback operation id",
+        "summary": "Capture one bounded rollback operation id so the Debian 12 rollback rehearsal stays anchored to explicit controller truth."
+      },
+      {
+        "id": "rollback_result_summary",
+        "label": "Rollback result summary",
+        "summary": "Capture the terminal rollback result summary that states whether the rehearsal applied cleanly or stayed degraded."
+      },
+      {
+        "id": "post_rollback_diagnostics_linkage",
+        "label": "Post-rollback diagnostics linkage",
+        "summary": "Capture one linked post-rollback diagnostics artifact path or audit reference from the same rollback rehearsal packet."
+      }
+    ],
+    "sources": [
+      "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+      "docs/operations/portmanager-debian-12-review-packet-template.md",
+      "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+      "docs/operations/portmanager-backup-rollback-policy.md",
+      "apps/controller/src/controller-server.ts",
+      "apps/controller/src/controller-domain-service.ts"
+    ]
+  },
+  "satisfiedCriteria": [
+    {
+      "id": "locked_target_registry",
+      "label": "Locked target registry",
+      "reason": "One explicit locked target profile is already published across controller, CLI, and Web."
+    },
+    {
+      "id": "supported_target_baseline",
+      "label": "Supported target baseline",
+      "reason": "Supported-target claims are still locked to one explicit Ubuntu 24.04 + systemd + Tailscale baseline."
+    },
+    {
+      "id": "candidate_target_declared",
+      "label": "Candidate target declared",
+      "reason": "One explicit second-target candidate is declared for review."
+    },
+    {
+      "id": "docs_contract_ready",
+      "label": "Docs contract ready",
+      "reason": "Docs and public contract wording now describe the candidate target honestly."
+    },
+    {
+      "id": "acceptance_recipe_ready",
+      "label": "Acceptance recipe ready",
+      "reason": "Acceptance proof steps now exist for the candidate target."
+    },
+    {
+      "id": "operator_ownership_defined",
+      "label": "Operator ownership defined",
+      "reason": "Operator ownership and support responsibility are defined for the candidate target."
+    }
+  ],
+  "blockingCriteria": [
+    {
+      "id": "bootstrap_transport_parity",
+      "label": "Bootstrap transport parity",
+      "reason": "Bootstrap transport parity is still missing for the candidate target."
+    },
+    {
+      "id": "steady_state_transport_parity",
+      "label": "Steady-state transport parity",
+      "reason": "Steady-state transport parity is still missing for the candidate target."
+    },
+    {
+      "id": "backup_restore_parity",
+      "label": "Backup and restore parity",
+      "reason": "Backup and restore parity is still missing for the candidate target."
+    },
+    {
+      "id": "diagnostics_parity",
+      "label": "Diagnostics parity",
+      "reason": "Diagnostics parity is still missing for the candidate target."
+    },
+    {
+      "id": "rollback_parity",
+      "label": "Rollback parity",
+      "reason": "Rollback parity is still missing for the candidate target."
+    }
+  ],
+  "evidenceItems": [
+    {
+      "criterionId": "locked_target_registry",
+      "label": "Locked target registry",
+      "state": "landed",
+      "summary": "Locked target-profile registry now publishes the Ubuntu baseline across controller, CLI, and Web.",
+      "sources": [
+        "apps/controller/src/target-profile-registry.ts",
+        "tests/controller/target-profile-registry.test.ts",
+        "apps/web/src/main.ts",
+        "crates/portmanager-cli/src/main.rs"
+      ]
+    },
+    {
+      "criterionId": "supported_target_baseline",
+      "label": "Supported target baseline",
+      "state": "landed",
+      "summary": "Supported-target wording remains locked to ubuntu-24.04-systemd-tailscale.",
+      "sources": [
+        "README.md",
+        "docs/specs/portmanager-milestones.md",
+        "docs/specs/portmanager-toward-c-strategy.md",
+        "docs-site/data/roadmap.ts"
+      ]
+    },
+    {
+      "criterionId": "candidate_target_declared",
+      "label": "Candidate target declared",
+      "state": "review_prep",
+      "summary": "debian-12-systemd-tailscale is declared as the only review-prep candidate, not a supported target.",
+      "sources": [
+        "apps/controller/src/second-target-policy-pack.ts",
+        "tests/controller/second-target-policy-pack.test.ts",
+        "docs/specs/portmanager-milestones.md",
+        "docs-site/data/roadmap.ts"
+      ]
+    },
+    {
+      "criterionId": "docs_contract_ready",
+      "label": "Docs contract ready",
+      "state": "landed",
+      "summary": "Docs contract now freezes candidate-only wording plus review-prep guardrails for Debian 12.",
+      "sources": [
+        "docs/operations/portmanager-second-target-review-contract.md",
+        "README.md",
+        "docs/specs/portmanager-v1-product-spec.md",
+        "docs-site/data/roadmap.ts"
+      ]
+    },
+    {
+      "criterionId": "acceptance_recipe_ready",
+      "label": "Acceptance recipe ready",
+      "state": "landed",
+      "summary": "Acceptance recipe now defines the bounded Debian 12 review-prep proof sequence and artifact list.",
+      "sources": [
+        "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+        "README.md",
+        "TODO.md"
+      ]
+    },
+    {
+      "criterionId": "operator_ownership_defined",
+      "label": "Operator ownership defined",
+      "state": "landed",
+      "summary": "Operator ownership document now names who stages hosts, records evidence, and decides whether review stays on hold.",
+      "sources": [
+        "docs/operations/portmanager-debian-12-operator-ownership.md",
+        "README.md",
+        "docs/architecture/portmanager-v1-architecture.md"
+      ]
+    },
+    {
+      "criterionId": "bootstrap_transport_parity",
+      "label": "Bootstrap transport parity",
+      "state": "review_prep",
+      "summary": "Candidate host enrollment, probe, and bootstrap now run through the bounded review-prep lane, but parity proof stays false until one Debian 12 review packet preserves the bootstrap evidence bundle.",
+      "sources": [
+        "apps/controller/src/controller-server.ts",
+        "apps/controller/src/controller-domain-service.ts",
+        "tests/controller/target-profile-registry.test.ts",
+        "tests/controller/host-rule-policy.test.ts",
+        "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+        "docs/operations/portmanager-debian-12-review-packet-template.md",
+        "docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md"
+      ]
+    },
+    {
+      "criterionId": "steady_state_transport_parity",
+      "label": "Steady-state transport parity",
+      "state": "planned",
+      "summary": "Steady-state transport parity is still pending for Debian 12 until one post-bootstrap health and runtime bundle is captured.",
+      "sources": [
+        "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+        "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+        "docs/operations/portmanager-debian-12-review-packet-template.md",
+        "docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md"
+      ]
+    },
+    {
+      "criterionId": "backup_restore_parity",
+      "label": "Backup and restore parity",
+      "state": "planned",
+      "summary": "Backup and restore parity is still pending for Debian 12 until one backup-bearing mutation bundle and restore-readiness reference are captured.",
+      "sources": [
+        "docs/operations/portmanager-debian-12-backup-restore-proof-capture.md",
+        "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+        "docs/operations/portmanager-debian-12-review-packet-template.md",
+        "docs/operations/portmanager-backup-rollback-policy.md"
+      ]
+    },
+    {
+      "criterionId": "diagnostics_parity",
+      "label": "Diagnostics parity",
+      "state": "planned",
+      "summary": "Diagnostics parity is still pending for Debian 12 until one diagnostics artifact bundle and controller event reference are captured.",
+      "sources": [
+        "docs/operations/portmanager-debian-12-diagnostics-proof-capture.md",
+        "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+        "docs/operations/portmanager-debian-12-review-packet-template.md",
+        "docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md"
+      ]
+    },
+    {
+      "criterionId": "rollback_parity",
+      "label": "Rollback parity",
+      "state": "planned",
+      "summary": "Rollback parity is still pending for Debian 12 until one rollback rehearsal bundle links rollback-point, rollback result, and post-rollback diagnostics evidence together.",
+      "sources": [
+        "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+        "docs/operations/portmanager-debian-12-acceptance-recipe.md",
+        "docs/operations/portmanager-debian-12-review-packet-template.md",
+        "docs/operations/portmanager-backup-rollback-policy.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "capturedAt": "2026-04-21T21:08:56.383Z",
+  "controllerCommit": "ce19f8b6572171896e2bdb42cdb184eeab845454",
+  "controllerBaseUrl": "http://127.0.0.1:38123",
+  "candidateTargetProfileId": "debian-12-systemd-tailscale",
+  "environment": {
+    "platform": "docker",
+    "osRelease": "debian 12",
+    "containerName": "portmanager-unit65-refresh-2158663",
+    "containerIp": "172.17.0.2",
+    "agentPort": 8711,
+    "note": "Bounded local Debian 12 container rehearsal. Container bridge address replaces live Tailscale in this preserved bootstrap packet, so broader support claims remain locked."
+  },
+  "preCaptureReadinessState": "capture_in_progress",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "probeOperationId": "op_probe_host_1776805736296_177",
+  "probeOperationState": "succeeded",
+  "bootstrapOperationId": "op_bootstrap_host_1776805736313_817",
+  "bootstrapOperationState": "succeeded",
+  "bootstrapResultSummary": "host host_debian_12_review_packet_1776805736172_558 bootstrapped via http://172.17.0.2:8711; 0 rule(s) staged with backup policy best_effort",
+  "auditReferenceCount": 1,
+  "targetProfileConfirmation": {
+    "targetProfileId": "debian-12-systemd-tailscale",
+    "targetProfileStatus": "candidate",
+    "lifecycleState": "ready",
+    "tailscaleAddress": "172.17.0.2"
+  },
+  "agentBootstrap": {
+    "schemaVersion": "0.1.0",
+    "operationId": "op_container_bootstrap_review_packet_001",
+    "type": "bootstrap",
+    "state": "succeeded",
+    "hostId": "host_debian_12_review_packet_1776805736172_558",
+    "startedAt": "2026-04-21T21:08:56.243333244Z",
+    "finishedAt": "2026-04-21T21:08:56.243333244Z",
+    "resultSummary": "agent bootstrap skeleton completed",
+    "linkedArtifacts": [
+      "/etc/portmanager/agent.toml",
+      "/var/lib/portmanager/desired-state.toml",
+      "/var/lib/portmanager/runtime-state.json"
+    ]
+  }
+}

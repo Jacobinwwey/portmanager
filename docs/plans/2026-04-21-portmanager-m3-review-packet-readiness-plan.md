@@ -11,6 +11,14 @@ origin: docs/brainstorms/2026-04-21-portmanager-m3-review-packet-readiness-requi
 Updated: 2026-04-21
 Version: v0.1.0
 
+## Status Note
+Late `2026-04-21` progress now moves this plan past initial readiness publication.
+Units 63 through 65 are landed.
+`/second-target-policy-pack` now reports guide coverage `6/6`, artifact coverage `8/20`, and landed bootstrap plus steady-state packet parity for declared candidate `debian-12-systemd-tailscale`.
+One bounded Debian 12 review packet is preserved at `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`.
+The active remaining queue is now Units 66 through 69: backup-and-restore packet execution, diagnostics packet execution, rollback packet execution, and second-target review closeout.
+The implementation units below stay preserved as the original execution map so developers can trace why the current remaining queue exists.
+
 ## Overview
 This plan covers the post-guide Milestone 3 queue after Units 51 through 62 landed.
 It treats the Debian 12 review-prep guide set as complete baseline.
@@ -124,7 +132,7 @@ flowchart LR
 - Regression: existing second-target decision state and hold posture remain unchanged.
 - Regression: roadmap and development-progress pages point at the new requirements/plan pair and the post-guide wording stays locked.
 
-- [ ] **Unit 64: Bootstrap Packet Execution**
+- [x] **Unit 64: Bootstrap Packet Execution**
 
 **Goal:** Preserve one Debian 12 bootstrap execution bundle inside the review packet without changing support claims yet.
 
@@ -147,7 +155,7 @@ flowchart LR
 - Happy path: readiness surface shows bootstrap artifacts captured while other capture slots remain missing.
 - Regression: second-target decision state stays on hold until the rest of the packet is real.
 
-- [ ] **Unit 65: Steady-State Packet Execution**
+- [x] **Unit 65: Steady-State Packet Execution**
 
 **Goal:** Add steady-state `/health` and `/runtime-state` evidence to the same Debian 12 packet.
 

@@ -17,6 +17,23 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 - controller commit or release under review
 - short drift summary, including any still-blocking mismatch
 
+### Preserved bootstrap and steady-state packet on 2026-04-21
+- packet artifact root: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
+- review date: `2026-04-21`
+- controller commit: `ce19f8b6572171896e2bdb42cdb184eeab845454`
+- candidate target profile id: `debian-12-systemd-tailscale`
+- candidate host id: `host_debian_12_review_packet_1776805736172_558`
+- recorded address for this bounded rehearsal: `172.17.0.2`
+- bootstrap operation id: `op_bootstrap_host_1776805736313_817`
+- bootstrap result summary: `host host_debian_12_review_packet_1776805736172_558 bootstrapped via http://172.17.0.2:8711; 0 rule(s) staged with backup policy best_effort`
+- audit reference: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-audit-index.json`
+- target-profile confirmation: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-host-detail.json`
+- steady-state post-mutation operation id: `op_create_rule_1776805736384_555`
+- steady-state `/health` capture: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-health.json`
+- steady-state `/runtime-state` capture: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-runtime-state.json`
+- steady-state audit reference: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-audit-index.json`
+- drift summary: local Debian 12 Docker bridge replaced live Tailscale for this preserved review packet, so broader support claims remain locked.
+
 ### Required evidence sections
 1. Bootstrap transport parity
    - bootstrap operation id
@@ -62,6 +79,23 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 - operator 名称与 review 日期
 - 当前 review 的 controller commit 或 release
 - drift 摘要，以及仍然阻塞的 mismatch
+
+### 已保留的 2026-04-21 bootstrap 与 steady-state packet
+- packet 产物根目录：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
+- review 日期：`2026-04-21`
+- controller commit：`ce19f8b6572171896e2bdb42cdb184eeab845454`
+- candidate target profile id：`debian-12-systemd-tailscale`
+- candidate host id：`host_debian_12_review_packet_1776805736172_558`
+- 本次有边界预演记录地址：`172.17.0.2`
+- bootstrap operation id：`op_bootstrap_host_1776805736313_817`
+- bootstrap result summary：`host host_debian_12_review_packet_1776805736172_558 bootstrapped via http://172.17.0.2:8711; 0 rule(s) staged with backup policy best_effort`
+- audit 引用：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-audit-index.json`
+- target-profile 确认：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-host-detail.json`
+- steady-state 后续 mutation operation id：`op_create_rule_1776805736384_555`
+- steady-state `/health` 采集：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-health.json`
+- steady-state `/runtime-state` 采集：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-runtime-state.json`
+- steady-state audit 引用：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-audit-index.json`
+- drift 摘要：这次保留的 review packet 使用本地 Debian 12 Docker bridge 替代 live Tailscale，因此更广支持声明继续保持锁定。
 
 ### 必需证据分区
 1. Bootstrap transport parity

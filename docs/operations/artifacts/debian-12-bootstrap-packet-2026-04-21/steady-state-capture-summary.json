@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-04-21T21:08:56.449Z",
+  "controllerCommit": "ce19f8b6572171896e2bdb42cdb184eeab845454",
+  "controllerBaseUrl": "http://127.0.0.1:38123",
+  "candidateTargetProfileId": "debian-12-systemd-tailscale",
+  "packetArtifactRoot": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21",
+  "environment": {
+    "platform": "docker",
+    "osRelease": "debian 12",
+    "containerName": "portmanager-unit65-refresh-2158663",
+    "containerIp": "172.17.0.2",
+    "agentPort": 8711,
+    "note": "Bounded local Debian 12 container rehearsal. Container bridge address replaces live Tailscale in this preserved steady-state packet, so broader support claims remain locked."
+  },
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "probeOperationId": "op_probe_host_1776805736296_177",
+  "probeOperationState": "succeeded",
+  "bootstrapOperationId": "op_bootstrap_host_1776805736313_817",
+  "bootstrapOperationState": "succeeded",
+  "postMutationOperationId": "op_create_rule_1776805736384_555",
+  "postMutationOperationState": "succeeded",
+  "postMutationResultSummary": "rule rule_steady_state_review_rule_1776805736384_967 created for host host_debian_12_review_packet_1776805736172_558; 1 rule(s) staged with backup policy best_effort",
+  "controllerAuditReferenceCount": 1,
+  "healthStatus": "ok",
+  "runtimeRuleCount": 1,
+  "targetProfileConfirmation": {
+    "targetProfileId": "debian-12-systemd-tailscale",
+    "targetProfileStatus": "candidate",
+    "lifecycleState": "ready",
+    "tailscaleAddress": "172.17.0.2",
+    "agentHeartbeatState": "live"
+  },
+  "agentBootstrap": {
+    "schemaVersion": "0.1.0",
+    "operationId": "op_container_bootstrap_review_packet_001",
+    "type": "bootstrap",
+    "state": "succeeded",
+    "hostId": "host_debian_12_review_packet_1776805736172_558",
+    "startedAt": "2026-04-21T21:08:56.243333244Z",
+    "finishedAt": "2026-04-21T21:08:56.243333244Z",
+    "resultSummary": "agent bootstrap skeleton completed",
+    "linkedArtifacts": [
+      "/etc/portmanager/agent.toml",
+      "/var/lib/portmanager/desired-state.toml",
+      "/var/lib/portmanager/runtime-state.json"
+    ]
+  }
+}

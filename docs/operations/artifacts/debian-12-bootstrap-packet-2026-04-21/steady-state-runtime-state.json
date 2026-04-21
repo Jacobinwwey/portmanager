@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "0.1.0",
+  "hostId": "host_debian_12_review_packet_1776805736172_558",
+  "agentState": "ready",
+  "agentVersion": "0.1.0",
+  "effectiveStateHash": "cd403be0010e458e4b04277053b55500628b6258369fae5e86ecd78cf92e5244",
+  "health": {
+    "summary": "1 rule(s) staged with backup policy best_effort",
+    "signals": [
+      {
+        "code": "allowed_sources",
+        "status": "healthy",
+        "message": "tailscale"
+      },
+      {
+        "code": "conflict_policy",
+        "status": "healthy",
+        "message": "reject"
+      },
+      {
+        "code": "excluded_ports",
+        "status": "healthy",
+        "message": "22"
+      }
+    ]
+  },
+  "appliedRules": [
+    {
+      "id": "rule_steady_state_review_rule_1776805736384_967",
+      "listenPort": 18081,
+      "targetHost": "127.0.0.1",
+      "targetPort": 8080,
+      "status": "applied_unverified"
+    }
+  ],
+  "updatedAt": "2026-04-21T21:08:56.395793864Z"
+}

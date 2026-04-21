@@ -265,7 +265,7 @@ test('controller server probes hosts and marks bootstrap degraded when no live a
   }
 })
 
-test('controller server allows candidate host bootstrap review-prep but keeps rule mutation blocked', async () => {
+test('controller server keeps degraded candidate host rule mutation blocked during review-prep', async () => {
   const { directory, databasePath, artifactRoot } = tempPaths()
 
   try {

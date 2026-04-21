@@ -15,8 +15,16 @@ status: active
 > Updated: 2026-04-21 | Version: v0.1.0
 ### Purpose
 Freeze one concrete steady-state proof-capture guide for `debian-12-systemd-tailscale`.
-This document does not mark steady-state transport parity as passed.
+This document does not widen broader support claims by itself.
 It defines the minimum post-bootstrap artifact bundle that must exist before `/second-target-policy-pack` can move steady-state parity beyond review-prep.
+
+### Preserved packet on 2026-04-21
+- packet artifact root: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
+- candidate host id: `host_debian_12_review_packet_1776805736172_558`
+- post-mutation operation id: `op_create_rule_1776805736384_555`
+- health capture: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-health.json`
+- runtime-state capture: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-runtime-state.json`
+- controller audit reference: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-audit-index.json`
 
 ### Inputs
 - Candidate host already completed one bounded bootstrap rehearsal.
@@ -46,4 +54,4 @@ It defines the minimum post-bootstrap artifact bundle that must exist before `/s
 - controller audit-index or replay reference linked to the same mutation
 
 ### Exit rule
-Keep steady-state transport parity blocked until one review packet links all four artifacts back to the same post-bootstrap mutation.
+If these four artifacts stop linking back to the same bounded review packet, move steady-state transport parity back to blocked and keep broader support claims locked.

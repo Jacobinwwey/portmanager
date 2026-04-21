@@ -15,8 +15,8 @@ status: active
 > Updated: 2026-04-21 | Version: v0.1.0
 ### Purpose
 Freeze one concrete bootstrap-proof capture guide for `debian-12-systemd-tailscale`.
-This document does not mark bootstrap parity as passed.
-It defines the minimum artifact bundle that must exist before `/second-target-policy-pack` can move bootstrap parity beyond review-prep.
+This document now also points at one preserved bootstrap bundle.
+It still does not widen supported-target claims beyond the bounded review packet.
 
 ### Inputs
 - Candidate host already exists with target profile `debian-12-systemd-tailscale`.
@@ -24,7 +24,7 @@ It defines the minimum artifact bundle that must exist before `/second-target-po
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md` and `docs/operations/portmanager-debian-12-review-packet-template.md` stay the companion truth surfaces.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm bootstrap parity still blocks review.
+1. Read `portmanager operations second-target-policy-pack` and confirm the preserved bootstrap and steady-state packet is landed while backup, diagnostics, rollback, and second-target review still block broader review.
 2. Create or confirm one candidate host with `--target-profile-id debian-12-systemd-tailscale`.
 3. Run one bounded bootstrap rehearsal through the normal controller path:
    - `portmanager hosts probe <host-id> --wait`
@@ -37,6 +37,17 @@ It defines the minimum artifact bundle that must exist before `/second-target-po
    - `portmanager hosts get <host-id> --json`
 7. Copy every captured value into `docs/operations/portmanager-debian-12-review-packet-template.md`.
 
+### Preserved execution bundle
+- artifact root: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
+- capture summary: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-capture-summary.json`
+- bootstrap operation detail: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-operation.json`
+- bootstrap audit index: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-audit-index.json`
+- bootstrap host detail: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-host-detail.json`
+- preserved bootstrap operation id: `op_bootstrap_host_1776803574305_379`
+- preserved result summary: `host host_debian_12_bootstrap_review_1776803574142_396 bootstrapped via http://172.17.0.3:8711; 0 rule(s) staged with backup policy best_effort`
+- preserved target-profile confirmation: host `host_debian_12_bootstrap_review_1776803574142_396` stayed on `debian-12-systemd-tailscale` and reached `ready`
+- drift note: this bounded packet used a local Debian 12 Docker bridge address instead of a live Tailscale tailnet, so support claims remain locked
+
 ### Required artifacts
 - bootstrap operation id
 - bootstrap terminal result summary
@@ -44,4 +55,4 @@ It defines the minimum artifact bundle that must exist before `/second-target-po
 - host target profile confirmation showing `debian-12-systemd-tailscale`
 
 ### Exit rule
-Keep bootstrap parity blocked until one review packet links all four artifacts back to the same bootstrap rehearsal.
+Treat bootstrap transport parity as the landed packet slice only while the preserved review packet keeps all four artifacts linked to the same rehearsal; steady-state, backup, diagnostics, rollback, and review closeout remain blocked.
