@@ -178,9 +178,16 @@ fn operation_detail_with_evidence() -> Value {
 }
 
 fn run_portmanager(args: &[&str], base_url: &str) -> std::process::Output {
+    run_portmanager_with_env(args, &[("PORTMANAGER_CONTROLLER_BASE_URL", base_url)])
+}
+
+fn run_portmanager_with_env(
+    args: &[&str],
+    env_pairs: &[(&str, &str)],
+) -> std::process::Output {
     Command::new(env!("CARGO_BIN_EXE_portmanager"))
         .args(args)
-        .env("PORTMANAGER_CONTROLLER_BASE_URL", base_url)
+        .envs(env_pairs.iter().copied())
         .output()
         .expect("run portmanager")
 }
@@ -984,6 +991,66 @@ fn operations_persistence_readiness_json_reads_shared_controller_surface() {
     assert_eq!(parsed["status"], "monitor");
     assert_eq!(parsed["migrationTarget"], "postgresql");
     assert_eq!(parsed["metrics"]["operationRows"]["status"], "monitor");
+}
+
+#[test]
+fn operations_persistence_readiness_json_supports_consumer_boundary_env_and_prefix() {
+    let server = MockHttpServer::start(vec![(
+        "/api/controller/persistence-readiness",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "backend": "sqlite",
+                "databasePath": "/var/lib/portmanager/controller.sqlite",
+                "status": "healthy",
+                "migrationTarget": "postgresql",
+                "summary": "consumer boundary surface is alive",
+                "recommendedAction": "keep the current controller store",
+                "metrics": {
+                    "operationRows": {
+                        "current": 12,
+                        "monitor": 500,
+                        "migrationReady": 2000,
+                        "status": "healthy"
+                    },
+                    "diagnosticRows": {
+                        "current": 3,
+                        "monitor": 200,
+                        "migrationReady": 750,
+                        "status": "healthy"
+                    },
+                    "backupRows": {
+                        "current": 2,
+                        "monitor": 200,
+                        "migrationReady": 750,
+                        "status": "healthy"
+                    },
+                    "rollbackPointRows": {
+                        "current": 2,
+                        "monitor": 200,
+                        "migrationReady": 750,
+                        "status": "healthy"
+                    },
+                    "hostRows": {
+                        "current": 1,
+                        "monitor": 25,
+                        "migrationReady": 100,
+                        "status": "healthy"
+                    }
+                }
+            }),
+        }],
+    )]);
+
+    let consumer_base_url = format!("{}/api/controller", server.base_url());
+    let output = run_portmanager_with_env(
+        &["operations", "persistence-readiness", "--json"],
+        &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+    assert_eq!(server.hits_for("/api/controller/persistence-readiness"), 1);
 }
 
 #[test]

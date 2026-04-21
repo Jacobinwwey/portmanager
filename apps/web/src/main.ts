@@ -141,8 +141,16 @@ function defaultFetch(input: string | URL | Request, init?: RequestInit) {
   return fetch(input, init)
 }
 
+function normalizedControllerBaseUrl(baseUrl: string) {
+  return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+}
+
+function relativeControllerPath(pathname: string) {
+  return pathname.replace(/^\/+/u, '')
+}
+
 function controllerUrl(baseUrl: string, pathname: string, params?: Record<string, string | number | undefined>) {
-  const url = new URL(pathname, baseUrl)
+  const url = new URL(relativeControllerPath(pathname), normalizedControllerBaseUrl(baseUrl))
 
   for (const [key, value] of Object.entries(params ?? {})) {
     if (value !== undefined) {
@@ -399,8 +407,21 @@ function readControllerBaseUrl(container?: Element | null) {
   }
 
   const globalConfig = globalThis as typeof globalThis & {
+    PORTMANAGER_CONSUMER_BASE_URL?: string
+    __PORTMANAGER_CONSUMER_BASE_URL__?: string
     PORTMANAGER_CONTROLLER_BASE_URL?: string
     __PORTMANAGER_CONTROLLER_BASE_URL__?: string
+  }
+
+  if (typeof globalConfig.PORTMANAGER_CONSUMER_BASE_URL === 'string' && globalConfig.PORTMANAGER_CONSUMER_BASE_URL) {
+    return globalConfig.PORTMANAGER_CONSUMER_BASE_URL
+  }
+
+  if (
+    typeof globalConfig.__PORTMANAGER_CONSUMER_BASE_URL__ === 'string' &&
+    globalConfig.__PORTMANAGER_CONSUMER_BASE_URL__
+  ) {
+    return globalConfig.__PORTMANAGER_CONSUMER_BASE_URL__
   }
 
   if (typeof globalConfig.PORTMANAGER_CONTROLLER_BASE_URL === 'string' && globalConfig.PORTMANAGER_CONTROLLER_BASE_URL) {
@@ -412,6 +433,10 @@ function readControllerBaseUrl(container?: Element | null) {
     globalConfig.__PORTMANAGER_CONTROLLER_BASE_URL__
   ) {
     return globalConfig.__PORTMANAGER_CONTROLLER_BASE_URL__
+  }
+
+  if (typeof process !== 'undefined' && typeof process.env?.PORTMANAGER_CONSUMER_BASE_URL === 'string') {
+    return process.env.PORTMANAGER_CONSUMER_BASE_URL
   }
 
   if (typeof process !== 'undefined' && typeof process.env?.PORTMANAGER_CONTROLLER_BASE_URL === 'string') {
@@ -2348,7 +2373,7 @@ function renderControllerErrorPage(view: WebView, message: string) {
       { label: 'Action', value: 'inspect logs', tone: 'info' }
     ],
     main: emptyState(message),
-    rail: emptyState('Check `PORTMANAGER_CONTROLLER_BASE_URL`, selected resource ids, and controller server health.'),
+    rail: emptyState('Check `PORTMANAGER_CONSUMER_BASE_URL` or `PORTMANAGER_CONTROLLER_BASE_URL`, selected resource ids, and controller server health.'),
     eventStream: []
   })
 }

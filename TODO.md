@@ -72,6 +72,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Milestone 3 Unit 53: land `/event-audit-index`, shared indexed event/audit review reads, and Web operations/console audit panels without changing the accepted evidence model.
 - [x] Milestone 3 Unit 54: add the SQLite-backed persistence adapter seam, measurable PostgreSQL readiness reporting, and keep store behavior unchanged behind the new adapter boundary.
 - [x] Milestone 3 Unit 55: publish `/event-audit-index` and `/persistence-readiness` as generated contract surfaces, add CLI parity for both reads, and surface persistence readiness in Web overview/console developer views.
+- [x] Milestone 3 Unit 56: land `/api/controller/*` as the compatibility-safe consumer boundary, preserve prefixed Web base URLs, and let CLI read `PORTMANAGER_CONSUMER_BASE_URL` without breaking older controller-base config.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -81,7 +82,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
 - [x] Milestone 2 acceptance closure: add `pnpm milestone:fetch:review-pack` so developers can stage the uploaded current-run `milestone-confidence-bundle-*` into `.portmanager/reports/current-ci-review-pack/` with a local manifest instead of manual GitHub artifact browsing.
-- [ ] Next lane: keep Milestone 3 as bounded `Phase 0 enablement` while Milestone 2 review helpers remain the guardrail truth surface. Continue running `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, keep `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, `Source surface status`, the verification report, and the public development-progress page as the wording-truth bundle, and move the next implementation step from landed Units 51-54 into deeper gateway-ready contract hardening, standalone audit/event boundary decisions, and target-abstraction rules from `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.
+- [ ] Next lane: keep Milestone 3 as bounded `Phase 0 enablement` while Milestone 2 review helpers remain the guardrail truth surface. Continue running `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, keep `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, `Source surface status`, the verification report, and the public development-progress page as the wording-truth bundle, and move the next implementation step from landed Units 51-56 into standalone audit/event boundary decisions and target-abstraction rules from `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -185,6 +186,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] 里程碑 3 Unit 53：落地 `/event-audit-index`、共享的索引化 event/audit review read，以及 Web operations/console 审计面板，同时不改变已验收 evidence model。
 - [x] 里程碑 3 Unit 54：落地 SQLite-backed persistence adapter seam、可度量的 PostgreSQL readiness 报告，并保持新适配器边界后的 store 行为不变。
 - [x] 里程碑 3 Unit 55：把 `/event-audit-index` 与 `/persistence-readiness` 作为生成后的合同面发布，补齐 CLI 双读一致性，并在 Web overview/console 开发者视图公开 persistence readiness。
+- [x] 里程碑 3 Unit 56：把 `/api/controller/*` 落成兼容旧路由的 consumer boundary，保证 Web 的 prefix base URL 不丢失，并让 CLI 支持 `PORTMANAGER_CONSUMER_BASE_URL` 而不破坏旧 controller-base 配置。
 - [x] 里程碑 3 Unit 51：抽出 `controller-domain-service` 与 `controller-read-model` seam，把 controller 编排与 host detail 组合收敛到显式模块后面，并保持现有 HTTP 契约与验收证据不变。
 
 ### 推荐推进顺序
@@ -195,7 +197,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
 - [x] 里程碑 2 验收闭环：补上 `pnpm milestone:fetch:review-pack`，让开发者把上传后的 current-run `milestone-confidence-bundle-*` 稳定落到 `.portmanager/reports/current-ci-review-pack/`，并保留 `review-pack-manifest.json`，不再依赖手动 GitHub artifact 点击。
-- [ ] 下一主线：继续把 Milestone 3 保持为有边界的 `Phase 0 enablement`，同时把 Milestone 2 的 review helper 保留为 guardrail 真相面。继续在 completed mainline runs 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；继续把 `.portmanager/reports/milestone-wording-review.md`、`Public claim class`、`Source surface status`、验证报告与公开 development-progress 页面当作文案真相包；然后把后续实现从已落地的 Unit 51-54 推进到更深的 gateway-ready contract hardening、独立 audit/event boundary 决策与 target-abstraction rule，继续遵循 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`。
+- [ ] 下一主线：继续把 Milestone 3 保持为有边界的 `Phase 0 enablement`，同时把 Milestone 2 的 review helper 保留为 guardrail 真相面。继续在 completed mainline runs 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；继续把 `.portmanager/reports/milestone-wording-review.md`、`Public claim class`、`Source surface status`、验证报告与公开 development-progress 页面当作文案真相包；然后把后续实现从已落地的 Unit 51-56 推进到独立 audit/event boundary 决策与 target-abstraction rule，继续遵循 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`

@@ -43,6 +43,10 @@ test('contracts generator emits openapi and json schema types into target tree',
   try {
     runGenerator(['--out-dir', outDir])
 
+    const openapiSource = readFileSync(
+      path.join(repoRoot, 'packages', 'contracts', 'openapi', 'openapi.yaml'),
+      'utf8'
+    )
     const openapiOutput = readFileSync(path.join(outDir, 'generated', 'openapi.ts'), 'utf8')
     const runtimeStateOutput = readFileSync(
       path.join(outDir, 'generated', 'jsonschema', 'runtime-state.ts'),
@@ -54,6 +58,7 @@ test('contracts generator emits openapi and json schema types into target tree',
     assert.match(openapiOutput, /"\/hosts"/u)
     assert.match(openapiOutput, /"\/event-audit-index"/u)
     assert.match(openapiOutput, /"\/persistence-readiness"/u)
+    assert.match(openapiSource, /url: http:\/\/localhost:8710\/api\/controller/u)
     assert.match(openapiOutput, /EventAuditIndexEntry/u)
     assert.match(openapiOutput, /PersistenceReadiness/u)
     assert.match(runtimeStateOutput, /export interface RuntimeState/u)

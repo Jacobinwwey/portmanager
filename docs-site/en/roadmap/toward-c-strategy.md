@@ -54,7 +54,7 @@ In that scheme:
 
 | Scheme C expectation | Current verified state | Gap posture |
 | --- | --- | --- |
-| Gateway-ready consumer boundary | Web and CLI still call the controller directly over `REST + SSE`, but `/event-audit-index` plus `/persistence-readiness` now publish one clearer review/readiness contract surface | Phase 0 baseline landed |
+| Gateway-ready consumer boundary | Controller now serves `/api/controller` as a consumer-prefixed boundary while keeping legacy direct routes compatible; Web preserves prefixed base URLs and CLI accepts `PORTMANAGER_CONSUMER_BASE_URL`, even though no standalone gateway app exists yet | Phase 0 baseline landed |
 | Explicit event/policy/audit seams | `apps/controller/src/controller-server.ts` and `apps/controller/src/operation-store.ts` still concentrate most of that work | Not started |
 | First-class bounded agent role | Agent already serves `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback` with live controller sync | Partially earned |
 | Batch host orchestration | Proof slice still centers on one host / one rule plus reliability replay | Not started |

@@ -1,4 +1,5 @@
 use std::{
+    env,
     process::ExitCode,
     time::{Duration, Instant},
 };
@@ -634,8 +635,19 @@ struct WaitOptions {
     controller_base_url: String,
 }
 
+fn hydrate_consumer_base_url_env() {
+    if env::var_os("PORTMANAGER_CONTROLLER_BASE_URL").is_none() {
+        if let Some(consumer_base_url) = env::var_os("PORTMANAGER_CONSUMER_BASE_URL") {
+            unsafe {
+                env::set_var("PORTMANAGER_CONTROLLER_BASE_URL", consumer_base_url);
+            }
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> ExitCode {
+    hydrate_consumer_base_url_env();
     let cli = Cli::parse();
     let result = execute(cli).await;
     println!("{}", result.body);

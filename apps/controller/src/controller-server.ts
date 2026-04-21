@@ -16,7 +16,7 @@ import { createOperationRunner } from './operation-runner.ts'
 
 export interface ControllerServer {
   close(): Promise<void>
-  listen(port?: number): Promise<{ port: number; baseUrl: string }>
+  listen(port?: number): Promise<{ port: number; baseUrl: string; consumerBaseUrl: string }>
 }
 
 interface EventFilters {
@@ -24,6 +24,8 @@ interface EventFilters {
   hostId?: string
   ruleId?: string
 }
+
+const controllerConsumerBoundaryPath = '/api/controller'
 
 function createOperationId(prefix: string) {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`
@@ -114,6 +116,18 @@ function matchesEventFilters(
   return true
 }
 
+function normalizeControllerPath(pathname: string) {
+  if (pathname === controllerConsumerBoundaryPath) {
+    return '/'
+  }
+
+  if (pathname.startsWith(`${controllerConsumerBoundaryPath}/`)) {
+    return pathname.slice(controllerConsumerBoundaryPath.length)
+  }
+
+  return pathname
+}
+
 async function readJsonBody(request: http.IncomingMessage) {
   const chunks: Buffer[] = []
 
@@ -175,20 +189,21 @@ export function createControllerServer(options: {
 
   async function handleRequest(request: http.IncomingMessage, response: http.ServerResponse) {
     const requestUrl = new URL(request.url ?? '/', 'http://127.0.0.1')
+    const pathname = normalizeControllerPath(requestUrl.pathname)
     const eventFilters: EventFilters = {
       operationId: requestUrl.searchParams.get('operationId') ?? undefined,
       hostId: requestUrl.searchParams.get('hostId') ?? undefined,
       ruleId: requestUrl.searchParams.get('ruleId') ?? undefined
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/hosts') {
+    if (request.method === 'GET' && pathname === '/hosts') {
       sendJson(response, 200, {
         items: readModel.listHosts()
       })
       return
     }
 
-    if (request.method === 'POST' && requestUrl.pathname === '/hosts') {
+    if (request.method === 'POST' && pathname === '/hosts') {
       const payload = await readJsonBody(request)
       const name = typeof payload.name === 'string' ? payload.name.trim() : ''
       const labels = payload.labels === undefined ? [] : parseStringArray(payload.labels)
@@ -228,8 +243,7 @@ export function createControllerServer(options: {
       return
     }
 
-    const hostDetailMatch =
-      request.method === 'GET' ? requestUrl.pathname.match(/^\/hosts\/([^/]+)$/) : null
+    const hostDetailMatch = request.method === 'GET' ? pathname.match(/^\/hosts\/([^/]+)$/) : null
 
     if (hostDetailMatch) {
       const hostId = decodeURIComponent(hostDetailMatch[1] ?? '')
@@ -243,8 +257,7 @@ export function createControllerServer(options: {
       return
     }
 
-    const hostProbeMatch =
-      request.method === 'POST' ? requestUrl.pathname.match(/^\/hosts\/([^/]+)\/probe$/) : null
+    const hostProbeMatch = request.method === 'POST' ? pathname.match(/^\/hosts\/([^/]+)\/probe$/) : null
 
     if (hostProbeMatch) {
       const hostId = decodeURIComponent(hostProbeMatch[1] ?? '')
@@ -284,7 +297,7 @@ export function createControllerServer(options: {
     }
 
     const hostBootstrapMatch =
-      request.method === 'POST' ? requestUrl.pathname.match(/^\/hosts\/([^/]+)\/bootstrap$/) : null
+      request.method === 'POST' ? pathname.match(/^\/hosts\/([^/]+)\/bootstrap$/) : null
 
     if (hostBootstrapMatch) {
       const hostId = decodeURIComponent(hostBootstrapMatch[1] ?? '')
@@ -327,14 +340,14 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/bridge-rules') {
+    if (request.method === 'GET' && pathname === '/bridge-rules') {
       sendJson(response, 200, {
         items: readModel.listBridgeRules()
       })
       return
     }
 
-    if (request.method === 'POST' && requestUrl.pathname === '/bridge-rules') {
+    if (request.method === 'POST' && pathname === '/bridge-rules') {
       const payload = await readJsonBody(request)
       const hostId = typeof payload.hostId === 'string' ? payload.hostId : undefined
       const host = hostId ? readModel.getHost(hostId) : null
@@ -386,7 +399,7 @@ export function createControllerServer(options: {
 
     const bridgeRuleDetailMatch =
       ['GET', 'PATCH', 'DELETE'].includes(request.method ?? '')
-        ? requestUrl.pathname.match(/^\/bridge-rules\/([^/]+)$/)
+        ? pathname.match(/^\/bridge-rules\/([^/]+)$/)
         : null
 
     if (bridgeRuleDetailMatch && request.method === 'GET') {
@@ -486,7 +499,7 @@ export function createControllerServer(options: {
 
     const exposurePolicyMatch =
       ['GET', 'PUT'].includes(request.method ?? '')
-        ? requestUrl.pathname.match(/^\/exposure-policies\/([^/]+)$/)
+        ? pathname.match(/^\/exposure-policies\/([^/]+)$/)
         : null
 
     if (exposurePolicyMatch && request.method === 'GET') {
@@ -562,7 +575,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'POST' && requestUrl.pathname === '/batch-operations/exposure-policies/apply') {
+    if (request.method === 'POST' && pathname === '/batch-operations/exposure-policies/apply') {
       const payload = await readJsonBody(request)
       const hostIds = parseStringArray(payload.hostIds)
       const allowedSources = parseStringArray(payload.allowedSources)
@@ -624,7 +637,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/operations') {
+    if (request.method === 'GET' && pathname === '/operations') {
       sendJson(response, 200, {
         items: readModel.listOperations({
           hostId: requestUrl.searchParams.get('hostId') ?? undefined,
@@ -637,7 +650,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/events') {
+    if (request.method === 'GET' && pathname === '/events') {
       const rawLimit = Number(requestUrl.searchParams.get('limit') ?? '20')
       const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 20
       const items = eventBus
@@ -649,7 +662,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/event-audit-index') {
+    if (request.method === 'GET' && pathname === '/event-audit-index') {
       const rawLimit = Number(requestUrl.searchParams.get('limit') ?? '20')
       const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 20
 
@@ -667,12 +680,12 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/persistence-readiness') {
+    if (request.method === 'GET' && pathname === '/persistence-readiness') {
       sendJson(response, 200, store.getPersistenceReadiness())
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/backups') {
+    if (request.method === 'GET' && pathname === '/backups') {
       sendJson(response, 200, {
         items: readModel.listBackups({
           hostId: requestUrl.searchParams.get('hostId') ?? undefined,
@@ -682,7 +695,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/health-checks') {
+    if (request.method === 'GET' && pathname === '/health-checks') {
       sendJson(response, 200, {
         items: readModel.listHealthChecks({
           hostId: requestUrl.searchParams.get('hostId') ?? undefined,
@@ -692,7 +705,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/diagnostics') {
+    if (request.method === 'GET' && pathname === '/diagnostics') {
       sendJson(response, 200, {
         items: readModel.listDiagnostics({
           hostId: requestUrl.searchParams.get('hostId') ?? undefined,
@@ -705,7 +718,7 @@ export function createControllerServer(options: {
 
     const driftMatch =
       request.method === 'POST'
-        ? requestUrl.pathname.match(/^\/bridge-rules\/([^/]+)\/drift-check$/)
+        ? pathname.match(/^\/bridge-rules\/([^/]+)\/drift-check$/)
         : null
 
     if (driftMatch) {
@@ -762,7 +775,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'POST' && requestUrl.pathname === '/backups/run') {
+    if (request.method === 'POST' && pathname === '/backups/run') {
       const payload = await readJsonBody(request)
       const hostId = typeof payload.hostId === 'string' ? payload.hostId : 'host_alpha'
       const mode = payload.mode === 'required' ? 'required' : 'best_effort'
@@ -795,7 +808,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'POST' && requestUrl.pathname === '/snapshots/diagnostics') {
+    if (request.method === 'POST' && pathname === '/snapshots/diagnostics') {
       const payload = await readJsonBody(request)
       const hostId = typeof payload.hostId === 'string' ? payload.hostId : undefined
       const port =
@@ -852,7 +865,7 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname === '/rollback-points') {
+    if (request.method === 'GET' && pathname === '/rollback-points') {
       const state = requestUrl.searchParams.get('state')
       sendJson(response, 200, {
         items: readModel.listRollbackPoints({
@@ -866,10 +879,10 @@ export function createControllerServer(options: {
 
     if (
       request.method === 'POST' &&
-      requestUrl.pathname.startsWith('/rollback-points/') &&
-      requestUrl.pathname.endsWith('/apply')
+      pathname.startsWith('/rollback-points/') &&
+      pathname.endsWith('/apply')
     ) {
-      const rollbackPointId = requestUrl.pathname
+      const rollbackPointId = pathname
         .slice('/rollback-points/'.length, -'/apply'.length)
         .replace(/\/$/, '')
 
@@ -905,8 +918,8 @@ export function createControllerServer(options: {
       return
     }
 
-    if (request.method === 'GET' && requestUrl.pathname.startsWith('/operations/')) {
-      const operationId = requestUrl.pathname.slice('/operations/'.length)
+    if (request.method === 'GET' && pathname.startsWith('/operations/')) {
+      const operationId = pathname.slice('/operations/'.length)
 
       if (operationId === 'events') {
         const replay = eventBus
@@ -973,7 +986,8 @@ export function createControllerServer(options: {
 
       return {
         port: address.port,
-        baseUrl: `http://127.0.0.1:${address.port}`
+        baseUrl: `http://127.0.0.1:${address.port}`,
+        consumerBaseUrl: `http://127.0.0.1:${address.port}${controllerConsumerBoundaryPath}`
       }
     },
     async close() {

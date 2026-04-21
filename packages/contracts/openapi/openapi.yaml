@@ -4,7 +4,10 @@ info:
   version: v0.1.0-docs-baseline
   description: Docs-first controller API baseline for PortManager V1.
 servers:
+  - url: http://localhost:8710/api/controller
+    description: Gateway-ready consumer boundary
   - url: http://localhost:8710
+    description: Legacy direct controller boundary
 tags:
   - name: controller
   - name: hosts

@@ -19,6 +19,7 @@ import {
   OperationsPage,
   OverviewPage,
   createMockOperationsState,
+  loadOverviewState,
   renderWebPreviewDocument,
   webBootstrapMessage
 } from '../../apps/web/src/main.ts'
@@ -216,4 +217,169 @@ test('preview document renders hosts shell when requested', () => {
 
   assert.match(html, /Managed host inventory/i)
   assert.match(html, /Selected host rollout/i)
+})
+
+test('overview loader keeps consumer boundary base path when building controller urls', async () => {
+  const requestedPaths: string[] = []
+  const fetchImpl: typeof fetch = async (input) => {
+    const url = new URL(typeof input === 'string' ? input : input.toString())
+    requestedPaths.push(url.pathname)
+
+    if (url.pathname === '/api/controller/hosts') {
+      return new Response(
+        JSON.stringify({
+          items: [
+            {
+              id: 'host_alpha',
+              name: 'Alpha Relay',
+              readiness: 'ready',
+              labels: ['edge'],
+              sshHost: '100.64.0.11',
+              sshPort: 22,
+              exposurePolicySummary: 'https preferred',
+              bridgeRuleIds: ['rule_alpha_https'],
+              degradedReasons: []
+            }
+          ]
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/json'
+          }
+        }
+      )
+    }
+
+    if (url.pathname === '/api/controller/operations') {
+      return new Response(JSON.stringify({ items: [] }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+    }
+
+    if (url.pathname === '/api/controller/events') {
+      return new Response(JSON.stringify({ items: [] }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+    }
+
+    if (url.pathname === '/api/controller/hosts/host_alpha') {
+      return new Response(
+        JSON.stringify({
+          id: 'host_alpha',
+          name: 'Alpha Relay',
+          readiness: 'ready',
+          labels: ['edge'],
+          sshHost: '100.64.0.11',
+          sshPort: 22,
+          agentVersion: '0.1.0',
+          agentHeartbeatState: 'live',
+          bridgeRules: [],
+          recentOperations: [],
+          effectiveExposurePolicy: {
+            hostId: 'host_alpha',
+            allowedSources: ['0.0.0.0/0'],
+            excludedPorts: [],
+            samePortMirror: true,
+            conflictPolicy: 'replace_existing',
+            backupPolicy: 'best_effort'
+          }
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/json'
+          }
+        }
+      )
+    }
+
+    if (
+      url.pathname === '/api/controller/health-checks' ||
+      url.pathname === '/api/controller/backups' ||
+      url.pathname === '/api/controller/rollback-points' ||
+      url.pathname === '/api/controller/diagnostics'
+    ) {
+      return new Response(JSON.stringify({ items: [] }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+    }
+
+    if (url.pathname === '/api/controller/persistence-readiness') {
+      return new Response(
+        JSON.stringify({
+          backend: 'sqlite',
+          databasePath: '/var/lib/portmanager/controller.sqlite',
+          status: 'healthy',
+          migrationTarget: 'postgresql',
+          summary: 'consumer boundary readiness is healthy',
+          recommendedAction: 'keep current store',
+          metrics: {
+            operationRows: {
+              current: 2,
+              monitor: 500,
+              migrationReady: 2000,
+              status: 'healthy'
+            },
+            diagnosticRows: {
+              current: 1,
+              monitor: 200,
+              migrationReady: 750,
+              status: 'healthy'
+            },
+            backupRows: {
+              current: 1,
+              monitor: 200,
+              migrationReady: 750,
+              status: 'healthy'
+            },
+            rollbackPointRows: {
+              current: 1,
+              monitor: 200,
+              migrationReady: 750,
+              status: 'healthy'
+            },
+            hostRows: {
+              current: 1,
+              monitor: 25,
+              migrationReady: 100,
+              status: 'healthy'
+            }
+          }
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/json'
+          }
+        }
+      )
+    }
+
+    return new Response(JSON.stringify({ error: 'not_found' }), {
+      status: 404,
+      headers: {
+        'content-type': 'application/json'
+      }
+    })
+  }
+
+  const state = await loadOverviewState({
+    baseUrl: 'http://127.0.0.1:8710/api/controller',
+    fetchImpl
+  })
+
+  assert.equal(state.persistenceReadiness.backend, 'sqlite')
+  assert.equal(requestedPaths.every((pathname) => pathname.startsWith('/api/controller/')), true)
+  assert.equal(requestedPaths.includes('/api/controller/persistence-readiness'), true)
+  assert.equal(requestedPaths.includes('/api/controller/hosts/host_alpha'), true)
 })

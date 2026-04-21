@@ -269,6 +269,47 @@ flowchart LR
 - Happy path: Web overview and console render persistence readiness from the live controller contract.
 - Regression: generated contracts stay in sync with committed outputs.
 
+- [x] **Unit 56: Consumer Boundary Routing Split**
+
+**Goal:** Land one gateway-ready consumer-prefixed routing surface without inventing a fake gateway binary or breaking the accepted controller contract.
+
+**Requirements:** R4-R6
+
+**Dependencies:** Units 51-55
+
+**Files:**
+- Modify: `packages/contracts/openapi/openapi.yaml`
+- Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/web/src/main.ts`
+- Modify: `crates/portmanager-cli/src/main.rs`
+- Create: `tests/controller/consumer-boundary.test.ts`
+- Modify: `tests/web/web-shell.test.ts`
+- Modify: `crates/portmanager-cli/tests/operation_get_cli.rs`
+- Modify: `tests/contracts/generate-contracts.test.mjs`
+- Modify: `README.md`
+- Modify: `TODO.md`
+- Modify: `Interface Document.md`
+- Modify: `docs/specs/portmanager-milestones.md`
+- Modify: `docs/specs/portmanager-toward-c-strategy.md`
+- Modify: `docs/architecture/portmanager-v1-architecture.md`
+- Modify: `docs-site/data/roadmap.ts`
+
+**Approach:**
+- Serve a shared `/api/controller/*` consumer boundary from the controller while preserving legacy root routes as compatibility aliases.
+- Keep Web and CLI aligned on the same prefixed boundary by preserving base-path joins in Web and honoring `PORTMANAGER_CONSUMER_BASE_URL` in CLI without dropping older controller configuration.
+- Update roadmap and progress docs so Milestone 3 truth moves from “routing split next” to “routing split landed; standalone audit/event decisions and target abstraction next”.
+
+**Patterns to follow:**
+- `apps/controller/src/controller-server.ts`
+- `apps/web/src/main.ts`
+- `crates/portmanager-cli/tests/operation_get_cli.rs`
+
+**Test scenarios:**
+- Happy path: `/api/controller/*` REST and SSE routes replay the same controller-backed truth as legacy routes.
+- Happy path: Web loaders preserve the consumer boundary prefix when building URLs.
+- Happy path: CLI accepts `PORTMANAGER_CONSUMER_BASE_URL` and reaches prefixed routes.
+- Regression: generated contract verification still passes after the new OpenAPI server base is documented.
+
 ## Verification Strategy
 - `pnpm exec node --experimental-strip-types --test tests/docs/*.test.mjs`
 - `corepack pnpm --dir docs-site --ignore-workspace run docs:generate`
