@@ -124,3 +124,73 @@ test('controller server replays sse through consumer-prefixed routes', async () 
     rmSync(directory, { recursive: true, force: true })
   }
 })
+
+test('controller server serves audit review routes through consumer-prefixed boundary', async () => {
+  const { directory, databasePath } = tempDbPath()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const runner = createOperationRunner({ store, eventBus })
+    const server = createControllerServer({ store, eventBus })
+
+    store.enqueueOperation({
+      id: 'op_consumer_boundary_review_001',
+      type: 'backup',
+      initiator: 'web',
+      hostId: 'host_alpha'
+    })
+
+    const listening = await server.listen(0)
+
+    try {
+      await runner.run('op_consumer_boundary_review_001', async () => ({
+        state: 'degraded',
+        resultSummary: 'consumer audit review boundary is alive'
+      }))
+
+      const legacyEventsResponse = await fetch(
+        `${listening.baseUrl}/events?operationId=op_consumer_boundary_review_001`
+      )
+      const consumerEventsResponse = await fetch(
+        `${listening.baseUrl}/api/controller/events?operationId=op_consumer_boundary_review_001`
+      )
+      const legacyAuditResponse = await fetch(
+        `${listening.baseUrl}/event-audit-index?operationId=op_consumer_boundary_review_001`
+      )
+      const consumerAuditResponse = await fetch(
+        `${listening.baseUrl}/api/controller/event-audit-index?operationId=op_consumer_boundary_review_001`
+      )
+
+      assert.equal(legacyEventsResponse.status, 200)
+      assert.equal(consumerEventsResponse.status, 200)
+      assert.equal(legacyAuditResponse.status, 200)
+      assert.equal(consumerAuditResponse.status, 200)
+
+      const legacyEventsPayload = (await legacyEventsResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+      const consumerEventsPayload = (await consumerEventsResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+      const legacyAuditPayload = (await legacyAuditResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+      const consumerAuditPayload = (await consumerAuditResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+
+      assert.deepEqual(consumerEventsPayload, legacyEventsPayload)
+      assert.deepEqual(consumerAuditPayload, legacyAuditPayload)
+      assert.equal(
+        (consumerAuditPayload.items[0]?.latestEvent as Record<string, unknown>)?.summary,
+        'consumer audit review boundary is alive'
+      )
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})

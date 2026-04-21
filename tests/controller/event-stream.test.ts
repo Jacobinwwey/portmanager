@@ -160,6 +160,24 @@ test('controller server filters event history and SSE replay for one selected op
       assert.equal(eventsPayload.items[0]?.state, 'degraded')
       assert.equal(eventsPayload.items[1]?.state, 'running')
 
+      const auditIndexResponse = await fetch(
+        `${listening.baseUrl}/event-audit-index?operationId=op_events_target_001`
+      )
+      assert.equal(auditIndexResponse.status, 200)
+      const auditIndexPayload = (await auditIndexResponse.json()) as {
+        items: Array<Record<string, unknown>>
+      }
+
+      assert.equal(auditIndexPayload.items.length, 1)
+      assert.equal(
+        (auditIndexPayload.items[0]?.latestEvent as Record<string, unknown>)?.summary,
+        eventsPayload.items[0]?.summary
+      )
+      assert.equal(
+        (auditIndexPayload.items[0]?.latestEvent as Record<string, unknown>)?.state,
+        eventsPayload.items[0]?.state
+      )
+
       const sseResponse = await fetch(
         `${listening.baseUrl}/operations/events?operationId=op_events_target_001`,
         {

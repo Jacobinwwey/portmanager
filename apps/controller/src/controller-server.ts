@@ -3,8 +3,8 @@ import http from 'node:http'
 import path from 'node:path'
 
 import { createAgentClient } from './agent-client.ts'
+import { createAuditReviewService } from './audit-review-service.ts'
 import { createControllerDomainService } from './controller-domain-service.ts'
-import { createEventAuditIndex } from './event-audit-index.ts'
 import type { ControllerEventBus } from './controller-events.ts'
 import { createControllerReadModel } from './controller-read-model.ts'
 import { closeHttpServer } from './http-server-lifecycle.ts'
@@ -17,12 +17,6 @@ import { createOperationRunner } from './operation-runner.ts'
 export interface ControllerServer {
   close(): Promise<void>
   listen(port?: number): Promise<{ port: number; baseUrl: string; consumerBaseUrl: string }>
-}
-
-interface EventFilters {
-  operationId?: string
-  hostId?: string
-  ruleId?: string
 }
 
 const controllerConsumerBoundaryPath = '/api/controller'
@@ -97,25 +91,6 @@ function sendJson(response: http.ServerResponse, status: number, payload: unknow
   response.end(JSON.stringify(payload))
 }
 
-function matchesEventFilters(
-  event: { operationId?: string; hostId?: string; ruleId?: string },
-  filters: EventFilters
-) {
-  if (filters.operationId && event.operationId !== filters.operationId) {
-    return false
-  }
-
-  if (filters.hostId && event.hostId !== filters.hostId) {
-    return false
-  }
-
-  if (filters.ruleId && event.ruleId !== filters.ruleId) {
-    return false
-  }
-
-  return true
-}
-
 function normalizeControllerPath(pathname: string) {
   if (pathname === controllerConsumerBoundaryPath) {
     return '/'
@@ -140,6 +115,11 @@ async function readJsonBody(request: http.IncomingMessage) {
   }
 
   return JSON.parse(Buffer.concat(chunks).toString('utf8')) as Record<string, unknown>
+}
+
+function parsePositiveLimit(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value ?? '')
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, max) : fallback
 }
 
 export function createControllerServer(options: {
@@ -169,7 +149,7 @@ export function createControllerServer(options: {
   const diagnosticsPrimitive = createLocalDiagnosticsPrimitive({ artifactRoot })
   const subscriptions = new Set<() => void>()
   const readModel = createControllerReadModel({ store })
-  const eventAuditIndex = createEventAuditIndex({ store, eventBus })
+  const auditReview = createAuditReviewService({ store, eventBus })
   const domainService = createControllerDomainService({
     store,
     agentClient,
@@ -190,7 +170,7 @@ export function createControllerServer(options: {
   async function handleRequest(request: http.IncomingMessage, response: http.ServerResponse) {
     const requestUrl = new URL(request.url ?? '/', 'http://127.0.0.1')
     const pathname = normalizeControllerPath(requestUrl.pathname)
-    const eventFilters: EventFilters = {
+    const eventFilters = {
       operationId: requestUrl.searchParams.get('operationId') ?? undefined,
       hostId: requestUrl.searchParams.get('hostId') ?? undefined,
       ruleId: requestUrl.searchParams.get('ruleId') ?? undefined
@@ -651,30 +631,25 @@ export function createControllerServer(options: {
     }
 
     if (request.method === 'GET' && pathname === '/events') {
-      const rawLimit = Number(requestUrl.searchParams.get('limit') ?? '20')
-      const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 20
-      const items = eventBus
-        .listRecent(200)
-        .filter((event) => matchesEventFilters(event, eventFilters))
-        .slice(0, limit)
-
-      sendJson(response, 200, { items })
+      sendJson(response, 200, {
+        items: auditReview.listEventHistory({
+          ...eventFilters,
+          limit: parsePositiveLimit(requestUrl.searchParams.get('limit'), 20, 200)
+        })
+      })
       return
     }
 
     if (request.method === 'GET' && pathname === '/event-audit-index') {
-      const rawLimit = Number(requestUrl.searchParams.get('limit') ?? '20')
-      const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 20
-
       sendJson(response, 200, {
-        items: eventAuditIndex.list({
+        items: auditReview.listAuditEntries({
           operationId: requestUrl.searchParams.get('operationId') ?? undefined,
           hostId: requestUrl.searchParams.get('hostId') ?? undefined,
           parentOperationId: requestUrl.searchParams.get('parentOperationId') ?? undefined,
           ruleId: requestUrl.searchParams.get('ruleId') ?? undefined,
           state: requestUrl.searchParams.get('state') ?? undefined,
           type: requestUrl.searchParams.get('type') ?? undefined,
-          limit
+          limit: parsePositiveLimit(requestUrl.searchParams.get('limit'), 20, 200)
         })
       })
       return
@@ -922,10 +897,10 @@ export function createControllerServer(options: {
       const operationId = pathname.slice('/operations/'.length)
 
       if (operationId === 'events') {
-        const replay = eventBus
-          .listRecent(200)
-          .filter((event) => matchesEventFilters(event, eventFilters))
-          .slice(0, 50)
+        const replay = auditReview.listReplayEvents({
+          ...eventFilters,
+          limit: 50
+        })
 
         response.writeHead(200, {
           'cache-control': 'no-cache',
@@ -933,14 +908,14 @@ export function createControllerServer(options: {
           'content-type': 'text/event-stream'
         })
         response.write(': connected\n\n')
-        for (const event of [...replay].reverse()) {
+        for (const event of replay) {
           response.write(`id: ${event.id}\n`)
           response.write(`event: ${event.kind}\n`)
           response.write(`data: ${JSON.stringify(event)}\n\n`)
         }
 
         const unsubscribe = eventBus.subscribe((event) => {
-          if (!matchesEventFilters(event, eventFilters)) {
+          if (!auditReview.listEventHistory({ ...eventFilters, operationId: event.operationId, limit: 1 }).some((entry) => entry.id === event.id)) {
             return
           }
           response.write(`id: ${event.id}\n`)

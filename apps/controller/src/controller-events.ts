@@ -14,6 +14,13 @@ export type ControllerEvent = components['schemas']['OperationEvent'] & {
 
 export type ControllerEventHandler = (event: ControllerEvent) => void
 
+export interface ControllerEventQuery {
+  operationId?: string
+  hostId?: string
+  ruleId?: string
+  limit?: number
+}
+
 export interface ControllerEventBus {
   publish(event: ControllerEvent): void
   listAll(): ControllerEvent[]
