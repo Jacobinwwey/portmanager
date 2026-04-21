@@ -42,13 +42,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(docsConfig, /roadmap\/development-progress/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:confidence/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:promotion-ready/)
+  assert.match(milestoneConfidenceComponent, /pnpm milestone:fetch:review-pack/)
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m2-confidence-review-pack-ci-requirements\.md/
+    /2026-04-21-portmanager-m2-confidence-review-pack-fetch-requirements\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m2-confidence-review-pack-ci-plan\.md/
+    /2026-04-21-portmanager-m2-confidence-review-pack-fetch-plan\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
@@ -59,8 +60,8 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /Source surface status/)
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
-  assert.match(roadmapComponent, /2026-04-21-portmanager-m2-confidence-review-pack-ci-plan\.md/)
-  assert.match(roadmapComponent, /--skip-sync/)
+  assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
+  assert.match(roadmapComponent, /2026-04-21-portmanager-m2-confidence-review-pack-fetch-plan\.md/)
   assert.match(roadmapComponent, /milestone-confidence-bundle-\*/)
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)

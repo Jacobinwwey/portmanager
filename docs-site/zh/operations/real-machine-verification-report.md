@@ -93,7 +93,7 @@ status: active
 - completed mainline runs 之后的默认本地复核顺序：
   - `pnpm milestone:review:promotion-ready -- --limit 20`
 - 当前 run 的默认 CI review-pack 顺序：
-  - `pnpm milestone:review:promotion-ready -- --skip-sync`
+  - `pnpm milestone:fetch:review-pack`
 - 这条 helper 补上的信息：
   - 把已完成 `mainline-acceptance` history 同步回本地 `.portmanager/reports/`
   - 通过既有 `pnpm milestone:review:confidence` 路径写出 `.portmanager/reports/milestone-confidence-review.md`
@@ -101,15 +101,15 @@ status: active
   - 把 countdown 对齐状态与完整本地 visibility-only 漂移拆开汇报
   - 只有显式加上 `--refresh-published-artifact` 时，才会推进被跟踪公开 artifact
 - 这条 CI review-pack 模式补上的信息：
-  - 复用当前 run 已经写出的本地 `.portmanager/reports/` 文件，而不再额外回拉远端 history
-  - 把 `.portmanager/reports/milestone-confidence-review.md` 与 `.portmanager/reports/milestone-wording-review.md` 直接追加到 GitHub Actions job summary
-  - 把同一组文件一并上传进 `milestone-confidence-bundle-*`，供开发者在本地同步前先查看当前 run
+  - 把最新已完成的 `milestone-confidence-bundle-*` 下载到 `.portmanager/reports/current-ci-review-pack/`
+  - 稳定落盘 `.portmanager/reports/milestone-confidence-review.md`、`.portmanager/reports/milestone-wording-review.md` 与存在时的 summary/history/report 文件
+  - 额外写出 `.portmanager/reports/current-ci-review-pack/review-pack-manifest.json`，让开发者在本地同步前先保留 run 元数据与本地文件路径
 - helper 之后的发布规则：
   - 只有当 helper 结论与人工复核都认为公开快照应该变化时，才重新执行 `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`；`2026-04-21` 的这次对齐 `promotion-ready` 快照就是按这个顺序重发的
 
 ### 复核协议
 - 在判断 readiness 累积时，先看 GitHub Actions `mainline-acceptance` summary。
-- 如果第一问题是当前 CI run，而不是已同步的本地视图，就先读取上传的 `milestone-confidence-bundle-*` review pack。
+- 如果第一问题是当前 CI run，而不是已同步的本地视图，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`。
 - 先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，让已完成 confidence history 回到本地 `.portmanager/reports/`，并让 `.portmanager/reports/milestone-confidence-review.md` 先记录公开倒计时是否真正对齐、还是只有 visibility-only 漂移，同时写出带 `Public claim class` 与 `Source surface status` 的 `.portmanager/reports/milestone-wording-review.md` 供人工文案复核。
 - 如果 helper 报告 `promotion-ready-refresh-required` 且公开快照应该前进，就在人工复核同意后重跑同一条 helper 并加上 `--refresh-published-artifact`。
 - 同时对比同步后的本地 summary、wording-review 清单、已跟踪 docs confidence artifact 与公开 development-progress 页面。

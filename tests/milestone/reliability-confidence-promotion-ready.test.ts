@@ -242,6 +242,7 @@ test('buildMilestoneWordingReview renders human review checklist from aligned pr
     /\| docs-site\/data\/milestone-confidence-progress\.ts \| tracked-counter-source \| Exact published counters belong here and on the development-progress page, not in root-doc prose\. \|/
   )
   assert.match(wordingReview.content, /Do not claim Milestone 2 is complete solely from confidence thresholds\./)
+  assert.match(wordingReview.content, /pnpm milestone:fetch:review-pack/)
   assert.match(wordingReview.content, /README\.md/)
   assert.match(wordingReview.content, /docs\/specs\/portmanager-milestones\.md/)
 })

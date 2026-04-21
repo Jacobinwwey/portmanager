@@ -12,6 +12,7 @@
     "milestone:sync:confidence-history": "node scripts/acceptance/sync-confidence-history.mjs",
     "milestone:review:confidence": "node scripts/acceptance/review-confidence.mjs",
     "milestone:review:promotion-ready": "node scripts/acceptance/review-promotion-ready.mjs",
+    "milestone:fetch:review-pack": "node scripts/acceptance/fetch-review-pack.mjs",
     "contracts:generate": "node scripts/contracts/generate-contracts.mjs",
     "contracts:check": "node scripts/contracts/generate-contracts.mjs --check",
     "milestone:verify:reliability-remote-backup-replay": "node --experimental-strip-types scripts/milestone/verify-reliability-remote-backup-replay.ts",

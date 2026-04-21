@@ -339,6 +339,7 @@ export function buildMilestoneWordingReview({
     '- [ ] Do not claim Milestone 2 is complete solely from confidence thresholds.',
     '- [ ] Do not claim Toward C activation from promotion-ready evidence alone.',
     '- [ ] Keep exact counters on the development-progress page and tracked confidence artifact.',
+    '- [ ] If the current CI run is the first question, run `pnpm milestone:fetch:review-pack` and inspect `.portmanager/reports/current-ci-review-pack/` before changing public wording.',
     '- [ ] Re-run `pnpm milestone:review:promotion-ready -- --limit 20` before any public wording change.',
     '- [ ] Re-run `pnpm acceptance:verify` before merging wording changes.',
     '',

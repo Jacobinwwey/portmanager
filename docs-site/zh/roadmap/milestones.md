@@ -77,7 +77,8 @@ status: active
 - `Confidence progress page 切片`：已完成。docs-site 现在会从生成后的 confidence 数据发布一级开发者进度页，并在 roadmap 首页显示相同的 live 计数。
 - `Confidence review digest 切片`：已完成。`pnpm milestone:review:confidence` 现在会把同步后的本地 readiness 与已跟踪公开 progress artifact 直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，区分 countdown 漂移与 visibility-only 漂移，并把严格公开倒计时检查保持为显式可选。
 - `Confidence review-pack CI 切片`：已完成。`pnpm milestone:review:promotion-ready -- --skip-sync` 现在会让 `mainline-acceptance` 把当前 run 的 `.portmanager/reports/milestone-confidence-review.md` 与 `.portmanager/reports/milestone-wording-review.md` 直接上传进 `milestone-confidence-bundle-*`，供开发者查看当前 run。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先读取上传的 `milestone-confidence-bundle-*` review pack；随后只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照，复核验证报告、公开 development-progress 页面与当前 run review pack，并把 qualified history 持续转绿。
+- `Confidence review-pack fetch 切片`：已完成。`pnpm milestone:fetch:review-pack` 现在会把上传后的 current-run review bundle 落到 `.portmanager/reports/current-ci-review-pack/`，并写出 `review-pack-manifest.json`，让开发者用 repo-native 路径复核当前 CI run。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；随后只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照，复核验证报告、公开 development-progress 页面与当前 run review pack，并把 qualified history 持续转绿。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
