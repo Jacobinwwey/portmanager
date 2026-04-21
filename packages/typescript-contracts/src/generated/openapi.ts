@@ -351,6 +351,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/deployment-boundary-decision-pack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get controller deployment-boundary decision pack */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deployment-boundary decision detail */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DeploymentBoundaryDecisionPack"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/diagnostics": {
         parameters: {
             query?: never;
@@ -1179,6 +1215,28 @@ export interface components {
             ssh: components["schemas"]["SshConnection"];
             targetProfileId?: string;
         };
+        DeploymentBoundaryCriterion: {
+            /** @enum {string} */
+            id: "shared_consumer_contract" | "audit_review_owner" | "rollback_evidence_baseline" | "independent_deployable_artifact" | "edge_runtime_controls" | "standalone_replay_parity" | "observability_boundary" | "external_scale_pressure";
+            label: string;
+            reason: string;
+        };
+        DeploymentBoundaryDecisionPack: {
+            blockingCriteria: components["schemas"]["DeploymentBoundaryCriterion"][];
+            /** @enum {string} */
+            boundaryTarget: "/api/controller";
+            decisionState: components["schemas"]["DeploymentBoundaryDecisionState"];
+            /** @enum {string} */
+            deploymentMode: "controller_embedded";
+            nextActions: string[];
+            /** @enum {string} */
+            reviewOwner: "controller";
+            satisfiedCriteria: components["schemas"]["DeploymentBoundaryCriterion"][];
+            standaloneReviewRequired: boolean;
+            summary: string;
+        };
+        /** @enum {string} */
+        DeploymentBoundaryDecisionState: "hold" | "prepare_review" | "review_required";
         EventAuditIndexEntry: {
             backup?: components["schemas"]["BackupSummary"];
             eventCount: number;
@@ -1466,6 +1524,9 @@ export type ConsumerBoundaryDecisionPack = components['schemas']['ConsumerBounda
 export type ConsumerBoundaryDecisionState = components['schemas']['ConsumerBoundaryDecisionState'];
 export type CreateBridgeRuleRequest = components['schemas']['CreateBridgeRuleRequest'];
 export type CreateHostRequest = components['schemas']['CreateHostRequest'];
+export type DeploymentBoundaryCriterion = components['schemas']['DeploymentBoundaryCriterion'];
+export type DeploymentBoundaryDecisionPack = components['schemas']['DeploymentBoundaryDecisionPack'];
+export type DeploymentBoundaryDecisionState = components['schemas']['DeploymentBoundaryDecisionState'];
 export type EventAuditIndexEntry = components['schemas']['EventAuditIndexEntry'];
 export type EventAuditIndexResponse = components['schemas']['EventAuditIndexResponse'];
 export type EventListResponse = components['schemas']['EventListResponse'];

@@ -391,6 +391,40 @@ test('overview loader keeps consumer boundary base path when building controller
       )
     }
 
+    if (url.pathname === '/api/controller/deployment-boundary-decision-pack') {
+      return new Response(
+        JSON.stringify({
+          boundaryTarget: '/api/controller',
+          deploymentMode: 'controller_embedded',
+          reviewOwner: 'controller',
+          decisionState: 'hold',
+          standaloneReviewRequired: false,
+          summary: 'deployment boundary pack is alive',
+          nextActions: ['keep /api/controller controller-embedded'],
+          satisfiedCriteria: [
+            {
+              id: 'audit_review_owner',
+              label: 'Audit review owner',
+              reason: 'Replay plus indexed review already sit behind one audit-review owner.'
+            }
+          ],
+          blockingCriteria: [
+            {
+              id: 'independent_deployable_artifact',
+              label: 'Independent deployable artifact',
+              reason: 'still missing'
+            }
+          ]
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/json'
+          }
+        }
+      )
+    }
+
     if (url.pathname === '/api/controller/consumer-boundary-decision-pack') {
       return new Response(
         JSON.stringify({
@@ -443,8 +477,10 @@ test('overview loader keeps consumer boundary base path when building controller
 
   assert.equal(state.persistenceDecisionPack.backend, 'sqlite')
   assert.equal(state.persistenceDecisionPack.decisionState, 'hold')
+  assert.equal(state.deploymentBoundaryDecisionPack.decisionState, 'hold')
   assert.equal(requestedPaths.every((pathname) => pathname.startsWith('/api/controller/')), true)
   assert.equal(requestedPaths.includes('/api/controller/consumer-boundary-decision-pack'), true)
+  assert.equal(requestedPaths.includes('/api/controller/deployment-boundary-decision-pack'), true)
   assert.equal(requestedPaths.includes('/api/controller/persistence-decision-pack'), true)
   assert.equal(requestedPaths.includes('/api/controller/hosts/host_alpha'), true)
 })
@@ -484,6 +520,34 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
             {
               id: 'standalone_deployment_boundary',
               label: 'Standalone deployment boundary',
+              reason: 'still missing'
+            }
+          ]
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/json'
+          }
+        }
+      )
+    }
+
+    if (url.pathname === '/api/controller/deployment-boundary-decision-pack') {
+      return new Response(
+        JSON.stringify({
+          boundaryTarget: '/api/controller',
+          deploymentMode: 'controller_embedded',
+          reviewOwner: 'controller',
+          decisionState: 'hold',
+          standaloneReviewRequired: false,
+          summary: 'deployment boundary pack is alive',
+          nextActions: ['keep /api/controller controller-embedded'],
+          satisfiedCriteria: [],
+          blockingCriteria: [
+            {
+              id: 'independent_deployable_artifact',
+              label: 'Independent deployable artifact',
               reason: 'still missing'
             }
           ]
@@ -571,5 +635,7 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
   })
 
   assert.equal(state.consumerBoundaryDecisionPack.decisionState, 'hold')
+  assert.equal(state.deploymentBoundaryDecisionPack.decisionState, 'hold')
   assert.equal(requestedPaths.includes('/api/controller/consumer-boundary-decision-pack'), true)
+  assert.equal(requestedPaths.includes('/api/controller/deployment-boundary-decision-pack'), true)
 })

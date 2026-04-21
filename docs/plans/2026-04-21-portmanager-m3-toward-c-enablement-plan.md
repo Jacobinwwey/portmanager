@@ -9,7 +9,7 @@ origin: docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requireme
 # PortManager Milestone 3 Toward C Enablement Plan
 
 Updated: 2026-04-21
-Version: v0.2.0
+Version: v0.3.0
 
 ## Overview
 This plan keeps Milestone 3 as a bounded `Phase 0 enablement` lane after Units 50 through 56 have already landed.
@@ -473,6 +473,54 @@ flowchart LR
 - Happy path: consumer-boundary pack escalates to split-review-required when deployment boundary, edge-policy ownership, and external consumer pressure all exist.
 - Happy path: CLI and Web consume the same `/consumer-boundary-decision-pack` controller contract through the consumer-prefixed base URL.
 - Regression: `/api/controller` and legacy compatibility aliases keep returning the same decision pack.
+
+- [x] **Unit 61: Deployment Boundary Decision Pack**
+
+**Goal:** Publish one explicit deployment-boundary decision pack that keeps `/api/controller` controller-embedded until deployable artifact, edge runtime controls, replay parity, observability ownership, and external pressure justify a standalone deployment review.
+
+**Requirements:** R4-R7
+
+**Dependencies:** Units 57-60
+
+**Files:**
+- Modify: `packages/contracts/openapi/openapi.yaml`
+- Modify: `packages/typescript-contracts/src/generated/*`
+- Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/web/src/main.ts`
+- Modify: `crates/portmanager-cli/src/main.rs`
+- Create: `apps/controller/src/deployment-boundary-decision-pack.ts`
+- Create: `tests/controller/deployment-boundary-decision-pack.test.ts`
+- Modify: `crates/portmanager-cli/tests/operation_get_cli.rs`
+- Modify: `tests/web/web-shell.test.ts`
+- Modify: `tests/web/live-controller-shell.test.ts`
+- Modify: `tests/contracts/generate-contracts.test.mjs`
+- Modify: `tests/docs/development-progress.test.mjs`
+- Modify: `README.md`
+- Modify: `TODO.md`
+- Modify: `Interface Document.md`
+- Modify: `docs/specs/portmanager-milestones.md`
+- Modify: `docs/specs/portmanager-v1-product-spec.md`
+- Modify: `docs/specs/portmanager-toward-c-strategy.md`
+- Modify: `docs/architecture/portmanager-v1-architecture.md`
+- Modify: `docs-site/data/roadmap.ts`
+- Modify: `docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue`
+
+**Approach:**
+- Reuse the decision-pack pattern, but point it at standalone deployment-review evidence instead of database pressure or consumer routing alone.
+- Keep `/api/controller` stable and honest: the new surface explains why no standalone deployment exists yet and what review criteria must become true before one can be justified.
+- Publish the same pack through controller, generated contracts, CLI, Web, and roadmap/progress docs so developers do not infer deployment timing from prose drift.
+
+**Patterns to follow:**
+- `apps/controller/src/consumer-boundary-decision-pack.ts`
+- `apps/controller/src/persistence-decision-pack.ts`
+- `tests/controller/consumer-boundary-decision-pack.test.ts`
+- `crates/portmanager-cli/tests/operation_get_cli.rs`
+
+**Test scenarios:**
+- Happy path: deployment-boundary pack keeps `/api/controller` controller-embedded while standalone deployment evidence is missing.
+- Happy path: deployment-boundary pack escalates to standalone-review-required when deployable artifact, edge controls, replay parity, observability ownership, and external pressure all exist.
+- Happy path: CLI and Web consume the same `/deployment-boundary-decision-pack` controller contract through the consumer-prefixed base URL.
+- Regression: `/api/controller` and legacy compatibility aliases keep returning the same deployment-boundary pack.
 
 ## Verification Strategy
 - `pnpm exec node --experimental-strip-types --test tests/docs/*.test.mjs`

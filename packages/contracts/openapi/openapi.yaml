@@ -459,6 +459,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsumerBoundaryDecisionPack'
+  /deployment-boundary-decision-pack:
+    get:
+      tags: [controller]
+      summary: Get controller deployment-boundary decision pack
+      responses:
+        '200':
+          description: Deployment-boundary decision detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentBoundaryDecisionPack'
   /rollback-points:
     get:
       tags: [rollback-points]
@@ -1247,6 +1258,72 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ConsumerBoundaryCriterion'
+    DeploymentBoundaryDecisionState:
+      type: string
+      enum: [hold, prepare_review, review_required]
+    DeploymentBoundaryCriterion:
+      type: object
+      required: [id, label, reason]
+      properties:
+        id:
+          type: string
+          enum:
+            [
+              shared_consumer_contract,
+              audit_review_owner,
+              rollback_evidence_baseline,
+              independent_deployable_artifact,
+              edge_runtime_controls,
+              standalone_replay_parity,
+              observability_boundary,
+              external_scale_pressure
+            ]
+        label:
+          type: string
+        reason:
+          type: string
+    DeploymentBoundaryDecisionPack:
+      type: object
+      required:
+        [
+          boundaryTarget,
+          deploymentMode,
+          reviewOwner,
+          decisionState,
+          standaloneReviewRequired,
+          summary,
+          nextActions,
+          satisfiedCriteria,
+          blockingCriteria
+        ]
+      properties:
+        boundaryTarget:
+          type: string
+          enum: [/api/controller]
+        deploymentMode:
+          type: string
+          enum: [controller_embedded]
+        reviewOwner:
+          type: string
+          enum: [controller]
+        decisionState:
+          $ref: '#/components/schemas/DeploymentBoundaryDecisionState'
+        standaloneReviewRequired:
+          type: boolean
+        summary:
+          type: string
+        nextActions:
+          type: array
+          items:
+            type: string
+        satisfiedCriteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeploymentBoundaryCriterion'
+        blockingCriteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeploymentBoundaryCriterion'
     RollbackPoint:
       type: object
       required: [id, hostId, operationId, createdAt, state]

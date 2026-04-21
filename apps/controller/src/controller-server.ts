@@ -9,6 +9,10 @@ import {
   createDefaultConsumerBoundaryDecisionSnapshot
 } from './consumer-boundary-decision-pack.ts'
 import { createControllerDomainService } from './controller-domain-service.ts'
+import {
+  buildDeploymentBoundaryDecisionPack,
+  createDefaultDeploymentBoundaryDecisionSnapshot
+} from './deployment-boundary-decision-pack.ts'
 import type { ControllerEventBus } from './controller-events.ts'
 import { createControllerReadModel } from './controller-read-model.ts'
 import { closeHttpServer } from './http-server-lifecycle.ts'
@@ -688,6 +692,15 @@ export function createControllerServer(options: {
         response,
         200,
         buildConsumerBoundaryDecisionPack(createDefaultConsumerBoundaryDecisionSnapshot())
+      )
+      return
+    }
+
+    if (request.method === 'GET' && pathname === '/deployment-boundary-decision-pack') {
+      sendJson(
+        response,
+        200,
+        buildDeploymentBoundaryDecisionPack(createDefaultDeploymentBoundaryDecisionSnapshot())
       )
       return
     }

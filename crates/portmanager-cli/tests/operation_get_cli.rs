@@ -1296,6 +1296,93 @@ fn operations_consumer_boundary_decision_pack_json_supports_consumer_boundary_en
 }
 
 #[test]
+fn operations_deployment_boundary_decision_pack_text_surfaces_standalone_review_criteria() {
+    let server = MockHttpServer::start(vec![(
+        "/deployment-boundary-decision-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "boundaryTarget": "/api/controller",
+                "deploymentMode": "controller_embedded",
+                "reviewOwner": "controller",
+                "decisionState": "hold",
+                "standaloneReviewRequired": false,
+                "summary": "/api/controller should remain controller-embedded because standalone deployment evidence is still missing.",
+                "nextActions": [
+                    "Keep /api/controller controller-embedded while independent deployable artifact evidence is absent.",
+                    "Prove edge runtime controls, standalone replay parity, and observability before reopening deployment review."
+                ],
+                "satisfiedCriteria": [
+                    {
+                        "id": "shared_consumer_contract",
+                        "label": "Shared consumer contract",
+                        "reason": "CLI, Web, and automation already share one consumer contract."
+                    }
+                ],
+                "blockingCriteria": [
+                    {
+                        "id": "independent_deployable_artifact",
+                        "label": "Independent deployable artifact",
+                        "reason": "No separately deployable controller-adjacent artifact exists yet."
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["operations", "deployment-boundary-decision-pack"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("Boundary Target: /api/controller"));
+    assert!(stdout.contains("Decision State: hold"));
+    assert!(stdout.contains("Standalone Review Required: no"));
+    assert!(stdout.contains("independent_deployable_artifact"));
+}
+
+#[test]
+fn operations_deployment_boundary_decision_pack_json_supports_consumer_boundary_env_and_prefix() {
+    let server = MockHttpServer::start(vec![(
+        "/api/controller/deployment-boundary-decision-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "boundaryTarget": "/api/controller",
+                "deploymentMode": "controller_embedded",
+                "reviewOwner": "controller",
+                "decisionState": "hold",
+                "standaloneReviewRequired": false,
+                "summary": "deployment boundary pack is alive",
+                "nextActions": ["keep /api/controller controller-embedded"],
+                "satisfiedCriteria": [],
+                "blockingCriteria": [
+                    {
+                        "id": "independent_deployable_artifact",
+                        "label": "Independent deployable artifact",
+                        "reason": "still missing"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let consumer_base_url = format!("{}/api/controller", server.base_url());
+    let output = run_portmanager_with_env(
+        &["operations", "deployment-boundary-decision-pack", "--json"],
+        &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+    assert_eq!(server.hits_for("/api/controller/deployment-boundary-decision-pack"), 1);
+}
+
+#[test]
 fn operations_audit_index_text_surfaces_linked_evidence() {
     let server = MockHttpServer::start(vec![(
         "/event-audit-index?limit=2&hostId=host_alpha&ruleId=rule_alpha_https",

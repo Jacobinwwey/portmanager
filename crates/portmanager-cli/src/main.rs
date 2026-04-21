@@ -140,6 +140,7 @@ enum OperationsSubcommand {
     AuditIndex(OperationsAuditIndexArgs),
     BatchApplyPolicy(OperationsBatchApplyPolicyArgs),
     ConsumerBoundaryDecisionPack(OperationsConsumerBoundaryDecisionPackArgs),
+    DeploymentBoundaryDecisionPack(OperationsDeploymentBoundaryDecisionPackArgs),
     List(OperationsListArgs),
     PersistenceDecisionPack(OperationsPersistenceDecisionPackArgs),
     PersistenceReadiness(OperationsPersistenceReadinessArgs),
@@ -545,6 +546,14 @@ struct OperationsConsumerBoundaryDecisionPackArgs {
 }
 
 #[derive(Args, Clone)]
+struct OperationsDeploymentBoundaryDecisionPackArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
 struct OperationsBatchApplyPolicyArgs {
     #[arg(long = "host-id")]
     host_ids: Vec<String>,
@@ -716,6 +725,9 @@ async fn execute(cli: Cli) -> ExecutionResult {
             }
             OperationsSubcommand::ConsumerBoundaryDecisionPack(args) => {
                 run_operations_consumer_boundary_decision_pack(args).await
+            }
+            OperationsSubcommand::DeploymentBoundaryDecisionPack(args) => {
+                run_operations_deployment_boundary_decision_pack(args).await
             }
             OperationsSubcommand::List(args) => run_operations_list(args).await,
             OperationsSubcommand::PersistenceDecisionPack(args) => {
@@ -1377,6 +1389,26 @@ async fn run_operations_consumer_boundary_decision_pack(
     }
 }
 
+async fn run_operations_deployment_boundary_decision_pack(
+    args: OperationsDeploymentBoundaryDecisionPackArgs,
+) -> ExecutionResult {
+    match fetch_deployment_boundary_decision_pack(&Client::new(), &args.controller_base_url).await
+    {
+        Ok(pack) => {
+            if args.json {
+                ExecutionResult::success_json(&pack)
+            } else {
+                ExecutionResult::success_text(format_deployment_boundary_decision_pack_text(&pack))
+            }
+        }
+        Err(error) => json_or_text_error_flag(
+            args.json,
+            error,
+            "deployment boundary decision pack fetch failed".to_string(),
+        ),
+    }
+}
+
 async fn run_operations_batch_apply_policy(
     args: OperationsBatchApplyPolicyArgs,
 ) -> ExecutionResult {
@@ -1924,7 +1956,7 @@ fn format_persistence_decision_pack_text(pack: &Value) -> String {
     )
 }
 
-fn format_consumer_boundary_criteria_block(title: &str, criteria: &Value) -> String {
+fn format_decision_criteria_block(title: &str, criteria: &Value) -> String {
     let lines = criteria
         .as_array()
         .into_iter()
@@ -1973,8 +2005,40 @@ fn format_consumer_boundary_decision_pack_text(pack: &Value) -> String {
         },
         pack["summary"].as_str().unwrap_or("no summary"),
         action_block,
-        format_consumer_boundary_criteria_block("Satisfied Criteria", &pack["satisfiedCriteria"]),
-        format_consumer_boundary_criteria_block("Blocking Criteria", &pack["blockingCriteria"])
+        format_decision_criteria_block("Satisfied Criteria", &pack["satisfiedCriteria"]),
+        format_decision_criteria_block("Blocking Criteria", &pack["blockingCriteria"])
+    )
+}
+
+fn format_deployment_boundary_decision_pack_text(pack: &Value) -> String {
+    let action_lines = pack["nextActions"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|action| format!("- {}", action.as_str().unwrap_or("unknown")))
+        .collect::<Vec<_>>();
+
+    let action_block = if action_lines.is_empty() {
+        "Next Actions:\n- none".to_string()
+    } else {
+        format!("Next Actions:\n{}", action_lines.join("\n"))
+    };
+
+    format!(
+        "Boundary Target: {}\nDeployment Mode: {}\nReview Owner: {}\nDecision State: {}\nStandalone Review Required: {}\nSummary: {}\n{}\n{}\n{}",
+        pack["boundaryTarget"].as_str().unwrap_or("unknown"),
+        pack["deploymentMode"].as_str().unwrap_or("unknown"),
+        pack["reviewOwner"].as_str().unwrap_or("unknown"),
+        pack["decisionState"].as_str().unwrap_or("unknown"),
+        if pack["standaloneReviewRequired"].as_bool().unwrap_or(false) {
+            "yes"
+        } else {
+            "no"
+        },
+        pack["summary"].as_str().unwrap_or("no summary"),
+        action_block,
+        format_decision_criteria_block("Satisfied Criteria", &pack["satisfiedCriteria"]),
+        format_decision_criteria_block("Blocking Criteria", &pack["blockingCriteria"])
     )
 }
 
@@ -2680,6 +2744,17 @@ async fn fetch_consumer_boundary_decision_pack(
 ) -> Result<Value, JsonErrorOutput> {
     let url = format!(
         "{}/consumer-boundary-decision-pack",
+        controller_base_url.trim_end_matches('/')
+    );
+    request_json(client.get(url), None, None).await
+}
+
+async fn fetch_deployment_boundary_decision_pack(
+    client: &Client,
+    controller_base_url: &str,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!(
+        "{}/deployment-boundary-decision-pack",
         controller_base_url.trim_end_matches('/')
     );
     request_json(client.get(url), None, None).await

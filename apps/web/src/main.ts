@@ -34,6 +34,8 @@ export interface EventStreamEntry {
 export type OperationEventContract = components['schemas']['OperationEvent']
 export type ConsumerBoundaryDecisionPackContract =
   components['schemas']['ConsumerBoundaryDecisionPack']
+export type DeploymentBoundaryDecisionPackContract =
+  components['schemas']['DeploymentBoundaryDecisionPack']
 export type EventAuditIndexEntry = components['schemas']['EventAuditIndexEntry']
 export type PersistenceReadinessContract = components['schemas']['PersistenceReadiness']
 export type PersistenceDecisionPackContract = components['schemas']['PersistenceDecisionPack']
@@ -62,6 +64,7 @@ export interface HostDetailState {
 export interface OverviewState {
   controllerHealth: 'healthy' | 'degraded'
   consumerBoundaryDecisionPack: ConsumerBoundaryDecisionPackContract
+  deploymentBoundaryDecisionPack: DeploymentBoundaryDecisionPackContract
   persistenceReadiness: PersistenceReadinessContract
   persistenceDecisionPack: PersistenceDecisionPackContract
   managedHosts: HostSummary[]
@@ -112,6 +115,7 @@ export interface BackupsState {
 
 export interface ConsoleState {
   consumerBoundaryDecisionPack: ConsumerBoundaryDecisionPackContract
+  deploymentBoundaryDecisionPack: DeploymentBoundaryDecisionPackContract
   operations: OperationDetailContract[]
   auditIndex: EventAuditIndexEntry[]
   persistenceReadiness: PersistenceReadinessContract
@@ -1376,6 +1380,67 @@ export function createMockConsumerBoundaryDecisionPack(): ConsumerBoundaryDecisi
   }
 }
 
+export function createMockDeploymentBoundaryDecisionPack(): DeploymentBoundaryDecisionPackContract {
+  return {
+    boundaryTarget: '/api/controller',
+    deploymentMode: 'controller_embedded',
+    reviewOwner: 'controller',
+    decisionState: 'hold',
+    standaloneReviewRequired: false,
+    summary:
+      '/api/controller should remain controller-embedded because independent deployable artifact, edge runtime controls, standalone replay parity, observability boundary, external scale pressure are still missing.',
+    nextActions: [
+      'Keep /api/controller controller-embedded while independent deployable artifact evidence is absent.',
+      'Prove edge runtime controls, standalone replay parity, and observability before reopening deployment review.',
+      'Pair any later standalone proposal with second-target policy and rollback rehearsal evidence.'
+    ],
+    satisfiedCriteria: [
+      {
+        id: 'shared_consumer_contract',
+        label: 'Shared consumer contract',
+        reason: 'CLI, Web, and automation already share one consumer contract.'
+      },
+      {
+        id: 'audit_review_owner',
+        label: 'Audit review owner',
+        reason: 'Replay plus indexed review already sit behind one audit-review owner.'
+      },
+      {
+        id: 'rollback_evidence_baseline',
+        label: 'Rollback evidence baseline',
+        reason: 'Rollback, backup, and replay evidence already exist on the embedded controller slice.'
+      }
+    ],
+    blockingCriteria: [
+      {
+        id: 'independent_deployable_artifact',
+        label: 'Independent deployable artifact',
+        reason: 'No separately deployable controller-adjacent artifact exists yet.'
+      },
+      {
+        id: 'edge_runtime_controls',
+        label: 'Edge runtime controls',
+        reason: 'Auth, health, and rate-limit controls outside the controller process are still missing.'
+      },
+      {
+        id: 'standalone_replay_parity',
+        label: 'Standalone replay parity',
+        reason: 'Standalone replay, rollback, and audit parity are still unproven.'
+      },
+      {
+        id: 'observability_boundary',
+        label: 'Observability boundary',
+        reason: 'Observability, rollout, and rollback ownership for a standalone boundary are still undefined.'
+      },
+      {
+        id: 'external_scale_pressure',
+        label: 'External scale pressure',
+        reason: 'No external consumer or scale pressure justifies standalone deployment review yet.'
+      }
+    ]
+  }
+}
+
 export function createMockOverviewState(): OverviewState {
   const selectedHost = createMockHostDetailState()
 
@@ -1413,6 +1478,7 @@ export function createMockOverviewState(): OverviewState {
   return {
     controllerHealth: 'healthy',
     consumerBoundaryDecisionPack: createMockConsumerBoundaryDecisionPack(),
+    deploymentBoundaryDecisionPack: createMockDeploymentBoundaryDecisionPack(),
     persistenceReadiness: createMockPersistenceReadiness(),
     persistenceDecisionPack: createMockPersistenceDecisionPack(),
     managedHosts: [selectedHost.host, secondaryHost, degradedHost],
@@ -1659,6 +1725,7 @@ export function createMockConsoleState(): ConsoleState {
 
   return {
     consumerBoundaryDecisionPack: createMockConsumerBoundaryDecisionPack(),
+    deploymentBoundaryDecisionPack: createMockDeploymentBoundaryDecisionPack(),
     operations: operationsState.operations.map((entry) => entry.operation),
     auditIndex: operationsState.auditIndex,
     persistenceReadiness: createMockPersistenceReadiness(),
@@ -1723,6 +1790,21 @@ async function loadPersistenceDecisionPack(
   return fetchControllerJson<PersistenceDecisionPackContract>(baseUrl, '/persistence-decision-pack', {
     fetchImpl: options.fetchImpl
   })
+}
+
+async function loadDeploymentBoundaryDecisionPack(
+  baseUrl: string,
+  options: {
+    fetchImpl?: FetchLike
+  } = {}
+) {
+  return fetchControllerJson<DeploymentBoundaryDecisionPackContract>(
+    baseUrl,
+    '/deployment-boundary-decision-pack',
+    {
+      fetchImpl: options.fetchImpl
+    }
+  )
 }
 
 async function loadConsumerBoundaryDecisionPack(
@@ -1792,8 +1874,14 @@ export async function loadOverviewState(
   }
 ): Promise<OverviewState> {
   const eventLimit = options.eventLimit ?? 20
-  const [managedHosts, operations, events, persistenceDecisionPack, consumerBoundaryDecisionPack] =
-    await Promise.all([
+  const [
+    managedHosts,
+    operations,
+    events,
+    persistenceDecisionPack,
+    consumerBoundaryDecisionPack,
+    deploymentBoundaryDecisionPack
+  ] = await Promise.all([
     fetchControllerList<HostSummary>(options.baseUrl, '/hosts', {
       fetchImpl: options.fetchImpl
     }),
@@ -1808,6 +1896,9 @@ export async function loadOverviewState(
       fetchImpl: options.fetchImpl
     }),
     loadConsumerBoundaryDecisionPack(options.baseUrl, {
+      fetchImpl: options.fetchImpl
+    }),
+    loadDeploymentBoundaryDecisionPack(options.baseUrl, {
       fetchImpl: options.fetchImpl
     })
   ])
@@ -1832,6 +1923,7 @@ export async function loadOverviewState(
   return {
     controllerHealth: degradedCount > 0 ? 'degraded' : 'healthy',
     consumerBoundaryDecisionPack,
+    deploymentBoundaryDecisionPack,
     persistenceReadiness: persistenceDecisionPack.readiness,
     persistenceDecisionPack,
     managedHosts,
@@ -2068,7 +2160,8 @@ export async function loadConsoleState(
     events,
     auditIndex,
     persistenceDecisionPack,
-    consumerBoundaryDecisionPack
+    consumerBoundaryDecisionPack,
+    deploymentBoundaryDecisionPack
   ] = await Promise.all([
     loadOperationDetails(options.baseUrl, {
       params: { hostId: options.hostId },
@@ -2097,6 +2190,9 @@ export async function loadConsoleState(
     }),
     loadConsumerBoundaryDecisionPack(options.baseUrl, {
       fetchImpl: options.fetchImpl
+    }),
+    loadDeploymentBoundaryDecisionPack(options.baseUrl, {
+      fetchImpl: options.fetchImpl
     })
   ])
 
@@ -2107,6 +2203,7 @@ export async function loadConsoleState(
 
   return {
     consumerBoundaryDecisionPack,
+    deploymentBoundaryDecisionPack,
     operations,
     auditIndex,
     persistenceReadiness: persistenceDecisionPack.readiness,
@@ -2142,6 +2239,11 @@ export function OverviewPage(props: { state: OverviewState }) {
         label: 'Consumer Boundary',
         value: state.consumerBoundaryDecisionPack.decisionState,
         tone: toneFromState(state.consumerBoundaryDecisionPack.decisionState)
+      },
+      {
+        label: 'Deployment Boundary',
+        value: state.deploymentBoundaryDecisionPack.decisionState,
+        tone: toneFromState(state.deploymentBoundaryDecisionPack.decisionState)
       },
       {
         label: 'Managed Hosts',
@@ -2372,6 +2474,11 @@ export function ConsolePage(props: { state: ConsoleState }) {
         label: 'Consumer Boundary',
         value: props.state.consumerBoundaryDecisionPack.decisionState,
         tone: toneFromState(props.state.consumerBoundaryDecisionPack.decisionState)
+      },
+      {
+        label: 'Deployment Boundary',
+        value: props.state.deploymentBoundaryDecisionPack.decisionState,
+        tone: toneFromState(props.state.deploymentBoundaryDecisionPack.decisionState)
       },
       {
         label: 'Operations',
@@ -2904,6 +3011,68 @@ function ConsumerBoundaryDecisionCard(props: {
   ])
 }
 
+function DeploymentBoundaryDecisionCard(props: {
+  pack: DeploymentBoundaryDecisionPackContract
+  title: string
+  detail?: string
+}) {
+  const criteriaList = (
+    title: string,
+    items: DeploymentBoundaryDecisionPackContract['satisfiedCriteria'],
+    emptyCopy: string
+  ) =>
+    h('section', { className: 'pm-card', key: title }, [
+      h(SectionHeading, { key: 'heading', title, detail: `${items.length} criteria` }),
+      items.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            items.map((criterion) =>
+              h('li', { className: 'pm-list-item', key: criterion.id }, [
+                h('div', { key: 'line1' }, `${criterion.label} · ${criterion.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, criterion.reason)
+              ])
+            )
+          )
+        : emptyState(emptyCopy, 'empty')
+    ])
+
+  return h('div', { className: 'pm-panel-stack' }, [
+    h('section', { className: 'pm-card', key: 'summary-card' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: props.title,
+        detail: props.detail ?? props.pack.decisionState
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Boundary Target', props.pack.boundaryTarget),
+        kvRow('Deployment Mode', props.pack.deploymentMode),
+        kvRow('Review Owner', props.pack.reviewOwner),
+        kvRow('Decision State', h(StatusBadge, { state: props.pack.decisionState })),
+        kvRow('Standalone Review Required', props.pack.standaloneReviewRequired ? 'yes' : 'no')
+      ]),
+      h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.summary),
+      h(
+        'ul',
+        { className: 'pm-list', key: 'actions' },
+        props.pack.nextActions.map((action) =>
+          h('li', { className: 'pm-list-item', key: action }, [h('div', { key: 'line1' }, action)])
+        )
+      )
+    ]),
+    criteriaList(
+      'Satisfied criteria',
+      props.pack.satisfiedCriteria,
+      'No satisfied deployment-boundary criteria recorded yet.'
+    ),
+    criteriaList(
+      'Blocking criteria',
+      props.pack.blockingCriteria,
+      'No blocking deployment-boundary criteria recorded right now.'
+    )
+  ])
+}
+
 function OverviewRail(props: { state: OverviewState }) {
   const detailState = props.state.selectedHost
 
@@ -2921,6 +3090,11 @@ function OverviewRail(props: { state: OverviewState }) {
         key: 'persistence',
         pack: props.state.persistenceDecisionPack,
         title: 'Persistence readiness'
+      }),
+      h(DeploymentBoundaryDecisionCard, {
+        key: 'deployment-boundary',
+        pack: props.state.deploymentBoundaryDecisionPack,
+        title: 'Deployment boundary'
       }),
       h(ConsumerBoundaryDecisionCard, {
         key: 'consumer-boundary',
@@ -2961,6 +3135,11 @@ function OverviewRail(props: { state: OverviewState }) {
       key: 'persistence',
       pack: props.state.persistenceDecisionPack,
       title: 'Persistence readiness'
+    }),
+    h(DeploymentBoundaryDecisionCard, {
+      key: 'deployment-boundary',
+      pack: props.state.deploymentBoundaryDecisionPack,
+      title: 'Deployment boundary'
     }),
     h(ConsumerBoundaryDecisionCard, {
       key: 'consumer-boundary',
@@ -3916,6 +4095,12 @@ function ConsoleRail(props: { state: ConsoleState }) {
       pack: props.state.persistenceDecisionPack,
       title: 'Persistence readiness',
       detail: 'controller store'
+    }),
+    h(DeploymentBoundaryDecisionCard, {
+      key: 'deployment-boundary',
+      pack: props.state.deploymentBoundaryDecisionPack,
+      title: 'Deployment boundary',
+      detail: props.state.deploymentBoundaryDecisionPack.boundaryTarget
     }),
     h(ConsumerBoundaryDecisionCard, {
       key: 'consumer-boundary',

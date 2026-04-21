@@ -92,7 +92,8 @@ Milestone 3 now continues from landed seams instead of restarting them:
 - Unit 58: complete. explicit target-profile registry and target-abstraction rules now lock the Ubuntu 24.04 + systemd + Tailscale contract before any second-target claim
 - Unit 59: complete. persistence promotion decision surface now turns measured readiness criteria into `/persistence-decision-pack` with explicit next actions while SQLite stays active
 - Unit 60: complete. consumer-boundary split criteria now publish `/consumer-boundary-decision-pack`, keeping `/api/controller` embedded until standalone deployment boundary, edge-policy ownership, and external consumer pressure justify a split review
-- Next queue: later standalone deployment-boundary evidence and broader second-target policy work, not a PostgreSQL default-store claim
+- Unit 61: complete. deployment-boundary decision pack now publishes `/deployment-boundary-decision-pack`, keeping `/api/controller` controller-embedded until deployable artifact, edge runtime controls, replay parity, observability ownership, and external pressure justify standalone deployment review
+- Next queue: broader second-target policy work, not a PostgreSQL default-store claim or a fake standalone deployment push
 - keep bounded batch work on the same evidence model instead of inventing a second orchestration path
 
 ### Language and boundary decisions carried into C

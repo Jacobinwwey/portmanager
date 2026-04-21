@@ -13,6 +13,10 @@ export {
   buildConsumerBoundaryDecisionPack,
   createDefaultConsumerBoundaryDecisionSnapshot
 } from './consumer-boundary-decision-pack.ts'
+export {
+  buildDeploymentBoundaryDecisionPack,
+  createDefaultDeploymentBoundaryDecisionSnapshot
+} from './deployment-boundary-decision-pack.ts'
 export { createControllerDomainService } from './controller-domain-service.ts'
 export { createControllerReadModel } from './controller-read-model.ts'
 export { createEventAuditIndex } from './event-audit-index.ts'

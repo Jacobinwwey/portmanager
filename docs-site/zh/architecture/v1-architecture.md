@@ -39,7 +39,7 @@ status: active
 
 | Scheme C 关注点 | 当前仓库真相 | 推进分类 | 对 Milestone 3 的含义 |
 | --- | --- | --- | --- |
-| Consumer gateway boundary | 当前还没有独立 gateway app 或 service，但 controller 已经开始提供 gateway-ready 的 `/api/controller` consumer boundary，并继续兼容旧直连路由；`/consumer-boundary-decision-pack` 也已经明确说明这条边界为什么现在仍应保持内嵌 | Phase 0 baseline 已落地 | 下一焦点应该转向独立部署边界证据与更广第二目标策略，而不是继续做路由外壳工作 |
+| Consumer gateway boundary | 当前还没有独立 gateway app 或 service，但 controller 已经开始提供 gateway-ready 的 `/api/controller` consumer boundary，并继续兼容旧直连路由；`/consumer-boundary-decision-pack` 已明确说明这条边界为什么现在仍应保持内嵌，`/deployment-boundary-decision-pack` 也已明确说明为什么独立部署复核仍应保持在 hold | Phase 0 baseline 已落地 | 下一焦点应该转向更聚焦的第二目标策略，而不是继续做路由外壳工作 |
 | Controller / policy / event / audit 分层 | `controller-read-model`、`controller-domain-service`、`/event-audit-index` 与 persistence adapter 已经抽出第一批 seam，虽然 transport 与 storage 仍然集中太多职责 | Phase 0 baseline 已落地 | 下一焦点应该转向显式 audit-review owner，再讨论部署拆分 |
 | 一等远端 agent | Agent 已提供 `/health`、`/runtime-state`、`/apply`、`/snapshot`、`/rollback`，controller 也已接入 live sync | 部分达成 | 在保持 agent 有边界的前提下继续增强事件语义 |
 | 批量主机编排 | 一个有边界的 batch exposure-policy envelope 现在已经落地：controller、CLI 与 Web 都能围绕同一个 parent operation 与 host-scoped child outcome 复核结果 | Phase 0 baseline 已落地 | 继续把更广的 orchestration 收敛在同一套 audit model 上，而不是长出第二条路径 |

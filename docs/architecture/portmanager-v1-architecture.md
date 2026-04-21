@@ -32,7 +32,7 @@ Version: v0.2.0-m3-phase0-enablement
 
 | Scheme C concern | Current repo truth | Progress classification | Implication for Milestone 3 |
 | --- | --- | --- | --- |
-| Consumer gateway boundary | No dedicated gateway app or service yet, but controller now serves a gateway-ready `/api/controller` consumer boundary while keeping legacy direct routes compatible, and `/consumer-boundary-decision-pack` now states why that boundary remains embedded for now | Phase 0 baseline landed | Next focus shifts to standalone deployment-boundary evidence and broader second-target policy work, not more routing-shell churn |
+| Consumer gateway boundary | No dedicated gateway app or service yet, but controller now serves a gateway-ready `/api/controller` consumer boundary while keeping legacy direct routes compatible, `/consumer-boundary-decision-pack` states why routing stays embedded, and `/deployment-boundary-decision-pack` states why standalone deployment review still stays on hold | Phase 0 baseline landed | Next focus shifts to broader second-target policy work, not more routing-shell churn |
 | Controller, policy, event, and audit separation | `controller-read-model`, `controller-domain-service`, `audit-review-service`, `/event-audit-index`, and the persistence adapter now extract the first seam set, even though transport and storage still centralize too much work | Phase 0 baseline landed | Explicit audit-review ownership is now landed inside controller; next focus shifts to target-profile and persistence-promotion decisions before debating deployment topology |
 | First-class remote agent | Agent already serves `/health`, `/runtime-state`, `/apply`, `/snapshot`, `/rollback`; controller syncs live desired state | Partially earned | Deepen event semantics while keeping the agent bounded |
 | Batch host orchestration | One bounded batch exposure-policy envelope now lands as an auditable parent operation with host-scoped child outcomes across controller, CLI, and Web | Phase 0 baseline landed | Keep broader orchestration on the same audit model instead of inventing a second path |
@@ -97,7 +97,7 @@ It now continues with bounded enablement:
 
 | Scheme C 关注点 | 当前仓库真相 | 推进分类 | 对 Milestone 3 的含义 |
 | --- | --- | --- | --- |
-| Consumer gateway boundary | 当前还没有独立 gateway app 或 service，但 controller 已经开始提供 gateway-ready 的 `/api/controller` consumer boundary，并继续兼容旧直连路由；`/consumer-boundary-decision-pack` 也已经明确说明这条边界为什么现在仍应保持内嵌 | Phase 0 baseline 已落地 | 下一焦点应该转向独立部署边界证据与更广第二目标策略，而不是继续做路由外壳工作 |
+| Consumer gateway boundary | 当前还没有独立 gateway app 或 service，但 controller 已经开始提供 gateway-ready 的 `/api/controller` consumer boundary，并继续兼容旧直连路由；`/consumer-boundary-decision-pack` 已明确说明这条边界为什么现在仍应保持内嵌，`/deployment-boundary-decision-pack` 也已明确说明为什么独立部署复核仍应保持在 hold | Phase 0 baseline 已落地 | 下一焦点应该转向更聚焦的第二目标策略，而不是继续做路由外壳工作 |
 | Controller / policy / event / audit 分层 | `controller-read-model`、`controller-domain-service`、`/event-audit-index` 与 persistence adapter 已经抽出第一批 seam，虽然 transport 与 storage 仍然集中太多职责 | Phase 0 baseline 已落地 | 下一焦点应该转向显式 audit-review owner，再讨论部署拆分 |
 | 一等远端 agent | Agent 已提供 `/health`、`/runtime-state`、`/apply`、`/snapshot`、`/rollback`，controller 也已接入 live sync | 部分达成 | 在保持 agent 有边界的前提下继续增强事件语义 |
 | 批量主机编排 | 一个有边界的 batch exposure-policy envelope 现在已经落地：controller、CLI 与 Web 都能围绕同一个 parent operation 与 host-scoped child outcome 复核结果 | Phase 0 baseline 已落地 | 继续把更广的 orchestration 收敛在同一套 audit model 上，而不是长出第二条路径 |
