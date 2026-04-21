@@ -320,7 +320,7 @@ flowchart LR
 - Happy path: CLI accepts `PORTMANAGER_CONSUMER_BASE_URL` and reaches prefixed routes.
 - Regression: generated contract verification still passes after the new OpenAPI server base is documented.
 
-- [ ] **Unit 57: Audit And Event Boundary Decision Pack**
+- [x] **Unit 57: Audit And Event Boundary Decision Pack**
 
 **Goal:** Separate replay transport, indexed audit review, and operation-evidence composition behind one explicit audit-review boundary so later service-split or gateway-proxy decisions have a credible owner.
 

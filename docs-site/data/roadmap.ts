@@ -148,8 +148,8 @@ export const roadmapDeveloperProgress = {
     zh: '开发进度'
   },
   lede: {
-    en: 'This page now exposes three layers at once: the accepted Milestone 1 public slice, the still-mandatory Milestone 2 confidence guardrail, and the active Milestone 3 `Phase 0 enablement` lane. Current repo truth is no longer “Toward C someday” and no longer “Milestone 2 helper plumbing first.” Current repo truth is evidence-first progression: keep the same accepted live slice honest through review helpers and public counters, then extend the already landed Units 51 through 56 into Unit 57 audit/event boundary decisions, Unit 58 target-profile abstraction rules, and Unit 59 persistence promotion decision work. Exact live counters stay on this development-progress page and the tracked confidence artifact.',
-    zh: '这个页面现在同时暴露三层真实状态：已经完成验收的 Milestone 1 公共切片、仍然必须保持的 Milestone 2 confidence guardrail，以及已经进入执行中的 Milestone 3 `Phase 0 enablement` 主线。当前仓库真相已经不再是“Toward C 以后再说”，也不再是“先补 Milestone 2 helper 脚手架”；当前真相是 evidence-first 递进：继续用 review helper 与公开计数保护同一条 accepted live slice，再把已经落地的 Unit 51 到 Unit 56 推进到 Unit 57 audit/event boundary 决策、Unit 58 target-profile abstraction rule，以及 Unit 59 persistence promotion decision 工作。精确实时计数继续留在这个 development-progress 页面与被跟踪 confidence artifact 上。'
+    en: 'This page now exposes three layers at once: the accepted Milestone 1 public slice, the still-mandatory Milestone 2 confidence guardrail, and the active Milestone 3 `Phase 0 enablement` lane. Current repo truth is no longer “Toward C someday” and no longer “Milestone 2 helper plumbing first.” Current repo truth is evidence-first progression: keep the same accepted live slice honest through review helpers and public counters, then extend the already landed Units 51 through 57 toward Unit 58 target-profile abstraction rules and Unit 59 persistence promotion decision work. Exact live counters stay on this development-progress page and the tracked confidence artifact.',
+    zh: '这个页面现在同时暴露三层真实状态：已经完成验收的 Milestone 1 公共切片、仍然必须保持的 Milestone 2 confidence guardrail，以及已经进入执行中的 Milestone 3 `Phase 0 enablement` 主线。当前仓库真相已经不再是“Toward C 以后再说”，也不再是“先补 Milestone 2 helper 脚手架”；当前真相是 evidence-first 递进：继续用 review helper 与公开计数保护同一条 accepted live slice，再把已经落地的 Unit 51 到 Unit 57 推进到 Unit 58 target-profile abstraction rule 与 Unit 59 persistence promotion decision 工作。精确实时计数继续留在这个 development-progress 页面与被跟踪 confidence artifact 上。'
   },
   buckets: [
     {
@@ -169,8 +169,8 @@ export const roadmapDeveloperProgress = {
           'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
           'Configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and publishes explicit succeeded remote redundancy state across API, CLI, web, and dedicated reliability proof.',
           'Remote-backup replay is now durable in repo: one proof replays local-only, configured-success, and configured-failure required backups on the same live agent-backed slice across API, CLI, Web backup views, and agent runtime.',
-          'Milestone 3 Units 51 through 56 are now real: controller seam extraction baseline, bounded batch exposure-policy envelope, explicit `/event-audit-index` and `/persistence-readiness` generated contracts, shared CLI/Web review parity, a SQLite-backed persistence adapter that measures PostgreSQL readiness from live store counts, and a compatibility-safe `/api/controller` consumer boundary all landed without changing the accepted evidence model.',
-          'The active plan now also names the concrete next queue for developers: Unit 57 audit/event boundary decisions, Unit 58 target-profile abstraction rules, and Unit 59 persistence promotion decision work.',
+          'Milestone 3 Units 51 through 57 are now real: controller seam extraction baseline, bounded batch exposure-policy envelope, explicit `/event-audit-index` and `/persistence-readiness` generated contracts, shared CLI/Web review parity, a SQLite-backed persistence adapter that measures PostgreSQL readiness from live store counts, a compatibility-safe `/api/controller` consumer boundary, and one explicit `audit-review-service` owner behind replay plus indexed review all landed without changing the accepted evidence model.',
+          'The active plan now also names the concrete next queue for developers: Unit 58 target-profile abstraction rules and Unit 59 persistence promotion decision work.',
           'Deep compare now also confirms what still does not exist: no gateway app, no standalone event/audit service, no PostgreSQL default-store path, and no broader target abstraction.'
         ],
         zh: [
@@ -182,8 +182,8 @@ export const roadmapDeveloperProgress = {
           'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
           '当 GitHub backup 已配置时，controller backup bundle 现在会通过 GitHub Contents API 上传，并在 API、CLI、web 与专门的可靠性证明里显式暴露远端冗余成功状态。',
           'repo 内已经落地可重复执行的 remote-backup replay：同一条 live agent-backed 切片现在会重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据保持一致。',
-          'Milestone 3 的 Unit 51 到 Unit 56 现在都已真实落地：controller seam extraction baseline、bounded batch exposure-policy envelope、显式 `/event-audit-index` 与 `/persistence-readiness` 生成契约、共享 CLI/Web 复核一致性、会从真实 store 计数衡量 PostgreSQL readiness 的 SQLite-backed persistence adapter，以及兼容旧路由的 `/api/controller` consumer boundary 都已经建立，而且没有改动已验收 evidence model。',
-          '当前实现地图也已经给开发者排好了下一批具体工作：Unit 57 audit/event boundary 决策、Unit 58 target-profile abstraction rule，以及 Unit 59 persistence promotion decision。',
+          'Milestone 3 的 Unit 51 到 Unit 57 现在都已真实落地：controller seam extraction baseline、bounded batch exposure-policy envelope、显式 `/event-audit-index` 与 `/persistence-readiness` 生成契约、共享 CLI/Web 复核一致性、会从真实 store 计数衡量 PostgreSQL readiness 的 SQLite-backed persistence adapter、兼容旧路由的 `/api/controller` consumer boundary，以及统一接管 replay 与 indexed review 查询的 `audit-review-service` owner 都已经建立，而且没有改动已验收 evidence model。',
+          '当前实现地图也已经给开发者排好了下一批具体工作：Unit 58 target-profile abstraction rule，以及 Unit 59 persistence promotion decision。',
           '深度对比现在也已经明确当前尚未存在的东西：没有 gateway app、没有独立的 event/audit service、没有 PostgreSQL 默认状态库路径，也没有更广目标平台抽象。'
         ]
       }
@@ -199,14 +199,14 @@ export const roadmapDeveloperProgress = {
         en: [
           'Milestone 2 remains the guardrail lane, but Milestone 3 `Phase 0 enablement` is now the next execution phase.',
           'Current repo work has shifted from helper-access closure to architecture enablement on top of a protected evidence model.',
-          'Indexed event/audit review, persistence-readiness reporting, and the compatibility-safe `/api/controller` consumer boundary are now all landed, so the remaining gap is standalone audit/event boundary work, target-profile abstraction, and persistence promotion decisions.',
+          'Indexed event/audit review, explicit audit-review ownership, persistence-readiness reporting, and the compatibility-safe `/api/controller` consumer boundary are now all landed, so the remaining gap is target-profile abstraction, persistence promotion decisions, and any later standalone deployment split.',
           'Roadmap, milestone docs, product spec, architecture doc, and root progress docs now all publish the same Milestone 3 gap map and next direction.',
           'Mainline evidence collection still keeps `pnpm acceptance:verify` on PRs while `push main`, `workflow_dispatch`, and the daily schedule run `pnpm milestone:verify:confidence`, restore/save the confidence history bundle, upload the bundle artifact, and publish the readiness summary for developers.'
         ],
         zh: [
           'Milestone 2 现在仍然是 guardrail 主线，但 Milestone 3 `Phase 0 enablement` 已经成为下一阶段。',
           '当前仓库工作已经从 helper 访问闭环，转向建立在受保护 evidence model 之上的架构 enablement。',
-          '索引化 event/audit review、persistence-readiness reporting，以及兼容旧路由的 `/api/controller` consumer boundary 现在都已经落地，所以剩余缺口转成独立 audit/event boundary 工作、target-profile abstraction 与 persistence promotion 决策。',
+          '索引化 event/audit review、显式 audit-review owner、persistence-readiness reporting，以及兼容旧路由的 `/api/controller` consumer boundary 现在都已经落地，所以剩余缺口转成 target-profile abstraction、persistence promotion 决策，以及更后置的独立部署边界。',
           'roadmap、里程碑文档、产品规格、架构文档与 root progress docs 现在都已经发布同一份 Milestone 3 gap map 与下一步方向。',
           'mainline evidence collection 现在仍然会把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 路径上运行 `pnpm milestone:verify:confidence`、恢复并保存 confidence history bundle、上传 bundle artifact，并向开发者发布 readiness summary。'
         ]
@@ -225,7 +225,7 @@ export const roadmapDeveloperProgress = {
           'Run `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs and use `pnpm milestone:fetch:review-pack` when the current CI run is the first question; Milestone 3 does not replace that review chain.',
           'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while Milestone 3 work begins.',
           'Use the new requirements/plan pair as the current implementation map: `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.',
-          'Units 51 through 56 are now landed on that map, and Units 57 through 59 are the queued next step: audit/event boundary decisions, target-profile abstraction rules, and persistence promotion decision work.',
+          'Units 51 through 57 are now landed on that map, and Units 58 through 59 are the queued next step: target-profile abstraction rules and persistence promotion decision work.',
           'Protect the lighter Unit 0 branch gate while the heavier confidence routine keeps collecting evidence.',
           'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.'
         ],
@@ -234,7 +234,7 @@ export const roadmapDeveloperProgress = {
           '在主线出现已完成 run 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack`，Milestone 3 不会替代这条复核链路。',
           '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，同时 Milestone 3 开始推进。',
           '把新的 requirements/plan 组合作为当前实现地图：`docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`。',
-          'Unit 51 到 Unit 56 现在都已落地，而 Unit 57 到 Unit 59 则是当前排队的下一步：audit/event boundary 决策、target-profile abstraction rule，以及 persistence promotion decision。',
+          'Unit 51 到 Unit 57 现在都已落地，而 Unit 58 到 Unit 59 则是当前排队的下一步：target-profile abstraction rule 与 persistence promotion decision。',
           '在更重的 confidence routine 继续收集证据时，保住更轻的 Unit 0 分支 gate 不被重新定义。',
           '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。'
         ]
@@ -426,12 +426,12 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       zh: 'Milestone 3 之所以现在可以开始，只是因为仓库已经挣到了可信进入信号。它的起点仍然应该是 seam 与有边界契约，而不是过早的拓扑表演。'
     },
     productOutcomes: {
-      en: ['A gateway-ready consumer boundary with explicit future split criteria.', 'A standalone audit/event boundary decision pack on top of the landed review surfaces.', 'An explicit path to later platform expansion through target-profile and persistence-promotion rules.'],
-      zh: ['一个带未来 split criteria 的 gateway-ready consumer boundary。', '建立在已落地 review surface 之上的独立 audit/event boundary 决策包。', '通过 target-profile 与 persistence-promotion 规则，为后续平台扩展建立显式路径。']
+      en: ['A gateway-ready consumer boundary with explicit future split criteria.', 'A landed audit-review boundary on top of the replay and indexed review surfaces.', 'An explicit path to later platform expansion through target-profile and persistence-promotion rules.'],
+      zh: ['一个带未来 split criteria 的 gateway-ready consumer boundary。', '一个已经落地、建立在 replay 与 indexed review surface 之上的 audit-review boundary。', '通过 target-profile 与 persistence-promotion 规则，为后续平台扩展建立显式路径。']
     },
     engineeringWork: {
-      en: ['Audit-review service extraction behind `/events` and `/event-audit-index`.', 'Target-profile registry for the locked Ubuntu 24.04 + systemd + Tailscale assumption.', 'Persistence promotion decision work and continued CLI/Web review parity on top of the landed bounded batch envelope.'],
-      zh: ['在 `/events` 与 `/event-audit-index` 后方抽出 audit-review service。', '为锁定的 Ubuntu 24.04 + systemd + Tailscale 假设建立 target-profile registry。', '在已落地的 bounded batch envelope 之上推进 persistence promotion 决策与持续的 CLI/Web 复核一致性。']
+      en: ['Keep the landed audit-review service boundary stable behind `/events`, `/operations/events`, and `/event-audit-index`.', 'Target-profile registry for the locked Ubuntu 24.04 + systemd + Tailscale assumption.', 'Persistence promotion decision work and continued CLI/Web review parity on top of the landed bounded batch envelope.'],
+      zh: ['继续把已经落地的 audit-review service boundary 稳定保持在 `/events`、`/operations/events` 与 `/event-audit-index` 后方。', '为锁定的 Ubuntu 24.04 + systemd + Tailscale 假设建立 target-profile registry。', '在已落地的 bounded batch envelope 之上推进 persistence promotion 决策与持续的 CLI/Web 复核一致性。']
     },
     entryCriteria: {
       en: ['Milestone 1 slice is accepted.', 'Milestone 2 confidence is promotion-ready and still guarded by review helpers.', 'Minimal agent-service migration is already complete.'],
@@ -448,6 +448,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Controller transport now delegates baseline host-detail composition and host/rule/policy orchestration through explicit `controller-read-model` and `controller-domain-service` seams while preserving the current HTTP contract and acceptance evidence.',
         'A bounded batch exposure-policy envelope now lands as one auditable parent operation with host-scoped child outcomes across controller, CLI, and Web without introducing a fake fleet engine.',
         'Controller now also exposes `/event-audit-index` and `/persistence-readiness` as generated contracts, and CLI plus Web consume those same review/readiness surfaces without introducing a second evidence model.',
+        'Replay query rules, indexed audit review composition, and linkage for batch, diagnostics, backup, and rollback evidence now live behind one explicit `audit-review-service` owner while legacy and consumer-prefixed routes stay compatible.',
         'Controller store now also runs behind a SQLite-backed persistence adapter seam that reports measurable PostgreSQL readiness pressure without changing the default store.',
         'Controller now also serves `/api/controller/*` as a compatibility-safe consumer boundary, Web preserves prefixed base URLs, and CLI accepts `PORTMANAGER_CONSUMER_BASE_URL` while legacy direct routes stay valid.',
         'Current docs still publish the remaining gap map honestly: no gateway app, no standalone event/audit service, no PostgreSQL default-store path, and no broader target abstraction yet.'
@@ -458,6 +459,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Controller transport 现在已经通过显式的 `controller-read-model` 与 `controller-domain-service` seam 委托 host detail 组合与 host/rule/policy 编排，同时保持现有 HTTP 契约与验收证据不变。',
         '一个有边界的 batch exposure-policy envelope 现在已经落地：controller、CLI 与 Web 都可以围绕同一个 parent operation 与 host-scoped child outcome 复核批量结果，而没有引入伪 fleet engine。',
         'controller 现在还额外把 `/event-audit-index` 与 `/persistence-readiness` 作为生成契约公开，CLI 与 Web 都在消费同一份 review/readiness surface，同时没有引入第二套 evidence model。',
+        'replay 查询规则、indexed audit review 组合，以及 batch、diagnostics、backup、rollback 证据链接现在都已经收拢到显式的 `audit-review-service` owner 后面，同时 legacy 与 consumer-prefixed 路由兼容性保持不变。',
         'controller store 现在也已经运行在 SQLite-backed persistence adapter seam 后面，会在不改变默认状态库的前提下报告可度量的 PostgreSQL readiness pressure。',
         'controller 现在还会把 `/api/controller/*` 作为兼容旧路由的 consumer boundary 公开出来；Web 已经保持 prefix base URL 不丢失，CLI 也已经支持 `PORTMANAGER_CONSUMER_BASE_URL`。',
         '当前文档仍然诚实公开剩余缺口地图：还没有 gateway app、没有独立的 event/audit service、没有 PostgreSQL 默认状态库路径，也没有更广目标平台抽象。'
@@ -466,25 +468,25 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     blockingGaps: {
       en: [
         'The `/api/controller` consumer boundary still lives inside the controller process; there is still no standalone gateway app or deployment boundary.',
-        'Indexed review and persistence reporting now have explicit contract surfaces, but standalone audit/event ownership and a real migration decision surface are still unfinished.',
+        'Indexed review now has explicit audit-review ownership inside controller and persistence reporting has explicit contract surfaces, but a real migration decision surface and any later standalone deployment split are still unfinished.',
         'Only one locked target profile is credible today; broader orchestration and second-target abstractions are still missing.'
       ],
       zh: [
         '`/api/controller` consumer boundary 目前仍然承载在 controller 进程内部；仓库依然没有独立 gateway app 或部署边界。',
-        'indexed review 与 persistence reporting 现在已经有显式合同面，但独立 audit/event owner 与真实 migration decision surface 仍未完成。',
+        'indexed review 现在已经在 controller 内拥有显式 audit-review owner，persistence reporting 也已有显式合同面，但真实 migration decision surface 与更后置的独立部署拆分仍未完成。',
         '当前只有一个被锁定的 target profile 是可信的；更广的 orchestration 与第二目标抽象仍然缺失。'
       ]
     },
     developerFocus: {
       en: [
-        'Use `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` as the active implementation map; Units 51 through 56 are landed and Units 57 through 59 are now queued on that path.',
-        'Move next to Unit 57 audit/event boundary decisions, Unit 58 target-profile abstraction rules, and Unit 59 persistence promotion decision work instead of reopening routing split or already-landed persistence seams.',
+        'Use `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` as the active implementation map; Units 51 through 57 are landed and Units 58 through 59 are now queued on that path.',
+        'Move next to Unit 58 target-profile abstraction rules and Unit 59 persistence promotion decision work instead of reopening routing split, replay ownership, or already-landed persistence seams.',
         'Extend Milestone 3 on the same evidence model: keep the landed batch envelope, generated review/readiness contracts, and persistence-readiness report auditable while the next boundary decisions are made.',
         'Keep Milestone 2 review helpers and public progress counters active while Milestone 3 work lands.'
       ],
       zh: [
-        '把 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 当作当前实现地图；其中 Unit 51 到 Unit 56 已经落地，而 Unit 57 到 Unit 59 现在已经排进下一步。',
-        '下一步转向 Unit 57 audit/event boundary 决策、Unit 58 target-profile abstraction rule，以及 Unit 59 persistence promotion decision，而不是重新把 controller transport 堆回去、重做 routing split，或重复补已经落地的 persistence seam。',
+        '把 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 当作当前实现地图；其中 Unit 51 到 Unit 57 已经落地，而 Unit 58 到 Unit 59 现在已经排进下一步。',
+        '下一步转向 Unit 58 target-profile abstraction rule 与 Unit 59 persistence promotion decision，而不是重新把 controller transport 堆回去、重做 routing split、重做 replay owner，或重复补已经落地的 persistence seam。',
         '继续在同一套 evidence model 上扩展 Milestone 3：保住已经落地的 batch envelope、生成后的 review/readiness contract 与 persistence-readiness report 可审计性，再推进下一层 boundary 决策。',
         '在 Milestone 3 落地时，继续让 Milestone 2 review helper 与公开 progress counter 保持为真相护栏。'
       ]

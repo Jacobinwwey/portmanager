@@ -80,7 +80,7 @@ Costs of Scheme C if started carelessly:
 Milestone 3 now continues from landed seams instead of restarting them:
 
 - keep the landed `/api/controller` consumer boundary stable while defining future split criteria
-- Unit 57: standalone audit/event boundary decisions on top of the current replay plus indexed review surfaces
+- Unit 57: complete. one explicit `audit-review-service` owner now governs the current replay plus indexed review surfaces without changing route contracts
 - Unit 58: explicit target-profile registry and target-abstraction rules before second-target claims
 - Unit 59: persistence promotion decision surface on top of measured readiness criteria
 - keep bounded batch work on the same evidence model instead of inventing a second orchestration path
