@@ -4,6 +4,7 @@ import path from 'node:path'
 
 import { createAgentClient } from './agent-client.ts'
 import { createControllerDomainService } from './controller-domain-service.ts'
+import { createEventAuditIndex } from './event-audit-index.ts'
 import type { ControllerEventBus } from './controller-events.ts'
 import { createControllerReadModel } from './controller-read-model.ts'
 import { closeHttpServer } from './http-server-lifecycle.ts'
@@ -154,6 +155,7 @@ export function createControllerServer(options: {
   const diagnosticsPrimitive = createLocalDiagnosticsPrimitive({ artifactRoot })
   const subscriptions = new Set<() => void>()
   const readModel = createControllerReadModel({ store })
+  const eventAuditIndex = createEventAuditIndex({ store, eventBus })
   const domainService = createControllerDomainService({
     store,
     agentClient,
@@ -644,6 +646,24 @@ export function createControllerServer(options: {
         .slice(0, limit)
 
       sendJson(response, 200, { items })
+      return
+    }
+
+    if (request.method === 'GET' && requestUrl.pathname === '/event-audit-index') {
+      const rawLimit = Number(requestUrl.searchParams.get('limit') ?? '20')
+      const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 20
+
+      sendJson(response, 200, {
+        items: eventAuditIndex.list({
+          operationId: requestUrl.searchParams.get('operationId') ?? undefined,
+          hostId: requestUrl.searchParams.get('hostId') ?? undefined,
+          parentOperationId: requestUrl.searchParams.get('parentOperationId') ?? undefined,
+          ruleId: requestUrl.searchParams.get('ruleId') ?? undefined,
+          state: requestUrl.searchParams.get('state') ?? undefined,
+          type: requestUrl.searchParams.get('type') ?? undefined,
+          limit
+        })
+      })
       return
     }
 

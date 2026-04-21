@@ -16,6 +16,7 @@ export type ControllerEventHandler = (event: ControllerEvent) => void
 
 export interface ControllerEventBus {
   publish(event: ControllerEvent): void
+  listAll(): ControllerEvent[]
   listRecent(limit?: number): ControllerEvent[]
   subscribe(handler: ControllerEventHandler): () => void
 }
@@ -35,6 +36,9 @@ export function createControllerEventBus(): ControllerEventBus {
       for (const handler of handlers) {
         handler(event)
       }
+    },
+    listAll() {
+      return [...history]
     },
     listRecent(limit = history.length) {
       return [...history].slice(-limit).reverse()

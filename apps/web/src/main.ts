@@ -32,6 +32,17 @@ export interface EventStreamEntry {
 }
 
 export type OperationEventContract = components['schemas']['OperationEvent']
+export interface EventAuditIndexEntry {
+  operation: OperationDetailContract
+  latestEvent: OperationEventContract | null
+  eventCount: number
+  firstEventAt?: string
+  lastEventAt?: string
+  latestDiagnostic?: OperationDetailContract
+  backup?: BackupSummary
+  rollbackPoint?: RollbackPoint
+  linkedArtifacts: string[]
+}
 type FetchLike = typeof fetch
 
 interface ControllerListEnvelope<T> {
@@ -72,6 +83,7 @@ export interface OperationInventoryEntry {
 
 export interface OperationsState {
   operations: OperationInventoryEntry[]
+  auditIndex: EventAuditIndexEntry[]
   selectedOperationId: string
   timeline: OperationEventContract[]
 }
@@ -103,6 +115,7 @@ export interface BackupsState {
 
 export interface ConsoleState {
   operations: OperationDetailContract[]
+  auditIndex: EventAuditIndexEntry[]
   selectedOperation: OperationDetailContract | null
   diagnostics: OperationDetailContract[]
   selectedDiagnostic: OperationDetailContract | null
@@ -323,6 +336,50 @@ function backupRemoteAction(backup: BackupSummary) {
 
 function requestSourceFromOperation(operation: OperationDetailContract) {
   return `${operation.initiator ?? 'controller'}/${operation.type}`
+}
+
+function selectAuditIndexEntry(entries: EventAuditIndexEntry[], operationId?: string) {
+  if (!entries.length) {
+    return null
+  }
+
+  if (!operationId) {
+    return entries[0] ?? null
+  }
+
+  return entries.find((entry) => entry.operation.id === operationId) ?? entries[0] ?? null
+}
+
+function renderAuditIndexList(entries: EventAuditIndexEntry[], key: string) {
+  return entries.length
+    ? h(
+        'ul',
+        { className: 'pm-list', key },
+        entries.map((entry) =>
+          h('li', { className: 'pm-list-item', key: entry.operation.id }, [
+            h('div', { key: 'line1' }, `${entry.operation.id} · ${entry.operation.type}`),
+            h(
+              'div',
+              { className: 'pm-microcopy', key: 'line2' },
+              `${entry.eventCount} events · ${shortTime(entry.lastEventAt)}`
+            ),
+            h(
+              'div',
+              { key: 'line3' },
+              entry.latestEvent?.summary ?? entry.operation.resultSummary ?? 'No indexed summary'
+            ),
+            h(
+              'div',
+              { className: 'pm-artifact', key: 'line4' },
+              entry.linkedArtifacts[0] ??
+                entry.latestDiagnostic?.snapshotResult?.pageTitle ??
+                'No linked audit artifact'
+            ),
+            h(StatusBadge, { key: 'badge', state: entry.operation.state })
+          ])
+        )
+      )
+    : emptyState('No indexed event and audit entries are available yet.', key)
 }
 
 function readControllerBaseUrl(container?: Element | null) {
@@ -1176,91 +1233,169 @@ export function createMockOverviewState(): OverviewState {
 }
 
 export function createMockOperationsState(): OperationsState {
+  const operations = [
+    {
+      operation: {
+        id: 'op_backup_required_001',
+        type: 'backup',
+        state: 'degraded',
+        initiator: 'web',
+        hostId: 'host_alpha',
+        startedAt: '2026-04-16T18:11:00.000Z',
+        finishedAt: '2026-04-16T18:12:00.000Z',
+        resultSummary: 'required GitHub backup is not configured',
+        backupId: 'backup_alpha_002',
+        rollbackPointId: 'rp_alpha_002',
+        eventStreamUrl: '/operations/events?operationId=op_backup_required_001'
+      },
+      requestSource: 'policy-runbook/backup-required',
+      linkedRuleId: 'rule_alpha_https',
+      linkedArtifacts: [
+        '/var/lib/portmanager/snapshots/op_snapshot_002-manifest.json',
+        '/var/lib/portmanager/rollback/rp_alpha_002-result.json',
+        '/var/lib/portmanager/snapshots/snapshot-op_diag_001.html'
+      ]
+    },
+    {
+      operation: {
+        id: 'op_diag_001',
+        type: 'diagnostics',
+        state: 'succeeded',
+        initiator: 'web',
+        hostId: 'host_alpha',
+        ruleId: 'rule_alpha_https',
+        startedAt: '2026-04-16T17:49:00.000Z',
+        finishedAt: '2026-04-16T17:52:00.000Z',
+        resultSummary: 'diagnostics confirmed https relay and refreshed host readiness evidence',
+        eventStreamUrl: '/operations/events?operationId=op_diag_001'
+      },
+      requestSource: 'host-detail/diagnostics',
+      linkedRuleId: 'rule_alpha_https',
+      linkedArtifacts: ['/var/lib/portmanager/snapshots/snapshot-op_diag_001.html']
+    },
+    {
+      operation: {
+        id: 'op_verify_001',
+        type: 'verify_rule',
+        state: 'degraded',
+        initiator: 'automation',
+        hostId: 'host_alpha',
+        ruleId: 'rule_alpha_https',
+        startedAt: '2026-04-16T18:08:00.000Z',
+        finishedAt: '2026-04-16T18:09:00.000Z',
+        resultSummary:
+          'drift detected: expected expected_hash_alpha, observed observed_hash_bravo, rollback inspection required',
+        eventStreamUrl: '/operations/events?operationId=op_verify_001'
+      },
+      requestSource: 'drift-watch/bridge-verify',
+      linkedRuleId: 'rule_alpha_https',
+      linkedArtifacts: ['/var/lib/portmanager/rollback/rp_alpha_001-result.json']
+    }
+  ] satisfies OperationInventoryEntry[]
+
+  const timeline = [
+    {
+      id: 'evt_010',
+      kind: 'operation_state_changed',
+      operationId: 'op_backup_required_001',
+      operationType: 'backup',
+      state: 'running',
+      level: 'info',
+      summary: 'backup operation entered running',
+      hostId: 'host_alpha',
+      emittedAt: '2026-04-16T18:11:10.000Z'
+    },
+    {
+      id: 'evt_011',
+      kind: 'operation_state_changed',
+      operationId: 'op_backup_required_001',
+      operationType: 'backup',
+      state: 'degraded',
+      level: 'warn',
+      summary: 'required GitHub backup is not configured',
+      hostId: 'host_alpha',
+      emittedAt: '2026-04-16T18:12:00.000Z'
+    }
+  ] satisfies OperationEventContract[]
+
   return {
-    operations: [
+    operations,
+    auditIndex: [
       {
-        operation: {
-          id: 'op_backup_required_001',
-          type: 'backup',
-          state: 'degraded',
-          initiator: 'web',
+        operation: operations[0].operation,
+        latestEvent: timeline[1] ?? null,
+        eventCount: 2,
+        firstEventAt: timeline[0]?.emittedAt,
+        lastEventAt: timeline[1]?.emittedAt,
+        latestDiagnostic: operations[1].operation,
+        backup: {
+          id: 'backup_alpha_002',
           hostId: 'host_alpha',
-          startedAt: '2026-04-16T18:11:00.000Z',
-          finishedAt: '2026-04-16T18:12:00.000Z',
-          resultSummary: 'required GitHub backup is not configured',
-          backupId: 'backup_alpha_002',
-          rollbackPointId: 'rp_alpha_002',
-          eventStreamUrl: '/operations/events?operationId=op_backup_required_001'
+          operationId: 'op_backup_required_001',
+          createdAt: '2026-04-16T18:11:20.000Z',
+          backupMode: 'required',
+          localStatus: 'succeeded',
+          githubStatus: 'not_configured',
+          manifestPath: '/var/lib/portmanager/snapshots/op_snapshot_002-manifest.json',
+          remoteTarget: 'github',
+          remoteConfigured: false,
+          remoteStatusSummary:
+            'GitHub backup missing; required-mode degradation stays active until remote backup is configured.',
+          remoteAction: 'Configure GitHub backup before rerunning required-mode mutations.'
         },
-        requestSource: 'policy-runbook/backup-required',
-        linkedRuleId: 'rule_alpha_https',
-        linkedArtifacts: [
-          '/var/lib/portmanager/snapshots/op_snapshot_002-manifest.json',
-          '/var/lib/portmanager/rollback/rp_alpha_002-result.json',
-          '/var/lib/portmanager/snapshots/snapshot-op_diag_001.html'
-        ]
+        rollbackPoint: {
+          id: 'rp_alpha_002',
+          hostId: 'host_alpha',
+          operationId: 'op_backup_required_001',
+          state: 'ready',
+          createdAt: '2026-04-16T18:11:20.000Z'
+        },
+        linkedArtifacts: operations[0].linkedArtifacts
       },
       {
-        operation: {
-          id: 'op_diag_001',
-          type: 'diagnostics',
+        operation: operations[1].operation,
+        latestEvent: {
+          id: 'evt_009',
+          kind: 'operation_state_changed',
+          operationId: 'op_diag_001',
+          operationType: 'diagnostics',
           state: 'succeeded',
-          initiator: 'web',
+          level: 'success',
+          summary: 'diagnostics confirmed https relay and refreshed host readiness evidence',
           hostId: 'host_alpha',
           ruleId: 'rule_alpha_https',
-          startedAt: '2026-04-16T17:49:00.000Z',
-          finishedAt: '2026-04-16T17:52:00.000Z',
-          resultSummary: 'diagnostics confirmed https relay and refreshed host readiness evidence',
-          eventStreamUrl: '/operations/events?operationId=op_diag_001'
+          emittedAt: '2026-04-16T17:52:00.000Z'
         },
-        requestSource: 'host-detail/diagnostics',
-        linkedRuleId: 'rule_alpha_https',
-        linkedArtifacts: ['/var/lib/portmanager/snapshots/snapshot-op_diag_001.html']
+        eventCount: 2,
+        firstEventAt: '2026-04-16T17:49:10.000Z',
+        lastEventAt: '2026-04-16T17:52:00.000Z',
+        latestDiagnostic: operations[1].operation,
+        linkedArtifacts: operations[1].linkedArtifacts
       },
       {
-        operation: {
-          id: 'op_verify_001',
-          type: 'verify_rule',
+        operation: operations[2].operation,
+        latestEvent: {
+          id: 'evt_008',
+          kind: 'operation_state_changed',
+          operationId: 'op_verify_001',
+          operationType: 'verify_rule',
           state: 'degraded',
-          initiator: 'automation',
+          level: 'warn',
+          summary:
+            'drift detected: expected expected_hash_alpha, observed observed_hash_bravo, rollback inspection required',
           hostId: 'host_alpha',
           ruleId: 'rule_alpha_https',
-          startedAt: '2026-04-16T18:08:00.000Z',
-          finishedAt: '2026-04-16T18:09:00.000Z',
-          resultSummary:
-            'drift detected: expected expected_hash_alpha, observed observed_hash_bravo, rollback inspection required',
-          eventStreamUrl: '/operations/events?operationId=op_verify_001'
+          emittedAt: '2026-04-16T18:09:00.000Z'
         },
-        requestSource: 'drift-watch/bridge-verify',
-        linkedRuleId: 'rule_alpha_https',
-        linkedArtifacts: ['/var/lib/portmanager/rollback/rp_alpha_001-result.json']
+        eventCount: 2,
+        firstEventAt: '2026-04-16T18:08:05.000Z',
+        lastEventAt: '2026-04-16T18:09:00.000Z',
+        latestDiagnostic: operations[1].operation,
+        linkedArtifacts: operations[2].linkedArtifacts
       }
     ],
     selectedOperationId: 'op_backup_required_001',
-    timeline: [
-      {
-        id: 'evt_010',
-        kind: 'operation_state_changed',
-        operationId: 'op_backup_required_001',
-        operationType: 'backup',
-        state: 'running',
-        level: 'info',
-        summary: 'backup operation entered running',
-        hostId: 'host_alpha',
-        emittedAt: '2026-04-16T18:11:10.000Z'
-      },
-      {
-        id: 'evt_011',
-        kind: 'operation_state_changed',
-        operationId: 'op_backup_required_001',
-        operationType: 'backup',
-        state: 'degraded',
-        level: 'warn',
-        summary: 'required GitHub backup is not configured',
-        hostId: 'host_alpha',
-        emittedAt: '2026-04-16T18:12:00.000Z'
-      }
-    ]
+    timeline
   }
 }
 
@@ -1320,6 +1455,7 @@ export function createMockConsoleState(): ConsoleState {
 
   return {
     operations: operationsState.operations.map((entry) => entry.operation),
+    auditIndex: operationsState.auditIndex,
     selectedOperation: operationsState.operations[0]?.operation ?? null,
     diagnostics: hostDetailState.diagnostics,
     selectedDiagnostic: hostDetailState.diagnostics[0] ?? null,
@@ -1348,6 +1484,16 @@ async function loadOperationDetails(
       })
     )
   )
+}
+
+async function loadEventAuditIndex(
+  baseUrl: string,
+  options: {
+    params?: Record<string, string | number | undefined>
+    fetchImpl?: FetchLike
+  } = {}
+) {
+  return fetchControllerList<EventAuditIndexEntry>(baseUrl, '/event-audit-index', options)
 }
 
 export async function loadHostDetailState(
@@ -1450,7 +1596,7 @@ export async function loadOperationsState(
   }
 ): Promise<OperationsState> {
   const eventLimit = options.eventLimit ?? 20
-  const [operationDetails, backups] = await Promise.all([
+  const [operationDetails, backups, auditIndex] = await Promise.all([
     loadOperationDetails(options.baseUrl, {
       params: {
         hostId: options.hostId,
@@ -1459,6 +1605,14 @@ export async function loadOperationsState(
       fetchImpl: options.fetchImpl
     }),
     fetchControllerList<BackupSummary>(options.baseUrl, '/backups', {
+      fetchImpl: options.fetchImpl
+    }),
+    loadEventAuditIndex(options.baseUrl, {
+      params: {
+        hostId: options.hostId,
+        ruleId: options.ruleId,
+        limit: eventLimit
+      },
       fetchImpl: options.fetchImpl
     })
   ])
@@ -1488,6 +1642,7 @@ export async function loadOperationsState(
         ...artifactPathsFromOperations([operation])
       ])
     })),
+    auditIndex,
     selectedOperationId: selectedOperation?.id ?? '',
     timeline
   }
@@ -1653,7 +1808,7 @@ export async function loadConsoleState(
   }
 ): Promise<ConsoleState> {
   const eventLimit = options.eventLimit ?? 20
-  const [operations, diagnostics, events] = await Promise.all([
+  const [operations, diagnostics, events, auditIndex] = await Promise.all([
     loadOperationDetails(options.baseUrl, {
       params: { hostId: options.hostId },
       fetchImpl: options.fetchImpl
@@ -1663,6 +1818,13 @@ export async function loadConsoleState(
       fetchImpl: options.fetchImpl
     }),
     fetchControllerList<OperationEventContract>(options.baseUrl, '/events', {
+      params: {
+        hostId: options.hostId,
+        limit: eventLimit
+      },
+      fetchImpl: options.fetchImpl
+    }),
+    loadEventAuditIndex(options.baseUrl, {
       params: {
         hostId: options.hostId,
         limit: eventLimit
@@ -1678,6 +1840,7 @@ export async function loadConsoleState(
 
   return {
     operations,
+    auditIndex,
     selectedOperation,
     diagnostics,
     selectedDiagnostic,
@@ -2649,6 +2812,14 @@ function OperationsMain(props: { state: OperationsState; selected: OperationInve
           )
         : emptyState('No timeline replay yet for selected operation.')
     ]),
+    h('section', { className: 'pm-card', key: 'audit-index' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Indexed audit review',
+        detail: `${props.state.auditIndex.length} indexed entries`
+      }),
+      renderAuditIndexList(props.state.auditIndex, 'operations-audit-index')
+    ]),
     h('section', { className: 'pm-card', key: 'initiator' }, [
       h(SectionHeading, {
         key: 'heading',
@@ -2714,6 +2885,10 @@ function OperationsMain(props: { state: OperationsState; selected: OperationInve
 
 function OperationsRail(props: { state: OperationsState; selected: OperationInventoryEntry | null }) {
   const childOperations = props.selected?.operation.childOperations ?? []
+  const selectedAuditEntry = selectAuditIndexEntry(
+    props.state.auditIndex,
+    props.selected?.operation.id
+  )
 
   return h('div', { className: 'pm-panel-stack' }, [
     h('section', { className: 'pm-card', key: 'selected' }, [
@@ -2752,6 +2927,37 @@ function OperationsRail(props: { state: OperationsState; selected: OperationInve
             kvRow('Latest Event', props.state.timeline[0]?.summary ?? 'No events')
           ])
         : emptyState('No replay path until one operation is selected.')
+    ]),
+    h('section', { className: 'pm-card', key: 'audit' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Selected audit evidence',
+        detail: selectedAuditEntry?.operation.id ?? 'no indexed selection'
+      }),
+      selectedAuditEntry
+        ? [
+            h('div', { className: 'pm-kv', key: 'kv' }, [
+              kvRow('Latest Event', selectedAuditEntry.latestEvent?.summary ?? 'No indexed event'),
+              kvRow('Event Count', String(selectedAuditEntry.eventCount)),
+              kvRow('First Seen', shortTime(selectedAuditEntry.firstEventAt)),
+              kvRow('Last Seen', shortTime(selectedAuditEntry.lastEventAt)),
+              kvRow('Diagnostic', selectedAuditEntry.latestDiagnostic?.id ?? 'n/a'),
+              kvRow('Backup', selectedAuditEntry.backup?.id ?? 'n/a'),
+              kvRow('Rollback', selectedAuditEntry.rollbackPoint?.id ?? 'n/a')
+            ]),
+            selectedAuditEntry.linkedArtifacts.length
+              ? h(
+                  'ul',
+                  { className: 'pm-list', key: 'list' },
+                  selectedAuditEntry.linkedArtifacts.map((artifact) =>
+                    h('li', { className: 'pm-list-item', key: artifact }, [
+                      h('div', { className: 'pm-artifact', key: 'artifact' }, artifact)
+                    ])
+                  )
+                )
+              : emptyState('No linked audit artifact published for selected indexed entry.', 'empty')
+          ]
+        : emptyState('No indexed audit evidence available yet.')
     ]),
     h('section', { className: 'pm-card', key: 'children' }, [
       h(SectionHeading, {
@@ -3154,6 +3360,14 @@ function ConsoleMain(props: { state: ConsoleState }) {
           )
         : emptyState('No controller events have been replayed yet.')
     ]),
+    h('section', { className: 'pm-card', key: 'audit-index' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Indexed event and audit review',
+        detail: `${props.state.auditIndex.length} indexed entries`
+      }),
+      renderAuditIndexList(props.state.auditIndex, 'console-audit-index')
+    ]),
     h('section', { className: 'pm-card', key: 'operations' }, [
       h(SectionHeading, {
         key: 'heading',
@@ -3196,6 +3410,11 @@ function ConsoleMain(props: { state: ConsoleState }) {
 }
 
 function ConsoleRail(props: { state: ConsoleState }) {
+  const selectedAuditEntry = selectAuditIndexEntry(
+    props.state.auditIndex,
+    props.state.selectedOperation?.id
+  )
+
   return h('div', { className: 'pm-panel-stack' }, [
     h('section', { className: 'pm-card', key: 'selected' }, [
       h(SectionHeading, {
@@ -3212,6 +3431,36 @@ function ConsoleRail(props: { state: ConsoleState }) {
             kvRow('Summary', props.state.selectedOperation.resultSummary ?? 'No summary')
           ])
         : emptyState('No operation selected for replay.')
+    ]),
+    h('section', { className: 'pm-card', key: 'audit' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Selected audit evidence',
+        detail: selectedAuditEntry?.operation.id ?? 'no indexed selection'
+      }),
+      selectedAuditEntry
+        ? [
+            h('div', { className: 'pm-kv', key: 'kv' }, [
+              kvRow('Latest Event', selectedAuditEntry.latestEvent?.summary ?? 'No indexed event'),
+              kvRow('Event Count', String(selectedAuditEntry.eventCount)),
+              kvRow('Operation State', h(StatusBadge, { state: selectedAuditEntry.operation.state })),
+              kvRow('Diagnostic', selectedAuditEntry.latestDiagnostic?.id ?? 'n/a'),
+              kvRow('Backup', selectedAuditEntry.backup?.id ?? 'n/a'),
+              kvRow('Rollback', selectedAuditEntry.rollbackPoint?.id ?? 'n/a')
+            ]),
+            selectedAuditEntry.linkedArtifacts.length
+              ? h(
+                  'ul',
+                  { className: 'pm-list', key: 'list' },
+                  selectedAuditEntry.linkedArtifacts.map((artifact) =>
+                    h('li', { className: 'pm-list-item', key: artifact }, [
+                      h('div', { className: 'pm-artifact', key: 'artifact' }, artifact)
+                    ])
+                  )
+                )
+              : emptyState('No linked audit artifact published for selected indexed entry.', 'empty')
+          ]
+        : emptyState('No indexed audit evidence available yet.')
     ]),
     h('section', { className: 'pm-card', key: 'diagnostics' }, [
       h(SectionHeading, {

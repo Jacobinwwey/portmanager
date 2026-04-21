@@ -172,7 +172,7 @@ flowchart LR
 - Edge case: one failed host keeps partial degradation explicit without hiding successful hosts.
 - Regression: existing single-host flows still behave unchanged.
 
-- [ ] **Unit 53: Event And Audit Indexing Surface**
+- [x] **Unit 53: Event And Audit Indexing Surface**
 
 **Goal:** Turn the current event stream and review artifacts into a stronger indexed surface that can later support gateway consumers and broader orchestration without raw-log archaeology.
 

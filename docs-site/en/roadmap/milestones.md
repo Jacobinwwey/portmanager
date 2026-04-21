@@ -165,10 +165,10 @@ Milestone 3 can now begin as a bounded execution phase because all of the follow
 
 | Scheme C expectation | Current verified state | Gap classification |
 | --- | --- | --- |
-| Gateway-ready consumer boundary | Web and CLI still call the controller directly over `REST + SSE` | Not started |
-| Explicit controller / policy / event / audit separation | `apps/controller/src/controller-server.ts` plus `apps/controller/src/operation-store.ts` still centralize most of that work | Not started |
+| Gateway-ready consumer boundary | Web and CLI still call the controller directly over `REST + SSE`, but the bounded batch envelope plus `/event-audit-index` now shape one cleaner gateway-ready contract surface | Phase 0 baseline landed |
+| Explicit controller / policy / event / audit separation | `controller-read-model`, `controller-domain-service`, and `/event-audit-index` now extract the first read/write seams, even though transport and persistence still centralize too much work | Phase 0 baseline landed |
 | First-class bounded remote agent | Live agent service boundary already exists with `/health`, `/runtime-state`, `/apply`, `/snapshot`, `/rollback` | Partially earned |
-| Batch host management | Current verified proof remains one host / one rule plus reliability replay | Not started |
+| Batch host management | One bounded batch exposure-policy envelope now lands as an auditable parent operation with host-scoped child outcomes across controller, CLI, and Web | Phase 0 baseline landed |
 | Persistence readiness beyond SQLite | SQLite remains the only real store | Not started |
 | Platform abstraction for additional targets | Ubuntu 24.04 + systemd + Tailscale remains the only credible target | Not started |
 
