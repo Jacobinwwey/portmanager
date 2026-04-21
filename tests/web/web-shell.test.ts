@@ -32,6 +32,7 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /Selected Host/)
   assert.match(html, /Effective Policy/)
   assert.match(html, /Persistence readiness/i)
+  assert.match(html, /review prep/i)
   assert.match(html, /Event Stream/)
   assert.match(html, /Overview/)
   assert.match(html, /Bridge Rules/)
@@ -326,45 +327,54 @@ test('overview loader keeps consumer boundary base path when building controller
       })
     }
 
-    if (url.pathname === '/api/controller/persistence-readiness') {
+    if (url.pathname === '/api/controller/persistence-decision-pack') {
       return new Response(
         JSON.stringify({
           backend: 'sqlite',
-          databasePath: '/var/lib/portmanager/controller.sqlite',
-          status: 'healthy',
           migrationTarget: 'postgresql',
-          summary: 'consumer boundary readiness is healthy',
-          recommendedAction: 'keep current store',
-          metrics: {
-            operationRows: {
-              current: 2,
-              monitor: 500,
-              migrationReady: 2000,
-              status: 'healthy'
-            },
-            diagnosticRows: {
-              current: 1,
-              monitor: 200,
-              migrationReady: 750,
-              status: 'healthy'
-            },
-            backupRows: {
-              current: 1,
-              monitor: 200,
-              migrationReady: 750,
-              status: 'healthy'
-            },
-            rollbackPointRows: {
-              current: 1,
-              monitor: 200,
-              migrationReady: 750,
-              status: 'healthy'
-            },
-            hostRows: {
-              current: 1,
-              monitor: 25,
-              migrationReady: 100,
-              status: 'healthy'
+          decisionState: 'hold',
+          reviewRequired: false,
+          summary: 'consumer boundary keeps SQLite active and no PostgreSQL review is required yet',
+          nextActions: ['keep SQLite active', 'continue tracking counters'],
+          triggerMetrics: [],
+          readiness: {
+            backend: 'sqlite',
+            databasePath: '/var/lib/portmanager/controller.sqlite',
+            status: 'healthy',
+            migrationTarget: 'postgresql',
+            summary: 'consumer boundary readiness is healthy',
+            recommendedAction: 'keep current store',
+            metrics: {
+              operationRows: {
+                current: 2,
+                monitor: 500,
+                migrationReady: 2000,
+                status: 'healthy'
+              },
+              diagnosticRows: {
+                current: 1,
+                monitor: 200,
+                migrationReady: 750,
+                status: 'healthy'
+              },
+              backupRows: {
+                current: 1,
+                monitor: 200,
+                migrationReady: 750,
+                status: 'healthy'
+              },
+              rollbackPointRows: {
+                current: 1,
+                monitor: 200,
+                migrationReady: 750,
+                status: 'healthy'
+              },
+              hostRows: {
+                current: 1,
+                monitor: 25,
+                migrationReady: 100,
+                status: 'healthy'
+              }
             }
           }
         }),
@@ -390,8 +400,9 @@ test('overview loader keeps consumer boundary base path when building controller
     fetchImpl
   })
 
-  assert.equal(state.persistenceReadiness.backend, 'sqlite')
+  assert.equal(state.persistenceDecisionPack.backend, 'sqlite')
+  assert.equal(state.persistenceDecisionPack.decisionState, 'hold')
   assert.equal(requestedPaths.every((pathname) => pathname.startsWith('/api/controller/')), true)
-  assert.equal(requestedPaths.includes('/api/controller/persistence-readiness'), true)
+  assert.equal(requestedPaths.includes('/api/controller/persistence-decision-pack'), true)
   assert.equal(requestedPaths.includes('/api/controller/hosts/host_alpha'), true)
 })

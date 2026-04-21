@@ -13,6 +13,7 @@ import { createLocalBackupPrimitive } from './local-backup-primitive.ts'
 import { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.ts'
 import type { OperationStore } from './operation-store.ts'
 import { createOperationRunner } from './operation-runner.ts'
+import { buildPersistenceDecisionPack } from './persistence-decision-pack.ts'
 import { defaultTargetProfileId, getTargetProfile } from './target-profile-registry.ts'
 
 export interface ControllerServer {
@@ -670,6 +671,11 @@ export function createControllerServer(options: {
 
     if (request.method === 'GET' && pathname === '/persistence-readiness') {
       sendJson(response, 200, store.getPersistenceReadiness())
+      return
+    }
+
+    if (request.method === 'GET' && pathname === '/persistence-decision-pack') {
+      sendJson(response, 200, buildPersistenceDecisionPack(store.getPersistenceReadiness()))
       return
     }
 

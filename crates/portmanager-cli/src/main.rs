@@ -140,6 +140,7 @@ enum OperationsSubcommand {
     AuditIndex(OperationsAuditIndexArgs),
     BatchApplyPolicy(OperationsBatchApplyPolicyArgs),
     List(OperationsListArgs),
+    PersistenceDecisionPack(OperationsPersistenceDecisionPackArgs),
     PersistenceReadiness(OperationsPersistenceReadinessArgs),
 }
 
@@ -527,6 +528,14 @@ struct OperationsPersistenceReadinessArgs {
 }
 
 #[derive(Args, Clone)]
+struct OperationsPersistenceDecisionPackArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
 struct OperationsBatchApplyPolicyArgs {
     #[arg(long = "host-id")]
     host_ids: Vec<String>,
@@ -697,6 +706,9 @@ async fn execute(cli: Cli) -> ExecutionResult {
                 run_operations_batch_apply_policy(args).await
             }
             OperationsSubcommand::List(args) => run_operations_list(args).await,
+            OperationsSubcommand::PersistenceDecisionPack(args) => {
+                run_operations_persistence_decision_pack(args).await
+            }
             OperationsSubcommand::PersistenceReadiness(args) => {
                 run_operations_persistence_readiness(args).await
             }
@@ -1315,6 +1327,25 @@ async fn run_operations_persistence_readiness(
     }
 }
 
+async fn run_operations_persistence_decision_pack(
+    args: OperationsPersistenceDecisionPackArgs,
+) -> ExecutionResult {
+    match fetch_persistence_decision_pack(&Client::new(), &args.controller_base_url).await {
+        Ok(pack) => {
+            if args.json {
+                ExecutionResult::success_json(&pack)
+            } else {
+                ExecutionResult::success_text(format_persistence_decision_pack_text(&pack))
+            }
+        }
+        Err(error) => json_or_text_error_flag(
+            args.json,
+            error,
+            "persistence decision pack fetch failed".to_string(),
+        ),
+    }
+}
+
 async fn run_operations_batch_apply_policy(
     args: OperationsBatchApplyPolicyArgs,
 ) -> ExecutionResult {
@@ -1803,6 +1834,62 @@ fn format_persistence_readiness_text(readiness: &Value) -> String {
         metrics["hostRows"]["monitor"].as_u64().unwrap_or_default(),
         metrics["hostRows"]["migrationReady"].as_u64().unwrap_or_default(),
         readiness["recommendedAction"].as_str().unwrap_or("no action guidance"),
+    )
+}
+
+fn format_persistence_decision_pack_text(pack: &Value) -> String {
+    let trigger_lines = pack["triggerMetrics"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|trigger| {
+            format!(
+                "- {} ({}) current {} monitor {} migration {} status {} :: {}",
+                trigger["key"].as_str().unwrap_or("unknown"),
+                trigger["label"].as_str().unwrap_or("unknown"),
+                trigger["current"].as_u64().unwrap_or_default(),
+                trigger["monitor"].as_u64().unwrap_or_default(),
+                trigger["migrationReady"].as_u64().unwrap_or_default(),
+                trigger["status"].as_str().unwrap_or("unknown"),
+                trigger["reason"].as_str().unwrap_or("no reason")
+            )
+        })
+        .collect::<Vec<_>>();
+
+    let action_lines = pack["nextActions"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|action| format!("- {}", action.as_str().unwrap_or("unknown")))
+        .collect::<Vec<_>>();
+
+    let trigger_block = if trigger_lines.is_empty() {
+        "Trigger Metrics:\n- none".to_string()
+    } else {
+        format!("Trigger Metrics:\n{}", trigger_lines.join("\n"))
+    };
+
+    let action_block = if action_lines.is_empty() {
+        "Next Actions:\n- none".to_string()
+    } else {
+        format!("Next Actions:\n{}", action_lines.join("\n"))
+    };
+
+    format!(
+        "Backend: {}\nMigration Target: {}\nDecision State: {}\nReview Required: {}\nSummary: {}\nReadiness Status: {}\nDatabase: {}\n{}\n{}",
+        pack["backend"].as_str().unwrap_or("unknown"),
+        pack["migrationTarget"].as_str().unwrap_or("unknown"),
+        pack["decisionState"].as_str().unwrap_or("unknown"),
+        if pack["reviewRequired"].as_bool().unwrap_or(false) {
+            "yes"
+        } else {
+            "no"
+        },
+        pack["summary"].as_str().unwrap_or("no summary"),
+        pack["readiness"]["status"].as_str().unwrap_or("unknown"),
+        pack["readiness"]["databasePath"].as_str().unwrap_or("unknown"),
+        action_block,
+        trigger_block
     )
 }
 
@@ -2486,6 +2573,17 @@ async fn fetch_persistence_readiness(
 ) -> Result<Value, JsonErrorOutput> {
     let url = format!(
         "{}/persistence-readiness",
+        controller_base_url.trim_end_matches('/')
+    );
+    request_json(client.get(url), None, None).await
+}
+
+async fn fetch_persistence_decision_pack(
+    client: &Client,
+    controller_base_url: &str,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!(
+        "{}/persistence-decision-pack",
         controller_base_url.trim_end_matches('/')
     );
     request_json(client.get(url), None, None).await

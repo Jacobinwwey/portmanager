@@ -1054,6 +1054,161 @@ fn operations_persistence_readiness_json_supports_consumer_boundary_env_and_pref
 }
 
 #[test]
+fn operations_persistence_decision_pack_text_surfaces_review_state_and_triggers() {
+    let server = MockHttpServer::start(vec![(
+        "/persistence-decision-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "backend": "sqlite",
+                "migrationTarget": "postgresql",
+                "decisionState": "review_required",
+                "reviewRequired": true,
+                "summary": "SQLite stays active, but PostgreSQL cutover review must begin now.",
+                "nextActions": [
+                    "Open PostgreSQL cutover review before widening orchestration breadth.",
+                    "Keep SQLite active until review approves migration."
+                ],
+                "triggerMetrics": [
+                    {
+                        "key": "operationRows",
+                        "label": "Operations",
+                        "current": 2200,
+                        "monitor": 500,
+                        "migrationReady": 2000,
+                        "status": "migration_ready",
+                        "reason": "Operations crossed migration-ready threshold; PostgreSQL review required."
+                    }
+                ],
+                "readiness": {
+                    "backend": "sqlite",
+                    "databasePath": "/var/lib/portmanager/controller.sqlite",
+                    "status": "migration_ready",
+                    "migrationTarget": "postgresql",
+                    "summary": "raw readiness summary",
+                    "recommendedAction": "open review",
+                    "metrics": {
+                        "operationRows": {
+                            "current": 2200,
+                            "monitor": 500,
+                            "migrationReady": 2000,
+                            "status": "migration_ready"
+                        },
+                        "diagnosticRows": {
+                            "current": 12,
+                            "monitor": 200,
+                            "migrationReady": 750,
+                            "status": "healthy"
+                        },
+                        "backupRows": {
+                            "current": 8,
+                            "monitor": 200,
+                            "migrationReady": 750,
+                            "status": "healthy"
+                        },
+                        "rollbackPointRows": {
+                            "current": 4,
+                            "monitor": 200,
+                            "migrationReady": 750,
+                            "status": "healthy"
+                        },
+                        "hostRows": {
+                            "current": 3,
+                            "monitor": 25,
+                            "migrationReady": 100,
+                            "status": "healthy"
+                        }
+                    }
+                }
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["operations", "persistence-decision-pack"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("Decision State: review_required"));
+    assert!(stdout.contains("Review Required: yes"));
+    assert!(stdout.contains("operationRows"));
+    assert!(stdout.contains("Open PostgreSQL cutover review"));
+}
+
+#[test]
+fn operations_persistence_decision_pack_json_supports_consumer_boundary_env_and_prefix() {
+    let server = MockHttpServer::start(vec![(
+        "/api/controller/persistence-decision-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "backend": "sqlite",
+                "migrationTarget": "postgresql",
+                "decisionState": "hold",
+                "reviewRequired": false,
+                "summary": "SQLite stays active and no review is required yet.",
+                "nextActions": ["Keep SQLite active."],
+                "triggerMetrics": [],
+                "readiness": {
+                    "backend": "sqlite",
+                    "databasePath": "/var/lib/portmanager/controller.sqlite",
+                    "status": "healthy",
+                    "migrationTarget": "postgresql",
+                    "summary": "consumer boundary surface is alive",
+                    "recommendedAction": "keep the current controller store",
+                    "metrics": {
+                        "operationRows": {
+                            "current": 12,
+                            "monitor": 500,
+                            "migrationReady": 2000,
+                            "status": "healthy"
+                        },
+                        "diagnosticRows": {
+                            "current": 3,
+                            "monitor": 200,
+                            "migrationReady": 750,
+                            "status": "healthy"
+                        },
+                        "backupRows": {
+                            "current": 2,
+                            "monitor": 200,
+                            "migrationReady": 750,
+                            "status": "healthy"
+                        },
+                        "rollbackPointRows": {
+                            "current": 2,
+                            "monitor": 200,
+                            "migrationReady": 750,
+                            "status": "healthy"
+                        },
+                        "hostRows": {
+                            "current": 1,
+                            "monitor": 25,
+                            "migrationReady": 100,
+                            "status": "healthy"
+                        }
+                    }
+                }
+            }),
+        }],
+    )]);
+
+    let consumer_base_url = format!("{}/api/controller", server.base_url());
+    let output = run_portmanager_with_env(
+        &["operations", "persistence-decision-pack", "--json"],
+        &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+    assert_eq!(server.hits_for("/api/controller/persistence-decision-pack"), 1);
+}
+
+#[test]
 fn operations_audit_index_text_surfaces_linked_evidence() {
     let server = MockHttpServer::start(vec![(
         "/event-audit-index?limit=2&hostId=host_alpha&ruleId=rule_alpha_https",

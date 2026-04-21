@@ -853,6 +853,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/persistence-decision-pack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get controller persistence promotion decision pack */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Persistence promotion decision detail */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PersistenceDecisionPack"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/persistence-readiness": {
         parameters: {
             query?: never;
@@ -1212,6 +1248,31 @@ export interface components {
             /** @enum {string} */
             type: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "batch_apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
         };
+        PersistenceDecisionPack: {
+            /** @enum {string} */
+            backend: "sqlite";
+            decisionState: components["schemas"]["PersistenceDecisionState"];
+            /** @enum {string} */
+            migrationTarget: "postgresql";
+            nextActions: string[];
+            readiness: components["schemas"]["PersistenceReadiness"];
+            reviewRequired: boolean;
+            summary: string;
+            triggerMetrics: components["schemas"]["PersistenceDecisionTriggerMetric"][];
+        };
+        /** @enum {string} */
+        PersistenceDecisionState: "hold" | "prepare_review" | "review_required";
+        PersistenceDecisionTriggerMetric: {
+            current: number;
+            /** @enum {string} */
+            key: "operationRows" | "diagnosticRows" | "backupRows" | "rollbackPointRows" | "hostRows";
+            label: string;
+            migrationReady: number;
+            monitor: number;
+            reason: string;
+            /** @enum {string} */
+            status: "healthy" | "monitor" | "migration_ready";
+        };
         PersistenceReadiness: {
             /** @enum {string} */
             backend: "sqlite";
@@ -1357,6 +1418,9 @@ export type OperationAccepted = components['schemas']['OperationAccepted'];
 export type OperationDetail = components['schemas']['OperationDetail'];
 export type OperationEvent = components['schemas']['OperationEvent'];
 export type OperationSummary = components['schemas']['OperationSummary'];
+export type PersistenceDecisionPack = components['schemas']['PersistenceDecisionPack'];
+export type PersistenceDecisionState = components['schemas']['PersistenceDecisionState'];
+export type PersistenceDecisionTriggerMetric = components['schemas']['PersistenceDecisionTriggerMetric'];
 export type PersistenceReadiness = components['schemas']['PersistenceReadiness'];
 export type PersistenceReadinessMetric = components['schemas']['PersistenceReadinessMetric'];
 export type PersistenceReadinessMetrics = components['schemas']['PersistenceReadinessMetrics'];

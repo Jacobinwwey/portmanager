@@ -390,7 +390,7 @@ flowchart LR
 - Edge case: unknown target profile ids are rejected or marked unsupported explicitly.
 - Regression: bootstrap, apply, diagnostics, and rollback flows stay unchanged for the locked profile.
 
-- [ ] **Unit 59: Persistence Promotion Decision Surface**
+- [x] **Unit 59: Persistence Promotion Decision Surface**
 
 **Goal:** Turn existing persistence-readiness counters into an explicit migration decision surface that tells developers when PostgreSQL cutover review must begin, without enabling PostgreSQL yet.
 

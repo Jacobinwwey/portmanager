@@ -57,13 +57,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /Phase 0 enablement/)
   assert.match(milestoneConfidenceComponent, /Unit 57 audit\/event boundary/)
   assert.match(milestoneConfidenceComponent, /Unit 58 target-profile abstraction/)
+  assert.match(milestoneConfidenceComponent, /persistence-decision-pack/)
   assert.match(
     milestoneConfidenceComponent,
     /\.portmanager\/reports\/milestone-wording-review\.md/
   )
-  assert.match(roadmapData, /Units 51 through 58/)
-  assert.match(roadmapData, /Unit 59 is the queued next step/)
-  assert.match(roadmapData, /persistence promotion decision/)
+  assert.match(roadmapData, /Units 51 through 59/)
+  assert.match(roadmapData, /later standalone split criteria/)
+  assert.match(roadmapData, /persistence-decision-pack/)
   assert.match(milestoneConfidenceComponent, /--skip-sync/)
   assert.match(milestoneConfidenceComponent, /Public claim class/)
   assert.match(milestoneConfidenceComponent, /Source surface status/)

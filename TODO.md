@@ -75,7 +75,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Milestone 3 Unit 56: land `/api/controller/*` as the compatibility-safe consumer boundary, preserve prefixed Web base URLs, and let CLI read `PORTMANAGER_CONSUMER_BASE_URL` without breaking older controller-base config.
 - [x] Milestone 3 Unit 57: extract `audit-review-service`, make `/events` and `/event-audit-index` share one boundary owner, and preserve batch parent/child evidence plus compatibility-safe consumer routes.
 - [x] Milestone 3 Unit 58: add an explicit target-profile registry for `ubuntu-24.04-systemd-tailscale`, publish it across controller, CLI, and Web, and reject unsupported second-target claims without broadening current support.
-- [ ] Milestone 3 Unit 59: promote `persistence-readiness` into a migration decision surface with explicit next actions while keeping SQLite as the active backend.
+- [x] Milestone 3 Unit 59: promote `persistence-readiness` into a migration decision surface with explicit next actions while keeping SQLite as the active backend.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.
@@ -85,7 +85,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
 - [x] Milestone 2 acceptance closure: add `pnpm milestone:fetch:review-pack` so developers can stage the uploaded current-run `milestone-confidence-bundle-*` into `.portmanager/reports/current-ci-review-pack/` with a local manifest instead of manual GitHub artifact browsing.
-- [ ] Next lane: keep Milestone 3 as bounded `Phase 0 enablement` while Milestone 2 review helpers remain the guardrail truth surface. Continue running `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, keep `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, `Source surface status`, the verification report, and the public development-progress page as the wording-truth bundle, and move the next implementation step from landed Units 51-58 into Unit 59 persistence promotion decision work from `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.
+- [ ] Next lane: keep Milestone 3 as bounded `Phase 0 enablement` while Milestone 2 review helpers remain the guardrail truth surface. Continue running `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, keep `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, `Source surface status`, the verification report, and the public development-progress page as the wording-truth bundle, and move the next implementation step from landed Units 51-59 toward later standalone split criteria and broader second-target policy work while keeping `/persistence-decision-pack`, the target-profile registry, and `/api/controller` stable.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -194,7 +194,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] 里程碑 3 Unit 56：把 `/api/controller/*` 落成兼容旧路由的 consumer boundary，保证 Web 的 prefix base URL 不丢失，并让 CLI 支持 `PORTMANAGER_CONSUMER_BASE_URL` 而不破坏旧 controller-base 配置。
 - [x] 里程碑 3 Unit 57：抽出 `audit-review-service`，让 `/events` 与 `/event-audit-index` 拥有同一个 boundary owner，并继续保住 batch parent/child 证据和 consumer route 兼容性。
 - [x] 里程碑 3 Unit 58：为 `ubuntu-24.04-systemd-tailscale` 建立显式 target-profile registry，在 controller、CLI 与 Web 中统一发布，并在不扩大当前支持范围的前提下拒绝不受支持的第二目标声明。
-- [ ] 里程碑 3 Unit 59：把 `persistence-readiness` 提升成带明确 next action 的 migration decision surface，同时继续把 SQLite 保持为当前 active backend。
+- [x] 里程碑 3 Unit 59：把 `persistence-readiness` 提升成带明确 next action 的 migration decision surface，同时继续把 SQLite 保持为当前 active backend。
 
 ### 推荐推进顺序
 - [x] Unit 0：通过 `pnpm acceptance:verify` 与 `.github/workflows/mainline-acceptance.yml` 固化可重复的本地与 CI 验收 gate，并继续把这条 gate 在 `main` 上维持为绿，再把主动主线切到 Unit 1。
@@ -204,7 +204,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
 - [x] 里程碑 2 验收闭环：补上 `pnpm milestone:fetch:review-pack`，让开发者把上传后的 current-run `milestone-confidence-bundle-*` 稳定落到 `.portmanager/reports/current-ci-review-pack/`，并保留 `review-pack-manifest.json`，不再依赖手动 GitHub artifact 点击。
-- [ ] 下一主线：继续把 Milestone 3 保持为有边界的 `Phase 0 enablement`，同时把 Milestone 2 的 review helper 保留为 guardrail 真相面。继续在 completed mainline runs 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；继续把 `.portmanager/reports/milestone-wording-review.md`、`Public claim class`、`Source surface status`、验证报告与公开 development-progress 页面当作文案真相包；然后把后续实现从已落地的 Unit 51-58 收窄到 Unit 59 persistence promotion decision，继续遵循 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`。
+- [ ] 下一主线：继续把 Milestone 3 保持为有边界的 `Phase 0 enablement`，同时把 Milestone 2 的 review helper 保留为 guardrail 真相面。继续在 completed mainline runs 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；继续把 `.portmanager/reports/milestone-wording-review.md`、`Public claim class`、`Source surface status`、验证报告与公开 development-progress 页面当作文案真相包；然后把后续实现从已落地的 Unit 51-59 转向更后置的独立 split criteria 与第二目标策略，同时继续保持 `/persistence-decision-pack`、target-profile registry 与 `/api/controller` 稳定。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`

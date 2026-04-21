@@ -437,6 +437,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersistenceReadiness'
+  /persistence-decision-pack:
+    get:
+      tags: [controller]
+      summary: Get controller persistence promotion decision pack
+      responses:
+        '200':
+          description: Persistence promotion decision detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistenceDecisionPack'
   /rollback-points:
     get:
       tags: [rollback-points]
@@ -1107,6 +1118,59 @@ components:
           type: string
         metrics:
           $ref: '#/components/schemas/PersistenceReadinessMetrics'
+    PersistenceDecisionState:
+      type: string
+      enum: [hold, prepare_review, review_required]
+    PersistenceDecisionTriggerMetric:
+      type: object
+      required: [key, label, current, monitor, migrationReady, status, reason]
+      properties:
+        key:
+          type: string
+          enum: [operationRows, diagnosticRows, backupRows, rollbackPointRows, hostRows]
+        label:
+          type: string
+        current:
+          type: integer
+          minimum: 0
+        monitor:
+          type: integer
+          minimum: 0
+        migrationReady:
+          type: integer
+          minimum: 0
+        status:
+          type: string
+          enum: [healthy, monitor, migration_ready]
+        reason:
+          type: string
+    PersistenceDecisionPack:
+      type: object
+      required:
+        [backend, migrationTarget, decisionState, reviewRequired, summary, nextActions, triggerMetrics, readiness]
+      properties:
+        backend:
+          type: string
+          enum: [sqlite]
+        migrationTarget:
+          type: string
+          enum: [postgresql]
+        decisionState:
+          $ref: '#/components/schemas/PersistenceDecisionState'
+        reviewRequired:
+          type: boolean
+        summary:
+          type: string
+        nextActions:
+          type: array
+          items:
+            type: string
+        triggerMetrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersistenceDecisionTriggerMetric'
+        readiness:
+          $ref: '#/components/schemas/PersistenceReadiness'
     RollbackPoint:
       type: object
       required: [id, hostId, operationId, createdAt, state]

@@ -32,6 +32,8 @@ export interface PersistenceReadinessMetrics {
   hostRows: PersistenceReadinessMetric
 }
 
+export type PersistenceReadinessMetricKey = keyof PersistenceReadinessMetrics
+
 export interface PersistenceReadiness {
   backend: 'sqlite'
   databasePath: string
