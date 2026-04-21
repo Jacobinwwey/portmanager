@@ -79,7 +79,7 @@ Milestone 1 is only accepted when all of the following become true:
 - `Confidence-review-digest slice`: complete. `pnpm milestone:review:confidence` now compares synced local readiness with the tracked public progress artifact, writes `.portmanager/reports/milestone-confidence-review.md`, separates countdown drift from visibility-only drift, and keeps strict published-countdown failure opt-in.
 - `Confidence-review-pack CI slice`: complete. `pnpm milestone:review:promotion-ready -- --skip-sync` now lets `mainline-acceptance` publish the current-run `.portmanager/reports/milestone-confidence-review.md` and `.portmanager/reports/milestone-wording-review.md` inside `milestone-confidence-bundle-*`.
 - `Confidence-review-pack fetch slice`: complete. `pnpm milestone:fetch:review-pack` now stages the uploaded current-run review bundle into `.portmanager/reports/current-ci-review-pack/` and writes `review-pack-manifest.json` for CI-first review.
-- `Next lane`: Milestone 3 now opens as bounded `Phase 0 enablement` on top of the same live host / rule / policy slice. Milestone 2 review helpers remain mandatory guardrails: keep `pnpm milestone:review:promotion-ready -- --limit 20` as the default completed-mainline review entrypoint, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, keep the public development-progress page plus `.portmanager/reports/milestone-wording-review.md` as the wording-truth bundle, and only move the tracked public snapshot through the same helper plus `--refresh-published-artifact` when review agrees. New implementation energy now goes to standalone audit/event boundary decisions and target-abstraction rules described in `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.
+- `Next lane`: Milestone 3 now opens as bounded `Phase 0 enablement` on top of the same live host / rule / policy slice. Milestone 2 review helpers remain mandatory guardrails: keep `pnpm milestone:review:promotion-ready -- --limit 20` as the default completed-mainline review entrypoint, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, keep the public development-progress page plus `.portmanager/reports/milestone-wording-review.md` as the wording-truth bundle, and only move the tracked public snapshot through the same helper plus `--refresh-published-artifact` when review agrees. New implementation energy now goes to Units 57 through 59 described in `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`: audit/event boundary decisions, target-profile abstraction rules, and persistence promotion decision work.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -166,19 +166,18 @@ Milestone 3 can now begin as a bounded execution phase because all of the follow
 | Scheme C expectation | Current verified state | Gap classification |
 | --- | --- | --- |
 | Gateway-ready consumer boundary | Controller now serves a consumer-prefixed `/api/controller` boundary while keeping legacy direct routes compatible; Web preserves prefixed base URLs and CLI accepts `PORTMANAGER_CONSUMER_BASE_URL`, even though no separate gateway app exists yet | Phase 0 baseline landed |
-| Explicit controller / policy / event / audit separation | `controller-read-model`, `controller-domain-service`, and `/event-audit-index` now extract the first read/write seams, even though transport and persistence still centralize too much work | Phase 0 baseline landed |
+| Explicit controller / policy / event / audit separation | `controller-read-model`, `controller-domain-service`, `/event-audit-index`, and the persistence adapter now extract the first read/write seams, even though transport and persistence still centralize too much work | Phase 0 baseline landed |
 | First-class bounded remote agent | Live agent service boundary already exists with `/health`, `/runtime-state`, `/apply`, `/snapshot`, `/rollback` | Partially earned |
 | Batch host management | One bounded batch exposure-policy envelope now lands as an auditable parent operation with host-scoped child outcomes across controller, CLI, and Web | Phase 0 baseline landed |
 | Persistence readiness beyond SQLite | `operation-store` now runs behind a SQLite-backed persistence adapter seam and publishes measurable PostgreSQL readiness pressure from live store counts | Phase 0 baseline landed |
 | Platform abstraction for additional targets | Ubuntu 24.04 + systemd + Tailscale remains the only credible target | Not started |
 
-#### Milestone 3 Phase 0 workstreams
-- gateway-ready consumer boundary
-- controller seam extraction for orchestration, policy, read models, and event/audit indexing
-- richer event and audit semantics on top of the same operation evidence model
-- bounded multi-host and batch-operation primitives
-- persistence seams and PostgreSQL readiness criteria
-- explicit target-abstraction rules before second-target claims
+#### Milestone 3 Phase 0 continuation workstreams
+- keep the landed `/api/controller` consumer boundary stable while defining future split criteria
+- Unit 57: standalone audit/event boundary decisions on top of `/events` and `/event-audit-index`
+- Unit 58: explicit target-profile registry and target-abstraction rules before second-target claims
+- Unit 59: persistence promotion decision surface on top of the landed readiness metrics
+- continue using the same bounded batch-operation envelope and evidence model rather than inventing a second orchestration path
 
 #### Guardrails that still stay in force
 - keep `pnpm acceptance:verify` green

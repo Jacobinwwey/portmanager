@@ -9,52 +9,58 @@ origin: docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requireme
 # PortManager Milestone 3 Toward C Enablement Plan
 
 Updated: 2026-04-21
-Version: v0.1.0
+Version: v0.2.0
 
 ## Overview
-This plan opens Milestone 3 as a bounded `Phase 0 enablement` lane.
+This plan keeps Milestone 3 as a bounded `Phase 0 enablement` lane after Units 50 through 56 have already landed.
 It does not treat `Toward C` as already delivered.
-It uses the accepted Milestone 1 slice and the promotion-ready Milestone 2 guardrail as the verified base, then defines the first concrete workstreams needed before PortManager can truthfully claim any stronger distributed-platform shape.
+It uses the accepted Milestone 1 slice and the promotion-ready Milestone 2 guardrail as the verified base, then defines the next concrete workstreams needed before PortManager can truthfully claim any stronger distributed-platform shape.
 
 ## Problem Frame
 The repo no longer lacks Milestone 2 review machinery.
-It now lacks a concrete next-phase architecture path.
+It no longer lacks the first Milestone 3 seams either.
+It now lacks the next boundary-decision layer that turns those seams into credible future split criteria.
 
 Deep comparison against the current codebase shows:
 
 - `apps/controller/src/controller-server.ts` still concentrates transport handling, orchestration, and much of the domain wiring
-- `apps/controller/src/operation-store.ts` still centralizes persistence, host/rule/policy state, event-adjacent records, and heartbeat indexing behind one SQLite-backed store
-- `apps/web/src/main.ts` and `crates/portmanager-cli/src/main.rs` still consume the controller directly instead of a gateway boundary
+- `apps/controller/src/operation-store.ts` still centralizes persistence, host/rule/policy state, event-adjacent records, and heartbeat indexing even though it now sits behind a persistence adapter
+- `apps/web/src/main.ts` and `crates/portmanager-cli/src/main.rs` now consume the shared `/api/controller` consumer boundary, but that boundary still lives inside the controller process
+- `apps/controller/src/event-audit-index.ts` and `apps/controller/src/controller-events.ts` now expose review and replay surfaces, but no explicit audit-review boundary owns them yet
 - `crates/portmanager-agent/src/main.rs` already proves a bounded remote execution plane, but not richer event semantics or orchestration contracts
+- `apps/controller/src/persistence-adapter.ts` now measures PostgreSQL readiness pressure, but no explicit migration decision surface tells developers when cutover review must start
+- the locked Ubuntu 24.04 + systemd + Tailscale target still exists mostly as scattered assumptions rather than one explicit target-profile registry
 - `scripts/acceptance/verify.mjs`, `scripts/acceptance/verify-confidence.mjs`, and the milestone tests already protect one trusted evidence model that Milestone 3 must not bypass
 
 Without a concrete Milestone 3 plan, the roadmap can drift in two bad directions:
 
 - stay artificially frozen in Milestone 2 wording maintenance even though the entry gate is now credible
-- overclaim full Scheme C readiness even though the code still lacks its key architecture seams
+- overclaim full Scheme C readiness even though the code still lacks its next key boundary decisions and abstraction rules
 
 ## Requirements Trace
 - R1-R3. Open Milestone 3 as Phase 0 enablement while preserving the Milestone 2 guardrail.
-- R4-R7. Define bounded workstreams for gateway-ready boundaries, controller seams, event/audit indexing, batch orchestration, and persistence readiness.
+- R4-R7. Define bounded continuation workstreams for standalone audit/event boundary decisions, consumer-boundary split criteria, persistence migration criteria, and target abstraction.
 - R8-R10. Sync repo docs, roadmap pages, and regression coverage around the same evidence-first Milestone 3 posture.
 
 ## Current Architecture Deep Compare
 
-| Concern | Current verified base | Milestone 3 Phase 0 move |
+| Concern | Current verified base | Milestone 3 continuation move |
 | --- | --- | --- |
-| Consumer entry boundary | Web and CLI call controller `REST + SSE` directly | Define a gateway-ready contract boundary without adding a fake extra service yet |
-| Domain separation | Controller server and store still carry most policy, event, audit, and orchestration wiring | Extract explicit controller-domain seams first, then decide whether deployment split is justified |
-| Agent role | Agent already serves health, runtime, apply, snapshot, and rollback with bounded semantics | Deepen evidence/event reporting without turning the agent into a strategy peer |
-| Orchestration breadth | Proof slice remains one host / one rule plus reliability replay | Add bounded multi-host and batch-operation primitives on the same audit/evidence model |
-| Persistence path | SQLite is still the only real store | Introduce persistence seams and migration-readiness checks before any PostgreSQL promise |
-| Platform expansion | Only Ubuntu 24.04 target is credible | Define explicit target-abstraction rules before second-target work starts |
+| Consumer entry boundary | Web and CLI now use `/api/controller`, but the boundary still lives inside the controller process | Define split criteria and review ownership without inventing a fake gateway binary |
+| Domain separation | Controller read/write seams plus indexed review are real, but transport and storage still centralize too much work | Extract an explicit audit-review service boundary before debating deployable topology |
+| Agent role | Agent already serves health, runtime, apply, snapshot, and rollback with bounded semantics | Deepen evidence/reporting without turning the agent into a strategy peer |
+| Orchestration breadth | One bounded batch exposure-policy envelope is real with parent/child outcomes | Reuse that audited envelope while deciding what wider multi-host operations may exist next |
+| Persistence path | SQLite-backed persistence adapter and readiness metrics are real, but PostgreSQL is still disabled | Promote readiness metrics into a decision surface before any backend promise |
+| Platform expansion | Only Ubuntu 24.04 + systemd + Tailscale is credible and mostly implicit | Introduce explicit target-profile rules before second-target work starts |
 
 ## Key Technical Decisions
 - Keep Milestone 2 review helpers and confidence artifacts as mandatory guardrails while Milestone 3 begins; no new phase gets to bypass `pnpm acceptance:verify`, `pnpm milestone:verify:confidence`, or the wording-review flow.
-- Start with seam extraction inside the current controller instead of adding deployment topology first. The architecture problem is not “missing microservices”; it is missing explicit boundaries.
+- Treat Units 51 through 56 as landed baselines. The plan does not reopen consumer-boundary routing, indexed review publishing, or persistence seams unless regressions are found.
+- Start the next phase with boundary ownership and abstraction rules inside the current controller instead of adding deployment topology first. The architecture problem is not “missing microservices”; it is missing explicit decision surfaces.
 - Treat an API gateway as a contract and routing boundary goal, not an immediate new binary or deployment requirement.
-- Introduce multi-host and batch orchestration only through auditable operation envelopes that reuse the existing evidence model.
-- Keep PostgreSQL as a readiness target behind persistence seams, not as an immediate default-store migration.
+- Introduce wider multi-host work only through auditable operation envelopes that reuse the existing evidence model.
+- Keep PostgreSQL as a readiness target behind persistence seams, then add a decision surface before any default-store migration.
+- Make the locked Ubuntu target explicit in code and contracts before discussing any second target.
 
 ## High-Level Technical Design
 
@@ -62,14 +68,18 @@ Without a concrete Milestone 3 plan, the roadmap can drift in two bad directions
 flowchart LR
   U[Web CLI Automation] --> G[Gateway-Ready Contract Boundary]
   G --> C[Controller Domain Seams]
-  C --> O[Operation and Audit Index]
+  C --> O[Audit Review Boundary]
+  O --> E[Event Replay Surface]
+  O --> V[Indexed Audit Surface]
   C --> P[Policy and Host Rule Services]
   C --> S[Persistence Adapter]
   S --> Q[SQLite Now]
-  S -. later .-> R[PostgreSQL Readiness]
+  S --> R[Persistence Decision Surface]
+  R -. later .-> X[PostgreSQL Backend]
+  C --> T[Target Profile Registry]
+  T -. later .-> Z[Additional Targets]
   C --> A[Agent Sync Boundary]
   A --> B[Bounded Agent Service]
-  O --> V[Event and Review Surfaces]
 ```
 
 ## Implementation Units
@@ -310,6 +320,112 @@ flowchart LR
 - Happy path: CLI accepts `PORTMANAGER_CONSUMER_BASE_URL` and reaches prefixed routes.
 - Regression: generated contract verification still passes after the new OpenAPI server base is documented.
 
+- [ ] **Unit 57: Audit And Event Boundary Decision Pack**
+
+**Goal:** Separate replay transport, indexed audit review, and operation-evidence composition behind one explicit audit-review boundary so later service-split or gateway-proxy decisions have a credible owner.
+
+**Requirements:** R4-R6
+
+**Dependencies:** Units 53-56
+
+**Files:**
+- Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/controller/src/controller-events.ts`
+- Modify: `apps/controller/src/event-audit-index.ts`
+- Create: `apps/controller/src/audit-review-service.ts`
+- Create: `tests/controller/audit-review-service.test.ts`
+- Modify: `tests/controller/event-audit-index.test.ts`
+- Modify: `tests/controller/consumer-boundary.test.ts`
+
+**Approach:**
+- Move replay query rules, indexed review composition, and audit linkage into `audit-review-service` so `/events` and `/event-audit-index` stop being owned only by transport code.
+- Keep `/events`, `/event-audit-index`, and `/api/controller/*` payloads compatible first; this unit defines boundary ownership, not a new deployable.
+- Preserve batch parent/child linkage, diagnostics linkage, backup linkage, and rollback linkage inside the same review boundary so later service-split work does not lose evidence context.
+
+**Patterns to follow:**
+- `apps/controller/src/controller-events.ts`
+- `apps/controller/src/event-audit-index.ts`
+- `tests/controller/event-audit-index.test.ts`
+- `tests/controller/consumer-boundary.test.ts`
+
+**Test scenarios:**
+- Happy path: the same operation can be replayed through SSE and read through the indexed audit service with stable ordering and linkage.
+- Happy path: batch parent plus child outcomes stay queryable from one audit-review boundary.
+- Edge case: degraded operations keep backup, rollback, and diagnostic linkage in the same review payload.
+- Regression: `/api/controller` and legacy event endpoints remain compatible.
+
+- [ ] **Unit 58: Target Profile Registry And Abstraction Rules**
+
+**Goal:** Make the locked Ubuntu 24.04 + systemd + Tailscale target explicit in code and contract surfaces so second-target work must declare capabilities instead of leaking hard-coded assumptions.
+
+**Requirements:** R4-R7
+
+**Dependencies:** Unit 56
+
+**Files:**
+- Modify: `packages/contracts/openapi/openapi.yaml`
+- Modify: `packages/typescript-contracts/src/generated/*`
+- Modify: `apps/controller/src/controller-domain-service.ts`
+- Modify: `apps/controller/src/controller-read-model.ts`
+- Modify: `apps/controller/src/operation-store.ts`
+- Create: `apps/controller/src/target-profile-registry.ts`
+- Modify: `apps/web/src/main.ts`
+- Modify: `crates/portmanager-cli/src/main.rs`
+- Create: `tests/controller/target-profile-registry.test.ts`
+- Modify: `tests/web/web-shell.test.ts`
+- Modify: `crates/portmanager-cli/tests/host_rule_policy_cli.rs`
+
+**Approach:**
+- Introduce one explicit target profile id such as `ubuntu-24.04-systemd-tailscale` plus capability descriptors consumed by controller, CLI, and Web.
+- Keep current behavior locked to that existing profile while exposing why it is special; do not imply additional targets are already supported.
+- Use the registry to reject or clearly label unsupported second-target claims before scope widens.
+
+**Patterns to follow:**
+- `docs/architecture/portmanager-agent-bootstrap.md`
+- `apps/controller/src/controller-domain-service.ts`
+- `crates/portmanager-cli/tests/host_rule_policy_cli.rs`
+
+**Test scenarios:**
+- Happy path: hosts default to the locked target profile and CLI/Web render it consistently.
+- Edge case: unknown target profile ids are rejected or marked unsupported explicitly.
+- Regression: bootstrap, apply, diagnostics, and rollback flows stay unchanged for the locked profile.
+
+- [ ] **Unit 59: Persistence Promotion Decision Surface**
+
+**Goal:** Turn existing persistence-readiness counters into an explicit migration decision surface that tells developers when PostgreSQL cutover review must begin, without enabling PostgreSQL yet.
+
+**Requirements:** R4-R7
+
+**Dependencies:** Units 54 and 57
+
+**Files:**
+- Modify: `apps/controller/src/persistence-adapter.ts`
+- Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/web/src/main.ts`
+- Modify: `crates/portmanager-cli/src/main.rs`
+- Create: `apps/controller/src/persistence-decision-pack.ts`
+- Create: `tests/controller/persistence-decision-pack.test.ts`
+- Modify: `crates/portmanager-cli/tests/operation_get_cli.rs`
+- Modify: `tests/web/web-shell.test.ts`
+- Modify: `docs/specs/portmanager-milestones.md`
+- Modify: `docs/specs/portmanager-toward-c-strategy.md`
+
+**Approach:**
+- Elevate readiness counters into recommendation states with explicit next actions and migration-review triggers.
+- Keep SQLite active; the new surface reports when review is required, not automatic backend switching.
+- Make docs and CLI/Web developer surfaces point to the same decision pack so migration pressure stays reviewable and honest.
+
+**Patterns to follow:**
+- `apps/controller/src/persistence-adapter.ts`
+- `tests/controller/persistence-readiness.test.ts`
+- `crates/portmanager-cli/tests/operation_get_cli.rs`
+
+**Test scenarios:**
+- Happy path: healthy, monitor, and migration-ready states produce explicit next-action guidance without changing the active backend.
+- Happy path: CLI and Web read the same decision surface as controller.
+- Edge case: threshold overrides still classify recommendation state correctly.
+- Regression: SQLite-backed host, rule, policy, diagnostics, backup, rollback, and confidence flows remain unchanged.
+
 ## Verification Strategy
 - `pnpm exec node --experimental-strip-types --test tests/docs/*.test.mjs`
 - `corepack pnpm --dir docs-site --ignore-workspace run docs:generate`
@@ -325,3 +441,5 @@ flowchart LR
 | Milestone 3 work weakens the Milestone 2 guardrail | Keep `pnpm acceptance:verify`, `pnpm milestone:verify:confidence`, and wording-review guidance visible in docs and tests |
 | Gateway talk becomes premature topology churn | Start with contract and seam extraction before adding another deployable service |
 | Batch orchestration bypasses evidence rules | Require every Phase 0 batch move to reuse the existing operation/audit model |
+| Audit boundary extraction duplicates current evidence logic | Centralize replay and review ownership in one service before debating deployment separation |
+| Target-profile work accidentally implies broad platform support | Ship one explicit locked profile first and reject unknown profiles clearly |

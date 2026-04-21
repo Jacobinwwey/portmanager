@@ -568,8 +568,8 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
         `当前公开状态已经是 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
         `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；promotion 门槛已经满足。`,
         'Milestone 2 现在继续承担 guardrail 角色：当前 CI-first 复核先执行 `pnpm milestone:fetch:review-pack`，completed-mainline 复核仍然经过 `pnpm milestone:review:promotion-ready -- --limit 20`。',
-        'Milestone 3 已经作为有边界的 `Phase 0 enablement` 打开；一个 bounded batch envelope 已经落地，但当前代码仍然没有 gateway app、显式 event/audit 分层，或 PostgreSQL readiness seam。',
-        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；新的实现能量现在转到 gateway-ready boundary、event/audit indexing 与 persistence-readiness，而不是继续把 Toward C 留在纯口号层。`
+        'Milestone 3 已经作为有边界的 `Phase 0 enablement` 打开；Unit 51 到 Unit 56 已经落地，但当前代码仍然没有独立 audit/event boundary、显式 target-profile abstraction rule，或 PostgreSQL backend 路径。',
+        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；新的实现能量现在转到 Unit 57 audit/event boundary 决策、Unit 58 target-profile abstraction rule，以及 Unit 59 persistence promotion decision，而不是继续把已经落地的 consumer boundary 或 review surface 当成未完成起点。`
       ]
     : [
         `当前公开状态仍为 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
@@ -582,8 +582,8 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
         `Current public status is now \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
         `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the promotion threshold is met.`,
         'Milestone 2 now stays in guardrail mode: current CI-first review starts with `pnpm milestone:fetch:review-pack`, and completed-mainline review still runs through `pnpm milestone:review:promotion-ready -- --limit 20`.',
-        'Milestone 3 is now open as bounded `Phase 0 enablement`; one bounded batch envelope is real now, but current code still lacks a gateway app, explicit event/audit separation, and a PostgreSQL readiness seam.',
-        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; new implementation energy now moves to gateway-ready boundaries, event/audit indexing, and persistence-readiness work instead of leaving Toward C as a distant slogan.`
+        'Milestone 3 is now open as bounded `Phase 0 enablement`; Units 51 through 56 are real now, but current code still lacks a standalone audit/event boundary, explicit target-profile abstraction rules, and a PostgreSQL backend path.',
+        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; new implementation energy now moves to Unit 57 audit/event boundary decisions, Unit 58 target-profile abstraction rules, and Unit 59 persistence promotion work instead of treating the landed consumer boundary or review surfaces as unfinished.`
       ]
     : [
         `Current public status remains \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,

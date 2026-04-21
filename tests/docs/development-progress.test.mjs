@@ -8,6 +8,7 @@ const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 const docsSiteRoot = path.join(repoRoot, 'docs-site')
 const docsConfigPath = path.join(docsSiteRoot, '.vitepress', 'config.ts')
 const generatedProgressDataPath = path.join(docsSiteRoot, 'data', 'milestone-confidence-progress.ts')
+const roadmapDataPath = path.join(docsSiteRoot, 'data', 'roadmap.ts')
 const milestoneConfidenceComponentPath = path.join(
   docsSiteRoot,
   '.vitepress',
@@ -30,10 +31,12 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.ok(existsSync(enPagePath), 'missing English development-progress roadmap page')
   assert.ok(existsSync(zhPagePath), 'missing Chinese development-progress roadmap page')
   assert.ok(existsSync(generatedProgressDataPath), 'missing generated milestone confidence progress data file')
+  assert.ok(existsSync(roadmapDataPath), 'missing roadmap data file')
 
   const enPage = readFileSync(enPagePath, 'utf8')
   const zhPage = readFileSync(zhPagePath, 'utf8')
   const docsConfig = readFileSync(docsConfigPath, 'utf8')
+  const roadmapData = readFileSync(roadmapDataPath, 'utf8')
   const milestoneConfidenceComponent = readFileSync(milestoneConfidenceComponentPath, 'utf8')
   const roadmapComponent = readFileSync(roadmapComponentPath, 'utf8')
 
@@ -52,11 +55,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
     /2026-04-21-portmanager-m3-toward-c-enablement-plan\.md/
   )
   assert.match(milestoneConfidenceComponent, /Phase 0 enablement/)
-  assert.match(milestoneConfidenceComponent, /gateway-ready/)
+  assert.match(milestoneConfidenceComponent, /Unit 57 audit\/event boundary/)
+  assert.match(milestoneConfidenceComponent, /Unit 58 target-profile abstraction/)
   assert.match(
     milestoneConfidenceComponent,
     /\.portmanager\/reports\/milestone-wording-review\.md/
   )
+  assert.match(roadmapData, /Units 57 through 59/)
+  assert.match(roadmapData, /persistence promotion decision/)
   assert.match(milestoneConfidenceComponent, /--skip-sync/)
   assert.match(milestoneConfidenceComponent, /Public claim class/)
   assert.match(milestoneConfidenceComponent, /Source surface status/)

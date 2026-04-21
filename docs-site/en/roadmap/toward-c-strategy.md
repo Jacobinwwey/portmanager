@@ -43,7 +43,7 @@ In that scheme:
 - not a rewrite mandate driven by language ideology
 - not hosted SaaS or multi-tenant scope by default
 - not permission to bypass contract governance
-- not proof that the repo already contains a gateway, split audit service, batch orchestration, or PostgreSQL readiness
+- not proof that the repo already contains a standalone gateway app, standalone audit service, broad fleet orchestration, or a PostgreSQL backend
 
 ### Relationship to A and B
 - `A` freezes the docs-first baseline, contracts, and design boundaries.
@@ -55,9 +55,9 @@ In that scheme:
 | Scheme C expectation | Current verified state | Gap posture |
 | --- | --- | --- |
 | Gateway-ready consumer boundary | Controller now serves `/api/controller` as a consumer-prefixed boundary while keeping legacy direct routes compatible; Web preserves prefixed base URLs and CLI accepts `PORTMANAGER_CONSUMER_BASE_URL`, even though no standalone gateway app exists yet | Phase 0 baseline landed |
-| Explicit event/policy/audit seams | `apps/controller/src/controller-server.ts` and `apps/controller/src/operation-store.ts` still concentrate most of that work | Not started |
+| Explicit event/policy/audit seams | `controller-read-model`, `controller-domain-service`, `/event-audit-index`, and the persistence adapter now extract the first seam set, even though controller transport and store still centralize too much work | Phase 0 baseline landed |
 | First-class bounded agent role | Agent already serves `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback` with live controller sync | Partially earned |
-| Batch host orchestration | Proof slice still centers on one host / one rule plus reliability replay | Not started |
+| Batch host orchestration | One bounded batch exposure-policy envelope now lands as an auditable parent operation with host-scoped child outcomes across controller, CLI, and Web | Phase 0 baseline landed |
 | Persistence readiness beyond SQLite | `operation-store` now runs behind a SQLite-backed persistence adapter seam and publishes measurable PostgreSQL readiness pressure from live store counts | Phase 0 baseline landed |
 | Platform abstraction for second targets | Ubuntu 24.04 + systemd + Tailscale remains the only credible target | Not started |
 
@@ -84,14 +84,14 @@ Costs of Scheme C if started carelessly:
 - infrastructure work can outrun delivered value
 - reliability truth can get diluted while scope broadens
 
-### Phase 0 enablement workstreams
-Milestone 3 starts with bounded enablement work, not full distributed separation:
+### Phase 0 continuation workstreams
+Milestone 3 now continues from landed seams instead of restarting them:
 
-- gateway-ready consumer boundary
-- controller seam extraction for policy, orchestration, read models, and audit/event indexing
-- bounded batch host and multi-operation primitives on the same evidence model
-- persistence seams and PostgreSQL readiness criteria
-- explicit target-abstraction rules before second-target claims
+- keep the landed `/api/controller` consumer boundary stable while defining future split criteria
+- Unit 57: standalone audit/event boundary decisions on top of the current replay plus indexed review surfaces
+- Unit 58: explicit target-profile registry and target-abstraction rules before second-target claims
+- Unit 59: persistence promotion decision surface on top of measured readiness criteria
+- keep bounded batch work on the same evidence model instead of inventing a second orchestration path
 
 ### Language and boundary decisions carried into C
 - The current `TypeScript web/controller + Rust CLI/agent` split remains valid until measured pressure proves otherwise.

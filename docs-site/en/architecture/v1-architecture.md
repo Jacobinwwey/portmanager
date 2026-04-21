@@ -40,21 +40,21 @@ status: active
 | Scheme C concern | Current repo truth | Progress classification | Implication for Milestone 3 |
 | --- | --- | --- | --- |
 | Consumer gateway boundary | No dedicated gateway app or service yet, but controller now serves a gateway-ready `/api/controller` consumer boundary while keeping legacy direct routes compatible | Phase 0 baseline landed | Next focus shifts to standalone audit/event boundary decisions and target abstractions, not more routing-shell churn |
-| Controller, policy, event, and audit separation | `apps/controller/src/controller-server.ts` and `apps/controller/src/operation-store.ts` still centralize most of this work | Not started | Extract seams before debating deployment topology |
+| Controller, policy, event, and audit separation | `controller-read-model`, `controller-domain-service`, `/event-audit-index`, and the persistence adapter now extract the first seam set, even though transport and storage still centralize too much work | Phase 0 baseline landed | Next focus shifts to an explicit audit-review owner before debating deployment topology |
 | First-class remote agent | Agent already serves `/health`, `/runtime-state`, `/apply`, `/snapshot`, `/rollback`; controller syncs live desired state | Partially earned | Deepen event semantics while keeping the agent bounded |
-| Batch host orchestration | Proof slice remains one host / one rule plus reliability replay | Not started | Add bounded batch-operation envelopes on the same audit model |
-| Persistence growth beyond SQLite | SQLite remains the only real store | Not started | Introduce persistence seams and migration-readiness criteria |
+| Batch host orchestration | One bounded batch exposure-policy envelope now lands as an auditable parent operation with host-scoped child outcomes across controller, CLI, and Web | Phase 0 baseline landed | Keep broader orchestration on the same audit model instead of inventing a second path |
+| Persistence growth beyond SQLite | SQLite remains the active store, but the persistence adapter and readiness reporting seam are now real | Phase 0 baseline landed | Add a migration decision surface before any PostgreSQL promise |
 | Second-target platform abstraction | Ubuntu 24.04 + systemd + Tailscale remains the only credible target | Not started | Define abstraction rules before second-target claims |
 
 ### Milestone 3 Phase 0 architecture move
-Milestone 3 does not begin with “split everything.”
-It begins with bounded enablement:
+Milestone 3 still does not begin with “split everything.”
+It now continues with bounded enablement:
 
-- extract controller domain seams for orchestration, policy, read models, and event/audit indexing
 - keep `/api/controller` as the gateway-ready consumer boundary while deferring any separate gateway deployment
-- add bounded multi-host and batch-operation primitives that reuse the current operation/evidence model
-- isolate persistence behind readiness seams before any PostgreSQL move
-- keep supported-target expansion behind explicit abstraction rules
+- add an explicit audit-review owner for `/events` and `/event-audit-index`
+- keep bounded multi-host and batch-operation primitives on the same operation/evidence model
+- promote persistence readiness into a migration decision surface before any PostgreSQL move
+- keep supported-target expansion behind explicit target-profile rules
 
 ### Connectivity boundary that stays locked
 - `SSH`: bootstrap, install, rescue, and last-resort diagnostics only
