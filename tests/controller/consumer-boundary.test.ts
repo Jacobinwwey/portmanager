@@ -161,11 +161,19 @@ test('controller server serves audit review routes through consumer-prefixed bou
       const consumerAuditResponse = await fetch(
         `${listening.baseUrl}/api/controller/event-audit-index?operationId=op_consumer_boundary_review_001`
       )
+      const legacyDecisionPackResponse = await fetch(
+        `${listening.baseUrl}/consumer-boundary-decision-pack`
+      )
+      const consumerDecisionPackResponse = await fetch(
+        `${listening.baseUrl}/api/controller/consumer-boundary-decision-pack`
+      )
 
       assert.equal(legacyEventsResponse.status, 200)
       assert.equal(consumerEventsResponse.status, 200)
       assert.equal(legacyAuditResponse.status, 200)
       assert.equal(consumerAuditResponse.status, 200)
+      assert.equal(legacyDecisionPackResponse.status, 200)
+      assert.equal(consumerDecisionPackResponse.status, 200)
 
       const legacyEventsPayload = (await legacyEventsResponse.json()) as {
         items: Array<Record<string, unknown>>
@@ -179,13 +187,17 @@ test('controller server serves audit review routes through consumer-prefixed bou
       const consumerAuditPayload = (await consumerAuditResponse.json()) as {
         items: Array<Record<string, unknown>>
       }
+      const legacyDecisionPackPayload = (await legacyDecisionPackResponse.json()) as Record<string, unknown>
+      const consumerDecisionPackPayload = (await consumerDecisionPackResponse.json()) as Record<string, unknown>
 
       assert.deepEqual(consumerEventsPayload, legacyEventsPayload)
       assert.deepEqual(consumerAuditPayload, legacyAuditPayload)
+      assert.deepEqual(consumerDecisionPackPayload, legacyDecisionPackPayload)
       assert.equal(
         (consumerAuditPayload.items[0]?.latestEvent as Record<string, unknown>)?.summary,
         'consumer audit review boundary is alive'
       )
+      assert.equal(consumerDecisionPackPayload.decisionState, 'hold')
     } finally {
       await server.close()
       store.close()

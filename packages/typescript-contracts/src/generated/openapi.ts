@@ -315,6 +315,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/consumer-boundary-decision-pack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get controller consumer-boundary split criteria pack */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consumer-boundary split criteria detail */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConsumerBoundaryDecisionPack"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/diagnostics": {
         parameters: {
             query?: never;
@@ -1106,6 +1142,28 @@ export interface components {
             targetHost: string;
             targetPort: number;
         };
+        ConsumerBoundaryCriterion: {
+            /** @enum {string} */
+            id: "shared_contract_parity" | "prefixed_boundary" | "legacy_alias_compatibility" | "standalone_deployment_boundary" | "dedicated_edge_policy_layer" | "split_ownership" | "external_consumer_pressure";
+            label: string;
+            reason: string;
+        };
+        ConsumerBoundaryDecisionPack: {
+            blockingCriteria: components["schemas"]["ConsumerBoundaryCriterion"][];
+            /** @enum {string} */
+            boundaryPath: "/api/controller";
+            decisionState: components["schemas"]["ConsumerBoundaryDecisionState"];
+            /** @enum {string} */
+            hostingMode: "controller_embedded";
+            nextActions: string[];
+            /** @enum {string} */
+            reviewOwner: "controller";
+            satisfiedCriteria: components["schemas"]["ConsumerBoundaryCriterion"][];
+            splitReviewRequired: boolean;
+            summary: string;
+        };
+        /** @enum {string} */
+        ConsumerBoundaryDecisionState: "hold" | "prepare_review" | "review_required";
         CreateBridgeRuleRequest: {
             hostId: string;
             listenPort: number;
@@ -1403,6 +1461,9 @@ export type BatchExposurePolicyApplyRequest = components['schemas']['BatchExposu
 export type BatchOperationSummary = components['schemas']['BatchOperationSummary'];
 export type BootstrapHostRequest = components['schemas']['BootstrapHostRequest'];
 export type BridgeRule = components['schemas']['BridgeRule'];
+export type ConsumerBoundaryCriterion = components['schemas']['ConsumerBoundaryCriterion'];
+export type ConsumerBoundaryDecisionPack = components['schemas']['ConsumerBoundaryDecisionPack'];
+export type ConsumerBoundaryDecisionState = components['schemas']['ConsumerBoundaryDecisionState'];
 export type CreateBridgeRuleRequest = components['schemas']['CreateBridgeRuleRequest'];
 export type CreateHostRequest = components['schemas']['CreateHostRequest'];
 export type EventAuditIndexEntry = components['schemas']['EventAuditIndexEntry'];

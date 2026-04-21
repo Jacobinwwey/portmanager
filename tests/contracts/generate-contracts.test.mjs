@@ -56,10 +56,12 @@ test('contracts generator emits openapi and json schema types into target tree',
 
     assert.match(openapiOutput, /export interface paths/u)
     assert.match(openapiOutput, /"\/hosts"/u)
+    assert.match(openapiOutput, /"\/consumer-boundary-decision-pack"/u)
     assert.match(openapiOutput, /"\/event-audit-index"/u)
     assert.match(openapiOutput, /"\/persistence-decision-pack"/u)
     assert.match(openapiOutput, /"\/persistence-readiness"/u)
     assert.match(openapiSource, /url: http:\/\/localhost:8710\/api\/controller/u)
+    assert.match(openapiOutput, /ConsumerBoundaryDecisionPack/u)
     assert.match(openapiOutput, /EventAuditIndexEntry/u)
     assert.match(openapiOutput, /PersistenceDecisionPack/u)
     assert.match(openapiOutput, /PersistenceReadiness/u)

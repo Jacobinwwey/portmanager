@@ -448,6 +448,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersistenceDecisionPack'
+  /consumer-boundary-decision-pack:
+    get:
+      tags: [controller]
+      summary: Get controller consumer-boundary split criteria pack
+      responses:
+        '200':
+          description: Consumer-boundary split criteria detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumerBoundaryDecisionPack'
   /rollback-points:
     get:
       tags: [rollback-points]
@@ -1171,6 +1182,71 @@ components:
             $ref: '#/components/schemas/PersistenceDecisionTriggerMetric'
         readiness:
           $ref: '#/components/schemas/PersistenceReadiness'
+    ConsumerBoundaryDecisionState:
+      type: string
+      enum: [hold, prepare_review, review_required]
+    ConsumerBoundaryCriterion:
+      type: object
+      required: [id, label, reason]
+      properties:
+        id:
+          type: string
+          enum:
+            [
+              shared_contract_parity,
+              prefixed_boundary,
+              legacy_alias_compatibility,
+              standalone_deployment_boundary,
+              dedicated_edge_policy_layer,
+              split_ownership,
+              external_consumer_pressure
+            ]
+        label:
+          type: string
+        reason:
+          type: string
+    ConsumerBoundaryDecisionPack:
+      type: object
+      required:
+        [
+          boundaryPath,
+          hostingMode,
+          reviewOwner,
+          decisionState,
+          splitReviewRequired,
+          summary,
+          nextActions,
+          satisfiedCriteria,
+          blockingCriteria
+        ]
+      properties:
+        boundaryPath:
+          type: string
+          enum: [/api/controller]
+        hostingMode:
+          type: string
+          enum: [controller_embedded]
+        reviewOwner:
+          type: string
+          enum: [controller]
+        decisionState:
+          $ref: '#/components/schemas/ConsumerBoundaryDecisionState'
+        splitReviewRequired:
+          type: boolean
+        summary:
+          type: string
+        nextActions:
+          type: array
+          items:
+            type: string
+        satisfiedCriteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsumerBoundaryCriterion'
+        blockingCriteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsumerBoundaryCriterion'
     RollbackPoint:
       type: object
       required: [id, hostId, operationId, createdAt, state]

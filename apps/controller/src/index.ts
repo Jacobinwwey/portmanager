@@ -9,6 +9,10 @@ export type ControllerContracts = {
 export { createControllerEventBus } from './controller-events.ts'
 export { AgentClientError, createAgentClient } from './agent-client.ts'
 export { createAuditReviewService } from './audit-review-service.ts'
+export {
+  buildConsumerBoundaryDecisionPack,
+  createDefaultConsumerBoundaryDecisionSnapshot
+} from './consumer-boundary-decision-pack.ts'
 export { createControllerDomainService } from './controller-domain-service.ts'
 export { createControllerReadModel } from './controller-read-model.ts'
 export { createEventAuditIndex } from './event-audit-index.ts'

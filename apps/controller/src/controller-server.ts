@@ -4,6 +4,10 @@ import path from 'node:path'
 
 import { createAgentClient } from './agent-client.ts'
 import { createAuditReviewService } from './audit-review-service.ts'
+import {
+  buildConsumerBoundaryDecisionPack,
+  createDefaultConsumerBoundaryDecisionSnapshot
+} from './consumer-boundary-decision-pack.ts'
 import { createControllerDomainService } from './controller-domain-service.ts'
 import type { ControllerEventBus } from './controller-events.ts'
 import { createControllerReadModel } from './controller-read-model.ts'
@@ -676,6 +680,15 @@ export function createControllerServer(options: {
 
     if (request.method === 'GET' && pathname === '/persistence-decision-pack') {
       sendJson(response, 200, buildPersistenceDecisionPack(store.getPersistenceReadiness()))
+      return
+    }
+
+    if (request.method === 'GET' && pathname === '/consumer-boundary-decision-pack') {
+      sendJson(
+        response,
+        200,
+        buildConsumerBoundaryDecisionPack(createDefaultConsumerBoundaryDecisionSnapshot())
+      )
       return
     }
 

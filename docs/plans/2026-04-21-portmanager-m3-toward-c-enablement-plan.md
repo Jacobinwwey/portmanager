@@ -354,7 +354,7 @@ flowchart LR
 - Edge case: degraded operations keep backup, rollback, and diagnostic linkage in the same review payload.
 - Regression: `/api/controller` and legacy event endpoints remain compatible.
 
-- [ ] **Unit 58: Target Profile Registry And Abstraction Rules**
+- [x] **Unit 58: Target Profile Registry And Abstraction Rules**
 
 **Goal:** Make the locked Ubuntu 24.04 + systemd + Tailscale target explicit in code and contract surfaces so second-target work must declare capabilities instead of leaking hard-coded assumptions.
 
@@ -425,6 +425,54 @@ flowchart LR
 - Happy path: CLI and Web read the same decision surface as controller.
 - Edge case: threshold overrides still classify recommendation state correctly.
 - Regression: SQLite-backed host, rule, policy, diagnostics, backup, rollback, and confidence flows remain unchanged.
+
+- [x] **Unit 60: Consumer Boundary Split Criteria Pack**
+
+**Goal:** Publish one explicit decision pack that keeps `/api/controller` embedded inside controller until standalone deployment, edge-policy ownership, and external consumer pressure are real, so later gateway split work is reviewable instead of hand-wavy.
+
+**Requirements:** R4-R7
+
+**Dependencies:** Units 56-59
+
+**Files:**
+- Modify: `packages/contracts/openapi/openapi.yaml`
+- Modify: `packages/typescript-contracts/src/generated/*`
+- Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/web/src/main.ts`
+- Modify: `crates/portmanager-cli/src/main.rs`
+- Create: `apps/controller/src/consumer-boundary-decision-pack.ts`
+- Create: `tests/controller/consumer-boundary-decision-pack.test.ts`
+- Modify: `tests/controller/consumer-boundary.test.ts`
+- Modify: `crates/portmanager-cli/tests/operation_get_cli.rs`
+- Modify: `tests/web/web-shell.test.ts`
+- Modify: `tests/contracts/generate-contracts.test.mjs`
+- Modify: `tests/docs/development-progress.test.mjs`
+- Modify: `README.md`
+- Modify: `TODO.md`
+- Modify: `Interface Document.md`
+- Modify: `docs/specs/portmanager-milestones.md`
+- Modify: `docs/specs/portmanager-v1-product-spec.md`
+- Modify: `docs/specs/portmanager-toward-c-strategy.md`
+- Modify: `docs/architecture/portmanager-v1-architecture.md`
+- Modify: `docs-site/data/roadmap.ts`
+- Modify: `docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue`
+
+**Approach:**
+- Reuse the persistence decision-pack pattern, but point it at consumer-boundary split ownership rather than database pressure.
+- Keep `/api/controller` stable and honest: the new surface explains why the boundary stays embedded now and what must become true before a standalone split review is required.
+- Publish the same pack through controller, generated contracts, CLI, Web, and roadmap/progress docs so developers do not have to infer gateway timing from prose drift.
+
+**Patterns to follow:**
+- `apps/controller/src/persistence-decision-pack.ts`
+- `tests/controller/persistence-decision-pack.test.ts`
+- `crates/portmanager-cli/tests/operation_get_cli.rs`
+- `tests/web/web-shell.test.ts`
+
+**Test scenarios:**
+- Happy path: consumer-boundary pack keeps `/api/controller` embedded while standalone split criteria are missing.
+- Happy path: consumer-boundary pack escalates to split-review-required when deployment boundary, edge-policy ownership, and external consumer pressure all exist.
+- Happy path: CLI and Web consume the same `/consumer-boundary-decision-pack` controller contract through the consumer-prefixed base URL.
+- Regression: `/api/controller` and legacy compatibility aliases keep returning the same decision pack.
 
 ## Verification Strategy
 - `pnpm exec node --experimental-strip-types --test tests/docs/*.test.mjs`

@@ -1209,6 +1209,93 @@ fn operations_persistence_decision_pack_json_supports_consumer_boundary_env_and_
 }
 
 #[test]
+fn operations_consumer_boundary_decision_pack_text_surfaces_split_criteria() {
+    let server = MockHttpServer::start(vec![(
+        "/consumer-boundary-decision-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "boundaryPath": "/api/controller",
+                "hostingMode": "controller_embedded",
+                "reviewOwner": "controller",
+                "decisionState": "hold",
+                "splitReviewRequired": false,
+                "summary": "/api/controller should remain inside controller because standalone split criteria are still missing.",
+                "nextActions": [
+                    "Keep /api/controller embedded while standalone deployment ownership is absent.",
+                    "Define dedicated edge policy and ownership split before reopening gateway review."
+                ],
+                "satisfiedCriteria": [
+                    {
+                        "id": "shared_contract_parity",
+                        "label": "Shared contract parity",
+                        "reason": "CLI, Web, and automation already share one generated consumer contract."
+                    }
+                ],
+                "blockingCriteria": [
+                    {
+                        "id": "standalone_deployment_boundary",
+                        "label": "Standalone deployment boundary",
+                        "reason": "Consumer transport still ships inside controller with no independent deployment boundary."
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["operations", "consumer-boundary-decision-pack"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("Boundary Path: /api/controller"));
+    assert!(stdout.contains("Decision State: hold"));
+    assert!(stdout.contains("Split Review Required: no"));
+    assert!(stdout.contains("standalone_deployment_boundary"));
+}
+
+#[test]
+fn operations_consumer_boundary_decision_pack_json_supports_consumer_boundary_env_and_prefix() {
+    let server = MockHttpServer::start(vec![(
+        "/api/controller/consumer-boundary-decision-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "boundaryPath": "/api/controller",
+                "hostingMode": "controller_embedded",
+                "reviewOwner": "controller",
+                "decisionState": "hold",
+                "splitReviewRequired": false,
+                "summary": "consumer boundary pack is alive",
+                "nextActions": ["keep /api/controller embedded"],
+                "satisfiedCriteria": [],
+                "blockingCriteria": [
+                    {
+                        "id": "standalone_deployment_boundary",
+                        "label": "Standalone deployment boundary",
+                        "reason": "still missing"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let consumer_base_url = format!("{}/api/controller", server.base_url());
+    let output = run_portmanager_with_env(
+        &["operations", "consumer-boundary-decision-pack", "--json"],
+        &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+    assert_eq!(server.hits_for("/api/controller/consumer-boundary-decision-pack"), 1);
+}
+
+#[test]
 fn operations_audit_index_text_surfaces_linked_evidence() {
     let server = MockHttpServer::start(vec![(
         "/event-audit-index?limit=2&hostId=host_alpha&ruleId=rule_alpha_https",

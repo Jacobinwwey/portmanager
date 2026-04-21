@@ -32,6 +32,8 @@ export interface EventStreamEntry {
 }
 
 export type OperationEventContract = components['schemas']['OperationEvent']
+export type ConsumerBoundaryDecisionPackContract =
+  components['schemas']['ConsumerBoundaryDecisionPack']
 export type EventAuditIndexEntry = components['schemas']['EventAuditIndexEntry']
 export type PersistenceReadinessContract = components['schemas']['PersistenceReadiness']
 export type PersistenceDecisionPackContract = components['schemas']['PersistenceDecisionPack']
@@ -59,6 +61,7 @@ export interface HostDetailState {
 
 export interface OverviewState {
   controllerHealth: 'healthy' | 'degraded'
+  consumerBoundaryDecisionPack: ConsumerBoundaryDecisionPackContract
   persistenceReadiness: PersistenceReadinessContract
   persistenceDecisionPack: PersistenceDecisionPackContract
   managedHosts: HostSummary[]
@@ -108,6 +111,7 @@ export interface BackupsState {
 }
 
 export interface ConsoleState {
+  consumerBoundaryDecisionPack: ConsumerBoundaryDecisionPackContract
   operations: OperationDetailContract[]
   auditIndex: EventAuditIndexEntry[]
   persistenceReadiness: PersistenceReadinessContract
@@ -1316,6 +1320,62 @@ export function createMockPersistenceDecisionPack(): PersistenceDecisionPackCont
   }
 }
 
+export function createMockConsumerBoundaryDecisionPack(): ConsumerBoundaryDecisionPackContract {
+  return {
+    boundaryPath: '/api/controller',
+    hostingMode: 'controller_embedded',
+    reviewOwner: 'controller',
+    decisionState: 'hold',
+    splitReviewRequired: false,
+    summary:
+      '/api/controller should remain inside controller because standalone deployment boundary, dedicated edge policy layer, split ownership, external consumer pressure are still missing.',
+    nextActions: [
+      'Keep /api/controller embedded while standalone deployment ownership is absent.',
+      'Define dedicated edge policy and ownership split before reopening gateway review.',
+      'Pair any later split proposal with second-target policy and deployment-boundary evidence.'
+    ],
+    satisfiedCriteria: [
+      {
+        id: 'shared_contract_parity',
+        label: 'Shared contract parity',
+        reason: 'CLI, Web, and automation already share one generated consumer contract.'
+      },
+      {
+        id: 'prefixed_boundary',
+        label: 'Prefixed boundary',
+        reason: '`/api/controller` already exposes one compatibility-safe consumer entrypoint.'
+      },
+      {
+        id: 'legacy_alias_compatibility',
+        label: 'Legacy alias compatibility',
+        reason: 'Legacy controller routes still mirror the consumer-prefixed boundary.'
+      }
+    ],
+    blockingCriteria: [
+      {
+        id: 'standalone_deployment_boundary',
+        label: 'Standalone deployment boundary',
+        reason: 'Consumer transport still ships inside controller with no independent deployment boundary.'
+      },
+      {
+        id: 'dedicated_edge_policy_layer',
+        label: 'Dedicated edge policy layer',
+        reason: 'Dedicated auth, rate-limit, and edge policy handling outside controller transport is still missing.'
+      },
+      {
+        id: 'split_ownership',
+        label: 'Split ownership',
+        reason: 'Consumer-boundary ownership is still controller-only.'
+      },
+      {
+        id: 'external_consumer_pressure',
+        label: 'External consumer pressure',
+        reason: 'No external consumer or deployment pressure justifies a standalone split review yet.'
+      }
+    ]
+  }
+}
+
 export function createMockOverviewState(): OverviewState {
   const selectedHost = createMockHostDetailState()
 
@@ -1352,6 +1412,7 @@ export function createMockOverviewState(): OverviewState {
 
   return {
     controllerHealth: 'healthy',
+    consumerBoundaryDecisionPack: createMockConsumerBoundaryDecisionPack(),
     persistenceReadiness: createMockPersistenceReadiness(),
     persistenceDecisionPack: createMockPersistenceDecisionPack(),
     managedHosts: [selectedHost.host, secondaryHost, degradedHost],
@@ -1597,6 +1658,7 @@ export function createMockConsoleState(): ConsoleState {
   const hostDetailState = createMockHostDetailState()
 
   return {
+    consumerBoundaryDecisionPack: createMockConsumerBoundaryDecisionPack(),
     operations: operationsState.operations.map((entry) => entry.operation),
     auditIndex: operationsState.auditIndex,
     persistenceReadiness: createMockPersistenceReadiness(),
@@ -1663,6 +1725,21 @@ async function loadPersistenceDecisionPack(
   })
 }
 
+async function loadConsumerBoundaryDecisionPack(
+  baseUrl: string,
+  options: {
+    fetchImpl?: FetchLike
+  } = {}
+) {
+  return fetchControllerJson<ConsumerBoundaryDecisionPackContract>(
+    baseUrl,
+    '/consumer-boundary-decision-pack',
+    {
+      fetchImpl: options.fetchImpl
+    }
+  )
+}
+
 export async function loadHostDetailState(
   options: ControllerLoadOptions & {
     hostId: string
@@ -1715,7 +1792,8 @@ export async function loadOverviewState(
   }
 ): Promise<OverviewState> {
   const eventLimit = options.eventLimit ?? 20
-  const [managedHosts, operations, events, persistenceDecisionPack] = await Promise.all([
+  const [managedHosts, operations, events, persistenceDecisionPack, consumerBoundaryDecisionPack] =
+    await Promise.all([
     fetchControllerList<HostSummary>(options.baseUrl, '/hosts', {
       fetchImpl: options.fetchImpl
     }),
@@ -1727,6 +1805,9 @@ export async function loadOverviewState(
       fetchImpl: options.fetchImpl
     }),
     loadPersistenceDecisionPack(options.baseUrl, {
+      fetchImpl: options.fetchImpl
+    }),
+    loadConsumerBoundaryDecisionPack(options.baseUrl, {
       fetchImpl: options.fetchImpl
     })
   ])
@@ -1750,6 +1831,7 @@ export async function loadOverviewState(
 
   return {
     controllerHealth: degradedCount > 0 ? 'degraded' : 'healthy',
+    consumerBoundaryDecisionPack,
     persistenceReadiness: persistenceDecisionPack.readiness,
     persistenceDecisionPack,
     managedHosts,
@@ -1980,7 +2062,14 @@ export async function loadConsoleState(
   }
 ): Promise<ConsoleState> {
   const eventLimit = options.eventLimit ?? 20
-  const [operations, diagnostics, events, auditIndex, persistenceDecisionPack] = await Promise.all([
+  const [
+    operations,
+    diagnostics,
+    events,
+    auditIndex,
+    persistenceDecisionPack,
+    consumerBoundaryDecisionPack
+  ] = await Promise.all([
     loadOperationDetails(options.baseUrl, {
       params: { hostId: options.hostId },
       fetchImpl: options.fetchImpl
@@ -2005,6 +2094,9 @@ export async function loadConsoleState(
     }),
     loadPersistenceDecisionPack(options.baseUrl, {
       fetchImpl: options.fetchImpl
+    }),
+    loadConsumerBoundaryDecisionPack(options.baseUrl, {
+      fetchImpl: options.fetchImpl
     })
   ])
 
@@ -2014,6 +2106,7 @@ export async function loadConsoleState(
   ) ?? diagnostics[0] ?? null
 
   return {
+    consumerBoundaryDecisionPack,
     operations,
     auditIndex,
     persistenceReadiness: persistenceDecisionPack.readiness,
@@ -2044,6 +2137,11 @@ export function OverviewPage(props: { state: OverviewState }) {
         label: 'Persistence',
         value: state.persistenceDecisionPack.decisionState,
         tone: toneFromState(state.persistenceDecisionPack.decisionState)
+      },
+      {
+        label: 'Consumer Boundary',
+        value: state.consumerBoundaryDecisionPack.decisionState,
+        tone: toneFromState(state.consumerBoundaryDecisionPack.decisionState)
       },
       {
         label: 'Managed Hosts',
@@ -2269,6 +2367,11 @@ export function ConsolePage(props: { state: ConsoleState }) {
         label: 'Persistence',
         value: props.state.persistenceDecisionPack.decisionState,
         tone: toneFromState(props.state.persistenceDecisionPack.decisionState)
+      },
+      {
+        label: 'Consumer Boundary',
+        value: props.state.consumerBoundaryDecisionPack.decisionState,
+        tone: toneFromState(props.state.consumerBoundaryDecisionPack.decisionState)
       },
       {
         label: 'Operations',
@@ -2739,6 +2842,68 @@ function PersistenceDecisionCard(props: {
   ])
 }
 
+function ConsumerBoundaryDecisionCard(props: {
+  pack: ConsumerBoundaryDecisionPackContract
+  title: string
+  detail?: string
+}) {
+  const criteriaList = (
+    title: string,
+    items: ConsumerBoundaryDecisionPackContract['satisfiedCriteria'],
+    emptyCopy: string
+  ) =>
+    h('section', { className: 'pm-card', key: title }, [
+      h(SectionHeading, { key: 'heading', title, detail: `${items.length} criteria` }),
+      items.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            items.map((criterion) =>
+              h('li', { className: 'pm-list-item', key: criterion.id }, [
+                h('div', { key: 'line1' }, `${criterion.label} · ${criterion.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, criterion.reason)
+              ])
+            )
+          )
+        : emptyState(emptyCopy, 'empty')
+    ])
+
+  return h('div', { className: 'pm-panel-stack' }, [
+    h('section', { className: 'pm-card', key: 'summary-card' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: props.title,
+        detail: props.detail ?? props.pack.decisionState
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Boundary Path', props.pack.boundaryPath),
+        kvRow('Hosting Mode', props.pack.hostingMode),
+        kvRow('Review Owner', props.pack.reviewOwner),
+        kvRow('Decision State', h(StatusBadge, { state: props.pack.decisionState })),
+        kvRow('Split Review Required', props.pack.splitReviewRequired ? 'yes' : 'no')
+      ]),
+      h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.summary),
+      h(
+        'ul',
+        { className: 'pm-list', key: 'actions' },
+        props.pack.nextActions.map((action) =>
+          h('li', { className: 'pm-list-item', key: action }, [h('div', { key: 'line1' }, action)])
+        )
+      )
+    ]),
+    criteriaList(
+      'Satisfied criteria',
+      props.pack.satisfiedCriteria,
+      'No satisfied consumer-boundary criteria recorded yet.'
+    ),
+    criteriaList(
+      'Blocking criteria',
+      props.pack.blockingCriteria,
+      'No blocking consumer-boundary criteria recorded right now.'
+    )
+  ])
+}
+
 function OverviewRail(props: { state: OverviewState }) {
   const detailState = props.state.selectedHost
 
@@ -2756,6 +2921,11 @@ function OverviewRail(props: { state: OverviewState }) {
         key: 'persistence',
         pack: props.state.persistenceDecisionPack,
         title: 'Persistence readiness'
+      }),
+      h(ConsumerBoundaryDecisionCard, {
+        key: 'consumer-boundary',
+        pack: props.state.consumerBoundaryDecisionPack,
+        title: 'Consumer boundary split criteria'
       })
     ])
   }
@@ -2791,6 +2961,11 @@ function OverviewRail(props: { state: OverviewState }) {
       key: 'persistence',
       pack: props.state.persistenceDecisionPack,
       title: 'Persistence readiness'
+    }),
+    h(ConsumerBoundaryDecisionCard, {
+      key: 'consumer-boundary',
+      pack: props.state.consumerBoundaryDecisionPack,
+      title: 'Consumer boundary split criteria'
     })
   ])
 }
@@ -3742,6 +3917,12 @@ function ConsoleRail(props: { state: ConsoleState }) {
       title: 'Persistence readiness',
       detail: 'controller store'
     }),
+    h(ConsumerBoundaryDecisionCard, {
+      key: 'consumer-boundary',
+      pack: props.state.consumerBoundaryDecisionPack,
+      title: 'Consumer boundary split criteria',
+      detail: props.state.consumerBoundaryDecisionPack.boundaryPath
+    }),
     h('section', { className: 'pm-card', key: 'diagnostics' }, [
       h(SectionHeading, {
         key: 'heading',
@@ -3826,7 +4007,8 @@ function toneFromState(state: string): Tone {
     state === 'live' ||
     state === 'unknown' ||
     state === 'monitor' ||
-    state === 'prepare_review'
+    state === 'prepare_review' ||
+    state === 'hold'
   ) {
     return state === 'live' ? 'success' : 'info'
   }

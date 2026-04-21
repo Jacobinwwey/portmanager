@@ -91,7 +91,8 @@ Milestone 3 现在不是重新做一遍已落地 seam，而是在其上继续推
 - Unit 57：建立在当前 replay 与 indexed review surface 之上的独立 audit/event boundary 决策
 - Unit 58：已完成。显式 target-profile registry 与 target-abstraction rule 现在已经先锁定 Ubuntu 24.04 + systemd + Tailscale 契约，再拒绝任何第二目标声明
 - Unit 59：已完成。建立在已测量 readiness criteria 之上的 persistence promotion decision surface 现在已经通过 `/persistence-decision-pack` 公开显式 next action，同时继续让 SQLite 保持 active
-- 下一批队列：继续定义更后置的独立 split criteria 与更广第二目标策略，而不是宣称 PostgreSQL 默认状态库已经可用
+- Unit 60：已完成。consumer-boundary split criteria 现在已经通过 `/consumer-boundary-decision-pack` 公开，并明确只有在独立部署边界、edge-policy ownership 与 external consumer pressure 同时成立时，`/api/controller` 才需要进入 split review
+- 下一批队列：继续定义更后置的独立部署边界证据与更广第二目标策略，而不是宣称 PostgreSQL 默认状态库已经可用
 - 继续让 bounded batch work 留在同一套 evidence model 上，而不是再发明第二条 orchestration 路径
 
 ### 延续到 C 的语言与边界决策
