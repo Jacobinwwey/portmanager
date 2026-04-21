@@ -73,7 +73,7 @@ Version: v0.5.17-confidence-review-helper
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
-- [ ] Next lane: sync completed mainline confidence history into local review, run `pnpm milestone:review:promotion-ready -- --limit 20`, refresh the tracked public confidence artifact only through `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` when review agrees, use the summary's latest-qualified signal plus the verification report and public development-progress page during developer review, and keep qualified Milestone 2 confidence history green on the same live slice while human milestone-language review narrows wording.
+- [ ] Next lane: run `pnpm milestone:review:promotion-ready -- --limit 20`, rerun the same helper with `--refresh-published-artifact` when review agrees that publication should move, use the summary's latest-qualified signal plus the verification report and public development-progress page during developer review, and keep qualified Milestone 2 confidence history green on the same live slice while human milestone-language review narrows wording.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -168,7 +168,7 @@ Version: v0.5.17-confidence-review-helper
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
-- [ ] 下一主线：先把 completed mainline confidence history 同步到本地复核，再执行 `pnpm milestone:review:promotion-ready -- --limit 20`，只在人工复核同意时通过 `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` 推进公开 confidence artifact，利用 summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面做开发者判断，并继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，同时谨慎收窄里程碑文案。
+- [ ] 下一主线：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 推进公开 confidence artifact，利用 summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面做开发者判断，并继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，同时谨慎收窄里程碑文案。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
