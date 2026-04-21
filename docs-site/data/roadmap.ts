@@ -171,7 +171,7 @@ export const roadmapDeveloperProgress = {
           'Synced/local confidence summary now separates `Latest Run` from `Latest Qualified Run` and counts qualified mainline runs versus visibility-only local and non-qualified remote noise, so developer review no longer loses real mainline evidence after local reruns.',
           'The docs site now publishes `/en/roadmap/development-progress` and `/zh/roadmap/development-progress` from generated milestone confidence data, and roadmap home previews the same live counters.',
           'The latest promotion-ready refresh already republished the tracked snapshot, and exact live counts plus the latest qualified mainline run now belong to the live confidence card and tracked confidence artifact rather than brittle roadmap prose.',
-          '`pnpm milestone:review:promotion-ready` now also writes `.portmanager/reports/milestone-wording-review.md`, so wording review sees the latest gate, overclaim guardrails, and `Source surface status` in one local checklist.',
+          '`pnpm milestone:review:promotion-ready` now also writes `.portmanager/reports/milestone-wording-review.md`, and `mainline-acceptance` now runs the same helper with `--skip-sync` so the current run uploads `.portmanager/reports/milestone-confidence-review.md` plus `.portmanager/reports/milestone-wording-review.md` in `milestone-confidence-bundle-*`.',
           'Milestone proof now shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.',
           'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
           'Configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and publishes explicit succeeded remote redundancy state across API, CLI, web, and dedicated reliability proof.',
@@ -189,7 +189,7 @@ export const roadmapDeveloperProgress = {
           '同步后与本地 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计 qualified mainline run、本地 visibility-only 噪声、非 qualified 远端噪声，开发者在本地 rerun 之后也不会丢掉真实主线证据。',
           'docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 live 计数。',
           '`2026-04-21` 的最新 promotion-ready refresh 已把公开快照重发到同步后的已审核证据；精确实时计数与最新 qualified mainline run 现在统一以下方 live confidence 卡片和被跟踪 confidence artifact 为准，而不再继续依赖易漂移的 roadmap 文案。',
-          '`pnpm milestone:review:promotion-ready` 现在还会额外写出 `.portmanager/reports/milestone-wording-review.md`，让文案复核能在一份本地清单里同时看到最新 gate、过度表述护栏与 `Source surface status`。',
+          '`pnpm milestone:review:promotion-ready` 现在还会额外写出 `.portmanager/reports/milestone-wording-review.md`，而且 `mainline-acceptance` 现在会通过 `--skip-sync` 把当前 run 的 `.portmanager/reports/milestone-confidence-review.md` 与 `.portmanager/reports/milestone-wording-review.md` 一起上传到 `milestone-confidence-bundle-*`。',
           'milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup/rollback 证据保持不变。',
           'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
           '当 GitHub backup 已配置时，controller backup bundle 现在会通过 GitHub Contents API 上传，并在 API、CLI、web 与专门的可靠性证明里显式暴露远端冗余成功状态。',
@@ -208,7 +208,7 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Milestone 2 promotion-ready wording review is now the active lane, not Milestone 1 parity recovery and not more confidence scaffolding.',
-          'The wording-review checklist now exists as `.portmanager/reports/milestone-wording-review.md`, so developers no longer have to reconstruct guardrails by hand from scattered docs.',
+          'The wording-review checklist now exists as `.portmanager/reports/milestone-wording-review.md`, and the current-run CI bundle now carries that checklist plus `.portmanager/reports/milestone-confidence-review.md`, so developers no longer have to reconstruct guardrails by hand from scattered docs.',
           'That same helper output now distinguishes `promotion-ready-reviewed` from `promotion-ready-refresh-required`, so local promotion-ready evidence cannot be misread as public-artifact alignment.',
           'Configured, failed, and local-only GitHub backup paths now all exist inside one durable replay proof on the same live slice; remaining work is confidence maintenance, not first delivery.',
           'Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host/rule/policy slice.',
@@ -217,7 +217,7 @@ export const roadmapDeveloperProgress = {
         ],
         zh: [
           '当前主线已经转到 Milestone 2 的 promotion-ready 文案复核，而不再是 Milestone 1 一致性补洞，也不再是继续补 confidence 脚手架。',
-          '`.portmanager/reports/milestone-wording-review.md` 现在已经落地，开发者不再需要从分散文档里手动拼接文案护栏。',
+          '`.portmanager/reports/milestone-wording-review.md` 现在已经落地，而且当前 CI bundle 还会一起上传 `.portmanager/reports/milestone-confidence-review.md`，开发者不再需要从分散文档里手动拼接文案护栏。',
           '这份 helper 输出现在还会区分 `promotion-ready-reviewed` 与 `promotion-ready-refresh-required`，避免把本地 promotion-ready 证据误读成公开 artifact 已经对齐。',
           'configured、failed、local-only 三类 GitHub backup 路径现在都已经落在同一条 durable replay proof 的 live 切片上；剩余工作不再是首次交付，而是常态化维持与可信度加深。',
           'controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经在同一条 live host/rule/policy 切片上分组展示最新诊断、degraded diagnostics history 与 recovery-ready 成功证据。',
@@ -236,20 +236,20 @@ export const roadmapDeveloperProgress = {
       items: {
         en: [
           'Keep Unit 0 green now that the qualified-history threshold is met and the published state is `promotion-ready`.',
-          'Run `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs so local readiness review syncs real workflow evidence, writes the digest, and updates `.portmanager/reports/milestone-wording-review.md` in one repo-native step; inspect `Public claim class` plus `Source surface status`, and keep exact live counters on the confidence artifact plus development-progress page.',
+          'Run `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs so local readiness review syncs real workflow evidence, writes the digest, and updates `.portmanager/reports/milestone-wording-review.md` in one repo-native step; inspect `Public claim class` plus `Source surface status`, and use the uploaded `milestone-confidence-bundle-*` review pack from the current CI run when local sync is not the first question.',
           'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while synced summaries and human review drive milestone-language decisions.',
           'Use `pnpm milestone:review:promotion-ready -- --limit 20` as the default review entrypoint before any public wording move; it syncs completed history, writes the `pnpm milestone:review:confidence` digest internally, refreshes `.portmanager/reports/milestone-wording-review.md`, labels the current claim posture, and keeps artifact publication behind the same helper plus `--refresh-published-artifact` when review agrees.',
-          'Review the workflow job summary, uploaded confidence-history bundle, synced local `.portmanager/reports/milestone-confidence-summary.md`, `.portmanager/reports/milestone-wording-review.md`, and the verification report together, and use `Latest Qualified Run` plus the visibility breakdown instead of raw CI logs to judge readiness accumulation.',
+          'Review the workflow job summary, uploaded `milestone-confidence-bundle-*` review pack, synced local `.portmanager/reports/milestone-confidence-summary.md`, `.portmanager/reports/milestone-confidence-review.md`, `.portmanager/reports/milestone-wording-review.md`, and the verification report together, and use `Latest Qualified Run` plus the visibility breakdown instead of raw CI logs to judge readiness accumulation.',
           'Protect the lighter Unit 0 branch gate while the heavier confidence routine keeps collecting evidence.',
           'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.',
           'Keep Toward C deferred even though promotion thresholds are met; this lane is wording review, not platform expansion.'
         ],
         zh: [
           '当前 promotion-ready 门槛已经满足，继续把 Unit 0 保持为绿。',
-          '在主线出现已完成 run 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`，让本地 readiness 复核在一条 repo-native helper 里同时同步真实 workflow 证据、写出 digest，并刷新 `.portmanager/reports/milestone-wording-review.md`，而不只依赖本地 history；当前同步后与公开状态都已经稳定保持在 `promotion-ready` 门槛之上，精确实时计数统一留给 confidence artifact 与 development-progress 页面。' ,
+          '在主线出现已完成 run 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`，让本地 readiness 复核在一条 repo-native helper 里同时同步真实 workflow 证据、写出 digest，并刷新 `.portmanager/reports/milestone-wording-review.md`；如果当前问题只是确认这次 CI run 的复核结论，也可以先看上传后的 `milestone-confidence-bundle-*` review pack。' ,
           '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，同时让同步后的 summary 与人工复核共同驱动里程碑文案决策。',
           '在任何公开文案变动前先执行 `pnpm milestone:review:promotion-ready -- --limit 20` 作为默认复核入口；这条 helper 会在内部同步 completed history、写出 `pnpm milestone:review:confidence` digest、刷新带 claim posture 的 `.portmanager/reports/milestone-wording-review.md`，而公开 artifact 只会在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 前进。',
-          '优先同时查看 workflow job summary、上传后的 confidence-history bundle、同步后的本地 `.portmanager/reports/milestone-confidence-summary.md`、`.portmanager/reports/milestone-wording-review.md` 与验证报告，并直接使用 `Latest Qualified Run` 与 visibility breakdown，而不是继续只靠原始 CI 日志判断 readiness 积累。',
+          '优先同时查看 workflow job summary、上传后的 `milestone-confidence-bundle-*` review pack、同步后的本地 `.portmanager/reports/milestone-confidence-summary.md`、`.portmanager/reports/milestone-confidence-review.md`、`.portmanager/reports/milestone-wording-review.md` 与验证报告，并直接使用 `Latest Qualified Run` 与 visibility breakdown，而不是继续只靠原始 CI 日志判断 readiness 积累。',
           '在更重的 confidence routine 继续收集证据时，保住更轻的 Unit 0 分支 gate 不被重新定义。',
           '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。',
           '即使 promotion 门槛已经满足，也继续把 Toward C 保持为延后方向；当前主线是文案复核，而不是平台扩展。'

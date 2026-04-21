@@ -46,6 +46,7 @@ export function parseArgs(argv) {
     limit: DEFAULT_LIMIT,
     refreshPublishedArtifact: false,
     printDigest: false,
+    skipSync: false,
     historyPath: undefined,
     summaryPath: undefined,
     publishedDataPath: undefined,
@@ -114,6 +115,11 @@ export function parseArgs(argv) {
 
     if (current === '--print-digest') {
       options.printDigest = true
+      continue
+    }
+
+    if (current === '--skip-sync') {
+      options.skipSync = true
       continue
     }
 
@@ -368,6 +374,7 @@ export function writeMilestoneWordingReview({
 export function reviewPromotionReady({
   limit = DEFAULT_LIMIT,
   refreshPublishedArtifact = false,
+  skipSync = false,
   historyPath,
   summaryPath,
   publishedDataPath,
@@ -381,12 +388,14 @@ export function reviewPromotionReady({
   refreshPublishedConfidenceArtifactImpl = refreshPublishedConfidenceArtifact,
   writeMilestoneWordingReviewImpl = writeMilestoneWordingReview
 } = {}) {
-  const syncResult = syncConfidenceHistoryImpl({
-    limit,
-    historyPath,
-    summaryPath,
-    cwd
-  })
+  const syncResult = skipSync
+    ? null
+    : syncConfidenceHistoryImpl({
+        limit,
+        historyPath,
+        summaryPath,
+        cwd
+      })
 
   const reviewOptions = {
     historyPath,
@@ -428,6 +437,7 @@ export function reviewPromotionReady({
 export function renderPromotionReadyReview(result) {
   return [
     'Completed promotion-ready review flow',
+    `History sync: ${result.syncResult ? 'completed' : 'skipped'}`,
     `Readiness status: ${result.finalReview.review.local.readiness.status}`,
     `Qualified runs: ${result.finalReview.review.local.readiness.qualifiedRuns}/${result.finalReview.review.local.readiness.minimumQualifiedRuns}`,
     `Initial drift kind: ${result.initialReview.review.publicationDriftKind}`,

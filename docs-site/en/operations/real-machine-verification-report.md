@@ -37,6 +37,10 @@ Commands executed:
   - intentionally republishes the tracked docs artifact `docs-site/data/milestone-confidence-progress.ts` only through the explicit refresh contract behind the helper flag
   - proves the synced local review and the published confidence snapshot now match on the same completed workflow evidence
   - proves the tracked public artifact now carries latest qualified run `24702941958/1` and `16/7` qualified runs
+- `pnpm milestone:review:promotion-ready -- --skip-sync`
+  - reuses the current local confidence history/report/summary without reaching back to older completed workflow runs
+  - writes the same `.portmanager/reports/milestone-confidence-review.md` and `.portmanager/reports/milestone-wording-review.md` pair for the current run
+  - is the mode `mainline-acceptance` now uses before uploading `milestone-confidence-bundle-*`
 - GitHub Actions run `24702941958` for `mainline-acceptance`
   - proves the standing CI acceptance gate still passes after the refreshed confidence-progress artifact lands on `main`
   - proves the heavier confidence collection lane remains healthy alongside the refreshed public snapshot
@@ -92,17 +96,24 @@ Commands executed:
 ### Default developer review helper
 - Default local review sequence after completed mainline runs:
   - `pnpm milestone:review:promotion-ready -- --limit 20`
+- Default current-run CI review-pack sequence:
+  - `pnpm milestone:review:promotion-ready -- --skip-sync`
 - What the helper adds:
   - syncs completed `mainline-acceptance` history back into local `.portmanager/reports/`
   - writes `.portmanager/reports/milestone-confidence-review.md` through the existing `pnpm milestone:review:confidence` path
   - writes `.portmanager/reports/milestone-wording-review.md` so human wording review sees the latest gate, guardrails, `Source surface status`, source surfaces, and claim posture in one local artifact
   - reports countdown alignment separately from full local visibility-only drift
   - keeps tracked-artifact publication behind the explicit `--refresh-published-artifact` flag
+- What the CI review-pack mode adds:
+  - reuses the current run's local `.portmanager/reports/` files without remote sync
+  - appends `.portmanager/reports/milestone-confidence-review.md` and `.portmanager/reports/milestone-wording-review.md` to the GitHub Actions job summary
+  - uploads the same files inside `milestone-confidence-bundle-*` for developers who need the current run before a local sync
 - Publication rule after that helper review:
   - when the helper exposes countdown drift and human review agrees, rerun `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`; this exact order republished the aligned `promotion-ready` snapshot on `2026-04-21`
 
 ### Review protocol
 - Read the GitHub Actions `mainline-acceptance` summary first when reviewing readiness accumulation.
+- Read the uploaded `milestone-confidence-bundle-*` review pack when the first question is the current CI run rather than a locally synced view.
 - Run `pnpm milestone:review:promotion-ready -- --limit 20` so completed mainline history syncs back into local `.portmanager/reports/`, `.portmanager/reports/milestone-confidence-review.md` records whether the published countdown is aligned or only visibility-drifted, and `.portmanager/reports/milestone-wording-review.md` freezes the wording-review checklist plus `Public claim class` and `Source surface status`.
 - If the helper reports `promotion-ready-refresh-required` and the public snapshot should move, rerun the same helper with `--refresh-published-artifact`.
 - Compare the synced local summary, the wording-review checklist, the tracked docs confidence artifact, and the public development-progress page together.

@@ -17,6 +17,7 @@ test('parseArgs accepts wording-review flags, refresh flag, print flag, and limi
     'tmp/wording.md',
     '--refresh-published-artifact',
     '--print-digest',
+    '--skip-sync',
     '--skip-wording-review'
   ])
 
@@ -24,6 +25,7 @@ test('parseArgs accepts wording-review flags, refresh flag, print flag, and limi
   assert.equal(options.refreshPublishedArtifact, true)
   assert.equal(options.printDigest, true)
   assert.match(options.wordingReviewPath, /tmp\/wording\.md$/)
+  assert.equal(options.skipSync, true)
   assert.equal(options.skipWordingReview, true)
 })
 
@@ -179,6 +181,37 @@ test('reviewPromotionReady can skip wording-review artifact writes for dry revie
   assert.equal(calls.wording, 0)
   assert.equal(result.wordingReview, null)
   assert.match(renderPromotionReadyReview(result), /Wording review path: skipped/)
+})
+
+test('reviewPromotionReady can reuse current local artifacts without syncing history', () => {
+  const calls = {
+    sync: 0,
+    review: 0
+  }
+
+  const result = reviewPromotionReady({
+    skipSync: true,
+    syncConfidenceHistoryImpl() {
+      calls.sync += 1
+      return { snapshot: { readiness: { status: 'promotion-ready' } } }
+    },
+    reviewConfidenceImpl() {
+      calls.review += 1
+      return createReviewResult({
+        publicationDriftKind: 'aligned',
+        countdownAligned: true,
+        fullSnapshotAligned: true
+      })
+    },
+    writeMilestoneWordingReviewImpl() {
+      return { path: '/tmp/milestone-wording-review.md', content: '# wording\n', allowed: true }
+    }
+  })
+
+  assert.equal(calls.sync, 0)
+  assert.equal(calls.review, 1)
+  assert.equal(result.syncResult, null)
+  assert.match(renderPromotionReadyReview(result), /History sync: skipped/)
 })
 
 test('buildMilestoneWordingReview renders human review checklist from aligned promotion-ready evidence', () => {

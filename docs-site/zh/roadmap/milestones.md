@@ -76,7 +76,8 @@ status: active
 - `Confidence review-signal 切片`：已完成。同步后与本地 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计本地 visibility-only 与非 qualified 远端噪声，让开发者在本地 rerun 之后仍然能看见真实主线证据。
 - `Confidence progress page 切片`：已完成。docs-site 现在会从生成后的 confidence 数据发布一级开发者进度页，并在 roadmap 首页显示相同的 live 计数。
 - `Confidence review digest 切片`：已完成。`pnpm milestone:review:confidence` 现在会把同步后的本地 readiness 与已跟踪公开 progress artifact 直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，区分 countdown 漂移与 visibility-only 漂移，并把严格公开倒计时检查保持为显式可选。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照，复核验证报告与公开 development-progress 页面，并把 qualified history 持续转绿。
+- `Confidence review-pack CI 切片`：已完成。`pnpm milestone:review:promotion-ready -- --skip-sync` 现在会让 `mainline-acceptance` 把当前 run 的 `.portmanager/reports/milestone-confidence-review.md` 与 `.portmanager/reports/milestone-wording-review.md` 直接上传进 `milestone-confidence-bundle-*`，供开发者查看当前 run。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先读取上传的 `milestone-confidence-bundle-*` review pack；随后只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照，复核验证报告、公开 development-progress 页面与当前 run review pack，并把 qualified history 持续转绿。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库
@@ -120,6 +121,7 @@ status: active
 - 当前已验证：持久 confidence history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，按照 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass 统计推进进度，并把同一份 summary 直接发布到 workflow 页面给开发者查看。
 - 当前已验证：`pnpm milestone:sync:confidence-history` 现在允许开发者通过已认证 `gh` 把这些已完成 workflow bundle 导回本地 readiness review，并按稳定 history entry id 去重。
 - 当前已验证：docs-site 现在会从生成后的 milestone confidence 数据公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，roadmap 首页也会直接预览同一份 readiness 快照，方便开发者公开复核。
+- 当前已验证：`mainline-acceptance` 的 confidence collection 现在会执行 `pnpm milestone:review:promotion-ready -- --skip-sync`，因此上传的 `milestone-confidence-bundle-*` 也会带上 `.portmanager/reports/milestone-confidence-review.md` 与 `.portmanager/reports/milestone-wording-review.md`，供开发者直接查看当前 run。
 - `2026-04-21` 的最新 promotion-ready 开发者复核刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` 已通过已认证 `gh` 同步 completed `mainline-acceptance` 运行、写出 review digest，并把被跟踪 docs 产物刷新到同一份已完成 workflow 证据；精确实时计数与最新 qualified run 改由 development-progress 页面与被跟踪 confidence artifact 发布，而这份 roadmap spec 保留更稳定的 threshold-met 结论。
 - `2026-04-20` 的运行时迁移证明也已经成立：在把 GitHub workflow JavaScript actions 强制运行到 Node 24 之后，`mainline-acceptance` 与 `docs-pages` 仍然保持通过；当前剩余的 Node 20 退役 annotation 现在已经收敛为 GitHub 官方 action 元数据层面的上游 warning，而不是 repo 本地 workflow 漂移。
 - 深度对比已经完成的 `2026-04-16` reconciliation plan 之后，现在可以确认：旧的表面一致性、稳态边界与证明编排缺口都已闭环；剩余架构缺口已经不再是继续补报告脚手架或继续修复 summary 复核语义，而是持续积累 qualified 绿历史，并根据同步后的证据与人工复核来决定文案是否继续收窄。
