@@ -12,69 +12,63 @@ status: active
 ---
 > Source of truth: `docs/operations/portmanager-real-machine-verification-report.md`
 > Audience: `shared` | Section: `operations` | Status: `active`
-> Updated: 2026-04-20 | Version: v0.2.4-confidence-promotion-ready-helper-refresh
+> Updated: 2026-04-21 | Version: v0.2.5-confidence-progress-refresh
 ### Purpose
 This document freezes the current real-machine verification report for PortManager.
 It exists so that acceptance truth, confidence truth, and docs-publication truth are recorded in one place instead of being inferred from scattered progress notes.
 
 ### Verification session
-The latest recorded verification session for this report happened on `2026-04-20`.
-It combined a Windows development-machine replay against the latest local `main`, a GitHub-hosted confirmation pass after forcing JavaScript-based workflow actions onto Node 24, and a latest-main helper refresh that used `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` to sync completed `mainline-acceptance` history, write the review digest, and republish the tracked confidence-progress artifact from the same completed workflow evidence.
+The latest recorded verification session for this report happened on `2026-04-21`.
+It combined a fresh local replay of the standing acceptance gate, a latest-main helper refresh that used `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` to sync completed `mainline-acceptance` history, write the review digest, and republish the tracked confidence-progress artifact from the same completed workflow evidence, plus a GitHub-hosted confirmation pair after that refreshed artifact landed on `main`.
 
 Commands executed:
 - `corepack pnpm acceptance:verify`
-- `pnpm milestone:verify:confidence`
 - `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
-- GitHub Actions run `24648911705` for `mainline-acceptance`
-- GitHub Actions run `24648911717` for `docs-pages`
+- GitHub Actions run `24701682768` for `mainline-acceptance`
+- GitHub Actions run `24701682767` for `docs-pages`
 
 ### What each command proves
 - `corepack pnpm acceptance:verify`
   - proves the standing local acceptance gate still passes across tests, type checks, Rust workspace checks, contract drift checks, docs build, and milestone verification
-- `pnpm milestone:verify:confidence`
-  - proves the heavier Milestone 2 confidence routine still passes on top of the accepted live slice
-  - writes `.portmanager/reports/milestone-confidence-report.json`
-  - appends `.portmanager/reports/milestone-confidence-history.json`
-  - renders `.portmanager/reports/milestone-confidence-summary.md`
 - `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
   - syncs completed `mainline-acceptance` confidence bundles from GitHub Actions into local `.portmanager/reports/`
   - writes `.portmanager/reports/milestone-confidence-review.md` through the existing review-digest path
   - intentionally republishes the tracked docs artifact `docs-site/data/milestone-confidence-progress.ts` only through the explicit refresh contract behind the helper flag
   - proves the synced local review and the published confidence snapshot now match on the same completed workflow evidence
-- GitHub Actions run `24648911705` for `mainline-acceptance`
-  - proves the standing CI acceptance gate still passes after the workflow migration away from `pnpm/action-setup`
-  - proves `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` does not break the accepted control-plane proof or the confidence routine
-- GitHub Actions run `24648911717` for `docs-pages`
-  - proves the published docs build and Pages deployment still succeed after the same Node 24 forcing change
+  - proves the tracked public artifact now carries latest qualified run `24699564258/1` and `13/7` qualified runs
+- GitHub Actions run `24701682768` for `mainline-acceptance`
+  - proves the standing CI acceptance gate still passes after the refreshed confidence-progress artifact lands on `main`
+  - proves the heavier confidence collection lane remains healthy alongside the refreshed public snapshot
+- GitHub Actions run `24701682767` for `docs-pages`
+  - proves the published docs build and Pages deployment still succeed after the refreshed confidence-progress artifact lands on `main`
   - proves the docs publication workflow remains operational alongside the standing acceptance gate
 
 ### Evidence frozen by this report
 - Local acceptance gate: passed
-- Local confidence routine: passed
 - Helper sync and explicit refresh: passed
-- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`, `24646810439/1`, `24647442700/1`, `24648118236/1`, `24648519364/1`, `24648911705/1`
+- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`, `24646810439/1`, `24647442700/1`, `24648118236/1`, `24648519364/1`, `24648911705/1`, `24650868231/1`, `24699338529/1`, `24699564258/1`
 - Imported qualified workflow: `mainline-acceptance`
-- Imported qualified event: `push`
+- Imported qualified events: `push`, `schedule`
 - Current published readiness state: `promotion-ready`
-- Current published qualified runs: `10/7`
-- Current published qualified consecutive passes: `10/3`
+- Current published qualified runs: `13/7`
+- Current published qualified consecutive passes: `13/3`
 - Current published remaining qualified runs: `0`
-- Current published tracked runs: `16`
+- Current published tracked runs: `19`
 - Current published local visibility-only runs: `6`
-- Current published latest qualified run: `24648911705/1`
-- Current published latest qualified SHA: `d7b90cdcba4f`
-- GitHub-hosted `mainline-acceptance` run: `24648911705` passed
-- GitHub-hosted `docs-pages` run: `24648911717` passed
-- Node 24 forced-action trial: passed
+- Current published latest qualified run: `24699564258/1`
+- Current published latest qualified SHA: `d11cd001ae31`
+- GitHub-hosted `mainline-acceptance` run: `24701682768` passed
+- GitHub-hosted `docs-pages` run: `24701682767` passed
+- Prior Node 24 forced-action trial: still passed
 - Remaining warning source: GitHub official action metadata still declaring `node20`
 - Review digest after explicit refresh: aligned
 
 ### Current conclusion
 - Milestone 1 accepted public-surface truth still holds.
 - The standing acceptance contract is now complete and currently healthy across both the local gate and the GitHub-hosted gate.
-- The docs publication gate is also complete and currently healthy on GitHub Pages after the Node 24 forcing trial.
+- The docs publication gate is also complete and currently healthy on GitHub Pages after the refreshed artifact replay.
 - Milestone 2 confidence maintenance is real and operational, and promotion criteria are now met.
-- The current truthful public wording is now `promotion-ready` after the helper-driven explicit refresh path republished the tracked artifact.
+- The current truthful public wording is now `promotion-ready` after the helper-driven explicit refresh path republished the tracked artifact to the latest synced `13/7` snapshot.
 - Human milestone-language review is now allowed; the remaining public lane is deliberate wording tightening plus sustained gate health.
 - The latest visible local run is intentionally separated from the latest qualified mainline run, so local reruns no longer erase mainline review evidence.
 - The remaining Node 20 deprecation annotations are now upstream-only warning debt in GitHub official actions; they no longer indicate a repo-local acceptance or publication failure.
@@ -103,7 +97,7 @@ Commands executed:
   - reports countdown alignment separately from full local visibility-only drift
   - keeps tracked-artifact publication behind the explicit `--refresh-published-artifact` flag
 - Publication rule after that helper review:
-  - when the helper exposes countdown drift and human review agrees, rerun `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`; this exact order republished the aligned `promotion-ready` snapshot on `2026-04-20`
+  - when the helper exposes countdown drift and human review agrees, rerun `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`; this exact order republished the aligned `promotion-ready` snapshot on `2026-04-21`
 
 ### Review protocol
 - Read the GitHub Actions `mainline-acceptance` summary first when reviewing readiness accumulation.

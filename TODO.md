@@ -1,7 +1,7 @@
 # PortManager
 
-Updated: 2026-04-20
-Version: v0.5.17-confidence-review-helper
+Updated: 2026-04-21
+Version: v0.5.18-confidence-progress-refresh
 
 ## English
 
@@ -51,7 +51,7 @@ Version: v0.5.17-confidence-review-helper
 - [x] Milestone 2 acceptance closure: expand live degraded/recovery/diagnostics-history UX on the same host/rule/policy model.
 - [x] Milestone 2 acceptance closure: deliver real GitHub backup on top of the now-explicit remote-backup guidance surfaces.
 - [x] Milestone 2 reliability slice: replay configured, failed, and local-only required remote-backup evidence on the same live agent-backed host/rule flow across API, CLI, Web, and agent proof.
-- [x] Milestone 2 acceptance closure: keep qualified `pnpm milestone:verify:confidence` history green until the readiness summary reaches `promotion-ready` with `7` qualified runs plus `3` consecutive qualified passes. Current synced and published checkpoint on `2026-04-20`: `promotion-ready`, thresholds met, exact live counters published through the tracked confidence artifact and development-progress page.
+- [x] Milestone 2 acceptance closure: keep qualified `pnpm milestone:verify:confidence` history green until the readiness summary reaches `promotion-ready` with `7` qualified runs plus `3` consecutive qualified passes. Current synced and published checkpoint on `2026-04-21`: `promotion-ready`, thresholds met, and the tracked public artifact now follows latest qualified run `24699564258/1` while exact live counters stay on the confidence artifact and development-progress page.
 - [x] Milestone 2 acceptance closure: land `pnpm milestone:verify:confidence` as the canonical composed routine while preserving `pnpm acceptance:verify` as the Unit 0 gate.
 - [x] Milestone 2 acceptance closure: wire the canonical confidence routine into `.github/workflows/mainline-acceptance.yml` for `push main`, `workflow_dispatch`, and the daily scheduled history lane.
 - [x] Milestone 2 acceptance closure: write `.portmanager/reports/milestone-confidence-report.json` from the canonical confidence routine with CI traceability metadata, and upload the same report from CI for developer inspection.
@@ -146,7 +146,7 @@ Version: v0.5.17-confidence-review-helper
 - [x] 里程碑 2 验收闭环：继续在统一 host/rule/policy 模型上补强 live degraded/recovery/diagnostics-history UX。
 - [x] 里程碑 2 验收闭环：在已经显式化的远端备份提示表面之上，真正交付 GitHub backup。
 - [x] 里程碑 2 可靠性切片：在同一条 live agent-backed host/rule 流程上，围绕 configured、failed、local-only 三类 required remote-backup 证据重放 API、CLI、Web 与 agent proof。
-- [x] 里程碑 2 验收闭环：让 qualified `pnpm milestone:verify:confidence` 历史持续保持为绿，直到 readiness summary 以 `7` 次 qualified run 加 `3` 次连续 qualified pass 进入 `promotion-ready`，再决定 Milestone 2 文案何时可以无保留提升。当前同步与公开检查点都已在 `2026-04-20` 进入 `promotion-ready`，门槛已满足，精确实时计数统一通过被跟踪 confidence artifact 与 development-progress 页面发布。
+- [x] 里程碑 2 验收闭环：让 qualified `pnpm milestone:verify:confidence` 历史持续保持为绿，直到 readiness summary 以 `7` 次 qualified run 加 `3` 次连续 qualified pass 进入 `promotion-ready`，再决定 Milestone 2 文案何时可以无保留提升。当前同步与公开检查点都已在 `2026-04-21` 进入 `promotion-ready`，门槛已满足，而且被跟踪公开 artifact 已跟上最新 qualified run `24699564258/1`；精确实时计数统一通过 confidence artifact 与 development-progress 页面发布。
 - [x] 里程碑 2 验收闭环：落地 `pnpm milestone:verify:confidence` 作为规范组合 routine，同时保留 `pnpm acceptance:verify` 作为 Unit 0 gate。
 - [x] 里程碑 2 验收闭环：把规范 confidence routine 接入 `.github/workflows/mainline-acceptance.yml` 的 `push main`、`workflow_dispatch` 与每日 schedule 历史路径。
 - [x] 里程碑 2 验收闭环：让规范 confidence routine 写出带 CI traceability 元数据的 `.portmanager/reports/milestone-confidence-report.json`，并把同一份报告从 CI 上传给开发者核对。
