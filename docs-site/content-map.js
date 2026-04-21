@@ -195,6 +195,45 @@ export const contentMap = [
     }
   },
   {
+    id: 'second-target-review-contract',
+    sourcePath: 'docs/operations/portmanager-second-target-review-contract.md',
+    route: 'operations/second-target-review-contract',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Second-Target Review Contract',
+      zh: '第二目标复核契约'
+    }
+  },
+  {
+    id: 'debian-12-acceptance-recipe',
+    sourcePath: 'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+    route: 'operations/debian-12-acceptance-recipe',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Debian 12 Acceptance Recipe',
+      zh: 'Debian 12 验收配方'
+    }
+  },
+  {
+    id: 'debian-12-operator-ownership',
+    sourcePath: 'docs/operations/portmanager-debian-12-operator-ownership.md',
+    route: 'operations/debian-12-operator-ownership',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Debian 12 Operator Ownership',
+      zh: 'Debian 12 操作员归属'
+    }
+  },
+  {
     id: 'overview-design-baseline',
     sourcePath: 'docs/design/portmanager-overview-design-baseline.md',
     route: 'architecture/overview-design-baseline',

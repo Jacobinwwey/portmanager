@@ -1498,18 +1498,29 @@ export interface components {
             observedStateHash: string;
         };
         SecondTargetPolicyCriterion: {
-            /** @enum {string} */
-            id: "locked_target_registry" | "supported_target_baseline" | "candidate_target_declared" | "bootstrap_transport_parity" | "steady_state_transport_parity" | "backup_restore_parity" | "diagnostics_parity" | "rollback_parity" | "docs_contract_ready" | "acceptance_recipe_ready" | "operator_ownership_defined";
+            id: components["schemas"]["SecondTargetPolicyCriterionId"];
             label: string;
             reason: string;
         };
         /** @enum {string} */
+        SecondTargetPolicyCriterionId: "locked_target_registry" | "supported_target_baseline" | "candidate_target_declared" | "bootstrap_transport_parity" | "steady_state_transport_parity" | "backup_restore_parity" | "diagnostics_parity" | "rollback_parity" | "docs_contract_ready" | "acceptance_recipe_ready" | "operator_ownership_defined";
+        /** @enum {string} */
         SecondTargetPolicyDecisionState: "hold" | "prepare_review" | "review_required";
+        SecondTargetPolicyEvidenceItem: {
+            criterionId: components["schemas"]["SecondTargetPolicyCriterionId"];
+            label: string;
+            sources: string[];
+            state: components["schemas"]["SecondTargetPolicyEvidenceState"];
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetPolicyEvidenceState: "landed" | "review_prep" | "planned";
         SecondTargetPolicyPack: {
             blockingCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
             candidateTargetProfileIds: string[];
             candidateTargetProfiles: components["schemas"]["TargetProfileSummary"][];
             decisionState: components["schemas"]["SecondTargetPolicyDecisionState"];
+            evidenceItems: components["schemas"]["SecondTargetPolicyEvidenceItem"][];
             expansionReviewRequired: boolean;
             /** @enum {string} */
             lockedTargetProfileId: "ubuntu-24.04-systemd-tailscale";
@@ -1612,7 +1623,10 @@ export type RunBackupRequest = components['schemas']['RunBackupRequest'];
 export type RunDiagnosticsRequest = components['schemas']['RunDiagnosticsRequest'];
 export type RunDriftCheckRequest = components['schemas']['RunDriftCheckRequest'];
 export type SecondTargetPolicyCriterion = components['schemas']['SecondTargetPolicyCriterion'];
+export type SecondTargetPolicyCriterionId = components['schemas']['SecondTargetPolicyCriterionId'];
 export type SecondTargetPolicyDecisionState = components['schemas']['SecondTargetPolicyDecisionState'];
+export type SecondTargetPolicyEvidenceItem = components['schemas']['SecondTargetPolicyEvidenceItem'];
+export type SecondTargetPolicyEvidenceState = components['schemas']['SecondTargetPolicyEvidenceState'];
 export type SecondTargetPolicyPack = components['schemas']['SecondTargetPolicyPack'];
 export type SshConnection = components['schemas']['SshConnection'];
 export type TargetProfile = components['schemas']['TargetProfile'];

@@ -34,6 +34,8 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /Effective Policy/)
   assert.match(html, /Persistence readiness/i)
   assert.match(html, /Consumer boundary split criteria/i)
+  assert.match(html, /Evidence ledger/i)
+  assert.match(html, /portmanager-debian-12-acceptance-recipe\.md/i)
   assert.match(html, /review prep/i)
   assert.match(html, /controller_embedded/i)
   assert.match(html, /Event Stream/)
@@ -454,6 +456,36 @@ test('overview loader keeps consumer boundary base path when building controller
             'Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.',
             'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
           ],
+          evidenceItems: [
+            {
+              criterionId: 'docs_contract_ready',
+              label: 'Docs contract ready',
+              state: 'landed',
+              summary: 'docs contract exists',
+              sources: ['docs/operations/portmanager-second-target-review-contract.md']
+            },
+            {
+              criterionId: 'acceptance_recipe_ready',
+              label: 'Acceptance recipe ready',
+              state: 'landed',
+              summary: 'acceptance recipe exists',
+              sources: ['docs/operations/portmanager-debian-12-acceptance-recipe.md']
+            },
+            {
+              criterionId: 'operator_ownership_defined',
+              label: 'Operator ownership defined',
+              state: 'landed',
+              summary: 'ownership definition exists',
+              sources: ['docs/operations/portmanager-debian-12-operator-ownership.md']
+            },
+            {
+              criterionId: 'bootstrap_transport_parity',
+              label: 'Bootstrap transport parity',
+              state: 'planned',
+              summary: 'bootstrap parity proof not landed yet',
+              sources: ['docs/operations/portmanager-debian-12-acceptance-recipe.md']
+            }
+          ],
           satisfiedCriteria: [
             {
               id: 'locked_target_registry',
@@ -648,6 +680,22 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
           expansionReviewRequired: false,
           summary: 'second target policy pack is alive',
           nextActions: ['keep supported targets locked'],
+          evidenceItems: [
+            {
+              criterionId: 'docs_contract_ready',
+              label: 'Docs contract ready',
+              state: 'landed',
+              summary: 'docs contract exists',
+              sources: ['docs/operations/portmanager-second-target-review-contract.md']
+            },
+            {
+              criterionId: 'bootstrap_transport_parity',
+              label: 'Bootstrap transport parity',
+              state: 'planned',
+              summary: 'bootstrap parity proof not landed yet',
+              sources: ['docs/operations/portmanager-debian-12-acceptance-recipe.md']
+            }
+          ],
           satisfiedCriteria: [],
           blockingCriteria: [
             {

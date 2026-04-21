@@ -28,6 +28,16 @@ export interface SecondTargetPolicyCriterion {
   reason: string
 }
 
+export type SecondTargetPolicyEvidenceState = 'landed' | 'review_prep' | 'planned'
+
+export interface SecondTargetPolicyEvidenceItem {
+  criterionId: SecondTargetPolicyCriterionId
+  label: string
+  state: SecondTargetPolicyEvidenceState
+  summary: string
+  sources: string[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -43,6 +53,7 @@ export interface SecondTargetPolicySnapshot {
   docsContractReady: boolean
   acceptanceRecipeReady: boolean
   operatorOwnershipDefined: boolean
+  evidenceItems?: SecondTargetPolicyEvidenceItem[]
 }
 
 export interface SecondTargetPolicyPack {
@@ -57,6 +68,7 @@ export interface SecondTargetPolicyPack {
   nextActions: string[]
   satisfiedCriteria: SecondTargetPolicyCriterion[]
   blockingCriteria: SecondTargetPolicyCriterion[]
+  evidenceItems: SecondTargetPolicyEvidenceItem[]
 }
 
 const criterionMetadata: Record<
@@ -120,6 +132,135 @@ const criterionMetadata: Record<
     satisfiedReason: 'Operator ownership and support responsibility are defined for the candidate target.',
     missingReason: 'Operator ownership is still undefined for the candidate target.'
   }
+}
+
+function evidenceItem(
+  criterionId: SecondTargetPolicyCriterionId,
+  state: SecondTargetPolicyEvidenceState,
+  summary: string,
+  sources: string[]
+): SecondTargetPolicyEvidenceItem {
+  return {
+    criterionId,
+    label: criterionMetadata[criterionId].label,
+    state,
+    summary,
+    sources
+  }
+}
+
+function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceItem[] {
+  return [
+    evidenceItem(
+      'locked_target_registry',
+      'landed',
+      'Locked target-profile registry now publishes the Ubuntu baseline across controller, CLI, and Web.',
+      [
+        'apps/controller/src/target-profile-registry.ts',
+        'tests/controller/target-profile-registry.test.ts',
+        'apps/web/src/main.ts',
+        'crates/portmanager-cli/src/main.rs'
+      ]
+    ),
+    evidenceItem(
+      'supported_target_baseline',
+      'landed',
+      'Supported-target wording remains locked to ubuntu-24.04-systemd-tailscale.',
+      [
+        'README.md',
+        'docs/specs/portmanager-milestones.md',
+        'docs/specs/portmanager-toward-c-strategy.md',
+        'docs-site/data/roadmap.ts'
+      ]
+    ),
+    evidenceItem(
+      'candidate_target_declared',
+      'review_prep',
+      'debian-12-systemd-tailscale is declared as the only review-prep candidate, not a supported target.',
+      [
+        'apps/controller/src/second-target-policy-pack.ts',
+        'tests/controller/second-target-policy-pack.test.ts',
+        'docs/specs/portmanager-milestones.md',
+        'docs-site/data/roadmap.ts'
+      ]
+    ),
+    evidenceItem(
+      'docs_contract_ready',
+      'landed',
+      'Docs contract now freezes candidate-only wording plus review-prep guardrails for Debian 12.',
+      [
+        'docs/operations/portmanager-second-target-review-contract.md',
+        'README.md',
+        'docs/specs/portmanager-v1-product-spec.md',
+        'docs-site/data/roadmap.ts'
+      ]
+    ),
+    evidenceItem(
+      'acceptance_recipe_ready',
+      'landed',
+      'Acceptance recipe now defines the bounded Debian 12 review-prep proof sequence and artifact list.',
+      [
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'README.md',
+        'TODO.md'
+      ]
+    ),
+    evidenceItem(
+      'operator_ownership_defined',
+      'landed',
+      'Operator ownership document now names who stages hosts, records evidence, and decides whether review stays on hold.',
+      [
+        'docs/operations/portmanager-debian-12-operator-ownership.md',
+        'README.md',
+        'docs/architecture/portmanager-v1-architecture.md'
+      ]
+    ),
+    evidenceItem(
+      'bootstrap_transport_parity',
+      'planned',
+      'Bootstrap parity proof is still pending for Debian 12 and remains blocked until review-prep runs are captured.',
+      [
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
+      ]
+    ),
+    evidenceItem(
+      'steady_state_transport_parity',
+      'planned',
+      'Steady-state transport parity is still pending for Debian 12.',
+      [
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
+      ]
+    ),
+    evidenceItem(
+      'backup_restore_parity',
+      'planned',
+      'Backup and restore parity evidence is still pending for Debian 12.',
+      [
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'docs/operations/portmanager-backup-rollback-policy.md'
+      ]
+    ),
+    evidenceItem(
+      'diagnostics_parity',
+      'planned',
+      'Diagnostics parity evidence is still pending for Debian 12.',
+      [
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
+      ]
+    ),
+    evidenceItem(
+      'rollback_parity',
+      'planned',
+      'Rollback parity evidence is still pending for Debian 12.',
+      [
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'docs/operations/portmanager-backup-rollback-policy.md'
+      ]
+    )
+  ]
 }
 
 function hasLockedSupportedTarget(snapshot: SecondTargetPolicySnapshot) {
@@ -249,6 +390,14 @@ function buildNextActions(
   }
 
   if (candidateTargetDeclared(snapshot)) {
+    if (governanceReady(snapshot)) {
+      return [
+        `Keep supported targets locked to ${lockedTarget}.`,
+        `Keep ${candidateTargets} in review-prep until bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity are all real.`,
+        'Keep docs contract, acceptance recipe, and operator ownership artifacts aligned with parity evidence while the candidate stays on hold.'
+      ]
+    }
+
     return [
       `Keep supported targets locked to ${lockedTarget}.`,
       `Keep ${candidateTargets} in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.`,
@@ -267,6 +416,7 @@ export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySna
   const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
     summarizeTargetProfile(profile.id)
   )
+  const evidenceItems = createDefaultSecondTargetEvidenceItems()
 
   return {
     lockedTargetProfileId: defaultTargetProfileId,
@@ -282,9 +432,10 @@ export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySna
     backupRestoreParity: false,
     diagnosticsParity: false,
     rollbackParity: false,
-    docsContractReady: false,
-    acceptanceRecipeReady: false,
-    operatorOwnershipDefined: false
+    docsContractReady: true,
+    acceptanceRecipeReady: true,
+    operatorOwnershipDefined: true,
+    evidenceItems
   }
 }
 
@@ -310,6 +461,13 @@ export function buildSecondTargetPolicyPack(
     summary: buildSummary(decisionState, blockingCriteria),
     nextActions: buildNextActions(snapshot, decisionState),
     satisfiedCriteria,
-    blockingCriteria
+    blockingCriteria,
+    evidenceItems: (snapshot.evidenceItems ?? []).map((item) => ({
+      criterionId: item.criterionId,
+      label: item.label,
+      state: item.state,
+      summary: item.summary,
+      sources: [...item.sources]
+    }))
   }
 }

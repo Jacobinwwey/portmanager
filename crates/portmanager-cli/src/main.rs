@@ -2031,6 +2031,42 @@ fn format_target_profile_summaries(title: &str, profiles: &Value) -> String {
     }
 }
 
+fn format_second_target_evidence_block(title: &str, evidence_items: &Value) -> String {
+    let lines = evidence_items
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|item| {
+            let sources = item["sources"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|source| source.as_str())
+                .collect::<Vec<_>>();
+            let sources_suffix = if sources.is_empty() {
+                String::new()
+            } else {
+                format!(" :: sources {}", sources.join(", "))
+            };
+
+            format!(
+                "- {} ({}) :: {} :: {}{}",
+                item["criterionId"].as_str().unwrap_or("unknown"),
+                item["state"].as_str().unwrap_or("unknown"),
+                item["label"].as_str().unwrap_or("unknown"),
+                item["summary"].as_str().unwrap_or("no summary"),
+                sources_suffix
+            )
+        })
+        .collect::<Vec<_>>();
+
+    if lines.is_empty() {
+        format!("{}:\n- none", title)
+    } else {
+        format!("{}:\n{}", title, lines.join("\n"))
+    }
+}
+
 fn format_consumer_boundary_decision_pack_text(pack: &Value) -> String {
     let action_lines = pack["nextActions"]
         .as_array()
@@ -2078,7 +2114,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
     };
 
     format!(
-        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}",
+        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}\n{}",
         pack["lockedTargetProfileId"].as_str().unwrap_or("unknown"),
         pack["reviewOwner"].as_str().unwrap_or("unknown"),
         pack["decisionState"].as_str().unwrap_or("unknown"),
@@ -2091,6 +2127,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
         action_block,
         format_target_profile_summaries("Supported Targets", &pack["supportedTargetProfiles"]),
         format_target_profile_summaries("Candidate Targets", &pack["candidateTargetProfiles"]),
+        format_second_target_evidence_block("Evidence Ledger", &pack["evidenceItems"]),
         format_decision_criteria_block("Satisfied Criteria", &pack["satisfiedCriteria"]),
         format_decision_criteria_block("Blocking Criteria", &pack["blockingCriteria"])
     )

@@ -1338,26 +1338,28 @@ components:
     SecondTargetPolicyDecisionState:
       type: string
       enum: [hold, prepare_review, review_required]
+    SecondTargetPolicyCriterionId:
+      type: string
+      enum:
+        [
+          locked_target_registry,
+          supported_target_baseline,
+          candidate_target_declared,
+          bootstrap_transport_parity,
+          steady_state_transport_parity,
+          backup_restore_parity,
+          diagnostics_parity,
+          rollback_parity,
+          docs_contract_ready,
+          acceptance_recipe_ready,
+          operator_ownership_defined
+        ]
     SecondTargetPolicyCriterion:
       type: object
       required: [id, label, reason]
       properties:
         id:
-          type: string
-          enum:
-            [
-              locked_target_registry,
-              supported_target_baseline,
-              candidate_target_declared,
-              bootstrap_transport_parity,
-              steady_state_transport_parity,
-              backup_restore_parity,
-              diagnostics_parity,
-              rollback_parity,
-              docs_contract_ready,
-              acceptance_recipe_ready,
-              operator_ownership_defined
-            ]
+          $ref: '#/components/schemas/SecondTargetPolicyCriterionId'
         label:
           type: string
         reason:
@@ -1376,7 +1378,8 @@ components:
           summary,
           nextActions,
           satisfiedCriteria,
-          blockingCriteria
+          blockingCriteria,
+          evidenceItems
         ]
       properties:
         lockedTargetProfileId:
@@ -1415,6 +1418,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetPolicyCriterion'
+        evidenceItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetPolicyEvidenceItem'
+    SecondTargetPolicyEvidenceState:
+      type: string
+      enum: [landed, review_prep, planned]
+    SecondTargetPolicyEvidenceItem:
+      type: object
+      required: [criterionId, label, state, summary, sources]
+      properties:
+        criterionId:
+          $ref: '#/components/schemas/SecondTargetPolicyCriterionId'
+        label:
+          type: string
+        state:
+          $ref: '#/components/schemas/SecondTargetPolicyEvidenceState'
+        summary:
+          type: string
+        sources:
+          type: array
+          items:
+            type: string
     RollbackPoint:
       type: object
       required: [id, hostId, operationId, createdAt, state]

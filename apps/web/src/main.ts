@@ -1466,11 +1466,11 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
     decisionState: 'hold',
     expansionReviewRequired: false,
     summary:
-      'Second-target support must stay on hold because bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity, docs contract ready, acceptance recipe ready, and operator ownership defined are still missing.',
+      'Second-target support must stay on hold because bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, and rollback parity are still missing.',
     nextActions: [
       'Keep supported targets locked to ubuntu-24.04-systemd-tailscale.',
-      'Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.',
-      'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
+      'Keep debian-12-systemd-tailscale in review-prep until bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity are all real.',
+      'Keep docs contract, acceptance recipe, and operator ownership artifacts aligned with parity evidence while the candidate stays on hold.'
     ],
     satisfiedCriteria: [
       {
@@ -1489,6 +1489,70 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         id: 'candidate_target_declared',
         label: 'Candidate target declared',
         reason: 'One explicit second-target candidate is declared for review.'
+      },
+      {
+        id: 'docs_contract_ready',
+        label: 'Docs contract ready',
+        reason: 'Docs and public contract wording now describe the candidate target honestly.'
+      },
+      {
+        id: 'acceptance_recipe_ready',
+        label: 'Acceptance recipe ready',
+        reason: 'Acceptance proof steps now exist for the candidate target.'
+      },
+      {
+        id: 'operator_ownership_defined',
+        label: 'Operator ownership defined',
+        reason: 'Operator ownership and support responsibility are defined for the candidate target.'
+      }
+    ],
+    evidenceItems: [
+      {
+        criterionId: 'locked_target_registry',
+        label: 'Locked target registry',
+        state: 'landed',
+        summary:
+          'Locked target-profile registry now publishes the Ubuntu baseline across controller, CLI, and Web.',
+        sources: [
+          'apps/controller/src/target-profile-registry.ts',
+          'tests/controller/target-profile-registry.test.ts'
+        ]
+      },
+      {
+        criterionId: 'candidate_target_declared',
+        label: 'Candidate target declared',
+        state: 'review_prep',
+        summary:
+          'debian-12-systemd-tailscale is declared as the only review-prep candidate, not a supported target.',
+        sources: ['docs/specs/portmanager-milestones.md', 'docs-site/data/roadmap.ts']
+      },
+      {
+        criterionId: 'docs_contract_ready',
+        label: 'Docs contract ready',
+        state: 'landed',
+        summary: 'Docs contract now freezes candidate-only wording plus review-prep guardrails for Debian 12.',
+        sources: ['docs/operations/portmanager-second-target-review-contract.md']
+      },
+      {
+        criterionId: 'acceptance_recipe_ready',
+        label: 'Acceptance recipe ready',
+        state: 'landed',
+        summary: 'Acceptance recipe now defines the bounded Debian 12 review-prep proof sequence and artifact list.',
+        sources: ['docs/operations/portmanager-debian-12-acceptance-recipe.md']
+      },
+      {
+        criterionId: 'operator_ownership_defined',
+        label: 'Operator ownership defined',
+        state: 'landed',
+        summary: 'Operator ownership document now names who stages hosts, records evidence, and decides whether review stays on hold.',
+        sources: ['docs/operations/portmanager-debian-12-operator-ownership.md']
+      },
+      {
+        criterionId: 'bootstrap_transport_parity',
+        label: 'Bootstrap transport parity',
+        state: 'planned',
+        summary: 'Bootstrap parity proof is still pending for Debian 12 and remains blocked until review-prep runs are captured.',
+        sources: ['docs/operations/portmanager-debian-12-acceptance-recipe.md']
       }
     ],
     blockingCriteria: [
@@ -3287,6 +3351,32 @@ function SecondTargetPolicyCard(props: {
             )
           )
         : emptyState('No second-target candidate declared yet.', 'empty')
+    ]),
+    h('section', { className: 'pm-card', key: 'evidence-ledger' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Evidence ledger',
+        detail: `${props.pack.evidenceItems.length} items`
+      }),
+      props.pack.evidenceItems.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.evidenceItems.map((item) =>
+              h('li', { className: 'pm-list-item', key: `${item.criterionId}-${item.state}` }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.criterionId}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, [
+                  `${item.state} · ${item.summary}`,
+                  h(
+                    'span',
+                    { key: 'sources' },
+                    item.sources.length > 0 ? ` Sources: ${item.sources.join(', ')}` : ''
+                  )
+                ])
+              ])
+            )
+          )
+        : emptyState('No second-target evidence ledger recorded yet.', 'empty')
     ]),
     criteriaList(
       'Satisfied criteria',

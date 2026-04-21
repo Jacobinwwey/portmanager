@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os'
 import {
   buildSecondTargetPolicyPack,
   createControllerEventBus,
+  createDefaultSecondTargetPolicySnapshot,
   createControllerServer,
   createOperationStore
 } from '../../apps/controller/src/index.ts'
@@ -103,6 +104,53 @@ test('second target policy pack requires expansion review when candidate, parity
   )
 })
 
+test('default second target policy pack lands governance artifacts while transport parity stays pending', () => {
+  const pack = buildSecondTargetPolicyPack(createDefaultSecondTargetPolicySnapshot())
+
+  assert.equal(pack.decisionState, 'hold')
+  assert.equal(pack.expansionReviewRequired, false)
+  assert.equal(
+    pack.satisfiedCriteria.some((criterion) => criterion.id === 'docs_contract_ready'),
+    true
+  )
+  assert.equal(
+    pack.satisfiedCriteria.some((criterion) => criterion.id === 'acceptance_recipe_ready'),
+    true
+  )
+  assert.equal(
+    pack.satisfiedCriteria.some((criterion) => criterion.id === 'operator_ownership_defined'),
+    true
+  )
+  assert.equal(
+    pack.blockingCriteria.some((criterion) => criterion.id === 'bootstrap_transport_parity'),
+    true
+  )
+  assert.equal(
+    pack.evidenceItems.some(
+      (item) =>
+        item.criterionId === 'acceptance_recipe_ready' &&
+        item.state === 'landed' &&
+        item.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-acceptance-recipe.md')
+        )
+    ),
+    true
+  )
+  assert.equal(
+    pack.evidenceItems.some(
+      (item) =>
+        item.criterionId === 'bootstrap_transport_parity' &&
+        item.state === 'planned' &&
+        item.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-acceptance-recipe.md')
+        )
+    ),
+    true
+  )
+  assert.match(pack.summary, /bootstrap transport parity/i)
+  assert.doesNotMatch(pack.summary, /docs contract ready/i)
+})
+
 test('controller server exposes second target policy pack as explicit controller contract', async () => {
   const { directory, databasePath } = tempDbPath()
 
@@ -128,6 +176,13 @@ test('controller server exposes second target policy pack as explicit controller
         nextActions: string[]
         satisfiedCriteria: Array<{ id: string; label: string }>
         blockingCriteria: Array<{ id: string; label: string }>
+        evidenceItems: Array<{
+          criterionId: string
+          label: string
+          state: string
+          summary: string
+          sources: string[]
+        }>
       }
 
       assert.equal(payload.lockedTargetProfileId, 'ubuntu-24.04-systemd-tailscale')
@@ -152,7 +207,31 @@ test('controller server exposes second target policy pack as explicit controller
         true
       )
       assert.equal(
+        payload.satisfiedCriteria.some((criterion) => criterion.id === 'docs_contract_ready'),
+        true
+      )
+      assert.equal(
+        payload.satisfiedCriteria.some((criterion) => criterion.id === 'acceptance_recipe_ready'),
+        true
+      )
+      assert.equal(
+        payload.satisfiedCriteria.some((criterion) => criterion.id === 'operator_ownership_defined'),
+        true
+      )
+      assert.equal(
         payload.blockingCriteria.some((criterion) => criterion.id === 'bootstrap_transport_parity'),
+        true
+      )
+      assert.equal(payload.evidenceItems.length >= 8, true)
+      assert.equal(
+        payload.evidenceItems.some(
+          (item) =>
+            item.criterionId === 'operator_ownership_defined' &&
+            item.state === 'landed' &&
+            item.sources.some((source) =>
+              source.endsWith('docs/operations/portmanager-debian-12-operator-ownership.md')
+            )
+        ),
         true
       )
     } finally {

@@ -1414,6 +1414,29 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                     "Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.",
                     "Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim."
                 ],
+                "evidenceItems": [
+                    {
+                        "criterionId": "docs_contract_ready",
+                        "label": "Docs contract ready",
+                        "state": "landed",
+                        "summary": "docs contract exists",
+                        "sources": ["docs/operations/portmanager-second-target-review-contract.md"]
+                    },
+                    {
+                        "criterionId": "acceptance_recipe_ready",
+                        "label": "Acceptance recipe ready",
+                        "state": "landed",
+                        "summary": "acceptance recipe exists",
+                        "sources": ["docs/operations/portmanager-debian-12-acceptance-recipe.md"]
+                    },
+                    {
+                        "criterionId": "bootstrap_transport_parity",
+                        "label": "Bootstrap transport parity",
+                        "state": "planned",
+                        "summary": "bootstrap parity proof not landed yet",
+                        "sources": ["docs/operations/portmanager-debian-12-acceptance-recipe.md"]
+                    }
+                ],
                 "satisfiedCriteria": [
                     {
                         "id": "locked_target_registry",
@@ -1451,6 +1474,8 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("Expansion Review Required: no"));
     assert!(stdout.contains("Candidate Targets"));
     assert!(stdout.contains("debian-12-systemd-tailscale"));
+    assert!(stdout.contains("Evidence Ledger"));
+    assert!(stdout.contains("portmanager-debian-12-acceptance-recipe.md"));
     assert!(stdout.contains("bootstrap_transport_parity"));
 }
 
@@ -1482,6 +1507,15 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                 "expansionReviewRequired": false,
                 "summary": "second target policy pack is alive",
                 "nextActions": ["keep supported targets locked"],
+                "evidenceItems": [
+                    {
+                        "criterionId": "docs_contract_ready",
+                        "label": "Docs contract ready",
+                        "state": "landed",
+                        "summary": "docs contract exists",
+                        "sources": ["docs/operations/portmanager-second-target-review-contract.md"]
+                    }
+                ],
                 "satisfiedCriteria": [],
                 "blockingCriteria": [
                     {

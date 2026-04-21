@@ -86,7 +86,8 @@ Milestone 3 now continues from landed seams instead of restarting them:
 - Unit 60: complete. consumer-boundary split criteria now publish `/consumer-boundary-decision-pack`, keeping `/api/controller` embedded until standalone deployment boundary, edge-policy ownership, and external consumer pressure justify a split review
 - Unit 61: complete. deployment-boundary decision pack now publishes `/deployment-boundary-decision-pack`, keeping `/api/controller` controller-embedded until deployable artifact, edge runtime controls, replay parity, observability ownership, and external pressure justify standalone deployment review
 - Unit 62: complete. second-target policy pack now publishes `/second-target-policy-pack`, keeping support locked to Ubuntu until candidate-target declaration, parity evidence, docs contract, acceptance recipe, and operator ownership justify review
-- Next queue: transport parity, recovery parity, docs, acceptance, and ownership evidence for declared candidate `debian-12-systemd-tailscale` under `/second-target-policy-pack`, not a PostgreSQL default-store claim or a fake standalone deployment push
+- Governance slice: complete. Debian review-prep docs now freeze second-target contract wording, acceptance recipe, and operator ownership without widening support claims
+- Next queue: transport parity and recovery parity for declared candidate `debian-12-systemd-tailscale` under `/second-target-policy-pack`, not a PostgreSQL default-store claim or a fake standalone deployment push
 - keep bounded batch work on the same evidence model instead of inventing a second orchestration path
 
 ### Language and boundary decisions carried into C
@@ -189,7 +190,8 @@ Milestone 3 现在不是重新做一遍已落地 seam，而是在其上继续推
 - Unit 60：已完成。consumer-boundary split criteria 现在已经通过 `/consumer-boundary-decision-pack` 公开，并明确只有在独立部署边界、edge-policy ownership 与 external consumer pressure 同时成立时，`/api/controller` 才需要进入 split review
 - Unit 61：已完成。deployment-boundary decision pack 现在已经通过 `/deployment-boundary-decision-pack` 公开，并明确只有在 deployable artifact、edge runtime controls、replay parity、observability ownership 与 external pressure 同时成立时，`/api/controller` 才需要进入独立部署复核
 - Unit 62：已完成。second-target policy pack 现在已经通过 `/second-target-policy-pack` 公开，并明确只有在候选第二目标声明、等价证据、文档契约、验收 recipe 与 operator ownership 同时成立时，支持声明才能超出 Ubuntu 锁定画像
-- 下一队列：围绕已声明候选 `debian-12-systemd-tailscale` 的传输等价、恢复等价、文档/验收/owner 证明，而不是 PostgreSQL 默认状态库承诺或伪造的独立部署推进
+- 治理切片：已完成。Debian review-prep 文档现在已经冻结第二目标文案契约、验收 recipe 与 operator ownership，同时没有扩大支持声明
+- 下一队列：围绕已声明候选 `debian-12-systemd-tailscale` 的传输等价与恢复等价，而不是 PostgreSQL 默认状态库承诺或伪造的独立部署推进
 - 下一批队列：继续定义更后置的独立部署边界证据与候选第二目标等价证据，而不是宣称 PostgreSQL 默认状态库已经可用
 - 继续让 bounded batch work 留在同一套 evidence model 上，而不是再发明第二条 orchestration 路径
 
