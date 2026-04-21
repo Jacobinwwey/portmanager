@@ -92,6 +92,26 @@ export interface SecondTargetSteadyStateProofCapture {
   sources: string[]
 }
 
+export type SecondTargetBackupRestoreProofArtifactId =
+  | 'backup_bearing_mutation_id'
+  | 'backup_manifest_path'
+  | 'remote_backup_result'
+  | 'restore_readiness_reference'
+
+export interface SecondTargetBackupRestoreProofArtifact {
+  id: SecondTargetBackupRestoreProofArtifactId
+  label: string
+  summary: string
+}
+
+export interface SecondTargetBackupRestoreProofCapture {
+  candidateTargetProfileId: string
+  guidePath: string
+  summary: string
+  requiredArtifacts: SecondTargetBackupRestoreProofArtifact[]
+  sources: string[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -123,6 +143,7 @@ export interface SecondTargetPolicyPack {
   reviewPacketTemplate: SecondTargetReviewPacketTemplate
   bootstrapProofCapture: SecondTargetBootstrapProofCapture
   steadyStateProofCapture: SecondTargetSteadyStateProofCapture
+  backupRestoreProofCapture: SecondTargetBackupRestoreProofCapture
   satisfiedCriteria: SecondTargetPolicyCriterion[]
   blockingCriteria: SecondTargetPolicyCriterion[]
   evidenceItems: SecondTargetPolicyEvidenceItem[]
@@ -133,6 +154,8 @@ const bootstrapProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md'
 const steadyStateProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-steady-state-proof-capture.md'
+const backupRestoreProofCaptureGuidePath =
+  'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md'
 
 const bootstrapProofArtifactMetadata: Record<
   SecondTargetBootstrapProofArtifactId,
@@ -183,6 +206,32 @@ const steadyStateProofArtifactMetadata: Record<
     label: 'Controller audit reference',
     summary:
       'Capture one linked controller event replay or audit-index reference that ties the mutation and steady-state captures together.'
+  }
+}
+
+const backupRestoreProofArtifactMetadata: Record<
+  SecondTargetBackupRestoreProofArtifactId,
+  { label: string; summary: string }
+> = {
+  backup_bearing_mutation_id: {
+    label: 'Backup-bearing mutation id',
+    summary:
+      'Capture one controller-driven mutation id that produced the backup bundle used for the Debian 12 review packet.'
+  },
+  backup_manifest_path: {
+    label: 'Backup manifest path',
+    summary:
+      'Capture the backup manifest path linked to the same mutation so artifact lineage stays explicit.'
+  },
+  remote_backup_result: {
+    label: 'Remote-backup result',
+    summary:
+      'Capture the remote-backup result from the same bundle, or the explicit not-configured state if remote backup is still absent.'
+  },
+  restore_readiness_reference: {
+    label: 'Restore-readiness reference',
+    summary:
+      'Capture one rollback-point or restore-readiness reference tied to the same backup-bearing mutation without widening support claims.'
   }
 }
 
@@ -301,6 +350,18 @@ function steadyStateProofArtifact(
   }
 }
 
+function backupRestoreProofArtifact(
+  id: SecondTargetBackupRestoreProofArtifactId
+): SecondTargetBackupRestoreProofArtifact {
+  const metadata = backupRestoreProofArtifactMetadata[id]
+
+  return {
+    id,
+    label: metadata.label,
+    summary: metadata.summary
+  }
+}
+
 function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceItem[] {
   return [
     evidenceItem(
@@ -395,8 +456,9 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     evidenceItem(
       'backup_restore_parity',
       'planned',
-      'Backup and restore parity evidence is still pending for Debian 12.',
+      'Backup and restore parity is still pending for Debian 12 until one backup-bearing mutation bundle and restore-readiness reference are captured.',
       [
+        backupRestoreProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
         'docs/operations/portmanager-backup-rollback-policy.md'
@@ -613,6 +675,7 @@ function buildReviewPacketTemplate(
         'backup_restore_parity',
         'Capture backup manifest linkage, remote-backup result if configured, and restore outcome notes from the same review packet.',
         [
+          backupRestoreProofCaptureGuidePath,
           reviewPacketTemplatePath,
           'docs/operations/portmanager-debian-12-acceptance-recipe.md',
           'docs/operations/portmanager-backup-rollback-policy.md'
@@ -692,6 +755,31 @@ function buildSteadyStateProofCapture(
   }
 }
 
+function buildBackupRestoreProofCapture(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetBackupRestoreProofCapture {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+
+  return {
+    candidateTargetProfileId,
+    guidePath: backupRestoreProofCaptureGuidePath,
+    summary:
+      `Backup-and-restore proof capture stays explicit for ${candidateTargetProfileId}: preserve one backup-bearing mutation bundle before backup parity can move.`,
+    requiredArtifacts: [
+      backupRestoreProofArtifact('backup_bearing_mutation_id'),
+      backupRestoreProofArtifact('backup_manifest_path'),
+      backupRestoreProofArtifact('remote_backup_result'),
+      backupRestoreProofArtifact('restore_readiness_reference')
+    ],
+    sources: [
+      backupRestoreProofCaptureGuidePath,
+      reviewPacketTemplatePath,
+      'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+      'docs/operations/portmanager-backup-rollback-policy.md'
+    ]
+  }
+}
+
 export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySnapshot {
   const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
     summarizeTargetProfile(profile.id)
@@ -743,6 +831,7 @@ export function buildSecondTargetPolicyPack(
     reviewPacketTemplate: buildReviewPacketTemplate(snapshot),
     bootstrapProofCapture: buildBootstrapProofCapture(snapshot),
     steadyStateProofCapture: buildSteadyStateProofCapture(snapshot),
+    backupRestoreProofCapture: buildBackupRestoreProofCapture(snapshot),
     satisfiedCriteria,
     blockingCriteria,
     evidenceItems: (snapshot.evidenceItems ?? []).map((item) => ({

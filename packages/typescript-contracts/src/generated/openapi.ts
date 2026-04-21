@@ -1497,6 +1497,20 @@ export interface components {
             hostId: string;
             observedStateHash: string;
         };
+        SecondTargetBackupRestoreProofArtifact: {
+            id: components["schemas"]["SecondTargetBackupRestoreProofArtifactId"];
+            label: string;
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetBackupRestoreProofArtifactId: "backup_bearing_mutation_id" | "backup_manifest_path" | "remote_backup_result" | "restore_readiness_reference";
+        SecondTargetBackupRestoreProofCapture: {
+            candidateTargetProfileId: string;
+            guidePath: string;
+            requiredArtifacts: components["schemas"]["SecondTargetBackupRestoreProofArtifact"][];
+            sources: string[];
+            summary: string;
+        };
         SecondTargetBootstrapProofArtifact: {
             id: components["schemas"]["SecondTargetBootstrapProofArtifactId"];
             label: string;
@@ -1530,6 +1544,7 @@ export interface components {
         /** @enum {string} */
         SecondTargetPolicyEvidenceState: "landed" | "review_prep" | "planned";
         SecondTargetPolicyPack: {
+            backupRestoreProofCapture: components["schemas"]["SecondTargetBackupRestoreProofCapture"];
             blockingCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
             bootstrapProofCapture: components["schemas"]["SecondTargetBootstrapProofCapture"];
             candidateTargetProfileIds: string[];
@@ -1665,6 +1680,9 @@ export type RollbackPoint = components['schemas']['RollbackPoint'];
 export type RunBackupRequest = components['schemas']['RunBackupRequest'];
 export type RunDiagnosticsRequest = components['schemas']['RunDiagnosticsRequest'];
 export type RunDriftCheckRequest = components['schemas']['RunDriftCheckRequest'];
+export type SecondTargetBackupRestoreProofArtifact = components['schemas']['SecondTargetBackupRestoreProofArtifact'];
+export type SecondTargetBackupRestoreProofArtifactId = components['schemas']['SecondTargetBackupRestoreProofArtifactId'];
+export type SecondTargetBackupRestoreProofCapture = components['schemas']['SecondTargetBackupRestoreProofCapture'];
 export type SecondTargetBootstrapProofArtifact = components['schemas']['SecondTargetBootstrapProofArtifact'];
 export type SecondTargetBootstrapProofArtifactId = components['schemas']['SecondTargetBootstrapProofArtifactId'];
 export type SecondTargetBootstrapProofCapture = components['schemas']['SecondTargetBootstrapProofCapture'];

@@ -154,6 +154,25 @@ test('default second target policy pack lands governance artifacts while transpo
     ),
     true
   )
+  assert.equal(pack.backupRestoreProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+  assert.match(
+    pack.backupRestoreProofCapture.guidePath,
+    /docs\/operations\/portmanager-debian-12-backup-restore-proof-capture\.md/u
+  )
+  assert.equal(pack.backupRestoreProofCapture.requiredArtifacts.length >= 4, true)
+  assert.equal(
+    pack.backupRestoreProofCapture.requiredArtifacts.some(
+      (item) =>
+        item.id === 'backup_manifest_path' && item.summary.includes('manifest')
+    ),
+    true
+  )
+  assert.equal(
+    pack.backupRestoreProofCapture.sources.some((source) =>
+      source.endsWith('docs/operations/portmanager-debian-12-backup-restore-proof-capture.md')
+    ),
+    true
+  )
   assert.equal(
     pack.reviewPacketTemplate.requiredEvidence.some(
       (item) =>
@@ -262,6 +281,17 @@ test('controller server exposes second target policy pack as explicit controller
           }>
           sources: string[]
         }
+        backupRestoreProofCapture: {
+          candidateTargetProfileId: string
+          guidePath: string
+          summary: string
+          requiredArtifacts: Array<{
+            id: string
+            label: string
+            summary: string
+          }>
+          sources: string[]
+        }
         satisfiedCriteria: Array<{ id: string; label: string }>
         blockingCriteria: Array<{ id: string; label: string }>
         evidenceItems: Array<{
@@ -323,6 +353,24 @@ test('controller server exposes second target policy pack as explicit controller
       assert.equal(
         payload.steadyStateProofCapture.sources.some((source) =>
           source.endsWith('docs/operations/portmanager-debian-12-steady-state-proof-capture.md')
+        ),
+        true
+      )
+      assert.equal(payload.backupRestoreProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+      assert.match(
+        payload.backupRestoreProofCapture.guidePath,
+        /docs\/operations\/portmanager-debian-12-backup-restore-proof-capture\.md/u
+      )
+      assert.equal(payload.backupRestoreProofCapture.requiredArtifacts.length >= 4, true)
+      assert.equal(
+        payload.backupRestoreProofCapture.requiredArtifacts.some(
+          (item) => item.id === 'backup_manifest_path'
+        ),
+        true
+      )
+      assert.equal(
+        payload.backupRestoreProofCapture.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-backup-restore-proof-capture.md')
         ),
         true
       )

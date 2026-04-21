@@ -47,7 +47,7 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### Publication rule
 - Keep the packet in review-prep until every required section has real artifact links.
 - If any section regresses, update `/second-target-policy-pack` first and keep support claims locked to Ubuntu.
-- Link this packet back into the acceptance recipe, bootstrap-proof guide, steady-state-proof guide, and operator ownership note when evidence changes.
+- Link this packet back into the acceptance recipe, bootstrap-proof guide, steady-state-proof guide, backup-restore-proof guide, and operator ownership note when evidence changes.
 
 ## 中文
 
@@ -93,4 +93,4 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### 发布规则
 - 在每个必需分区都拥有真实 artifact 链接之前，packet 只能停留在 review-prep。
 - 任何分区一旦回退，先更新 `/second-target-policy-pack`，并继续把支持声明锁在 Ubuntu。
-- 当证据变化时，把这份 packet 同步回 acceptance recipe、bootstrap proof 指南、steady-state proof 指南与 operator ownership 文档。
+- 当证据变化时，把这份 packet 同步回 acceptance recipe、bootstrap proof 指南、steady-state proof 指南、backup-restore proof 指南与 operator ownership 文档。

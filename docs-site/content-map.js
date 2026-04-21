@@ -273,6 +273,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'debian-12-backup-restore-proof-capture',
+    sourcePath: 'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md',
+    route: 'operations/debian-12-backup-restore-proof-capture',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Debian 12 Backup and Restore Proof Capture',
+      zh: 'Debian 12 备份与恢复证明采集'
+    }
+  },
+  {
     id: 'overview-design-baseline',
     sourcePath: 'docs/design/portmanager-overview-design-baseline.md',
     route: 'architecture/overview-design-baseline',

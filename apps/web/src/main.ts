@@ -1604,6 +1604,44 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         'docs/operations/portmanager-debian-12-acceptance-recipe.md'
       ]
     },
+    backupRestoreProofCapture: {
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      guidePath: 'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md',
+      summary:
+        'Backup-and-restore proof capture stays explicit for debian-12-systemd-tailscale before backup parity can move.',
+      requiredArtifacts: [
+        {
+          id: 'backup_bearing_mutation_id',
+          label: 'Backup-bearing mutation id',
+          summary:
+            'Capture one controller-driven mutation id that produced the backup bundle used for the Debian 12 review packet.'
+        },
+        {
+          id: 'backup_manifest_path',
+          label: 'Backup manifest path',
+          summary:
+            'Capture the backup manifest path linked to the same mutation so artifact lineage stays explicit.'
+        },
+        {
+          id: 'remote_backup_result',
+          label: 'Remote-backup result',
+          summary:
+            'Capture the remote-backup result from the same bundle, or the explicit not-configured state if remote backup is still absent.'
+        },
+        {
+          id: 'restore_readiness_reference',
+          label: 'Restore-readiness reference',
+          summary:
+            'Capture one rollback-point or restore-readiness reference tied to the same backup-bearing mutation without widening support claims.'
+        }
+      ],
+      sources: [
+        'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md',
+        'docs/operations/portmanager-debian-12-review-packet-template.md',
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'docs/operations/portmanager-backup-rollback-policy.md'
+      ]
+    },
     satisfiedCriteria: [
       {
         id: 'locked_target_registry',
@@ -3612,6 +3650,44 @@ function SecondTargetPolicyCard(props: {
         { className: 'pm-microcopy', key: 'sources' },
         props.pack.steadyStateProofCapture.sources.length > 0
           ? `Sources: ${props.pack.steadyStateProofCapture.sources.join(', ')}`
+          : 'Sources: none'
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'backup-restore-proof-capture' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Backup and restore proof capture',
+        detail: props.pack.backupRestoreProofCapture.candidateTargetProfileId
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Guide Path', props.pack.backupRestoreProofCapture.guidePath),
+        kvRow(
+          'Required Artifacts',
+          String(props.pack.backupRestoreProofCapture.requiredArtifacts.length)
+        )
+      ]),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'summary' },
+        props.pack.backupRestoreProofCapture.summary
+      ),
+      props.pack.backupRestoreProofCapture.requiredArtifacts.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.backupRestoreProofCapture.requiredArtifacts.map((item) =>
+              h('li', { className: 'pm-list-item', key: item.id }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, item.summary)
+              ])
+            )
+          )
+        : emptyState('No backup-restore-proof artifacts recorded yet.', 'empty'),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'sources' },
+        props.pack.backupRestoreProofCapture.sources.length > 0
+          ? `Sources: ${props.pack.backupRestoreProofCapture.sources.join(', ')}`
           : 'Sources: none'
       )
     ]),

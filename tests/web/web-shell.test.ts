@@ -41,6 +41,8 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /portmanager-debian-12-bootstrap-proof-capture\.md/i)
   assert.match(html, /Steady-state proof capture/i)
   assert.match(html, /portmanager-debian-12-steady-state-proof-capture\.md/i)
+  assert.match(html, /Backup and restore proof capture/i)
+  assert.match(html, /portmanager-debian-12-backup-restore-proof-capture\.md/i)
   assert.match(html, /portmanager-debian-12-acceptance-recipe\.md/i)
   assert.match(html, /review prep/i)
   assert.match(html, /controller_embedded/i)
@@ -507,6 +509,22 @@ test('overview loader keeps consumer boundary base path when building controller
               'docs/operations/portmanager-debian-12-acceptance-recipe.md'
             ]
           },
+          backupRestoreProofCapture: {
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
+            guidePath: 'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md',
+            summary: 'backup and restore proof capture guide exists',
+            requiredArtifacts: [
+              {
+                id: 'backup_manifest_path',
+                label: 'Backup manifest path',
+                summary: 'capture manifest path for one backup-bearing mutation'
+              }
+            ],
+            sources: [
+              'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md',
+              'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+            ]
+          },
           evidenceItems: [
             {
               criterionId: 'docs_contract_ready',
@@ -773,6 +791,19 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
               }
             ],
             sources: ['docs/operations/portmanager-debian-12-steady-state-proof-capture.md']
+          },
+          backupRestoreProofCapture: {
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
+            guidePath: 'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md',
+            summary: 'backup and restore proof capture guide exists',
+            requiredArtifacts: [
+              {
+                id: 'backup_manifest_path',
+                label: 'Backup manifest path',
+                summary: 'capture manifest path for one backup-bearing mutation'
+              }
+            ],
+            sources: ['docs/operations/portmanager-debian-12-backup-restore-proof-capture.md']
           },
           evidenceItems: [
             {

@@ -1380,6 +1380,7 @@ components:
           reviewPacketTemplate,
           bootstrapProofCapture,
           steadyStateProofCapture,
+          backupRestoreProofCapture,
           satisfiedCriteria,
           blockingCriteria,
           evidenceItems
@@ -1419,6 +1420,8 @@ components:
           $ref: '#/components/schemas/SecondTargetBootstrapProofCapture'
         steadyStateProofCapture:
           $ref: '#/components/schemas/SecondTargetSteadyStateProofCapture'
+        backupRestoreProofCapture:
+          $ref: '#/components/schemas/SecondTargetBackupRestoreProofCapture'
         satisfiedCriteria:
           type: array
           items:
@@ -1548,6 +1551,43 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetSteadyStateProofArtifact'
+        sources:
+          type: array
+          items:
+            type: string
+    SecondTargetBackupRestoreProofArtifactId:
+      type: string
+      enum:
+        [
+          backup_bearing_mutation_id,
+          backup_manifest_path,
+          remote_backup_result,
+          restore_readiness_reference
+        ]
+    SecondTargetBackupRestoreProofArtifact:
+      type: object
+      required: [id, label, summary]
+      properties:
+        id:
+          $ref: '#/components/schemas/SecondTargetBackupRestoreProofArtifactId'
+        label:
+          type: string
+        summary:
+          type: string
+    SecondTargetBackupRestoreProofCapture:
+      type: object
+      required: [candidateTargetProfileId, guidePath, summary, requiredArtifacts, sources]
+      properties:
+        candidateTargetProfileId:
+          type: string
+        guidePath:
+          type: string
+        summary:
+          type: string
+        requiredArtifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetBackupRestoreProofArtifact'
         sources:
           type: array
           items:

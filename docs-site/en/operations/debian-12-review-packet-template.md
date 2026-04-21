@@ -55,4 +55,4 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### Publication rule
 - Keep the packet in review-prep until every required section has real artifact links.
 - If any section regresses, update `/second-target-policy-pack` first and keep support claims locked to Ubuntu.
-- Link this packet back into the acceptance recipe, bootstrap-proof guide, steady-state-proof guide, and operator ownership note when evidence changes.
+- Link this packet back into the acceptance recipe, bootstrap-proof guide, steady-state-proof guide, backup-restore-proof guide, and operator ownership note when evidence changes.

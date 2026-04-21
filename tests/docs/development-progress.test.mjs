@@ -51,6 +51,18 @@ test('roadmap publishes a development-progress page backed by live milestone con
     'operations',
     'debian-12-steady-state-proof-capture.md'
   )
+  const enBackupRestoreProofPagePath = path.join(
+    docsSiteRoot,
+    'en',
+    'operations',
+    'debian-12-backup-restore-proof-capture.md'
+  )
+  const zhBackupRestoreProofPagePath = path.join(
+    docsSiteRoot,
+    'zh',
+    'operations',
+    'debian-12-backup-restore-proof-capture.md'
+  )
 
   assert.ok(existsSync(enPagePath), 'missing English development-progress roadmap page')
   assert.ok(existsSync(zhPagePath), 'missing Chinese development-progress roadmap page')
@@ -58,6 +70,8 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.ok(existsSync(zhBootstrapProofPagePath), 'missing Chinese bootstrap-proof operations page')
   assert.ok(existsSync(enSteadyStateProofPagePath), 'missing English steady-state operations page')
   assert.ok(existsSync(zhSteadyStateProofPagePath), 'missing Chinese steady-state operations page')
+  assert.ok(existsSync(enBackupRestoreProofPagePath), 'missing English backup-restore operations page')
+  assert.ok(existsSync(zhBackupRestoreProofPagePath), 'missing Chinese backup-restore operations page')
   assert.ok(existsSync(generatedProgressDataPath), 'missing generated milestone confidence progress data file')
   assert.ok(existsSync(roadmapDataPath), 'missing roadmap data file')
 
@@ -106,6 +120,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(roadmapData, /second-target-policy-pack/)
   assert.match(roadmapData, /portmanager-debian-12-bootstrap-proof-capture\.md/)
   assert.match(roadmapData, /portmanager-debian-12-steady-state-proof-capture\.md/)
+  assert.match(roadmapData, /portmanager-debian-12-backup-restore-proof-capture\.md/)
   assert.match(milestoneConfidenceComponent, /--skip-sync/)
   assert.match(milestoneConfidenceComponent, /Public claim class/)
   assert.match(milestoneConfidenceComponent, /Source surface status/)
