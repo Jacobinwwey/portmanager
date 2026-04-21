@@ -1,10 +1,15 @@
-import { DatabaseSync } from 'node:sqlite'
-
 import type {
   components,
   PortDiagnosticResultSchema,
   WebSnapshotResultSchema
 } from '@portmanager/typescript-contracts'
+
+import {
+  createPersistenceAdapter,
+  type PersistenceAdapter,
+  type PersistenceAdapterConfig,
+  type PersistenceReadiness
+} from './persistence-adapter.ts'
 
 export type BackupSummary = components['schemas']['BackupSummary']
 export type BatchOperationSummary = components['schemas']['BatchOperationSummary']
@@ -132,6 +137,7 @@ export interface UpdateHostRuntimeInput {
 
 export interface OperationStore {
   close(): void
+  getPersistenceReadiness(): PersistenceReadiness
   enqueueOperation(input: EnqueueOperationInput): OperationAccepted
   getOperation(id: string): OperationDetail | null
   listOperations(filters?: OperationListFilters): OperationSummary[]
@@ -161,6 +167,11 @@ export interface OperationStore {
   replaceExposurePolicy(input: ReplaceExposurePolicyInput): ExposurePolicy
   updateBridgeRule(id: string, input: UpdateBridgeRuleInput): BridgeRule
   updateHostRuntime(id: string, input: UpdateHostRuntimeInput): HostSummary
+}
+
+export interface OperationStoreOptions {
+  databasePath?: string
+  persistence?: PersistenceAdapter | PersistenceAdapterConfig
 }
 
 interface BackupRow {
@@ -485,8 +496,38 @@ function rowToSummary(row: OperationRow): OperationSummary {
   }
 }
 
-export function createOperationStore(options: { databasePath: string }): OperationStore {
-  const database = new DatabaseSync(options.databasePath)
+function isPersistenceAdapter(value: OperationStoreOptions['persistence']): value is PersistenceAdapter {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      'database' in value &&
+      'getReadiness' in value &&
+      'close' in value
+  )
+}
+
+function resolvePersistence(options: OperationStoreOptions): PersistenceAdapter {
+  if (isPersistenceAdapter(options.persistence)) {
+    return options.persistence
+  }
+
+  if (options.persistence) {
+    return createPersistenceAdapter(options.persistence)
+  }
+
+  if (typeof options.databasePath === 'string' && options.databasePath.trim()) {
+    return createPersistenceAdapter({
+      kind: 'sqlite',
+      databasePath: options.databasePath
+    })
+  }
+
+  throw new Error('Operation store requires a sqlite databasePath or persistence adapter config.')
+}
+
+export function createOperationStore(options: OperationStoreOptions): OperationStore {
+  const persistence = resolvePersistence(options)
+  const database = persistence.database
 
   database.exec(`
     CREATE TABLE IF NOT EXISTS operations (
@@ -1041,7 +1082,10 @@ export function createOperationStore(options: { databasePath: string }): Operati
 
   return {
     close() {
-      database.close()
+      persistence.close()
+    },
+    getPersistenceReadiness() {
+      return persistence.getReadiness()
     },
     enqueueOperation(input) {
       insertOperation.run(

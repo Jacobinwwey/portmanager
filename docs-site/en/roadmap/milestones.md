@@ -169,7 +169,7 @@ Milestone 3 can now begin as a bounded execution phase because all of the follow
 | Explicit controller / policy / event / audit separation | `controller-read-model`, `controller-domain-service`, and `/event-audit-index` now extract the first read/write seams, even though transport and persistence still centralize too much work | Phase 0 baseline landed |
 | First-class bounded remote agent | Live agent service boundary already exists with `/health`, `/runtime-state`, `/apply`, `/snapshot`, `/rollback` | Partially earned |
 | Batch host management | One bounded batch exposure-policy envelope now lands as an auditable parent operation with host-scoped child outcomes across controller, CLI, and Web | Phase 0 baseline landed |
-| Persistence readiness beyond SQLite | SQLite remains the only real store | Not started |
+| Persistence readiness beyond SQLite | `operation-store` now runs behind a SQLite-backed persistence adapter seam and publishes measurable PostgreSQL readiness pressure from live store counts | Phase 0 baseline landed |
 | Platform abstraction for additional targets | Ubuntu 24.04 + systemd + Tailscale remains the only credible target | Not started |
 
 #### Milestone 3 Phase 0 workstreams

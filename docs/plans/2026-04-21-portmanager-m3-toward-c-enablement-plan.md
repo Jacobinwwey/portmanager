@@ -204,7 +204,7 @@ flowchart LR
 - Edge case: degraded operations preserve linked evidence and event ordering.
 - Regression: existing replay URLs still work.
 
-- [ ] **Unit 54: Persistence Adapter And PostgreSQL Readiness Gate**
+- [x] **Unit 54: Persistence Adapter And PostgreSQL Readiness Gate**
 
 **Goal:** Make storage pressure measurable and migration-ready without promising PostgreSQL as the default store yet.
 

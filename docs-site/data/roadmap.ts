@@ -169,8 +169,8 @@ export const roadmapDeveloperProgress = {
           'Agent `/health` + `/runtime-state`, controller host summaries/details, CLI host output, and Web host detail now publish `agentVersion` plus `live` / `stale` / `unreachable` heartbeat semantics.',
           'Configured GitHub backup now uploads controller backup bundles through the GitHub Contents API and publishes explicit succeeded remote redundancy state across API, CLI, web, and dedicated reliability proof.',
           'Remote-backup replay is now durable in repo: one proof replays local-only, configured-success, and configured-failure required backups on the same live agent-backed slice across API, CLI, Web backup views, and agent runtime.',
-          'Milestone 3 Units 51 through 53 are now real: controller seam extraction baseline, bounded batch exposure-policy envelope, and `/event-audit-index` with shared Web audit-review panels all landed without changing the accepted evidence model.',
-          'Deep compare now also confirms what still does not exist: no gateway app, no standalone event/audit service, no PostgreSQL readiness seam, and no broader target abstraction.'
+          'Milestone 3 Units 51 through 54 are now real: controller seam extraction baseline, bounded batch exposure-policy envelope, `/event-audit-index` with shared Web audit-review panels, and a SQLite-backed persistence adapter that measures PostgreSQL readiness from live store counts all landed without changing the accepted evidence model.',
+          'Deep compare now also confirms what still does not exist: no gateway app, no standalone event/audit service, no PostgreSQL default-store path, and no broader target abstraction.'
         ],
         zh: [
           'Docs-first 基线、契约和路线排序继续保持锁定。',
@@ -181,8 +181,8 @@ export const roadmapDeveloperProgress = {
           'agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在已经会统一发布 `agentVersion` 与 `live` / `stale` / `unreachable` heartbeat 语义。',
           '当 GitHub backup 已配置时，controller backup bundle 现在会通过 GitHub Contents API 上传，并在 API、CLI、web 与专门的可靠性证明里显式暴露远端冗余成功状态。',
           'repo 内已经落地可重复执行的 remote-backup replay：同一条 live agent-backed 切片现在会重放 local-only、configured-success、configured-failure 三类 required backup，并把 API、CLI、Web backup 视图与 agent runtime 证据保持一致。',
-          'Milestone 3 的 Unit 51 到 Unit 53 现在都已真实落地：controller seam extraction baseline、bounded batch exposure-policy envelope，以及 `/event-audit-index` 加共享 Web audit-review 面板都已经建立，而且没有改动已验收 evidence model。',
-          '深度对比现在也已经明确当前尚未存在的东西：没有 gateway app、没有独立的 event/audit service、没有 PostgreSQL readiness seam，也没有更广目标平台抽象。'
+          'Milestone 3 的 Unit 51 到 Unit 54 现在都已真实落地：controller seam extraction baseline、bounded batch exposure-policy envelope、`/event-audit-index` 加共享 Web audit-review 面板，以及会从真实 store 计数衡量 PostgreSQL readiness 的 SQLite-backed persistence adapter 都已经建立，而且没有改动已验收 evidence model。',
+          '深度对比现在也已经明确当前尚未存在的东西：没有 gateway app、没有独立的 event/audit service、没有 PostgreSQL 默认状态库路径，也没有更广目标平台抽象。'
         ]
       }
     },
@@ -197,14 +197,14 @@ export const roadmapDeveloperProgress = {
         en: [
           'Milestone 2 remains the guardrail lane, but Milestone 3 `Phase 0 enablement` is now the next execution phase.',
           'Current repo work has shifted from helper-access closure to architecture enablement on top of a protected evidence model.',
-          'Indexed event/audit review is now landed as a shared read surface, so the remaining gap is no longer review indexing but the deeper Scheme C seams that current code still lacks.',
+          'Indexed event/audit review and persistence-readiness reporting are now both landed as shared baseline seams, so the remaining gap is the deeper Scheme C boundary work that current code still lacks.',
           'Roadmap, milestone docs, product spec, architecture doc, and root progress docs now all publish the same Milestone 3 gap map and next direction.',
           'Mainline evidence collection still keeps `pnpm acceptance:verify` on PRs while `push main`, `workflow_dispatch`, and the daily schedule run `pnpm milestone:verify:confidence`, restore/save the confidence history bundle, upload the bundle artifact, and publish the readiness summary for developers.'
         ],
         zh: [
           'Milestone 2 现在仍然是 guardrail 主线，但 Milestone 3 `Phase 0 enablement` 已经成为下一阶段。',
           '当前仓库工作已经从 helper 访问闭环，转向建立在受保护 evidence model 之上的架构 enablement。',
-          '索引化 event/audit review 现在已经作为共享 read surface 落地，所以剩余缺口已经不再是 review indexing，而是当前代码仍然缺少的更深层 Scheme C seam。',
+          '索引化 event/audit review 与 persistence-readiness reporting 现在都已经作为共享 baseline seam 落地，所以剩余缺口就是当前代码仍然缺少的更深层 Scheme C boundary 工作。',
           'roadmap、里程碑文档、产品规格、架构文档与 root progress docs 现在都已经发布同一份 Milestone 3 gap map 与下一步方向。',
           'mainline evidence collection 现在仍然会把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 路径上运行 `pnpm milestone:verify:confidence`、恢复并保存 confidence history bundle、上传 bundle artifact，并向开发者发布 readiness summary。'
         ]
@@ -223,7 +223,7 @@ export const roadmapDeveloperProgress = {
           'Run `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs and use `pnpm milestone:fetch:review-pack` when the current CI run is the first question; Milestone 3 does not replace that review chain.',
           'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while Milestone 3 work begins.',
           'Use the new requirements/plan pair as the current implementation map: `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`.',
-          'Units 51 through 53 are now landed on that map, so the next delivery step is Unit 54 persistence-readiness seams plus deeper gateway-ready contract hardening instead of reopening event/audit indexing.',
+          'Units 51 through 54 are now landed on that map, so the next delivery step is deeper gateway-ready contract hardening, standalone audit/event boundary decisions, and target-abstraction rules instead of reopening persistence or review-indexing seams.',
           'Protect the lighter Unit 0 branch gate while the heavier confidence routine keeps collecting evidence.',
           'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.'
         ],
@@ -232,7 +232,7 @@ export const roadmapDeveloperProgress = {
           '在主线出现已完成 run 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack`，Milestone 3 不会替代这条复核链路。',
           '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，同时 Milestone 3 开始推进。',
           '把新的 requirements/plan 组合作为当前实现地图：`docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`。',
-          'Unit 51 到 Unit 53 现在都已落地，所以下一步交付转到 Unit 54 的 persistence-readiness seam 与更深的 gateway-ready contract hardening，而不是重新回到 event/audit indexing 起点。',
+          'Unit 51 到 Unit 54 现在都已落地，所以下一步交付转到更深的 gateway-ready contract hardening、独立 audit/event boundary 决策与 target-abstraction rule，而不是重新回到 persistence 或 review-indexing 起点。',
           '在更重的 confidence routine 继续收集证据时，保住更轻的 Unit 0 分支 gate 不被重新定义。',
           '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。'
         ]
@@ -446,7 +446,8 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Controller transport now delegates baseline host-detail composition and host/rule/policy orchestration through explicit `controller-read-model` and `controller-domain-service` seams while preserving the current HTTP contract and acceptance evidence.',
         'A bounded batch exposure-policy envelope now lands as one auditable parent operation with host-scoped child outcomes across controller, CLI, and Web without introducing a fake fleet engine.',
         'Controller now also exposes `/event-audit-index`, and Web Operations plus Console consume the same indexed event/audit review surface without introducing a second evidence model.',
-        'Current docs still publish the remaining gap map honestly: no gateway app, no standalone event/audit service, no PostgreSQL readiness seam, and no broader target abstraction yet.'
+        'Controller store now also runs behind a SQLite-backed persistence adapter seam that reports measurable PostgreSQL readiness pressure without changing the default store.',
+        'Current docs still publish the remaining gap map honestly: no gateway app, no standalone event/audit service, no PostgreSQL default-store path, and no broader target abstraction yet.'
       ],
       zh: [
         '这个架构方向已经被文档化并可评审。',
@@ -454,32 +455,33 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Controller transport 现在已经通过显式的 `controller-read-model` 与 `controller-domain-service` seam 委托 host detail 组合与 host/rule/policy 编排，同时保持现有 HTTP 契约与验收证据不变。',
         '一个有边界的 batch exposure-policy envelope 现在已经落地：controller、CLI 与 Web 都可以围绕同一个 parent operation 与 host-scoped child outcome 复核批量结果，而没有引入伪 fleet engine。',
         'controller 现在还额外公开了 `/event-audit-index`，而且 Web 的 Operations 与 Console 都在消费同一份索引化 event/audit review surface，同时没有引入第二套 evidence model。',
-        '当前文档仍然诚实公开剩余缺口地图：还没有 gateway app、没有独立的 event/audit service、没有 PostgreSQL readiness seam，也没有更广目标平台抽象。'
+        'controller store 现在也已经运行在 SQLite-backed persistence adapter seam 后面，会在不改变默认状态库的前提下报告可度量的 PostgreSQL readiness pressure。',
+        '当前文档仍然诚实公开剩余缺口地图：还没有 gateway app、没有独立的 event/audit service、没有 PostgreSQL 默认状态库路径，也没有更广目标平台抽象。'
       ]
     },
     blockingGaps: {
       en: [
         'Web and CLI still consume the controller directly instead of a real gateway-ready boundary.',
-        'Controller seam extraction plus indexed review are only at the baseline stage; deeper contract hardening, standalone audit/event boundaries, and persistence seams are still unfinished.',
+        'Controller seam extraction, indexed review, and persistence reporting are only at the baseline stage; deeper contract hardening, standalone audit/event boundaries, and a real migration path are still unfinished.',
         'Only one bounded batch envelope is real today; broader orchestration, persistence seams, and target abstractions are still missing.'
       ],
       zh: [
         'Web 与 CLI 仍然直接消费 controller，而不是真正的 gateway-ready boundary。',
-        'Controller seam extraction 与 indexed review 目前都还只是 baseline 阶段；更深的 contract hardening、独立 audit/event boundary 与 persistence seam 仍未完成。',
+        'Controller seam extraction、indexed review 与 persistence reporting 目前都还只是 baseline 阶段；更深的 contract hardening、独立 audit/event boundary 与真实 migration path 仍未完成。',
         '当前真实存在的只是一个有边界的 batch envelope；更广的 orchestration、persistence seam 与 target abstraction 仍然缺失。'
       ]
     },
     developerFocus: {
       en: [
-        'Use `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` as the active implementation map; Units 51 through 53 are now landed on that path.',
-        'Move next to Unit 54 persistence seams and deeper gateway-ready contract hardening instead of reopening controller-transport concentration or redoing indexed review reads.',
-        'Extend Milestone 3 on the same evidence model: keep the landed batch envelope and indexed review surface auditable while the storage seam is extracted.',
+        'Use `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` as the active implementation map; Units 51 through 54 are now landed on that path.',
+        'Move next to deeper gateway-ready contract hardening, standalone audit/event boundary decisions, and target-abstraction rules instead of reopening controller-transport concentration or redoing landed persistence seams.',
+        'Extend Milestone 3 on the same evidence model: keep the landed batch envelope, indexed review surface, and persistence-readiness report auditable while the next boundary decisions are made.',
         'Keep Milestone 2 review helpers and public progress counters active while Milestone 3 work lands.'
       ],
       zh: [
-        '把 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 当作当前实现地图；其中 Unit 51 到 Unit 53 现在都已落地。',
-        '下一步转向 Unit 54 的 persistence seam 与更深的 gateway-ready contract hardening，而不是重新把 controller transport 堆回去，或重复补 indexed review read。',
-        '继续在同一套 evidence model 上扩展 Milestone 3：保住已经落地的 batch envelope 与 indexed review surface 可审计性，再抽出 storage seam。',
+        '把 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 当作当前实现地图；其中 Unit 51 到 Unit 54 现在都已落地。',
+        '下一步转向更深的 gateway-ready contract hardening、独立 audit/event boundary 决策与 target-abstraction rule，而不是重新把 controller transport 堆回去，或重复补已经落地的 persistence seam。',
+        '继续在同一套 evidence model 上扩展 Milestone 3：保住已经落地的 batch envelope、indexed review surface 与 persistence-readiness report 可审计性，再推进下一层 boundary 决策。',
         '在 Milestone 3 落地时，继续让 Milestone 2 review helper 与公开 progress counter 保持为真相护栏。'
       ]
     },
