@@ -222,6 +222,9 @@
             <li>{{ copy.currentReviewPackStatus }} {{ progress.currentReviewPack.sourceRun.conclusion ?? progress.currentReviewPack.sourceRun.status ?? copy.none }}</li>
             <li>{{ copy.currentReviewPackSha }} <code>{{ progress.currentReviewPack.sourceRun.headSha?.slice(0, 12) ?? copy.none }}</code></li>
             <li v-if="progress.currentReviewPack.sourceRun.htmlUrl">{{ copy.currentReviewPackRunLink }} <VPLink class="pm-doc-link" :href="progress.currentReviewPack.sourceRun.htmlUrl">{{ currentReviewPackRunLabel }}</VPLink></li>
+            <li>{{ copy.currentReviewPackWorkflowRef }} <code>{{ progress.currentReviewPack.workflowRef ?? copy.none }}</code></li>
+            <li>{{ copy.currentReviewPackSourceStartedAt }} {{ formatTimestamp(progress.currentReviewPack.sourceRun.createdAt) }}</li>
+            <li>{{ copy.currentReviewPackSourceUpdatedAt }} {{ formatTimestamp(progress.currentReviewPack.sourceRun.updatedAt) }}</li>
             <li>{{ copy.currentReviewPackFetchedAt }} {{ formatTimestamp(progress.currentReviewPack.fetchedAt) }}</li>
             <li>{{ copy.currentReviewPackReviewDigest }} <code>{{ currentReviewPackRequiredFile('milestone-confidence-review.md') }}</code></li>
             <li>{{ copy.currentReviewPackWordingReview }} <code>{{ currentReviewPackRequiredFile('milestone-wording-review.md') }}</code></li>
@@ -300,6 +303,9 @@ const copy = computed(() => props.locale === 'zh'
       currentReviewPackStatus: 'Current CI review-pack status：',
       currentReviewPackSha: 'Current CI review-pack SHA：',
       currentReviewPackRunLink: 'Current CI review-pack run link：',
+      currentReviewPackWorkflowRef: 'Current CI workflow ref：',
+      currentReviewPackSourceStartedAt: 'Current CI source created：',
+      currentReviewPackSourceUpdatedAt: 'Current CI source updated：',
       currentReviewPackFetchedAt: 'Current CI review-pack fetched：',
       currentReviewPackReviewDigest: 'Current CI review digest：',
       currentReviewPackWordingReview: 'Current CI wording review：',
@@ -395,6 +401,9 @@ const copy = computed(() => props.locale === 'zh'
       currentReviewPackStatus: 'Current CI review-pack status:',
       currentReviewPackSha: 'Current CI review-pack SHA:',
       currentReviewPackRunLink: 'Current CI review-pack run link:',
+      currentReviewPackWorkflowRef: 'Current CI workflow ref:',
+      currentReviewPackSourceStartedAt: 'Current CI source created:',
+      currentReviewPackSourceUpdatedAt: 'Current CI source updated:',
       currentReviewPackFetchedAt: 'Current CI review-pack fetched:',
       currentReviewPackReviewDigest: 'Current CI review digest:',
       currentReviewPackWordingReview: 'Current CI wording review:',

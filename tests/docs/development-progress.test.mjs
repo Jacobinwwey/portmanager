@@ -91,7 +91,19 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     milestoneConfidenceComponent,
+    /progress\.currentReviewPack\.workflowRef/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
     /progress\.currentReviewPack\.sourceRun\.headSha/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /progress\.currentReviewPack\.sourceRun\.createdAt/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /progress\.currentReviewPack\.sourceRun\.updatedAt/
   )
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
@@ -127,7 +139,19 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     roadmapComponent,
+    /confidenceProgress\.currentReviewPack\.workflowRef/
+  )
+  assert.match(
+    roadmapComponent,
     /confidenceProgress\.currentReviewPack\.sourceRun\.headSha/
+  )
+  assert.match(
+    roadmapComponent,
+    /confidenceProgress\.currentReviewPack\.sourceRun\.createdAt/
+  )
+  assert.match(
+    roadmapComponent,
+    /confidenceProgress\.currentReviewPack\.sourceRun\.updatedAt/
   )
 
   const { milestoneConfidenceProgress } = await import(pathToFileURL(generatedProgressDataPath).href)
@@ -181,6 +205,9 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.conclusion, 'string')
   assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.headSha, 'string')
   assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.htmlUrl, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.workflowRef, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.createdAt, 'string')
+  assert.equal(typeof milestoneConfidenceProgress.currentReviewPack.sourceRun.updatedAt, 'string')
   assert.equal(
     milestoneConfidenceProgress.currentReviewPack.files.required['milestone-confidence-review.md'],
     '.portmanager/reports/current-ci-review-pack/milestone-confidence-review.md'

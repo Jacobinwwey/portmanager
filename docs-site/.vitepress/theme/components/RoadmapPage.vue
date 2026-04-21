@@ -242,6 +242,9 @@
                   <li>{{ copy.liveCurrentReviewPackStatus }} {{ confidenceProgress.currentReviewPack.sourceRun.conclusion ?? confidenceProgress.currentReviewPack.sourceRun.status ?? 'none' }}</li>
                   <li>{{ copy.liveCurrentReviewPackSha }} <code>{{ confidenceProgress.currentReviewPack.sourceRun.headSha?.slice(0, 12) ?? 'none' }}</code></li>
                   <li v-if="confidenceProgress.currentReviewPack.sourceRun.htmlUrl">{{ copy.liveCurrentReviewPackRunLink }} <VPLink class="pm-doc-link" :href="confidenceProgress.currentReviewPack.sourceRun.htmlUrl">{{ currentReviewPackRunLabel }}</VPLink></li>
+                  <li>{{ copy.liveCurrentReviewPackWorkflowRef }} <code>{{ confidenceProgress.currentReviewPack.workflowRef ?? 'none' }}</code></li>
+                  <li>{{ copy.liveCurrentReviewPackSourceStartedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.sourceRun.createdAt) }}</li>
+                  <li>{{ copy.liveCurrentReviewPackSourceUpdatedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.sourceRun.updatedAt) }}</li>
                   <li>{{ copy.liveCurrentReviewPackFetchedAt }} {{ formatTimestamp(confidenceProgress.currentReviewPack.fetchedAt) }}</li>
                   <li>{{ copy.liveCurrentReviewPackManifest }} <code>{{ confidenceProgress.currentReviewPack.manifestPath }}</code></li>
                   <li>{{ copy.liveCurrentReviewPackDigest }} <code>{{ currentReviewPackRequiredFile('milestone-confidence-review.md') }}</code></li>
@@ -410,6 +413,9 @@ const copy = computed(() => props.locale === 'zh'
       liveCurrentReviewPackStatus: 'Current CI review-pack status：',
       liveCurrentReviewPackSha: 'Current CI review-pack SHA：',
       liveCurrentReviewPackRunLink: 'Current CI review-pack run link：',
+      liveCurrentReviewPackWorkflowRef: 'Current CI workflow ref：',
+      liveCurrentReviewPackSourceStartedAt: 'Current CI source created：',
+      liveCurrentReviewPackSourceUpdatedAt: 'Current CI source updated：',
       liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched：',
       liveCurrentReviewPackManifest: 'Current CI review-pack manifest：',
       liveCurrentReviewPackDigest: 'Current CI review digest：',
@@ -487,6 +493,9 @@ const copy = computed(() => props.locale === 'zh'
       liveCurrentReviewPackStatus: 'Current CI review-pack status:',
       liveCurrentReviewPackSha: 'Current CI review-pack SHA:',
       liveCurrentReviewPackRunLink: 'Current CI review-pack run link:',
+      liveCurrentReviewPackWorkflowRef: 'Current CI workflow ref:',
+      liveCurrentReviewPackSourceStartedAt: 'Current CI source created:',
+      liveCurrentReviewPackSourceUpdatedAt: 'Current CI source updated:',
       liveCurrentReviewPackFetchedAt: 'Current CI review-pack fetched:',
       liveCurrentReviewPackManifest: 'Current CI review-pack manifest:',
       liveCurrentReviewPackDigest: 'Current CI review digest:',
