@@ -1573,6 +1573,7 @@ export interface components {
             /** @enum {string} */
             reviewOwner: "controller";
             reviewPacketTemplate: components["schemas"]["SecondTargetReviewPacketTemplate"];
+            rollbackProofCapture: components["schemas"]["SecondTargetRollbackProofCapture"];
             satisfiedCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
             steadyStateProofCapture: components["schemas"]["SecondTargetSteadyStateProofCapture"];
             summary: string;
@@ -1589,6 +1590,20 @@ export interface components {
             requiredEvidence: components["schemas"]["SecondTargetReviewPacketRequirement"][];
             summary: string;
             templatePath: string;
+        };
+        SecondTargetRollbackProofArtifact: {
+            id: components["schemas"]["SecondTargetRollbackProofArtifactId"];
+            label: string;
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetRollbackProofArtifactId: "rollback_point_id" | "rollback_operation_id" | "rollback_result_summary" | "post_rollback_diagnostics_linkage";
+        SecondTargetRollbackProofCapture: {
+            candidateTargetProfileId: string;
+            guidePath: string;
+            requiredArtifacts: components["schemas"]["SecondTargetRollbackProofArtifact"][];
+            sources: string[];
+            summary: string;
         };
         SecondTargetSteadyStateProofArtifact: {
             id: components["schemas"]["SecondTargetSteadyStateProofArtifactId"];
@@ -1712,6 +1727,9 @@ export type SecondTargetPolicyEvidenceState = components['schemas']['SecondTarge
 export type SecondTargetPolicyPack = components['schemas']['SecondTargetPolicyPack'];
 export type SecondTargetReviewPacketRequirement = components['schemas']['SecondTargetReviewPacketRequirement'];
 export type SecondTargetReviewPacketTemplate = components['schemas']['SecondTargetReviewPacketTemplate'];
+export type SecondTargetRollbackProofArtifact = components['schemas']['SecondTargetRollbackProofArtifact'];
+export type SecondTargetRollbackProofArtifactId = components['schemas']['SecondTargetRollbackProofArtifactId'];
+export type SecondTargetRollbackProofCapture = components['schemas']['SecondTargetRollbackProofCapture'];
 export type SecondTargetSteadyStateProofArtifact = components['schemas']['SecondTargetSteadyStateProofArtifact'];
 export type SecondTargetSteadyStateProofArtifactId = components['schemas']['SecondTargetSteadyStateProofArtifactId'];
 export type SecondTargetSteadyStateProofCapture = components['schemas']['SecondTargetSteadyStateProofCapture'];

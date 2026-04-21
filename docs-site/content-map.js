@@ -299,6 +299,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'debian-12-rollback-proof-capture',
+    sourcePath: 'docs/operations/portmanager-debian-12-rollback-proof-capture.md',
+    route: 'operations/debian-12-rollback-proof-capture',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Debian 12 Rollback Proof Capture',
+      zh: 'Debian 12 回滚证明采集'
+    }
+  },
+  {
     id: 'overview-design-baseline',
     sourcePath: 'docs/design/portmanager-overview-design-baseline.md',
     route: 'architecture/overview-design-baseline',

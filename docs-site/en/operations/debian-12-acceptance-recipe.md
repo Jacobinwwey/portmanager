@@ -18,7 +18,7 @@ Define the bounded review-prep recipe for `debian-12-systemd-tailscale`.
 This document does not claim that parity proof already passed.
 It freezes the exact proof sequence and artifact bundle required before second-target review can open.
 The companion review-packet template at `docs/operations/portmanager-debian-12-review-packet-template.md` freezes how those artifacts are recorded.
-The companion capture guides at `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`, `docs/operations/portmanager-debian-12-steady-state-proof-capture.md`, `docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`, and `docs/operations/portmanager-debian-12-diagnostics-proof-capture.md` freeze how bootstrap, steady-state, backup, and diagnostics evidence are gathered.
+The companion capture guides at `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`, `docs/operations/portmanager-debian-12-steady-state-proof-capture.md`, `docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`, `docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`, and `docs/operations/portmanager-debian-12-rollback-proof-capture.md` freeze how bootstrap, steady-state, backup, diagnostics, and rollback evidence are gathered.
 Current repo baseline now supports candidate-host enrollment, probe, and bootstrap rehearsal only.
 It still does not claim bootstrap parity passed, and it still does not claim steady-state, backup, diagnostics, or rollback parity.
 
@@ -58,6 +58,7 @@ It still does not claim bootstrap parity passed, and it still does not claim ste
 - steady-state-proof guide path: `docs/operations/portmanager-debian-12-steady-state-proof-capture.md`
 - backup-restore-proof guide path: `docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`
 - diagnostics-proof guide path: `docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`
+- rollback-proof guide path: `docs/operations/portmanager-debian-12-rollback-proof-capture.md`
 
 ### Exit rule
 Only mark parity criteria true after the exact evidence bundle exists and is linked in the review packet.

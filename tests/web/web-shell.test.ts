@@ -45,6 +45,8 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /portmanager-debian-12-backup-restore-proof-capture\.md/i)
   assert.match(html, /Diagnostics proof capture/i)
   assert.match(html, /portmanager-debian-12-diagnostics-proof-capture\.md/i)
+  assert.match(html, /Rollback proof capture/i)
+  assert.match(html, /portmanager-debian-12-rollback-proof-capture\.md/i)
   assert.match(html, /portmanager-debian-12-acceptance-recipe\.md/i)
   assert.match(html, /review prep/i)
   assert.match(html, /controller_embedded/i)

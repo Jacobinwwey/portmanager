@@ -1382,6 +1382,7 @@ components:
           steadyStateProofCapture,
           backupRestoreProofCapture,
           diagnosticsProofCapture,
+          rollbackProofCapture,
           satisfiedCriteria,
           blockingCriteria,
           evidenceItems
@@ -1425,6 +1426,8 @@ components:
           $ref: '#/components/schemas/SecondTargetBackupRestoreProofCapture'
         diagnosticsProofCapture:
           $ref: '#/components/schemas/SecondTargetDiagnosticsProofCapture'
+        rollbackProofCapture:
+          $ref: '#/components/schemas/SecondTargetRollbackProofCapture'
         satisfiedCriteria:
           type: array
           items:
@@ -1628,6 +1631,43 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetDiagnosticsProofArtifact'
+        sources:
+          type: array
+          items:
+            type: string
+    SecondTargetRollbackProofArtifactId:
+      type: string
+      enum:
+        [
+          rollback_point_id,
+          rollback_operation_id,
+          rollback_result_summary,
+          post_rollback_diagnostics_linkage
+        ]
+    SecondTargetRollbackProofArtifact:
+      type: object
+      required: [id, label, summary]
+      properties:
+        id:
+          $ref: '#/components/schemas/SecondTargetRollbackProofArtifactId'
+        label:
+          type: string
+        summary:
+          type: string
+    SecondTargetRollbackProofCapture:
+      type: object
+      required: [candidateTargetProfileId, guidePath, summary, requiredArtifacts, sources]
+      properties:
+        candidateTargetProfileId:
+          type: string
+        guidePath:
+          type: string
+        summary:
+          type: string
+        requiredArtifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetRollbackProofArtifact'
         sources:
           type: array
           items:

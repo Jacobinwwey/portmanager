@@ -132,6 +132,26 @@ export interface SecondTargetDiagnosticsProofCapture {
   sources: string[]
 }
 
+export type SecondTargetRollbackProofArtifactId =
+  | 'rollback_point_id'
+  | 'rollback_operation_id'
+  | 'rollback_result_summary'
+  | 'post_rollback_diagnostics_linkage'
+
+export interface SecondTargetRollbackProofArtifact {
+  id: SecondTargetRollbackProofArtifactId
+  label: string
+  summary: string
+}
+
+export interface SecondTargetRollbackProofCapture {
+  candidateTargetProfileId: string
+  guidePath: string
+  summary: string
+  requiredArtifacts: SecondTargetRollbackProofArtifact[]
+  sources: string[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -165,6 +185,7 @@ export interface SecondTargetPolicyPack {
   steadyStateProofCapture: SecondTargetSteadyStateProofCapture
   backupRestoreProofCapture: SecondTargetBackupRestoreProofCapture
   diagnosticsProofCapture: SecondTargetDiagnosticsProofCapture
+  rollbackProofCapture: SecondTargetRollbackProofCapture
   satisfiedCriteria: SecondTargetPolicyCriterion[]
   blockingCriteria: SecondTargetPolicyCriterion[]
   evidenceItems: SecondTargetPolicyEvidenceItem[]
@@ -179,6 +200,8 @@ const backupRestoreProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md'
 const diagnosticsProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-diagnostics-proof-capture.md'
+const rollbackProofCaptureGuidePath =
+  'docs/operations/portmanager-debian-12-rollback-proof-capture.md'
 
 const bootstrapProofArtifactMetadata: Record<
   SecondTargetBootstrapProofArtifactId,
@@ -281,6 +304,32 @@ const diagnosticsProofArtifactMetadata: Record<
     label: 'Drift operator note',
     summary:
       'Capture one short operator note for any drift, degraded verification, or no-drift conclusion from the same diagnostics packet.'
+  }
+}
+
+const rollbackProofArtifactMetadata: Record<
+  SecondTargetRollbackProofArtifactId,
+  { label: string; summary: string }
+> = {
+  rollback_point_id: {
+    label: 'Rollback-point id',
+    summary:
+      'Capture one rollback-point id selected for the Debian 12 rehearsal so the packet records exactly which recovery anchor was exercised.'
+  },
+  rollback_operation_id: {
+    label: 'Rollback operation id',
+    summary:
+      'Capture one bounded rollback operation id so the Debian 12 rollback rehearsal stays anchored to explicit controller truth.'
+  },
+  rollback_result_summary: {
+    label: 'Rollback result summary',
+    summary:
+      'Capture the terminal rollback result summary that states whether the rehearsal applied cleanly or stayed degraded.'
+  },
+  post_rollback_diagnostics_linkage: {
+    label: 'Post-rollback diagnostics linkage',
+    summary:
+      'Capture one linked post-rollback diagnostics artifact path or audit reference from the same rollback rehearsal packet.'
   }
 }
 
@@ -423,6 +472,18 @@ function diagnosticsProofArtifact(
   }
 }
 
+function rollbackProofArtifact(
+  id: SecondTargetRollbackProofArtifactId
+): SecondTargetRollbackProofArtifact {
+  const metadata = rollbackProofArtifactMetadata[id]
+
+  return {
+    id,
+    label: metadata.label,
+    summary: metadata.summary
+  }
+}
+
 function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceItem[] {
   return [
     evidenceItem(
@@ -539,8 +600,9 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     evidenceItem(
       'rollback_parity',
       'planned',
-      'Rollback parity evidence is still pending for Debian 12.',
+      'Rollback parity is still pending for Debian 12 until one rollback rehearsal bundle links rollback-point, rollback result, and post-rollback diagnostics evidence together.',
       [
+        rollbackProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
         'docs/operations/portmanager-backup-rollback-policy.md'
@@ -757,6 +819,7 @@ function buildReviewPacketTemplate(
         'rollback_parity',
         'Capture rollback-point linkage, rollback result summary, and post-rollback diagnostics in the same packet.',
         [
+          rollbackProofCaptureGuidePath,
           reviewPacketTemplatePath,
           'docs/operations/portmanager-debian-12-acceptance-recipe.md',
           'docs/operations/portmanager-backup-rollback-policy.md'
@@ -870,6 +933,33 @@ function buildDiagnosticsProofCapture(
   }
 }
 
+function buildRollbackProofCapture(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetRollbackProofCapture {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+
+  return {
+    candidateTargetProfileId,
+    guidePath: rollbackProofCaptureGuidePath,
+    summary:
+      `Rollback proof capture stays explicit for ${candidateTargetProfileId}: preserve one bounded rollback rehearsal bundle before rollback parity can move.`,
+    requiredArtifacts: [
+      rollbackProofArtifact('rollback_point_id'),
+      rollbackProofArtifact('rollback_operation_id'),
+      rollbackProofArtifact('rollback_result_summary'),
+      rollbackProofArtifact('post_rollback_diagnostics_linkage')
+    ],
+    sources: [
+      rollbackProofCaptureGuidePath,
+      reviewPacketTemplatePath,
+      'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+      'docs/operations/portmanager-backup-rollback-policy.md',
+      'apps/controller/src/controller-server.ts',
+      'apps/controller/src/controller-domain-service.ts'
+    ]
+  }
+}
+
 export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySnapshot {
   const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
     summarizeTargetProfile(profile.id)
@@ -923,6 +1013,7 @@ export function buildSecondTargetPolicyPack(
     steadyStateProofCapture: buildSteadyStateProofCapture(snapshot),
     backupRestoreProofCapture: buildBackupRestoreProofCapture(snapshot),
     diagnosticsProofCapture: buildDiagnosticsProofCapture(snapshot),
+    rollbackProofCapture: buildRollbackProofCapture(snapshot),
     satisfiedCriteria,
     blockingCriteria,
     evidenceItems: (snapshot.evidenceItems ?? []).map((item) => ({

@@ -1491,6 +1491,22 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                         "docs/operations/portmanager-debian-12-acceptance-recipe.md"
                     ]
                 },
+                "rollbackProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+                    "summary": "rollback proof capture guide exists",
+                    "requiredArtifacts": [
+                        {
+                            "id": "rollback_operation_id",
+                            "label": "Rollback operation id",
+                            "summary": "capture rollback operation id for one bounded rollback rehearsal"
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+                        "docs/operations/portmanager-debian-12-acceptance-recipe.md"
+                    ]
+                },
                 "evidenceItems": [
                     {
                         "criterionId": "docs_contract_ready",
@@ -1561,10 +1577,12 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("Steady-State Proof Capture"));
     assert!(stdout.contains("Backup and Restore Proof Capture"));
     assert!(stdout.contains("Diagnostics Proof Capture"));
+    assert!(stdout.contains("Rollback Proof Capture"));
     assert!(stdout.contains("portmanager-debian-12-bootstrap-proof-capture.md"));
     assert!(stdout.contains("portmanager-debian-12-steady-state-proof-capture.md"));
     assert!(stdout.contains("portmanager-debian-12-backup-restore-proof-capture.md"));
     assert!(stdout.contains("portmanager-debian-12-diagnostics-proof-capture.md"));
+    assert!(stdout.contains("portmanager-debian-12-rollback-proof-capture.md"));
     assert!(stdout.contains("portmanager-debian-12-review-packet-template.md"));
     assert!(stdout.contains("portmanager-debian-12-acceptance-recipe.md"));
     assert!(stdout.contains("bootstrap_transport_parity"));
@@ -1572,6 +1590,7 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("health_capture"));
     assert!(stdout.contains("backup_manifest_path"));
     assert!(stdout.contains("diagnostics_artifact_paths"));
+    assert!(stdout.contains("rollback_operation_id"));
 }
 
 #[test]
@@ -1673,6 +1692,21 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                     ],
                     "sources": [
                         "docs/operations/portmanager-debian-12-diagnostics-proof-capture.md"
+                    ]
+                },
+                "rollbackProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+                    "summary": "rollback proof capture guide exists",
+                    "requiredArtifacts": [
+                        {
+                            "id": "rollback_operation_id",
+                            "label": "Rollback operation id",
+                            "summary": "capture rollback operation id for one bounded rollback rehearsal"
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-debian-12-rollback-proof-capture.md"
                     ]
                 },
                 "evidenceItems": [

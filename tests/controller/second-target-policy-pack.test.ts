@@ -192,6 +192,25 @@ test('default second target policy pack lands governance artifacts while transpo
     ),
     true
   )
+  assert.equal(pack.rollbackProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+  assert.match(
+    pack.rollbackProofCapture.guidePath,
+    /docs\/operations\/portmanager-debian-12-rollback-proof-capture\.md/u
+  )
+  assert.equal(pack.rollbackProofCapture.requiredArtifacts.length >= 4, true)
+  assert.equal(
+    pack.rollbackProofCapture.requiredArtifacts.some(
+      (item) =>
+        item.id === 'rollback_operation_id' && item.summary.includes('rollback operation')
+    ),
+    true
+  )
+  assert.equal(
+    pack.rollbackProofCapture.sources.some((source) =>
+      source.endsWith('docs/operations/portmanager-debian-12-rollback-proof-capture.md')
+    ),
+    true
+  )
   assert.equal(
     pack.reviewPacketTemplate.requiredEvidence.some(
       (item) =>
@@ -322,6 +341,17 @@ test('controller server exposes second target policy pack as explicit controller
           }>
           sources: string[]
         }
+        rollbackProofCapture: {
+          candidateTargetProfileId: string
+          guidePath: string
+          summary: string
+          requiredArtifacts: Array<{
+            id: string
+            label: string
+            summary: string
+          }>
+          sources: string[]
+        }
         satisfiedCriteria: Array<{ id: string; label: string }>
         blockingCriteria: Array<{ id: string; label: string }>
         evidenceItems: Array<{
@@ -419,6 +449,24 @@ test('controller server exposes second target policy pack as explicit controller
       assert.equal(
         payload.diagnosticsProofCapture.sources.some((source) =>
           source.endsWith('docs/operations/portmanager-debian-12-diagnostics-proof-capture.md')
+        ),
+        true
+      )
+      assert.equal(payload.rollbackProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+      assert.match(
+        payload.rollbackProofCapture.guidePath,
+        /docs\/operations\/portmanager-debian-12-rollback-proof-capture\.md/u
+      )
+      assert.equal(payload.rollbackProofCapture.requiredArtifacts.length >= 4, true)
+      assert.equal(
+        payload.rollbackProofCapture.requiredArtifacts.some(
+          (item) => item.id === 'rollback_operation_id'
+        ),
+        true
+      )
+      assert.equal(
+        payload.rollbackProofCapture.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-rollback-proof-capture.md')
         ),
         true
       )

@@ -1680,6 +1680,44 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         'docs/operations/portmanager-backup-rollback-policy.md'
       ]
     },
+    rollbackProofCapture: {
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      guidePath: 'docs/operations/portmanager-debian-12-rollback-proof-capture.md',
+      summary:
+        'Rollback proof capture stays explicit for debian-12-systemd-tailscale before rollback parity can move.',
+      requiredArtifacts: [
+        {
+          id: 'rollback_point_id',
+          label: 'Rollback-point id',
+          summary:
+            'Capture one rollback-point id selected for the Debian 12 rehearsal so the packet records exactly which recovery anchor was exercised.'
+        },
+        {
+          id: 'rollback_operation_id',
+          label: 'Rollback operation id',
+          summary:
+            'Capture one bounded rollback operation id so the Debian 12 rollback rehearsal stays anchored to explicit controller truth.'
+        },
+        {
+          id: 'rollback_result_summary',
+          label: 'Rollback result summary',
+          summary:
+            'Capture the terminal rollback result summary that states whether the rehearsal applied cleanly or stayed degraded.'
+        },
+        {
+          id: 'post_rollback_diagnostics_linkage',
+          label: 'Post-rollback diagnostics linkage',
+          summary:
+            'Capture one linked post-rollback diagnostics artifact path or audit reference from the same rollback rehearsal packet.'
+        }
+      ],
+      sources: [
+        'docs/operations/portmanager-debian-12-rollback-proof-capture.md',
+        'docs/operations/portmanager-debian-12-review-packet-template.md',
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'docs/operations/portmanager-backup-rollback-policy.md'
+      ]
+    },
     satisfiedCriteria: [
       {
         id: 'locked_target_registry',
@@ -3764,6 +3802,37 @@ function SecondTargetPolicyCard(props: {
         { className: 'pm-microcopy', key: 'sources' },
         props.pack.diagnosticsProofCapture.sources.length > 0
           ? `Sources: ${props.pack.diagnosticsProofCapture.sources.join(', ')}`
+          : 'Sources: none'
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'rollback-proof-capture' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Rollback proof capture',
+        detail: props.pack.rollbackProofCapture.candidateTargetProfileId
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Guide Path', props.pack.rollbackProofCapture.guidePath),
+        kvRow('Required Artifacts', String(props.pack.rollbackProofCapture.requiredArtifacts.length))
+      ]),
+      h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.rollbackProofCapture.summary),
+      props.pack.rollbackProofCapture.requiredArtifacts.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.rollbackProofCapture.requiredArtifacts.map((item) =>
+              h('li', { className: 'pm-list-item', key: item.id }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, item.summary)
+              ])
+            )
+          )
+        : emptyState('No rollback-proof artifacts recorded yet.', 'empty'),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'sources' },
+        props.pack.rollbackProofCapture.sources.length > 0
+          ? `Sources: ${props.pack.rollbackProofCapture.sources.join(', ')}`
           : 'Sources: none'
       )
     ]),
