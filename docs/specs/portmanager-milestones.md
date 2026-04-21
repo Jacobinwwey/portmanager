@@ -1,7 +1,7 @@
 # PortManager Milestones
 
 Updated: 2026-04-21
-Version: v0.5.19-confidence-progress-refresh
+Version: v0.5.20-confidence-refresh-maintenance
 
 ## English
 
@@ -50,7 +50,7 @@ Milestone 1 is only accepted when all of the following become true:
 - Fresh acceptance evidence on `2026-04-17`: `pnpm acceptance:verify` now passes after Unit 4 delivery and Unit 5 docs sync; the embedded milestone proof shows host `draft -> ready`, bridge rule `desired -> active`, live agent HTTP bootstrap/apply/runtime collection, snapshot evidence, and preserved backup/rollback artifacts.
 - Fresh Windows real-machine acceptance on `2026-04-18`: `pnpm acceptance:verify` passed again on the latest `main`, and development-progress docs validation now honors the committed generated confidence fallback when local `.portmanager` history is absent, matching the docs publication contract on a fresh machine.
 - Fresh acceptance hardening on `2026-04-18`: that same development-progress docs validation now also stays stable when ignored local `.portmanager` history is newer than committed docs-site progress data, so acceptance no longer depends on local hidden-state freshness unless docs generation is intentionally rerun.
-- Fresh GitHub-hosted acceptance completion proof on `2026-04-21`: local `corepack pnpm acceptance:verify` still passed, `docs-pages` run `24702941963` passed, and `mainline-acceptance` run `24702941958` passed after publishing the refreshed confidence-progress artifact. The standing acceptance gate and the docs publication gate therefore remain complete and healthy on the latest `main`.
+- Fresh promotion-ready maintenance checkpoint on `2026-04-21`: local `corepack pnpm acceptance:verify` still passed, the latest synced `mainline-acceptance` evidence now reaches run `24707884501`, the last published `docs-pages` proof before this refresh remained healthy at run `24707884469`, and the tracked confidence-progress artifact has now been deliberately refreshed to the latest reviewed `23/7` promotion-ready snapshot before publication. The standing acceptance gate therefore remains healthy, and the next publication proof should be rechecked after this refresh lands on `main`.
 - Controller-side rule truth intentionally becomes `active` only after diagnostics while raw agent runtime remains `applied_unverified` until verification. That separation is now shipped behavior, not a Milestone 1 gap.
 
 #### Current development sequence
@@ -72,7 +72,7 @@ Milestone 1 is only accepted when all of the following become true:
 - `Confidence-review-digest slice`: complete. `pnpm milestone:review:confidence` now compares synced local readiness with the tracked public progress artifact, writes `.portmanager/reports/milestone-confidence-review.md`, separates countdown drift from visibility-only drift, and keeps strict published-countdown failure opt-in.
 - `Confidence-review-pack CI slice`: complete. `pnpm milestone:review:promotion-ready -- --skip-sync` now lets `mainline-acceptance` publish the current-run `.portmanager/reports/milestone-confidence-review.md` and `.portmanager/reports/milestone-wording-review.md` inside `milestone-confidence-bundle-*`.
 - `Confidence-review-pack fetch slice`: complete. `pnpm milestone:fetch:review-pack` now stages the uploaded current-run review bundle into `.portmanager/reports/current-ci-review-pack/` and writes `review-pack-manifest.json` for CI-first review.
-- `Next lane`: Milestone 2 promotion-ready wording review on the same live host / rule / policy slice by running `pnpm milestone:review:promotion-ready -- --limit 20`, refreshing the tracked public snapshot only through the same helper plus `--refresh-published-artifact` when review agrees, running `pnpm milestone:fetch:review-pack` when the current CI run is the first question, reviewing the verification report plus the public development-progress page and `.portmanager/reports/current-ci-review-pack/`, and keeping qualified history green while human milestone-language review stays deliberate.
+- `Next lane`: Milestone 2 promotion-ready publication refresh and maintenance on the same live host / rule / policy slice by keeping `pnpm milestone:review:promotion-ready -- --limit 20` as the default completed-mainline review entrypoint, refreshing the tracked public snapshot only through the same helper plus `--refresh-published-artifact` when review agrees, running `pnpm milestone:fetch:review-pack` when the current CI run is the first question, reviewing the verification report plus the public development-progress page and `.portmanager/reports/current-ci-review-pack/` as one maintenance bundle, and keeping qualified history green while human milestone-language review stays deliberate.
 
 #### What remains intentionally deferred
 - PostgreSQL as the default store
@@ -223,7 +223,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - `2026-04-17` 的最新验收证据已经成立：Unit 4 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新转绿；其中内嵌的 milestone proof 现在已经证明 host `draft -> ready`、bridge rule `desired -> active`、live agent HTTP bootstrap/apply/runtime collection，以及 backup / rollback 证据保持不变。
 - `2026-04-18` 的 Windows 真机验收也已经成立：最新 `main` 上的 `pnpm acceptance:verify` 再次通过，而且 development-progress docs 校验现在已经在本地 `.portmanager` 历史缺失时尊重已提交的 generated confidence fallback，使全新机器的 gate 行为与 docs 发布契约保持一致。
 - `2026-04-18` 还继续补齐了一层 acceptance 加固：当被忽略的本地 `.portmanager` 历史比已提交 docs-site progress data 更新时，这条 development-progress docs 校验也会继续保持稳定，因此 acceptance 不再依赖本地隐藏状态是否“刚好够新”，除非开发者明确重跑 docs 生成。
-- `2026-04-21` 的 GitHub 托管验收闭环也已经成立：本地 `corepack pnpm acceptance:verify` 继续通过，刷新 confidence-progress artifact 之后的 `docs-pages` run `24702941963` 与 `mainline-acceptance` run `24702941958` 也继续通过。因此常驻 acceptance gate 与 docs 发布 gate 现在仍然在最新 `main` 上保持完整且健康。
+- `2026-04-21` 的 promotion-ready 维护检查点也已经成立：本地 `corepack pnpm acceptance:verify` 继续通过，最新同步的 `mainline-acceptance` 证据已经推进到 run `24707884501`，这次刷新前最近一次已发布 `docs-pages` 证明仍保持在 run `24707884469` 且健康，被跟踪的 confidence-progress artifact 现在也已经在发布前被有意刷新到最新评审过的 `23/7` promotion-ready 快照。因此当前剩余工作已经收窄为发布刷新维护，而不是新的 readiness 脚手架。
 - controller 侧规则真相会在 diagnostics 之后进入 `active`，而原始 agent runtime 在验证完成前仍保持 `applied_unverified`。这已经是有意保留的已交付语义，不再是里程碑 1 缺口。
 
 #### 当前推进顺序
@@ -244,7 +244,7 @@ Milestone 3 can only begin as a real execution phase when all of the following a
 - `Confidence review digest 切片`：已完成。`pnpm milestone:review:confidence` 现在会把同步后的本地 readiness 与已跟踪公开 progress artifact 直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，区分 countdown 漂移与 visibility-only 漂移，并把严格公开倒计时检查保持为显式可选。
 - `Confidence review-pack CI 切片`：已完成。`pnpm milestone:review:promotion-ready -- --skip-sync` 现在会让 `mainline-acceptance` 把当前 run 的 `.portmanager/reports/milestone-confidence-review.md` 与 `.portmanager/reports/milestone-wording-review.md` 直接上传进 `milestone-confidence-bundle-*`，供开发者查看当前 run。
 - `Confidence review-pack fetch 切片`：已完成。`pnpm milestone:fetch:review-pack` 现在会把上传后的 current-run review bundle 落到 `.portmanager/reports/current-ci-review-pack/`，并写出 `review-pack-manifest.json`，让开发者用 repo-native 路径复核当前 CI run。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；随后只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照，复核验证报告、公开 development-progress 页面与当前 run review pack，并把 qualified history 持续转绿。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 发布刷新与维护：把 `pnpm milestone:review:promotion-ready -- --limit 20` 作为 completed-mainline 之后的默认复核入口；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；随后把验证报告、公开 development-progress 页面与当前 run review pack 当成同一份维护复核包，只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照，并把 qualified history 持续转绿。
 
 #### 明确延后的内容
 - PostgreSQL 作为默认状态库

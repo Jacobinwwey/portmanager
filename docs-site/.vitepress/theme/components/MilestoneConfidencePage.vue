@@ -428,9 +428,9 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `当前公开状态已经是 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
         `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；promotion 门槛已经满足。`,
-        '默认复核顺序已经收敛为先执行 `pnpm milestone:fetch:review-pack` 读取当前 CI run，再执行 `pnpm milestone:review:promotion-ready -- --limit 20` 做同步后的本地复核；`mainline-acceptance` confidence job 仍会通过 `--skip-sync` 产出这组 uploaded bundle。',
-        'helper 现在会把 `promotion-ready-reviewed` 与 `promotion-ready-refresh-required` 明确区分开，避免把本地 promotion-ready 证据误读成公开页面已经同步到最新 counters。',
-        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前主线已从倒计时积累收窄为文案复核与 gate 持续健康，而不是继续补 readiness 脚手架。`
+        'review-pack 访问缺口已经关闭：当前 CI-first 复核先执行 `pnpm milestone:fetch:review-pack`，completed-mainline 复核仍然经过 `pnpm milestone:review:promotion-ready -- --limit 20`，当前主线已经转到公开快照刷新与维护。',
+        'helper 现在会把 `promotion-ready-reviewed` 与 `promotion-ready-refresh-required` 明确区分开，只有当公开快照真的落后于最新评审过的证据时才推动刷新。',
+        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前主线已从 helper 补洞收窄为公开进度维护、文案复核与 gate 持续健康，而不是继续补 readiness 脚手架或提前推进 Toward C。`
       ]
     : [
         `当前公开状态仍为 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
@@ -442,9 +442,9 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `Current public status is now \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
         `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the promotion threshold is met.`,
-        'The default review flow now stages the current CI bundle with `pnpm milestone:fetch:review-pack`, then runs `pnpm milestone:review:promotion-ready -- --limit 20` for synced local review; `mainline-acceptance` still produces that uploaded bundle through `--skip-sync`.',
-        'The helper now separates `promotion-ready-reviewed` from `promotion-ready-refresh-required`, so local promotion-ready evidence cannot be misread as public-artifact alignment.',
-        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active lane has narrowed from countdown accumulation to wording review plus sustained gate health.`
+        'Review-pack access is now closed: current CI-first review starts with `pnpm milestone:fetch:review-pack`, completed-mainline review still runs through `pnpm milestone:review:promotion-ready -- --limit 20`, and the active lane is public-snapshot refresh plus maintenance.',
+        'The helper now separates `promotion-ready-reviewed` from `promotion-ready-refresh-required`, so refresh only happens when the published artifact really trails the latest reviewed evidence.',
+        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active lane has narrowed from helper-gap closure to public-progress maintenance, wording review, and sustained gate health rather than more readiness plumbing or Toward C expansion.`
       ]
     : [
         `Current public status remains \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
@@ -456,11 +456,11 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
 
 const currentDirectionDocs = computed(() => [
   {
-    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m2-confidence-review-pack-fetch-requirements.md'),
+    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-requirements.md'),
     label: copy.value.currentDirectionRequirementsLink
   },
   {
-    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m2-confidence-review-pack-fetch-plan.md'),
+    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md'),
     label: copy.value.currentDirectionPlanLink
   },
   {

@@ -12,54 +12,54 @@ status: active
 ---
 > 真源文档：`docs/operations/portmanager-real-machine-verification-report.md`
 > Audience：`shared` | Section：`operations` | Status：`active`
-> Updated：2026-04-21 | Version：v0.2.7-confidence-progress-refresh
+> Updated：2026-04-21 | Version：v0.2.8-confidence-refresh-maintenance
 ### 用途
 这份文档用于冻结 PortManager 当前的真机验证报告。
 它的目标是把 acceptance 真相、confidence 真相与 docs 发布真相收束到同一个位置，而不是继续散落在不同的进度说明里。
 
 ### 验证会话
 本报告对应的最新验证会话发生在 `2026-04-21`。
-这次会话同时包含一轮针对最新本地 `main` 的常驻 acceptance gate 重放、一轮通过 `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` 完成的 helper 刷新，用同一组已完成 workflow 证据同步 history、写出 digest 并重发被跟踪 confidence-progress artifact，以及一轮在刷新产物落到 `main` 之后的 GitHub 托管确认性验证。
+这次会话同时包含一轮针对最新本地 `main` 的常驻 acceptance gate 重放、一轮通过 `pnpm milestone:review:promotion-ready -- --skip-sync --refresh-published-artifact` 完成的 helper 刷新，直接复用已经同步到本地的 confidence history 来重发被跟踪 confidence-progress artifact，并冻结最新导入的 qualified `mainline-acceptance` 证据 `24707884501/1` 与这次刷新前最后一次已发布的 `docs-pages` 证明 `24707884469`。
 
 本次执行命令：
 - `corepack pnpm acceptance:verify`
-- `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
-- `mainline-acceptance` 的 GitHub Actions run `24702941958`
-- `docs-pages` 的 GitHub Actions run `24702941963`
+- `pnpm milestone:review:promotion-ready -- --skip-sync --refresh-published-artifact`
+- 最新导入的 `mainline-acceptance` 证据：`24707884501/1`
+- 这次刷新前最后一次已发布的 `docs-pages` 证明：`24707884469`
 
 ### 各命令分别证明什么
 - `corepack pnpm acceptance:verify`
   - 证明当前常驻本地主线验收 gate 仍然通过，覆盖 tests、type checks、Rust workspace checks、contract drift checks、docs build 与 milestone verification
-- `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
-  - 会把 GitHub Actions 已完成的 `mainline-acceptance` confidence bundle 导入本地 `.portmanager/reports/`
+- `pnpm milestone:review:promotion-ready -- --skip-sync --refresh-published-artifact`
+  - 会直接复用已经同步到本地 `.portmanager/reports/` 的 confidence bundle，而不是再次导入 history
   - 会通过既有 review-digest 路径写出 `.portmanager/reports/milestone-confidence-review.md`
   - 还会写出 `.portmanager/reports/milestone-wording-review.md`，把人工里程碑文案复核需要的清单、`Public claim class`、`Source surface status` 与 `Required next action` 一起冻结在本地
   - 只会在 helper 显式刷新 flag 允许时，按原有发布契约重发 `docs-site/data/milestone-confidence-progress.ts`
-  - 证明同步后的本地复核与公开 confidence 快照现在已经建立在同一份已完成 workflow 证据之上
-  - 证明被跟踪公开 artifact 现在已经携带最新 qualified run `24702941958/1` 与 `16/7` qualified runs
-- GitHub Actions run `24702941958`
-  - 证明在刷新 confidence-progress artifact 落到 `main` 之后，常驻 CI acceptance gate 仍然通过
-  - 证明更重的 confidence 收集路径在这次公开快照刷新之后仍然保持健康
-- GitHub Actions run `24702941963`
-  - 证明在刷新 confidence-progress artifact 落到 `main` 之后，公开 docs build 与 Pages 部署仍然成功
-  - 证明 docs 发布工作流与常驻 acceptance gate 现在依然可以同时保持健康
+  - 证明同步后的本地复核与公开 confidence 快照现在已经建立在同一份最新评审过的证据 bundle 之上
+  - 证明被跟踪公开 artifact 现在已经携带最新 qualified run `24707884501/1` 与 `23/7` qualified runs
+- 最新导入的 `mainline-acceptance` 证据 `24707884501/1`
+  - 证明同步后的本地 history 已经推进到这次刷新前最新一条 qualified mainline run
+  - 证明更重的 confidence 收集路径在最新导入证据处仍然保持健康
+- 这次刷新前最后一次已发布的 `docs-pages` 证明 `24707884469`
+  - 证明 docs 发布工作流在上一个已发布快照上仍然健康
+  - 也标记了这次刷新落到 `main` 之后需要再次复核的发布基线
 
 ### 本报告冻结的证据
 - 本地 acceptance gate：已通过
 - helper 同步与显式刷新：已通过
-- 已导入并纳入跟踪的 qualified workflow runs：`24595022905/1`、`24645377989/1`、`24645746838/1`、`24645898239/1`、`24646210070/1`、`24646810439/1`、`24647442700/1`、`24648118236/1`、`24648519364/1`、`24648911705/1`、`24650868231/1`、`24699338529/1`、`24699564258/1`、`24701682768/1`、`24702539213/1`、`24702941958/1`
+- 已导入并纳入跟踪的 qualified workflow runs：`24595022905/1`、`24645377989/1`、`24645746838/1`、`24645898239/1`、`24646210070/1`、`24646810439/1`、`24647442700/1`、`24648118236/1`、`24648519364/1`、`24648911705/1`、`24650868231/1`、`24699338529/1`、`24699564258/1`、`24701682768/1`、`24702539213/1`、`24702941958/1`、`24703457084/1`、`24704483563/1`、`24705233374/1`、`24705969182/1`、`24706180264/1`、`24706987559/1`、`24707884501/1`
 - 已导入 qualified workflow：`mainline-acceptance`
 - 已导入 qualified events：`push`、`schedule`
 - 当前公开 readiness 状态：`promotion-ready`
-- 当前公开 qualified runs：`16/7`
-- 当前公开 qualified consecutive passes：`16/3`
+- 当前公开 qualified runs：`23/7`
+- 当前公开 qualified consecutive passes：`23/3`
 - 当前公开 remaining qualified runs：`0`
-- 当前公开 tracked runs：`22`
+- 当前公开 tracked runs：`29`
 - 当前公开 local visibility-only runs：`6`
-- 当前公开 latest qualified run：`24702941958/1`
-- 当前公开 latest qualified SHA：`e296ca97dd48`
-- GitHub 托管 `mainline-acceptance` run：`24702941958` 已通过
-- GitHub 托管 `docs-pages` run：`24702941963` 已通过
+- 当前公开 latest qualified run：`24707884501/1`
+- 当前公开 latest qualified SHA：`ca6dbe919157`
+- 最新导入的 `mainline-acceptance` run：`24707884501` 已通过
+- 这次刷新前最后一次已发布的 `docs-pages` run：`24707884469` 已通过
 - 既有 Node 24 强制 action 试跑：仍已通过
 - 剩余 warning 来源：GitHub 官方 action 元数据仍声明 `node20`
 - 显式刷新后的 review digest：已对齐
@@ -67,10 +67,10 @@ status: active
 ### 当前结论
 - Milestone 1 的 accepted public-surface 真相仍然成立。
 - 常驻 acceptance 契约现在已经在本地 gate 与 GitHub 托管 gate 两端同时闭环，并且当前健康。
-- docs 发布 gate 也已经在最新这轮公开快照重放之后继续保持完整与健康。
+- docs 发布 gate 在这次刷新前最后一个已发布快照上仍然保持健康，而这次刷新后的新快照现在已经准备好在落到 `main` 后再次复核。
 - Milestone 2 的 confidence 维护已经真实落地且可操作，而且 promotion 条件现在已经满足。
-- 当前对外公开的真实表述已经在 helper 驱动的显式刷新之后进入最新同步的 `promotion-ready` `16/7` 快照。
-- 当前已经允许人工里程碑文案复核；剩余公开主线是参考带 `Public claim class` 与 `Source surface status` 的 `.portmanager/reports/milestone-wording-review.md` 谨慎收窄文案并持续保持 gate 健康。
+- 当前对外公开的真实表述已经在 helper 驱动的显式刷新之后进入最新评审过的 `promotion-ready` `23/7` 快照。
+- 当前已经因为 helper posture 为 `promotion-ready-reviewed` 而允许人工里程碑文案复核；剩余公开主线是参考带 `Public claim class` 与 `Source surface status` 的 `.portmanager/reports/milestone-wording-review.md` 谨慎收窄文案并持续保持 gate 健康。
 - 最新可见 local run 现在被刻意与最新 qualified mainline run 分离，因此本地 rerun 不会再抹掉主线复核证据。
 - 当前剩余的 Node 20 退役 annotation 已经收敛为 GitHub 官方 action 的上游 warning debt，不再代表 repo 本地 acceptance 或 docs publication 失败。
 

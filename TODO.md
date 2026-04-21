@@ -1,7 +1,7 @@
 # PortManager
 
 Updated: 2026-04-21
-Version: v0.5.19-confidence-progress-refresh
+Version: v0.5.20-confidence-refresh-maintenance
 
 ## English
 
@@ -76,7 +76,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
 - [x] Milestone 2 acceptance closure: add `pnpm milestone:fetch:review-pack` so developers can stage the uploaded current-run `milestone-confidence-bundle-*` into `.portmanager/reports/current-ci-review-pack/` with a local manifest instead of manual GitHub artifact browsing.
-- [ ] Next lane: run `pnpm milestone:review:promotion-ready -- --limit 20`, run `pnpm milestone:fetch:review-pack` when the current CI run is the first question, read `.portmanager/reports/current-ci-review-pack/` plus `.portmanager/reports/milestone-wording-review.md` with `Public claim class`, `Source surface status`, the latest-qualified signal, the verification report, and the public development-progress page during developer review, rerun the same helper with `--refresh-published-artifact` when the helper reports `promotion-ready-refresh-required` and review agrees that publication should move, and keep qualified Milestone 2 confidence history green on the same live slice while human milestone-language review narrows wording.
+- [ ] Next lane: keep Milestone 2 on publication-refresh-and-maintenance work rather than helper-access work: run `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs, use `pnpm milestone:fetch:review-pack` when the current CI run is the first question, review `.portmanager/reports/current-ci-review-pack/`, `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, `Source surface status`, the latest-qualified signal, the verification report, and the public development-progress page together, rerun the same helper with `--refresh-published-artifact` only when it reports `promotion-ready-refresh-required` and review agrees, and keep qualified Milestone 2 confidence history green on the same live slice while wording stays deliberate.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -107,6 +107,8 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Land confidence-wording-surface-status implementation plan: `docs/plans/2026-04-21-portmanager-m2-confidence-wording-surface-status-plan.md`
 - [x] Land confidence-review-pack-fetch requirements doc: `docs/brainstorms/2026-04-21-portmanager-m2-confidence-review-pack-fetch-requirements.md`
 - [x] Land confidence-review-pack-fetch implementation plan: `docs/plans/2026-04-21-portmanager-m2-confidence-review-pack-fetch-plan.md`
+- [x] Land confidence-publication-refresh-maintenance requirements doc: `docs/brainstorms/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-requirements.md`
+- [x] Land confidence-publication-refresh-maintenance implementation plan: `docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -182,7 +184,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
 - [x] 里程碑 2 验收闭环：补上 `pnpm milestone:fetch:review-pack`，让开发者把上传后的 current-run `milestone-confidence-bundle-*` 稳定落到 `.portmanager/reports/current-ci-review-pack/`，并保留 `review-pack-manifest.json`，不再依赖手动 GitHub artifact 点击。
-- [ ] 下一主线：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；随后结合带 `Public claim class` 与 `Source surface status` 的 `.portmanager/reports/milestone-wording-review.md`、summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面做开发者判断，只在 helper 报告 `promotion-ready-refresh-required` 且人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 推进公开被跟踪 confidence artifact，并继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，同时谨慎收窄里程碑文案。
+- [ ] 下一主线：把 Milestone 2 保持在发布刷新与维护主线，而不是继续补 helper 访问缺口：在 completed mainline runs 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`；如果第一问题是当前 CI run，就先执行 `pnpm milestone:fetch:review-pack` 并读取 `.portmanager/reports/current-ci-review-pack/`；随后把 `.portmanager/reports/milestone-wording-review.md`、`Public claim class`、`Source surface status`、summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面一起作为开发者复核包，只在 helper 报告 `promotion-ready-refresh-required` 且人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 推进公开被跟踪 confidence artifact，并继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，同时谨慎收窄里程碑文案。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -213,4 +215,6 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] 落盘 confidence-wording-surface-status 实现计划：`docs/plans/2026-04-21-portmanager-m2-confidence-wording-surface-status-plan.md`
 - [x] 落盘 confidence-review-pack-fetch 需求文档：`docs/brainstorms/2026-04-21-portmanager-m2-confidence-review-pack-fetch-requirements.md`
 - [x] 落盘 confidence-review-pack-fetch 实现计划：`docs/plans/2026-04-21-portmanager-m2-confidence-review-pack-fetch-plan.md`
+- [x] 落盘 confidence-publication-refresh-maintenance 需求文档：`docs/brainstorms/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-requirements.md`
+- [x] 落盘 confidence-publication-refresh-maintenance 实现计划：`docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

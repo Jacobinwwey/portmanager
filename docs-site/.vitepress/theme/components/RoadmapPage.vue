@@ -462,7 +462,7 @@ const confidenceLatestQualifiedRun = computed(() => formatRun(confidenceProgress
 const confidenceLatestQualifiedSha = computed(() => formatSha(confidenceProgress.latestQualifiedRun))
 const confidenceLatestVisibleRun = computed(() => formatRun(confidenceProgress.latestRun))
 const reviewDigestPlanSourceLink = githubSourceLink(
-  'docs/plans/2026-04-21-portmanager-m2-confidence-review-pack-fetch-plan.md'
+  'docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md'
 )
 
 function stageLabel(stage: string) {
