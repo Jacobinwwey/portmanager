@@ -1472,6 +1472,64 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
       'Keep debian-12-systemd-tailscale in review-prep until bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity are all real.',
       'Keep docs contract, acceptance recipe, and operator ownership artifacts aligned with parity evidence while the candidate stays on hold.'
     ],
+    reviewPacketTemplate: {
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      templatePath: 'docs/operations/portmanager-debian-12-review-packet-template.md',
+      summary:
+        'Review-packet capture stays explicit for debian-12-systemd-tailscale before any support claim moves.',
+      requiredEvidence: [
+        {
+          criterionId: 'bootstrap_transport_parity',
+          label: 'Bootstrap transport parity',
+          summary:
+            'Capture one bootstrap operation id, result summary, and linked audit/event reference for the Debian 12 candidate host.',
+          sources: [
+            'docs/operations/portmanager-debian-12-review-packet-template.md',
+            'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+          ]
+        },
+        {
+          criterionId: 'steady_state_transport_parity',
+          label: 'Steady-state transport parity',
+          summary:
+            'Capture steady-state /health and /runtime-state evidence after one normal controller-driven mutation.',
+          sources: [
+            'docs/operations/portmanager-debian-12-review-packet-template.md',
+            'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+          ]
+        },
+        {
+          criterionId: 'backup_restore_parity',
+          label: 'Backup and restore parity',
+          summary:
+            'Capture backup manifest linkage, remote-backup result if configured, and restore outcome notes from the same review packet.',
+          sources: [
+            'docs/operations/portmanager-debian-12-review-packet-template.md',
+            'docs/operations/portmanager-backup-rollback-policy.md'
+          ]
+        },
+        {
+          criterionId: 'diagnostics_parity',
+          label: 'Diagnostics parity',
+          summary:
+            'Capture diagnostics artifact paths plus linked controller event references for the candidate host after transport rehearsal.',
+          sources: [
+            'docs/operations/portmanager-debian-12-review-packet-template.md',
+            'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+          ]
+        },
+        {
+          criterionId: 'rollback_parity',
+          label: 'Rollback parity',
+          summary:
+            'Capture rollback-point linkage, rollback result summary, and post-rollback diagnostics in the same packet.',
+          sources: [
+            'docs/operations/portmanager-debian-12-review-packet-template.md',
+            'docs/operations/portmanager-backup-rollback-policy.md'
+          ]
+        }
+      ]
+    },
     satisfiedCriteria: [
       {
         id: 'locked_target_registry',
@@ -1556,7 +1614,8 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         sources: [
           'apps/controller/src/controller-server.ts',
           'tests/controller/host-rule-policy.test.ts',
-          'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+          'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+          'docs/operations/portmanager-debian-12-review-packet-template.md'
         ]
       }
     ],
@@ -3382,6 +3441,37 @@ function SecondTargetPolicyCard(props: {
             )
           )
         : emptyState('No second-target evidence ledger recorded yet.', 'empty')
+    ]),
+    h('section', { className: 'pm-card', key: 'review-packet-template' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Review packet template',
+        detail: props.pack.reviewPacketTemplate.candidateTargetProfileId
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Template Path', props.pack.reviewPacketTemplate.templatePath),
+        kvRow('Required Evidence', String(props.pack.reviewPacketTemplate.requiredEvidence.length))
+      ]),
+      h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.reviewPacketTemplate.summary),
+      props.pack.reviewPacketTemplate.requiredEvidence.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.reviewPacketTemplate.requiredEvidence.map((item) =>
+              h('li', { className: 'pm-list-item', key: item.criterionId }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.criterionId}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, [
+                  `${item.summary}`,
+                  h(
+                    'span',
+                    { key: 'sources' },
+                    item.sources.length > 0 ? ` Sources: ${item.sources.join(', ')}` : ''
+                  )
+                ])
+              ])
+            )
+          )
+        : emptyState('No review-packet requirements recorded yet.', 'empty')
     ]),
     criteriaList(
       'Satisfied criteria',

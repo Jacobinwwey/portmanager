@@ -24,11 +24,13 @@ status: active
 - 在 review 开启前，持续把支持声明锁在 Ubuntu。
 - 负责 Debian 12 环境、Tailscale 可达性与 target-profile 注册。
 - 保留 bootstrap、steady-state、backup、diagnostics、rollback 证据。
+- 按 `docs/operations/portmanager-debian-12-review-packet-template.md` 记录 packet。
 - 证据变化时同步更新 `/second-target-policy-pack` 与 docs 表面。
 - 一旦 parity proof 回退，立即停止候选复核推进。
 
 ### 必需签字条件
 - review packet 包含完整 acceptance recipe 证据包。
+- review packet 遵循 `docs/operations/portmanager-debian-12-review-packet-template.md`。
 - `/second-target-policy-pack` 与 docs、CLI、Web 保持同一份真相。
 - rollback ownership 已经明确且完成演练。
 - 任何未解决的 parity gap 都必须列为 blocking，而不是被愿景文案掩盖。

@@ -9,6 +9,7 @@ Version: v0.1.0
 Define the bounded review-prep recipe for `debian-12-systemd-tailscale`.
 This document does not claim that parity proof already passed.
 It freezes the exact proof sequence and artifact bundle required before second-target review can open.
+The companion review-packet template at `docs/operations/portmanager-debian-12-review-packet-template.md` freezes how those artifacts are recorded.
 Current repo baseline now supports candidate-host enrollment, probe, and bootstrap rehearsal only.
 It still does not claim bootstrap parity passed, and it still does not claim steady-state, backup, diagnostics, or rollback parity.
 
@@ -34,7 +35,7 @@ It still does not claim bootstrap parity passed, and it still does not claim ste
 6. Trigger one backup-bearing mutation and record backup manifest plus remote-backup result if configured.
 7. Run diagnostics and preserve diagnostics artifacts plus controller event linkage.
 8. Rehearse rollback and record rollback-point linkage, result summary, and post-rollback diagnostics.
-9. Publish one review packet that links every artifact back to `/second-target-policy-pack`.
+9. Publish one review packet from `docs/operations/portmanager-debian-12-review-packet-template.md` that links every artifact back to `/second-target-policy-pack`.
 
 ### Required evidence bundle
 - controller operation ids for bootstrap, apply, diagnostics, backup, rollback
@@ -43,6 +44,7 @@ It still does not claim bootstrap parity passed, and it still does not claim ste
 - diagnostics artifact paths
 - host target-profile id and Debian 12 runtime notes
 - summary of any drift or parity mismatch
+- review-packet template path: `docs/operations/portmanager-debian-12-review-packet-template.md`
 
 ### Exit rule
 Only mark parity criteria true after the exact evidence bundle exists and is linked in the review packet.
@@ -53,6 +55,7 @@ Only mark parity criteria true after the exact evidence bundle exists and is lin
 定义 `debian-12-systemd-tailscale` 的有边界 review-prep recipe。
 本文档不宣称等价证明已经通过。
 它只冻结在第二目标 review 能开启前必须完成的证明顺序与产物包。
+配套的 `docs/operations/portmanager-debian-12-review-packet-template.md` 会冻结这些产物该如何落盘记录。
 当前仓库基线现在只支持 candidate host 的注册、probe 与 bootstrap 预演。
 它仍然不宣称 bootstrap parity 已通过，也不宣称 steady-state、backup、diagnostics 或 rollback parity 已通过。
 
@@ -78,7 +81,7 @@ Only mark parity criteria true after the exact evidence bundle exists and is lin
 6. 触发一次带 backup 的 mutation，并记录 backup manifest 与远端 backup 结果（若已配置）。
 7. 运行 diagnostics，保留 diagnostics 产物与 controller event 链接。
 8. 演练 rollback，记录 rollback-point linkage、结果摘要与回滚后的 diagnostics。
-9. 发布一份 review packet，把每个产物都链接回 `/second-target-policy-pack`。
+9. 按 `docs/operations/portmanager-debian-12-review-packet-template.md` 发布一份 review packet，把每个产物都链接回 `/second-target-policy-pack`。
 
 ### 必需证据包
 - bootstrap、apply、diagnostics、backup、rollback 的 controller operation id
@@ -87,6 +90,7 @@ Only mark parity criteria true after the exact evidence bundle exists and is lin
 - diagnostics artifact 路径
 - host target-profile id 与 Debian 12 运行时备注
 - 任意 drift 或 parity mismatch 的摘要
+- review-packet template 路径：`docs/operations/portmanager-debian-12-review-packet-template.md`
 
 ### 退出规则
 只有在完整证据包真实存在且已经链接进 review packet 之后，才能把等价 criteria 标为 true。

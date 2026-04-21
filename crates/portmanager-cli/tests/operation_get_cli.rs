@@ -1414,6 +1414,19 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                     "Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.",
                     "Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim."
                 ],
+                "reviewPacketTemplate": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "templatePath": "docs/operations/portmanager-debian-12-review-packet-template.md",
+                    "summary": "review packet template exists",
+                    "requiredEvidence": [
+                        {
+                            "criterionId": "bootstrap_transport_parity",
+                            "label": "Bootstrap transport parity",
+                            "summary": "capture bootstrap packet evidence",
+                            "sources": ["docs/operations/portmanager-debian-12-review-packet-template.md"]
+                        }
+                    ]
+                },
                 "evidenceItems": [
                     {
                         "criterionId": "docs_contract_ready",
@@ -1479,6 +1492,8 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("Candidate Targets"));
     assert!(stdout.contains("debian-12-systemd-tailscale"));
     assert!(stdout.contains("Evidence Ledger"));
+    assert!(stdout.contains("Review Packet Template"));
+    assert!(stdout.contains("portmanager-debian-12-review-packet-template.md"));
     assert!(stdout.contains("portmanager-debian-12-acceptance-recipe.md"));
     assert!(stdout.contains("bootstrap_transport_parity"));
 }
@@ -1511,6 +1526,19 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                 "expansionReviewRequired": false,
                 "summary": "second target policy pack is alive",
                 "nextActions": ["keep supported targets locked"],
+                "reviewPacketTemplate": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "templatePath": "docs/operations/portmanager-debian-12-review-packet-template.md",
+                    "summary": "review packet template exists",
+                    "requiredEvidence": [
+                        {
+                            "criterionId": "bootstrap_transport_parity",
+                            "label": "Bootstrap transport parity",
+                            "summary": "capture bootstrap packet evidence",
+                            "sources": ["docs/operations/portmanager-debian-12-review-packet-template.md"]
+                        }
+                    ]
+                },
                 "evidenceItems": [
                     {
                         "criterionId": "docs_contract_ready",

@@ -36,6 +36,7 @@ Freeze the public wording and maintainer wording for the declared review-prep ca
 - `docs/specs/portmanager-v1-product-spec.md`
 - `docs/specs/portmanager-toward-c-strategy.md`
 - `docs/architecture/portmanager-v1-architecture.md`
+- `docs/operations/portmanager-debian-12-review-packet-template.md`
 - `docs-site/data/roadmap.ts`
 - `apps/controller/src/second-target-policy-pack.ts`
 
@@ -44,4 +45,4 @@ Freeze the public wording and maintainer wording for the declared review-prep ca
 - Candidate target: `debian-12-systemd-tailscale`
 - Partial technical slice now landed: candidate-host create, probe, and bootstrap review-prep lane
 - Blocking evidence today: bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity
-- Landed governance artifacts today: docs contract, acceptance recipe, operator ownership definition
+- Landed governance artifacts today: docs contract, acceptance recipe, review-packet template, operator ownership definition

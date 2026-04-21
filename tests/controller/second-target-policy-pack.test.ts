@@ -109,6 +109,22 @@ test('default second target policy pack lands governance artifacts while transpo
 
   assert.equal(pack.decisionState, 'hold')
   assert.equal(pack.expansionReviewRequired, false)
+  assert.equal(pack.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+  assert.match(
+    pack.reviewPacketTemplate.templatePath,
+    /docs\/operations\/portmanager-debian-12-review-packet-template\.md/u
+  )
+  assert.equal(pack.reviewPacketTemplate.requiredEvidence.length >= 5, true)
+  assert.equal(
+    pack.reviewPacketTemplate.requiredEvidence.some(
+      (item) =>
+        item.criterionId === 'bootstrap_transport_parity' &&
+        item.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-review-packet-template.md')
+        )
+    ),
+    true
+  )
   assert.equal(
     pack.satisfiedCriteria.some((criterion) => criterion.id === 'docs_contract_ready'),
     true
@@ -142,7 +158,7 @@ test('default second target policy pack lands governance artifacts while transpo
         item.criterionId === 'bootstrap_transport_parity' &&
         item.state === 'review_prep' &&
         item.sources.some((source) =>
-          source.endsWith('docs/operations/portmanager-debian-12-acceptance-recipe.md')
+          source.endsWith('docs/operations/portmanager-debian-12-review-packet-template.md')
         )
     ),
     true
@@ -174,6 +190,17 @@ test('controller server exposes second target policy pack as explicit controller
         expansionReviewRequired: boolean
         summary: string
         nextActions: string[]
+        reviewPacketTemplate: {
+          candidateTargetProfileId: string
+          templatePath: string
+          summary: string
+          requiredEvidence: Array<{
+            criterionId: string
+            label: string
+            summary: string
+            sources: string[]
+          }>
+        }
         satisfiedCriteria: Array<{ id: string; label: string }>
         blockingCriteria: Array<{ id: string; label: string }>
         evidenceItems: Array<{
@@ -196,6 +223,12 @@ test('controller server exposes second target policy pack as explicit controller
       assert.deepEqual(payload.candidateTargetProfileIds, ['debian-12-systemd-tailscale'])
       assert.equal(payload.decisionState, 'hold')
       assert.equal(payload.expansionReviewRequired, false)
+      assert.equal(payload.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+      assert.match(
+        payload.reviewPacketTemplate.templatePath,
+        /docs\/operations\/portmanager-debian-12-review-packet-template\.md/u
+      )
+      assert.equal(payload.reviewPacketTemplate.requiredEvidence.length >= 5, true)
       assert.match(payload.summary, /stay on hold/i)
       assert.equal(payload.nextActions.length >= 2, true)
       assert.equal(
@@ -230,6 +263,16 @@ test('controller server exposes second target policy pack as explicit controller
             item.state === 'landed' &&
             item.sources.some((source) =>
               source.endsWith('docs/operations/portmanager-debian-12-operator-ownership.md')
+            )
+        ),
+        true
+      )
+      assert.equal(
+        payload.reviewPacketTemplate.requiredEvidence.some(
+          (item) =>
+            item.criterionId === 'bootstrap_transport_parity' &&
+            item.sources.some((source) =>
+              source.endsWith('docs/operations/portmanager-debian-12-review-packet-template.md')
             )
         ),
         true

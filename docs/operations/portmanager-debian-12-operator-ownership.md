@@ -17,11 +17,13 @@ Define who owns review-prep work for `debian-12-systemd-tailscale`.
 - Keep support claims locked to Ubuntu until review opens.
 - Stage Debian 12 environment, Tailscale reachability, and target-profile enrollment.
 - Preserve bootstrap, steady-state, backup, diagnostics, and rollback evidence.
+- Record the packet through `docs/operations/portmanager-debian-12-review-packet-template.md`.
 - Update `/second-target-policy-pack` and docs surfaces when evidence changes.
 - Stop the candidate review immediately if parity proof regresses.
 
 ### Required sign-off conditions
 - Review packet contains the full acceptance recipe evidence bundle.
+- Review packet follows `docs/operations/portmanager-debian-12-review-packet-template.md`.
 - `/second-target-policy-pack` reflects the same truth as docs, CLI, and Web.
 - Rollback ownership is explicit and rehearsed.
 - Any unresolved parity gap is listed as blocking, not hidden behind aspirational prose.
@@ -43,11 +45,13 @@ If owner duty or evidence retention cannot be maintained, keep `debian-12-system
 - 在 review 开启前，持续把支持声明锁在 Ubuntu。
 - 负责 Debian 12 环境、Tailscale 可达性与 target-profile 注册。
 - 保留 bootstrap、steady-state、backup、diagnostics、rollback 证据。
+- 按 `docs/operations/portmanager-debian-12-review-packet-template.md` 记录 packet。
 - 证据变化时同步更新 `/second-target-policy-pack` 与 docs 表面。
 - 一旦 parity proof 回退，立即停止候选复核推进。
 
 ### 必需签字条件
 - review packet 包含完整 acceptance recipe 证据包。
+- review packet 遵循 `docs/operations/portmanager-debian-12-review-packet-template.md`。
 - `/second-target-policy-pack` 与 docs、CLI、Web 保持同一份真相。
 - rollback ownership 已经明确且完成演练。
 - 任何未解决的 parity gap 都必须列为 blocking，而不是被愿景文案掩盖。

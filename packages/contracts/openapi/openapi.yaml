@@ -1377,6 +1377,7 @@ components:
           expansionReviewRequired,
           summary,
           nextActions,
+          reviewPacketTemplate,
           satisfiedCriteria,
           blockingCriteria,
           evidenceItems
@@ -1410,6 +1411,8 @@ components:
           type: array
           items:
             type: string
+        reviewPacketTemplate:
+          $ref: '#/components/schemas/SecondTargetReviewPacketTemplate'
         satisfiedCriteria:
           type: array
           items:
@@ -1441,6 +1444,34 @@ components:
           type: array
           items:
             type: string
+    SecondTargetReviewPacketRequirement:
+      type: object
+      required: [criterionId, label, summary, sources]
+      properties:
+        criterionId:
+          $ref: '#/components/schemas/SecondTargetPolicyCriterionId'
+        label:
+          type: string
+        summary:
+          type: string
+        sources:
+          type: array
+          items:
+            type: string
+    SecondTargetReviewPacketTemplate:
+      type: object
+      required: [candidateTargetProfileId, templatePath, summary, requiredEvidence]
+      properties:
+        candidateTargetProfileId:
+          type: string
+        templatePath:
+          type: string
+        summary:
+          type: string
+        requiredEvidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetReviewPacketRequirement'
     RollbackPoint:
       type: object
       required: [id, hostId, operationId, createdAt, state]

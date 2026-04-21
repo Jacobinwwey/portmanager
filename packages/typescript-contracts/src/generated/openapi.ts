@@ -1527,9 +1527,22 @@ export interface components {
             nextActions: string[];
             /** @enum {string} */
             reviewOwner: "controller";
+            reviewPacketTemplate: components["schemas"]["SecondTargetReviewPacketTemplate"];
             satisfiedCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
             summary: string;
             supportedTargetProfiles: components["schemas"]["TargetProfileSummary"][];
+        };
+        SecondTargetReviewPacketRequirement: {
+            criterionId: components["schemas"]["SecondTargetPolicyCriterionId"];
+            label: string;
+            sources: string[];
+            summary: string;
+        };
+        SecondTargetReviewPacketTemplate: {
+            candidateTargetProfileId: string;
+            requiredEvidence: components["schemas"]["SecondTargetReviewPacketRequirement"][];
+            summary: string;
+            templatePath: string;
         };
         SshConnection: {
             host: string;
@@ -1628,6 +1641,8 @@ export type SecondTargetPolicyDecisionState = components['schemas']['SecondTarge
 export type SecondTargetPolicyEvidenceItem = components['schemas']['SecondTargetPolicyEvidenceItem'];
 export type SecondTargetPolicyEvidenceState = components['schemas']['SecondTargetPolicyEvidenceState'];
 export type SecondTargetPolicyPack = components['schemas']['SecondTargetPolicyPack'];
+export type SecondTargetReviewPacketRequirement = components['schemas']['SecondTargetReviewPacketRequirement'];
+export type SecondTargetReviewPacketTemplate = components['schemas']['SecondTargetReviewPacketTemplate'];
 export type SshConnection = components['schemas']['SshConnection'];
 export type TargetProfile = components['schemas']['TargetProfile'];
 export type TargetProfileSummary = components['schemas']['TargetProfileSummary'];

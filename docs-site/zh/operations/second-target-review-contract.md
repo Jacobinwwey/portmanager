@@ -36,6 +36,7 @@ status: active
 - `docs/specs/portmanager-v1-product-spec.md`
 - `docs/specs/portmanager-toward-c-strategy.md`
 - `docs/architecture/portmanager-v1-architecture.md`
+- `docs/operations/portmanager-debian-12-review-packet-template.md`
 - `docs-site/data/roadmap.ts`
 - `apps/controller/src/second-target-policy-pack.ts`
 
@@ -44,4 +45,4 @@ status: active
 - 候选目标：`debian-12-systemd-tailscale`
 - 当前已经落地的局部技术切片：candidate host 注册、probe 与 bootstrap review-prep lane
 - 当前阻塞证据：bootstrap transport parity、steady-state transport parity、backup/restore parity、diagnostics parity、rollback parity
-- 当前已落地治理产物：docs contract、acceptance recipe、operator ownership definition
+- 当前已落地治理产物：docs contract、acceptance recipe、review-packet template、operator ownership definition

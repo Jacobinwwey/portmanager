@@ -2067,6 +2067,53 @@ fn format_second_target_evidence_block(title: &str, evidence_items: &Value) -> S
     }
 }
 
+fn format_second_target_review_packet_block(review_packet_template: &Value) -> String {
+    let required_lines = review_packet_template["requiredEvidence"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|item| {
+            let sources = item["sources"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|source| source.as_str())
+                .collect::<Vec<_>>();
+            let sources_suffix = if sources.is_empty() {
+                String::new()
+            } else {
+                format!(" :: sources {}", sources.join(", "))
+            };
+
+            format!(
+                "- {} :: {} :: {}{}",
+                item["criterionId"].as_str().unwrap_or("unknown"),
+                item["label"].as_str().unwrap_or("unknown"),
+                item["summary"].as_str().unwrap_or("no summary"),
+                sources_suffix
+            )
+        })
+        .collect::<Vec<_>>();
+
+    let required_block = if required_lines.is_empty() {
+        "Required Evidence:\n- none".to_string()
+    } else {
+        format!("Required Evidence:\n{}", required_lines.join("\n"))
+    };
+
+    format!(
+        "Review Packet Template:\nCandidate Target: {}\nTemplate Path: {}\nSummary: {}\n{}",
+        review_packet_template["candidateTargetProfileId"]
+            .as_str()
+            .unwrap_or("unknown"),
+        review_packet_template["templatePath"]
+            .as_str()
+            .unwrap_or("unknown"),
+        review_packet_template["summary"].as_str().unwrap_or("no summary"),
+        required_block
+    )
+}
+
 fn format_consumer_boundary_decision_pack_text(pack: &Value) -> String {
     let action_lines = pack["nextActions"]
         .as_array()
@@ -2114,7 +2161,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
     };
 
     format!(
-        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}\n{}",
+        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}\n{}\n{}",
         pack["lockedTargetProfileId"].as_str().unwrap_or("unknown"),
         pack["reviewOwner"].as_str().unwrap_or("unknown"),
         pack["decisionState"].as_str().unwrap_or("unknown"),
@@ -2128,6 +2175,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
         format_target_profile_summaries("Supported Targets", &pack["supportedTargetProfiles"]),
         format_target_profile_summaries("Candidate Targets", &pack["candidateTargetProfiles"]),
         format_second_target_evidence_block("Evidence Ledger", &pack["evidenceItems"]),
+        format_second_target_review_packet_block(&pack["reviewPacketTemplate"]),
         format_decision_criteria_block("Satisfied Criteria", &pack["satisfiedCriteria"]),
         format_decision_criteria_block("Blocking Criteria", &pack["blockingCriteria"])
     )

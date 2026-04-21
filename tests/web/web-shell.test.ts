@@ -35,6 +35,8 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /Persistence readiness/i)
   assert.match(html, /Consumer boundary split criteria/i)
   assert.match(html, /Evidence ledger/i)
+  assert.match(html, /Review packet template/i)
+  assert.match(html, /portmanager-debian-12-review-packet-template\.md/i)
   assert.match(html, /portmanager-debian-12-acceptance-recipe\.md/i)
   assert.match(html, /review prep/i)
   assert.match(html, /controller_embedded/i)
@@ -456,6 +458,19 @@ test('overview loader keeps consumer boundary base path when building controller
             'Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.',
             'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
           ],
+          reviewPacketTemplate: {
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
+            templatePath: 'docs/operations/portmanager-debian-12-review-packet-template.md',
+            summary: 'review packet template exists',
+            requiredEvidence: [
+              {
+                criterionId: 'bootstrap_transport_parity',
+                label: 'Bootstrap transport parity',
+                summary: 'capture bootstrap packet evidence',
+                sources: ['docs/operations/portmanager-debian-12-review-packet-template.md']
+              }
+            ]
+          },
           evidenceItems: [
             {
               criterionId: 'docs_contract_ready',
@@ -684,6 +699,19 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
           expansionReviewRequired: false,
           summary: 'second target policy pack is alive',
           nextActions: ['keep supported targets locked'],
+          reviewPacketTemplate: {
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
+            templatePath: 'docs/operations/portmanager-debian-12-review-packet-template.md',
+            summary: 'review packet template exists',
+            requiredEvidence: [
+              {
+                criterionId: 'bootstrap_transport_parity',
+                label: 'Bootstrap transport parity',
+                summary: 'capture bootstrap packet evidence',
+                sources: ['docs/operations/portmanager-debian-12-review-packet-template.md']
+              }
+            ]
+          },
           evidenceItems: [
             {
               criterionId: 'docs_contract_ready',

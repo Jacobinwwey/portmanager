@@ -38,6 +38,20 @@ export interface SecondTargetPolicyEvidenceItem {
   sources: string[]
 }
 
+export interface SecondTargetReviewPacketRequirement {
+  criterionId: SecondTargetPolicyCriterionId
+  label: string
+  summary: string
+  sources: string[]
+}
+
+export interface SecondTargetReviewPacketTemplate {
+  candidateTargetProfileId: string
+  templatePath: string
+  summary: string
+  requiredEvidence: SecondTargetReviewPacketRequirement[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -66,10 +80,13 @@ export interface SecondTargetPolicyPack {
   expansionReviewRequired: boolean
   summary: string
   nextActions: string[]
+  reviewPacketTemplate: SecondTargetReviewPacketTemplate
   satisfiedCriteria: SecondTargetPolicyCriterion[]
   blockingCriteria: SecondTargetPolicyCriterion[]
   evidenceItems: SecondTargetPolicyEvidenceItem[]
 }
+
+const reviewPacketTemplatePath = 'docs/operations/portmanager-debian-12-review-packet-template.md'
 
 const criterionMetadata: Record<
   SecondTargetPolicyCriterionId,
@@ -144,6 +161,19 @@ function evidenceItem(
     criterionId,
     label: criterionMetadata[criterionId].label,
     state,
+    summary,
+    sources
+  }
+}
+
+function reviewPacketRequirement(
+  criterionId: SecondTargetPolicyCriterionId,
+  summary: string,
+  sources: string[]
+): SecondTargetReviewPacketRequirement {
+  return {
+    criterionId,
+    label: criterionMetadata[criterionId].label,
     summary,
     sources
   }
@@ -225,6 +255,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
         'tests/controller/target-profile-registry.test.ts',
         'tests/controller/host-rule-policy.test.ts',
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        reviewPacketTemplatePath,
         'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
       ]
     ),
@@ -234,6 +265,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
       'Steady-state transport parity is still pending for Debian 12.',
       [
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        reviewPacketTemplatePath,
         'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
       ]
     ),
@@ -243,6 +275,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
       'Backup and restore parity evidence is still pending for Debian 12.',
       [
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        reviewPacketTemplatePath,
         'docs/operations/portmanager-backup-rollback-policy.md'
       ]
     ),
@@ -252,6 +285,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
       'Diagnostics parity evidence is still pending for Debian 12.',
       [
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        reviewPacketTemplatePath,
         'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
       ]
     ),
@@ -261,6 +295,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
       'Rollback parity evidence is still pending for Debian 12.',
       [
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        reviewPacketTemplatePath,
         'docs/operations/portmanager-backup-rollback-policy.md'
       ]
     )
@@ -288,6 +323,10 @@ function resolvedCandidateTargetProfileIds(snapshot: SecondTargetPolicySnapshot)
 
 function candidateTargetDeclared(snapshot: SecondTargetPolicySnapshot) {
   return resolvedCandidateTargetProfileIds(snapshot).length > 0
+}
+
+function primaryCandidateTargetProfileId(snapshot: SecondTargetPolicySnapshot) {
+  return resolvedCandidateTargetProfileIds(snapshot)[0] ?? candidateTargetProfileId
 }
 
 const criteria: Array<
@@ -416,6 +455,67 @@ function buildNextActions(
   ]
 }
 
+function buildReviewPacketTemplate(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetReviewPacketTemplate {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+
+  return {
+    candidateTargetProfileId,
+    templatePath: reviewPacketTemplatePath,
+    summary:
+      `Review-packet capture stays explicit for ${candidateTargetProfileId}: preserve one bounded evidence bundle before widening support claims.`,
+    requiredEvidence: [
+      reviewPacketRequirement(
+        'bootstrap_transport_parity',
+        'Capture one bootstrap operation id, result summary, and linked audit/event reference for the Debian 12 candidate host.',
+        [
+          reviewPacketTemplatePath,
+          'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+          'apps/controller/src/controller-server.ts',
+          'apps/controller/src/controller-domain-service.ts'
+        ]
+      ),
+      reviewPacketRequirement(
+        'steady_state_transport_parity',
+        'Capture steady-state `/health` and `/runtime-state` evidence after one normal controller-driven mutation.',
+        [
+          reviewPacketTemplatePath,
+          'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+          'apps/controller/src/controller-server.ts'
+        ]
+      ),
+      reviewPacketRequirement(
+        'backup_restore_parity',
+        'Capture backup manifest linkage, remote-backup result if configured, and restore outcome notes from the same review packet.',
+        [
+          reviewPacketTemplatePath,
+          'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+          'docs/operations/portmanager-backup-rollback-policy.md'
+        ]
+      ),
+      reviewPacketRequirement(
+        'diagnostics_parity',
+        'Capture diagnostics artifact paths plus linked controller event references for the candidate host after transport rehearsal.',
+        [
+          reviewPacketTemplatePath,
+          'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+          'docs/operations/portmanager-backup-rollback-policy.md'
+        ]
+      ),
+      reviewPacketRequirement(
+        'rollback_parity',
+        'Capture rollback-point linkage, rollback result summary, and post-rollback diagnostics in the same packet.',
+        [
+          reviewPacketTemplatePath,
+          'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+          'docs/operations/portmanager-backup-rollback-policy.md'
+        ]
+      )
+    ]
+  }
+}
+
 export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySnapshot {
   const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
     summarizeTargetProfile(profile.id)
@@ -464,6 +564,7 @@ export function buildSecondTargetPolicyPack(
     expansionReviewRequired: decisionState === 'review_required',
     summary: buildSummary(decisionState, blockingCriteria),
     nextActions: buildNextActions(snapshot, decisionState),
+    reviewPacketTemplate: buildReviewPacketTemplate(snapshot),
     satisfiedCriteria,
     blockingCriteria,
     evidenceItems: (snapshot.evidenceItems ?? []).map((item) => ({
