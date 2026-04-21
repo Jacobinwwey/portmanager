@@ -425,6 +425,52 @@ test('overview loader keeps consumer boundary base path when building controller
       )
     }
 
+    if (url.pathname === '/api/controller/second-target-policy-pack') {
+      return new Response(
+        JSON.stringify({
+          lockedTargetProfileId: 'ubuntu-24.04-systemd-tailscale',
+          reviewOwner: 'controller',
+          supportedTargetProfiles: [
+            {
+              id: 'ubuntu-24.04-systemd-tailscale',
+              label: 'Ubuntu 24.04 + systemd + Tailscale',
+              status: 'supported'
+            }
+          ],
+          candidateTargetProfileIds: [],
+          decisionState: 'hold',
+          expansionReviewRequired: false,
+          summary:
+            'Second-target support must stay on hold because candidate target, transport parity, backup parity, diagnostics parity, and rollback parity are still missing.',
+          nextActions: [
+            'Keep supported targets locked to ubuntu-24.04-systemd-tailscale.',
+            'Prove transport, backup, diagnostics, and rollback parity before any second-target support claim.'
+          ],
+          satisfiedCriteria: [
+            {
+              id: 'locked_target_registry',
+              label: 'Locked target registry',
+              reason:
+                'One explicit locked target profile is already published across controller, CLI, and Web.'
+            }
+          ],
+          blockingCriteria: [
+            {
+              id: 'candidate_target_declared',
+              label: 'Candidate target declared',
+              reason: 'No second target candidate is declared yet.'
+            }
+          ]
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/json'
+          }
+        }
+      )
+    }
+
     if (url.pathname === '/api/controller/consumer-boundary-decision-pack') {
       return new Response(
         JSON.stringify({
@@ -478,10 +524,12 @@ test('overview loader keeps consumer boundary base path when building controller
   assert.equal(state.persistenceDecisionPack.backend, 'sqlite')
   assert.equal(state.persistenceDecisionPack.decisionState, 'hold')
   assert.equal(state.deploymentBoundaryDecisionPack.decisionState, 'hold')
+  assert.equal(state.secondTargetPolicyPack.decisionState, 'hold')
   assert.equal(requestedPaths.every((pathname) => pathname.startsWith('/api/controller/')), true)
   assert.equal(requestedPaths.includes('/api/controller/consumer-boundary-decision-pack'), true)
   assert.equal(requestedPaths.includes('/api/controller/deployment-boundary-decision-pack'), true)
   assert.equal(requestedPaths.includes('/api/controller/persistence-decision-pack'), true)
+  assert.equal(requestedPaths.includes('/api/controller/second-target-policy-pack'), true)
   assert.equal(requestedPaths.includes('/api/controller/hosts/host_alpha'), true)
 })
 
@@ -548,6 +596,41 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
             {
               id: 'independent_deployable_artifact',
               label: 'Independent deployable artifact',
+              reason: 'still missing'
+            }
+          ]
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/json'
+          }
+        }
+      )
+    }
+
+    if (url.pathname === '/api/controller/second-target-policy-pack') {
+      return new Response(
+        JSON.stringify({
+          lockedTargetProfileId: 'ubuntu-24.04-systemd-tailscale',
+          reviewOwner: 'controller',
+          supportedTargetProfiles: [
+            {
+              id: 'ubuntu-24.04-systemd-tailscale',
+              label: 'Ubuntu 24.04 + systemd + Tailscale',
+              status: 'supported'
+            }
+          ],
+          candidateTargetProfileIds: [],
+          decisionState: 'hold',
+          expansionReviewRequired: false,
+          summary: 'second target policy pack is alive',
+          nextActions: ['keep supported targets locked'],
+          satisfiedCriteria: [],
+          blockingCriteria: [
+            {
+              id: 'candidate_target_declared',
+              label: 'Candidate target declared',
               reason: 'still missing'
             }
           ]
@@ -636,6 +719,8 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
 
   assert.equal(state.consumerBoundaryDecisionPack.decisionState, 'hold')
   assert.equal(state.deploymentBoundaryDecisionPack.decisionState, 'hold')
+  assert.equal(state.secondTargetPolicyPack.decisionState, 'hold')
   assert.equal(requestedPaths.includes('/api/controller/consumer-boundary-decision-pack'), true)
   assert.equal(requestedPaths.includes('/api/controller/deployment-boundary-decision-pack'), true)
+  assert.equal(requestedPaths.includes('/api/controller/second-target-policy-pack'), true)
 })

@@ -93,8 +93,9 @@ Milestone 3 现在不是重新做一遍已落地 seam，而是在其上继续推
 - Unit 59：已完成。建立在已测量 readiness criteria 之上的 persistence promotion decision surface 现在已经通过 `/persistence-decision-pack` 公开显式 next action，同时继续让 SQLite 保持 active
 - Unit 60：已完成。consumer-boundary split criteria 现在已经通过 `/consumer-boundary-decision-pack` 公开，并明确只有在独立部署边界、edge-policy ownership 与 external consumer pressure 同时成立时，`/api/controller` 才需要进入 split review
 - Unit 61：已完成。deployment-boundary decision pack 现在已经通过 `/deployment-boundary-decision-pack` 公开，并明确只有在 deployable artifact、edge runtime controls、replay parity、observability ownership 与 external pressure 同时成立时，`/api/controller` 才需要进入独立部署复核
-- 下一队列：更聚焦的第二目标策略工作，而不是 PostgreSQL 默认状态库承诺或伪造的独立部署推进
-- 下一批队列：继续定义更后置的独立部署边界证据与更广第二目标策略，而不是宣称 PostgreSQL 默认状态库已经可用
+- Unit 62：已完成。second-target policy pack 现在已经通过 `/second-target-policy-pack` 公开，并明确只有在候选第二目标声明、等价证据、文档契约、验收 recipe 与 operator ownership 同时成立时，支持声明才能超出 Ubuntu 锁定画像
+- 下一队列：围绕 `/second-target-policy-pack` 的候选第二目标声明、等价证据、文档/验收/owner 证明，而不是 PostgreSQL 默认状态库承诺或伪造的独立部署推进
+- 下一批队列：继续定义更后置的独立部署边界证据与候选第二目标等价证据，而不是宣称 PostgreSQL 默认状态库已经可用
 - 继续让 bounded batch work 留在同一套 evidence model 上，而不是再发明第二条 orchestration 路径
 
 ### 延续到 C 的语言与边界决策

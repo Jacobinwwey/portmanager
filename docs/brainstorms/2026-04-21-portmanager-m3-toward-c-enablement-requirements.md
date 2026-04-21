@@ -5,14 +5,14 @@ topic: portmanager-m3-toward-c-enablement
 
 # PortManager Milestone 3 Toward C Enablement Requirements
 
-Status note on `2026-04-21`: deep comparison now shows Milestone 1 accepted, Milestone 2 promotion-ready thresholds met, and Units 51 through 61 already landed. PortManager is no longer only entering Milestone 3; it is now inside Milestone 3 `Phase 0 enablement` with consumer-boundary, audit-index, target-profile, persistence, split-criteria, and deployment-boundary decision baselines in code. PortManager still has not earned full Scheme C claims because no standalone gateway deployment boundary, no broader second-target policy, and no real PostgreSQL backend path exist yet.
+Status note on `2026-04-21`: deep comparison now shows Milestone 1 accepted, Milestone 2 promotion-ready thresholds met, and Units 51 through 62 already landed. PortManager is no longer only entering Milestone 3; it is now inside Milestone 3 `Phase 0 enablement` with consumer-boundary, audit-index, target-profile, persistence, split-criteria, deployment-boundary, and second-target policy baselines in code. PortManager still has not earned full Scheme C claims because no standalone gateway deployment boundary, no broader second-target support claim, and no real PostgreSQL backend path exist yet.
 
 ## Problem Frame
 Current repo truth has shifted again:
 
 - the accepted live host / rule / policy slice is real across controller, CLI, web, agent, and docs
 - the reliability confidence lane is no longer missing history, review, or publication machinery
-- the first Milestone 3 seams are now real: `/api/controller`, `/consumer-boundary-decision-pack`, `/deployment-boundary-decision-pack`, `controller-domain-service`, `controller-read-model`, `/event-audit-index`, `/persistence-readiness`, the target-profile registry, and the SQLite-backed persistence adapter all landed without changing the accepted evidence model
+- the first Milestone 3 seams are now real: `/api/controller`, `/consumer-boundary-decision-pack`, `/deployment-boundary-decision-pack`, `/second-target-policy-pack`, `controller-domain-service`, `controller-read-model`, `/event-audit-index`, `/persistence-readiness`, the target-profile registry, and the SQLite-backed persistence adapter all landed without changing the accepted evidence model
 - roadmap and progress docs still need one refreshed gap map that distinguishes landed Phase 0 baselines from the still-missing standalone boundaries and abstraction rules
 
 That creates a new gap.
@@ -41,20 +41,20 @@ Developers now need one concrete Milestone 3 entry posture that does three thing
 - R3. The Milestone 2 maintenance gate remains mandatory while Milestone 3 begins; `pnpm acceptance:verify`, `pnpm milestone:verify:confidence`, and the wording-review flow stay active guardrails rather than “finished and forgotten” chores.
 
 **Phase 0 Continuation Workstreams**
-- R4. Milestone 3 continuation must define bounded workstreams for standalone audit/event boundary decisions, consumer-boundary split criteria, deployment-boundary review criteria, persistence migration decision criteria, and target-profile abstraction rules on top of the already landed Units 51 through 61 baselines.
+- R4. Milestone 3 continuation must define bounded workstreams for standalone audit/event boundary decisions, consumer-boundary split criteria, deployment-boundary review criteria, persistence migration decision criteria, and second-target expansion review criteria on top of the already landed Units 51 through 62 baselines.
 - R5. Those workstreams must keep one contract truth and one evidence model across controller, CLI, web, and agent rather than introducing side channels or surface-specific DTO drift; the landed `/api/controller`, `/event-audit-index`, and `/persistence-readiness` surfaces remain the canonical baseline while the next decisions are made.
 - R6. Phase 0 must keep the agent bounded as execution and evidence plane; Milestone 3 is not permission to pivot into arbitrary shell orchestration or an ungoverned strategy peer.
 - R7. Standalone gateway deployment, PostgreSQL default switching, broader platform targets, and broad productization of C-shaped capabilities remain follow-on work after the new decision packs and abstraction rules prove credible.
 
 **Documentation And Developer Guidance**
-- R8. `README.md`, `TODO.md`, `Interface Document.md`, `docs/specs/portmanager-milestones.md`, `docs/specs/portmanager-v1-product-spec.md`, `docs/specs/portmanager-toward-c-strategy.md`, and `docs/architecture/portmanager-v1-architecture.md` must all describe the same Milestone 3 truth: Units 51 through 61 are landed, but the repo still lacks the full Scheme C runtime shape.
-- R9. Roadmap and development-progress pages must surface the refreshed requirements/plan pair, show landed Units 51 through 61 for developers, explain the current architecture gap map, and keep the Milestone 2 review commands visible.
+- R8. `README.md`, `TODO.md`, `Interface Document.md`, `docs/specs/portmanager-milestones.md`, `docs/specs/portmanager-v1-product-spec.md`, `docs/specs/portmanager-toward-c-strategy.md`, and `docs/architecture/portmanager-v1-architecture.md` must all describe the same Milestone 3 truth: Units 51 through 62 are landed, but the repo still lacks the full Scheme C runtime shape.
+- R9. Roadmap and development-progress pages must surface the refreshed requirements/plan pair, show landed Units 51 through 62 for developers, explain the current architecture gap map, and keep the Milestone 2 review commands visible.
 - R10. Docs regression coverage must lock the roadmap/development-progress direction docs and Milestone 3 continuation wording so future copy drift cannot silently move the repo back to either “Toward C is only later,” “routing split is still unfinished,” or “Toward C is already delivered”.
 
 ## Success Criteria
-- Contributors can explain why Milestone 3 started now, what Units 51 through 61 already delivered, why the phase is still bounded, and what concrete architecture work comes next.
+- Contributors can explain why Milestone 3 started now, what Units 51 through 62 already delivered, why the phase is still bounded, and what concrete architecture work comes next.
 - Public roadmap and development-progress pages show Milestone 3 as the active execution phase without overstating distributed-platform delivery.
-- Root docs, milestone docs, strategy docs, and architecture docs all agree on the same posture: Milestone 2 remains a guardrail, Units 51 through 61 are landed baselines, and the next bounded continuation lane is broader second-target policy work plus any later standalone artifact proof only when real pressure appears.
+- Root docs, milestone docs, strategy docs, and architecture docs all agree on the same posture: Milestone 2 remains a guardrail, Units 51 through 62 are landed baselines, and the next bounded continuation lane is candidate-target parity evidence plus any later standalone artifact proof only when real pressure appears.
 
 ## Scope Boundaries
 - Do not claim that an API gateway, split event/audit services, batch orchestration, PostgreSQL readiness, or multi-platform abstractions are already implemented.
@@ -65,7 +65,7 @@ Developers now need one concrete Milestone 3 entry posture that does three thing
 
 ## Key Decisions
 - Treat Milestone 3 as a bounded enablement phase instead of a binary “later” bucket or a premature distributed rewrite.
-- Treat Units 51 through 61 as landed baselines and move the next implementation map to broader second-target policy work rather than restarting earlier seam work.
+- Treat Units 51 through 62 as landed baselines and move the next implementation map to candidate-target parity evidence under `/second-target-policy-pack` rather than restarting earlier seam work.
 - Keep Milestone 2 maintenance commands and review surfaces visible inside Milestone 3 docs because they still guard public truth.
 - Use a gap-map comparison against prior Scheme C expectations as the main way to keep Milestone 3 honest.
 

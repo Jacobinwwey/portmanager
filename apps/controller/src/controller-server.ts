@@ -22,6 +22,10 @@ import { createLocalDiagnosticsPrimitive } from './local-diagnostics-primitive.t
 import type { OperationStore } from './operation-store.ts'
 import { createOperationRunner } from './operation-runner.ts'
 import { buildPersistenceDecisionPack } from './persistence-decision-pack.ts'
+import {
+  buildSecondTargetPolicyPack,
+  createDefaultSecondTargetPolicySnapshot
+} from './second-target-policy-pack.ts'
 import { defaultTargetProfileId, getTargetProfile } from './target-profile-registry.ts'
 
 export interface ControllerServer {
@@ -701,6 +705,15 @@ export function createControllerServer(options: {
         response,
         200,
         buildDeploymentBoundaryDecisionPack(createDefaultDeploymentBoundaryDecisionSnapshot())
+      )
+      return
+    }
+
+    if (request.method === 'GET' && pathname === '/second-target-policy-pack') {
+      sendJson(
+        response,
+        200,
+        buildSecondTargetPolicyPack(createDefaultSecondTargetPolicySnapshot())
       )
       return
     }

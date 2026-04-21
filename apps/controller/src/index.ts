@@ -23,6 +23,10 @@ export { createEventAuditIndex } from './event-audit-index.ts'
 export { createOperationRunner } from './operation-runner.ts'
 export { createPersistenceAdapter } from './persistence-adapter.ts'
 export { buildPersistenceDecisionPack } from './persistence-decision-pack.ts'
+export {
+  buildSecondTargetPolicyPack,
+  createDefaultSecondTargetPolicySnapshot
+} from './second-target-policy-pack.ts'
 export { createControllerServer } from './controller-server.ts'
 export { closeHttpServer } from './http-server-lifecycle.ts'
 export { createLocalBackupPrimitive } from './local-backup-primitive.ts'

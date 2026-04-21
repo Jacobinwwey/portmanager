@@ -39,6 +39,7 @@ export type DeploymentBoundaryDecisionPackContract =
 export type EventAuditIndexEntry = components['schemas']['EventAuditIndexEntry']
 export type PersistenceReadinessContract = components['schemas']['PersistenceReadiness']
 export type PersistenceDecisionPackContract = components['schemas']['PersistenceDecisionPack']
+export type SecondTargetPolicyPackContract = components['schemas']['SecondTargetPolicyPack']
 type FetchLike = typeof fetch
 
 interface ControllerListEnvelope<T> {
@@ -67,6 +68,7 @@ export interface OverviewState {
   deploymentBoundaryDecisionPack: DeploymentBoundaryDecisionPackContract
   persistenceReadiness: PersistenceReadinessContract
   persistenceDecisionPack: PersistenceDecisionPackContract
+  secondTargetPolicyPack: SecondTargetPolicyPackContract
   managedHosts: HostSummary[]
   selectedHost: HostDetailState | null
   activeOperations: number
@@ -120,6 +122,7 @@ export interface ConsoleState {
   auditIndex: EventAuditIndexEntry[]
   persistenceReadiness: PersistenceReadinessContract
   persistenceDecisionPack: PersistenceDecisionPackContract
+  secondTargetPolicyPack: SecondTargetPolicyPackContract
   selectedOperation: OperationDetailContract | null
   diagnostics: OperationDetailContract[]
   selectedDiagnostic: OperationDetailContract | null
@@ -1441,6 +1444,91 @@ export function createMockDeploymentBoundaryDecisionPack(): DeploymentBoundaryDe
   }
 }
 
+export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContract {
+  return {
+    lockedTargetProfileId: 'ubuntu-24.04-systemd-tailscale',
+    reviewOwner: 'controller',
+    supportedTargetProfiles: [
+      {
+        id: 'ubuntu-24.04-systemd-tailscale',
+        label: 'Ubuntu 24.04 + systemd + Tailscale',
+        status: 'supported'
+      }
+    ],
+    candidateTargetProfileIds: [],
+    decisionState: 'hold',
+    expansionReviewRequired: false,
+    summary:
+      'Second-target support must stay on hold because candidate target declared, bootstrap transport parity, steady-state transport parity, backup and restore parity, diagnostics parity, rollback parity, docs contract ready, acceptance recipe ready, operator ownership defined are still missing.',
+    nextActions: [
+      'Keep supported targets locked to ubuntu-24.04-systemd-tailscale.',
+      'Declare one explicit second-target candidate before discussing broader platform support.',
+      'Prove transport, backup, diagnostics, and rollback parity before any second-target support claim.'
+    ],
+    satisfiedCriteria: [
+      {
+        id: 'locked_target_registry',
+        label: 'Locked target registry',
+        reason:
+          'One explicit locked target profile is already published across controller, CLI, and Web.'
+      },
+      {
+        id: 'supported_target_baseline',
+        label: 'Supported target baseline',
+        reason:
+          'Supported-target claims are still locked to one explicit Ubuntu 24.04 + systemd + Tailscale baseline.'
+      }
+    ],
+    blockingCriteria: [
+      {
+        id: 'candidate_target_declared',
+        label: 'Candidate target declared',
+        reason: 'No second target candidate is declared yet.'
+      },
+      {
+        id: 'bootstrap_transport_parity',
+        label: 'Bootstrap transport parity',
+        reason: 'Bootstrap transport parity is still missing for the candidate target.'
+      },
+      {
+        id: 'steady_state_transport_parity',
+        label: 'Steady-state transport parity',
+        reason: 'Steady-state transport parity is still missing for the candidate target.'
+      },
+      {
+        id: 'backup_restore_parity',
+        label: 'Backup and restore parity',
+        reason: 'Backup and restore parity is still missing for the candidate target.'
+      },
+      {
+        id: 'diagnostics_parity',
+        label: 'Diagnostics parity',
+        reason: 'Diagnostics parity is still missing for the candidate target.'
+      },
+      {
+        id: 'rollback_parity',
+        label: 'Rollback parity',
+        reason: 'Rollback parity is still missing for the candidate target.'
+      },
+      {
+        id: 'docs_contract_ready',
+        label: 'Docs contract ready',
+        reason: 'Docs and public contract wording are not ready for a candidate target claim yet.'
+      },
+      {
+        id: 'acceptance_recipe_ready',
+        label: 'Acceptance recipe ready',
+        reason: 'No acceptance proof recipe exists for the candidate target yet.'
+      },
+      {
+        id: 'operator_ownership_defined',
+        label: 'Operator ownership defined',
+        reason: 'Operator ownership is still undefined for the candidate target.'
+      }
+    ]
+  }
+}
+
 export function createMockOverviewState(): OverviewState {
   const selectedHost = createMockHostDetailState()
 
@@ -1481,6 +1569,7 @@ export function createMockOverviewState(): OverviewState {
     deploymentBoundaryDecisionPack: createMockDeploymentBoundaryDecisionPack(),
     persistenceReadiness: createMockPersistenceReadiness(),
     persistenceDecisionPack: createMockPersistenceDecisionPack(),
+    secondTargetPolicyPack: createMockSecondTargetPolicyPack(),
     managedHosts: [selectedHost.host, secondaryHost, degradedHost],
     selectedHost,
     activeOperations: 2,
@@ -1730,6 +1819,7 @@ export function createMockConsoleState(): ConsoleState {
     auditIndex: operationsState.auditIndex,
     persistenceReadiness: createMockPersistenceReadiness(),
     persistenceDecisionPack: createMockPersistenceDecisionPack(),
+    secondTargetPolicyPack: createMockSecondTargetPolicyPack(),
     selectedOperation: operationsState.operations[0]?.operation ?? null,
     diagnostics: hostDetailState.diagnostics,
     selectedDiagnostic: hostDetailState.diagnostics[0] ?? null,
@@ -1822,6 +1912,17 @@ async function loadConsumerBoundaryDecisionPack(
   )
 }
 
+async function loadSecondTargetPolicyPack(
+  baseUrl: string,
+  options: {
+    fetchImpl?: FetchLike
+  } = {}
+) {
+  return fetchControllerJson<SecondTargetPolicyPackContract>(baseUrl, '/second-target-policy-pack', {
+    fetchImpl: options.fetchImpl
+  })
+}
+
 export async function loadHostDetailState(
   options: ControllerLoadOptions & {
     hostId: string
@@ -1880,7 +1981,8 @@ export async function loadOverviewState(
     events,
     persistenceDecisionPack,
     consumerBoundaryDecisionPack,
-    deploymentBoundaryDecisionPack
+    deploymentBoundaryDecisionPack,
+    secondTargetPolicyPack
   ] = await Promise.all([
     fetchControllerList<HostSummary>(options.baseUrl, '/hosts', {
       fetchImpl: options.fetchImpl
@@ -1899,6 +2001,9 @@ export async function loadOverviewState(
       fetchImpl: options.fetchImpl
     }),
     loadDeploymentBoundaryDecisionPack(options.baseUrl, {
+      fetchImpl: options.fetchImpl
+    }),
+    loadSecondTargetPolicyPack(options.baseUrl, {
       fetchImpl: options.fetchImpl
     })
   ])
@@ -1926,6 +2031,7 @@ export async function loadOverviewState(
     deploymentBoundaryDecisionPack,
     persistenceReadiness: persistenceDecisionPack.readiness,
     persistenceDecisionPack,
+    secondTargetPolicyPack,
     managedHosts,
     selectedHost,
     activeOperations,
@@ -2161,7 +2267,8 @@ export async function loadConsoleState(
     auditIndex,
     persistenceDecisionPack,
     consumerBoundaryDecisionPack,
-    deploymentBoundaryDecisionPack
+    deploymentBoundaryDecisionPack,
+    secondTargetPolicyPack
   ] = await Promise.all([
     loadOperationDetails(options.baseUrl, {
       params: { hostId: options.hostId },
@@ -2193,6 +2300,9 @@ export async function loadConsoleState(
     }),
     loadDeploymentBoundaryDecisionPack(options.baseUrl, {
       fetchImpl: options.fetchImpl
+    }),
+    loadSecondTargetPolicyPack(options.baseUrl, {
+      fetchImpl: options.fetchImpl
     })
   ])
 
@@ -2208,6 +2318,7 @@ export async function loadConsoleState(
     auditIndex,
     persistenceReadiness: persistenceDecisionPack.readiness,
     persistenceDecisionPack,
+    secondTargetPolicyPack,
     selectedOperation,
     diagnostics,
     selectedDiagnostic,
@@ -2244,6 +2355,11 @@ export function OverviewPage(props: { state: OverviewState }) {
         label: 'Deployment Boundary',
         value: state.deploymentBoundaryDecisionPack.decisionState,
         tone: toneFromState(state.deploymentBoundaryDecisionPack.decisionState)
+      },
+      {
+        label: 'Second-Target Policy',
+        value: state.secondTargetPolicyPack.decisionState,
+        tone: toneFromState(state.secondTargetPolicyPack.decisionState)
       },
       {
         label: 'Managed Hosts',
@@ -2479,6 +2595,11 @@ export function ConsolePage(props: { state: ConsoleState }) {
         label: 'Deployment Boundary',
         value: props.state.deploymentBoundaryDecisionPack.decisionState,
         tone: toneFromState(props.state.deploymentBoundaryDecisionPack.decisionState)
+      },
+      {
+        label: 'Second-Target Policy',
+        value: props.state.secondTargetPolicyPack.decisionState,
+        tone: toneFromState(props.state.secondTargetPolicyPack.decisionState)
       },
       {
         label: 'Operations',
@@ -3073,6 +3194,105 @@ function DeploymentBoundaryDecisionCard(props: {
   ])
 }
 
+function SecondTargetPolicyCard(props: {
+  pack: SecondTargetPolicyPackContract
+  title: string
+  detail?: string
+}) {
+  const criteriaList = (
+    title: string,
+    items: SecondTargetPolicyPackContract['satisfiedCriteria'],
+    emptyCopy: string
+  ) =>
+    h('section', { className: 'pm-card', key: title }, [
+      h(SectionHeading, { key: 'heading', title, detail: `${items.length} criteria` }),
+      items.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            items.map((criterion) =>
+              h('li', { className: 'pm-list-item', key: criterion.id }, [
+                h('div', { key: 'line1' }, `${criterion.label} · ${criterion.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, criterion.reason)
+              ])
+            )
+          )
+        : emptyState(emptyCopy, 'empty')
+    ])
+
+  return h('div', { className: 'pm-panel-stack' }, [
+    h('section', { className: 'pm-card', key: 'summary-card' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: props.title,
+        detail: props.detail ?? props.pack.decisionState
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Locked Target', props.pack.lockedTargetProfileId),
+        kvRow('Review Owner', props.pack.reviewOwner),
+        kvRow('Decision State', h(StatusBadge, { state: props.pack.decisionState })),
+        kvRow('Expansion Review Required', props.pack.expansionReviewRequired ? 'yes' : 'no'),
+        kvRow('Supported Targets', String(props.pack.supportedTargetProfiles.length))
+      ]),
+      h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.summary),
+      h(
+        'ul',
+        { className: 'pm-list', key: 'actions' },
+        props.pack.nextActions.map((action) =>
+          h('li', { className: 'pm-list-item', key: action }, [h('div', { key: 'line1' }, action)])
+        )
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'supported-targets' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Supported target baseline',
+        detail: `${props.pack.supportedTargetProfiles.length} targets`
+      }),
+      props.pack.supportedTargetProfiles.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.supportedTargetProfiles.map((profile) =>
+              h('li', { className: 'pm-list-item', key: profile.id }, [
+                h('div', { key: 'line1' }, `${profile.label} · ${profile.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, `status ${profile.status}`)
+              ])
+            )
+          )
+        : emptyState('No supported target baseline recorded yet.', 'empty')
+    ]),
+    h('section', { className: 'pm-card', key: 'candidate-targets' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Candidate targets',
+        detail: `${props.pack.candidateTargetProfileIds.length} targets`
+      }),
+      props.pack.candidateTargetProfileIds.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.candidateTargetProfileIds.map((targetId) =>
+              h('li', { className: 'pm-list-item', key: targetId }, [
+                h('div', { key: 'line1' }, targetId)
+              ])
+            )
+          )
+        : emptyState('No second-target candidate declared yet.', 'empty')
+    ]),
+    criteriaList(
+      'Satisfied criteria',
+      props.pack.satisfiedCriteria,
+      'No satisfied second-target criteria recorded yet.'
+    ),
+    criteriaList(
+      'Blocking criteria',
+      props.pack.blockingCriteria,
+      'No blocking second-target criteria recorded right now.'
+    )
+  ])
+}
+
 function OverviewRail(props: { state: OverviewState }) {
   const detailState = props.state.selectedHost
 
@@ -3100,6 +3320,11 @@ function OverviewRail(props: { state: OverviewState }) {
         key: 'consumer-boundary',
         pack: props.state.consumerBoundaryDecisionPack,
         title: 'Consumer boundary split criteria'
+      }),
+      h(SecondTargetPolicyCard, {
+        key: 'second-target-policy',
+        pack: props.state.secondTargetPolicyPack,
+        title: 'Second-target policy'
       })
     ])
   }
@@ -3145,6 +3370,11 @@ function OverviewRail(props: { state: OverviewState }) {
       key: 'consumer-boundary',
       pack: props.state.consumerBoundaryDecisionPack,
       title: 'Consumer boundary split criteria'
+    }),
+    h(SecondTargetPolicyCard, {
+      key: 'second-target-policy',
+      pack: props.state.secondTargetPolicyPack,
+      title: 'Second-target policy'
     })
   ])
 }
@@ -4107,6 +4337,12 @@ function ConsoleRail(props: { state: ConsoleState }) {
       pack: props.state.consumerBoundaryDecisionPack,
       title: 'Consumer boundary split criteria',
       detail: props.state.consumerBoundaryDecisionPack.boundaryPath
+    }),
+    h(SecondTargetPolicyCard, {
+      key: 'second-target-policy',
+      pack: props.state.secondTargetPolicyPack,
+      title: 'Second-target policy',
+      detail: props.state.secondTargetPolicyPack.lockedTargetProfileId
     }),
     h('section', { className: 'pm-card', key: 'diagnostics' }, [
       h(SectionHeading, {

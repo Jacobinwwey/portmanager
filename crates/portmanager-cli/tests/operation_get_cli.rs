@@ -1383,6 +1383,107 @@ fn operations_deployment_boundary_decision_pack_json_supports_consumer_boundary_
 }
 
 #[test]
+fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
+    let server = MockHttpServer::start(vec![(
+        "/second-target-policy-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "lockedTargetProfileId": "ubuntu-24.04-systemd-tailscale",
+                "reviewOwner": "controller",
+                "supportedTargetProfiles": [
+                    {
+                        "id": "ubuntu-24.04-systemd-tailscale",
+                        "label": "Ubuntu 24.04 + systemd + Tailscale",
+                        "status": "supported"
+                    }
+                ],
+                "candidateTargetProfileIds": [],
+                "decisionState": "hold",
+                "expansionReviewRequired": false,
+                "summary": "Second-target support must stay on hold because candidate target, transport parity, backup parity, diagnostics parity, and rollback parity are still missing.",
+                "nextActions": [
+                    "Keep supported targets locked to ubuntu-24.04-systemd-tailscale.",
+                    "Prove transport, backup, diagnostics, and rollback parity before any second-target support claim."
+                ],
+                "satisfiedCriteria": [
+                    {
+                        "id": "locked_target_registry",
+                        "label": "Locked target registry",
+                        "reason": "One explicit locked target profile is already published across controller, CLI, and Web."
+                    }
+                ],
+                "blockingCriteria": [
+                    {
+                        "id": "candidate_target_declared",
+                        "label": "Candidate target declared",
+                        "reason": "No second target candidate is declared yet."
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["operations", "second-target-policy-pack"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("Locked Target Profile: ubuntu-24.04-systemd-tailscale"));
+    assert!(stdout.contains("Decision State: hold"));
+    assert!(stdout.contains("Expansion Review Required: no"));
+    assert!(stdout.contains("candidate_target_declared"));
+}
+
+#[test]
+fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_prefix() {
+    let server = MockHttpServer::start(vec![(
+        "/api/controller/second-target-policy-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "lockedTargetProfileId": "ubuntu-24.04-systemd-tailscale",
+                "reviewOwner": "controller",
+                "supportedTargetProfiles": [
+                    {
+                        "id": "ubuntu-24.04-systemd-tailscale",
+                        "label": "Ubuntu 24.04 + systemd + Tailscale",
+                        "status": "supported"
+                    }
+                ],
+                "candidateTargetProfileIds": [],
+                "decisionState": "hold",
+                "expansionReviewRequired": false,
+                "summary": "second target policy pack is alive",
+                "nextActions": ["keep supported targets locked"],
+                "satisfiedCriteria": [],
+                "blockingCriteria": [
+                    {
+                        "id": "candidate_target_declared",
+                        "label": "Candidate target declared",
+                        "reason": "still missing"
+                    }
+                ]
+            }),
+        }],
+    )]);
+
+    let consumer_base_url = format!("{}/api/controller", server.base_url());
+    let output = run_portmanager_with_env(
+        &["operations", "second-target-policy-pack", "--json"],
+        &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+    assert_eq!(server.hits_for("/api/controller/second-target-policy-pack"), 1);
+}
+
+#[test]
 fn operations_audit_index_text_surfaces_linked_evidence() {
     let server = MockHttpServer::start(vec![(
         "/event-audit-index?limit=2&hostId=host_alpha&ruleId=rule_alpha_https",

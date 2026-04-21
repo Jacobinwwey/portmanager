@@ -1076,6 +1076,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/second-target-policy-pack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get controller second-target policy pack */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Second-target policy detail */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SecondTargetPolicyPack"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/snapshots/diagnostics": {
         parameters: {
             query?: never;
@@ -1461,6 +1497,28 @@ export interface components {
             hostId: string;
             observedStateHash: string;
         };
+        SecondTargetPolicyCriterion: {
+            /** @enum {string} */
+            id: "locked_target_registry" | "supported_target_baseline" | "candidate_target_declared" | "bootstrap_transport_parity" | "steady_state_transport_parity" | "backup_restore_parity" | "diagnostics_parity" | "rollback_parity" | "docs_contract_ready" | "acceptance_recipe_ready" | "operator_ownership_defined";
+            label: string;
+            reason: string;
+        };
+        /** @enum {string} */
+        SecondTargetPolicyDecisionState: "hold" | "prepare_review" | "review_required";
+        SecondTargetPolicyPack: {
+            blockingCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
+            candidateTargetProfileIds: string[];
+            decisionState: components["schemas"]["SecondTargetPolicyDecisionState"];
+            expansionReviewRequired: boolean;
+            /** @enum {string} */
+            lockedTargetProfileId: "ubuntu-24.04-systemd-tailscale";
+            nextActions: string[];
+            /** @enum {string} */
+            reviewOwner: "controller";
+            satisfiedCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
+            summary: string;
+            supportedTargetProfiles: components["schemas"]["TargetProfileSummary"][];
+        };
         SshConnection: {
             host: string;
             port: number;
@@ -1552,6 +1610,9 @@ export type RollbackPoint = components['schemas']['RollbackPoint'];
 export type RunBackupRequest = components['schemas']['RunBackupRequest'];
 export type RunDiagnosticsRequest = components['schemas']['RunDiagnosticsRequest'];
 export type RunDriftCheckRequest = components['schemas']['RunDriftCheckRequest'];
+export type SecondTargetPolicyCriterion = components['schemas']['SecondTargetPolicyCriterion'];
+export type SecondTargetPolicyDecisionState = components['schemas']['SecondTargetPolicyDecisionState'];
+export type SecondTargetPolicyPack = components['schemas']['SecondTargetPolicyPack'];
 export type SshConnection = components['schemas']['SshConnection'];
 export type TargetProfile = components['schemas']['TargetProfile'];
 export type TargetProfileSummary = components['schemas']['TargetProfileSummary'];

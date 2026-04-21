@@ -51,7 +51,7 @@ In that scheme:
 | First-class bounded agent role | Agent already serves `/health`, `/runtime-state`, `/apply`, `/snapshot`, and `/rollback` with live controller sync | Partially earned |
 | Batch host orchestration | One bounded batch exposure-policy envelope now lands as an auditable parent operation with host-scoped child outcomes across controller, CLI, and Web | Phase 0 baseline landed |
 | Persistence readiness beyond SQLite | `operation-store` now runs behind a SQLite-backed persistence adapter seam, publishes measurable PostgreSQL readiness pressure from live store counts, and exposes `/persistence-decision-pack` so cutover review pressure is explicit while SQLite stays active | Phase 0 baseline landed |
-| Platform abstraction for second targets | Ubuntu 24.04 + systemd + Tailscale remains the only credible target | Not started |
+| Platform abstraction for second targets | The locked Ubuntu 24.04 + systemd + Tailscale target is now explicit through the target-profile registry, and `/second-target-policy-pack` keeps every broader target claim on hold until candidate-target parity evidence is real | Phase 0 baseline landed |
 
 ### Why keep C
 Without C, PortManager risks staying only a narrow single-purpose exposure tool.
@@ -85,7 +85,8 @@ Milestone 3 now continues from landed seams instead of restarting them:
 - Unit 59: complete. persistence promotion decision surface now turns measured readiness criteria into `/persistence-decision-pack` with explicit next actions while SQLite stays active
 - Unit 60: complete. consumer-boundary split criteria now publish `/consumer-boundary-decision-pack`, keeping `/api/controller` embedded until standalone deployment boundary, edge-policy ownership, and external consumer pressure justify a split review
 - Unit 61: complete. deployment-boundary decision pack now publishes `/deployment-boundary-decision-pack`, keeping `/api/controller` controller-embedded until deployable artifact, edge runtime controls, replay parity, observability ownership, and external pressure justify standalone deployment review
-- Next queue: broader second-target policy work, not a PostgreSQL default-store claim or a fake standalone deployment push
+- Unit 62: complete. second-target policy pack now publishes `/second-target-policy-pack`, keeping support locked to Ubuntu until candidate-target declaration, parity evidence, docs contract, acceptance recipe, and operator ownership justify review
+- Next queue: candidate-target declaration plus parity, docs, acceptance, and ownership evidence under `/second-target-policy-pack`, not a PostgreSQL default-store claim or a fake standalone deployment push
 - keep bounded batch work on the same evidence model instead of inventing a second orchestration path
 
 ### Language and boundary decisions carried into C
@@ -187,8 +188,9 @@ Milestone 3 现在不是重新做一遍已落地 seam，而是在其上继续推
 - Unit 59：已完成。建立在已测量 readiness criteria 之上的 persistence promotion decision surface 现在已经通过 `/persistence-decision-pack` 公开显式 next action，同时继续让 SQLite 保持 active
 - Unit 60：已完成。consumer-boundary split criteria 现在已经通过 `/consumer-boundary-decision-pack` 公开，并明确只有在独立部署边界、edge-policy ownership 与 external consumer pressure 同时成立时，`/api/controller` 才需要进入 split review
 - Unit 61：已完成。deployment-boundary decision pack 现在已经通过 `/deployment-boundary-decision-pack` 公开，并明确只有在 deployable artifact、edge runtime controls、replay parity、observability ownership 与 external pressure 同时成立时，`/api/controller` 才需要进入独立部署复核
-- 下一队列：更聚焦的第二目标策略工作，而不是 PostgreSQL 默认状态库承诺或伪造的独立部署推进
-- 下一批队列：继续定义更后置的独立部署边界证据与更广第二目标策略，而不是宣称 PostgreSQL 默认状态库已经可用
+- Unit 62：已完成。second-target policy pack 现在已经通过 `/second-target-policy-pack` 公开，并明确只有在候选第二目标声明、等价证据、文档契约、验收 recipe 与 operator ownership 同时成立时，支持声明才能超出 Ubuntu 锁定画像
+- 下一队列：围绕 `/second-target-policy-pack` 的候选第二目标声明、等价证据、文档/验收/owner 证明，而不是 PostgreSQL 默认状态库承诺或伪造的独立部署推进
+- 下一批队列：继续定义更后置的独立部署边界证据与候选第二目标等价证据，而不是宣称 PostgreSQL 默认状态库已经可用
 - 继续让 bounded batch work 留在同一套 evidence model 上，而不是再发明第二条 orchestration 路径
 
 ### 延续到 C 的语言与边界决策

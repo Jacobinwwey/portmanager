@@ -9,10 +9,10 @@ origin: docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requireme
 # PortManager Milestone 3 Toward C Enablement Plan
 
 Updated: 2026-04-21
-Version: v0.3.0
+Version: v0.4.0
 
 ## Overview
-This plan keeps Milestone 3 as a bounded `Phase 0 enablement` lane after Units 50 through 56 have already landed.
+This plan keeps Milestone 3 as a bounded `Phase 0 enablement` lane after Units 50 through 62 have already landed.
 It does not treat `Toward C` as already delivered.
 It uses the accepted Milestone 1 slice and the promotion-ready Milestone 2 guardrail as the verified base, then defines the next concrete workstreams needed before PortManager can truthfully claim any stronger distributed-platform shape.
 
@@ -55,7 +55,7 @@ Without a concrete Milestone 3 plan, the roadmap can drift in two bad directions
 
 ## Key Technical Decisions
 - Keep Milestone 2 review helpers and confidence artifacts as mandatory guardrails while Milestone 3 begins; no new phase gets to bypass `pnpm acceptance:verify`, `pnpm milestone:verify:confidence`, or the wording-review flow.
-- Treat Units 51 through 56 as landed baselines. The plan does not reopen consumer-boundary routing, indexed review publishing, or persistence seams unless regressions are found.
+- Treat Units 51 through 62 as landed baselines. The plan does not reopen consumer-boundary routing, indexed review publishing, persistence seams, or second-target policy framing unless regressions are found.
 - Start the next phase with boundary ownership and abstraction rules inside the current controller instead of adding deployment topology first. The architecture problem is not “missing microservices”; it is missing explicit decision surfaces.
 - Treat an API gateway as a contract and routing boundary goal, not an immediate new binary or deployment requirement.
 - Introduce wider multi-host work only through auditable operation envelopes that reuse the existing evidence model.
@@ -521,6 +521,54 @@ flowchart LR
 - Happy path: deployment-boundary pack escalates to standalone-review-required when deployable artifact, edge controls, replay parity, observability ownership, and external pressure all exist.
 - Happy path: CLI and Web consume the same `/deployment-boundary-decision-pack` controller contract through the consumer-prefixed base URL.
 - Regression: `/api/controller` and legacy compatibility aliases keep returning the same deployment-boundary pack.
+
+- [x] **Unit 62: Second-Target Policy Pack**
+
+**Goal:** Publish one explicit second-target policy pack that keeps supported-target claims locked to `ubuntu-24.04-systemd-tailscale` until a concrete candidate target, transport parity, backup/diagnostics/rollback parity, docs contract readiness, acceptance proof, and operator ownership justify review.
+
+**Requirements:** R4-R7
+
+**Dependencies:** Units 58-61
+
+**Files:**
+- Modify: `packages/contracts/openapi/openapi.yaml`
+- Modify: `packages/typescript-contracts/src/generated/*`
+- Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/web/src/main.ts`
+- Modify: `crates/portmanager-cli/src/main.rs`
+- Create: `apps/controller/src/second-target-policy-pack.ts`
+- Create: `tests/controller/second-target-policy-pack.test.ts`
+- Modify: `crates/portmanager-cli/tests/operation_get_cli.rs`
+- Modify: `tests/web/web-shell.test.ts`
+- Modify: `tests/web/live-controller-shell.test.ts`
+- Modify: `tests/contracts/generate-contracts.test.mjs`
+- Modify: `tests/docs/development-progress.test.mjs`
+- Modify: `README.md`
+- Modify: `TODO.md`
+- Modify: `Interface Document.md`
+- Modify: `docs/specs/portmanager-milestones.md`
+- Modify: `docs/specs/portmanager-v1-product-spec.md`
+- Modify: `docs/specs/portmanager-toward-c-strategy.md`
+- Modify: `docs/architecture/portmanager-v1-architecture.md`
+- Modify: `docs-site/data/roadmap.ts`
+- Modify: `docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue`
+
+**Approach:**
+- Reuse the decision-pack pattern, but point it at second-target expansion review evidence instead of deployment or persistence pressure alone.
+- Keep supported-target claims locked to the one explicit Ubuntu 24.04 profile; the new surface explains what must become true before any second-target claim can enter review.
+- Publish the same pack through controller, generated contracts, CLI, Web, and roadmap/progress docs so developers do not infer platform expansion timing from prose drift.
+
+**Patterns to follow:**
+- `apps/controller/src/deployment-boundary-decision-pack.ts`
+- `apps/controller/src/consumer-boundary-decision-pack.ts`
+- `tests/controller/deployment-boundary-decision-pack.test.ts`
+- `crates/portmanager-cli/tests/operation_get_cli.rs`
+
+**Test scenarios:**
+- Happy path: second-target policy pack keeps expansion review on hold while only the locked Ubuntu target is supported.
+- Happy path: second-target policy pack escalates to review-required when candidate target, parity evidence, docs contract, acceptance recipe, and operator ownership all exist.
+- Happy path: CLI and Web consume the same `/second-target-policy-pack` controller contract through the consumer-prefixed base URL.
+- Regression: live overview and console surfaces keep the same expansion-policy truth as controller.
 
 ## Verification Strategy
 - `pnpm exec node --experimental-strip-types --test tests/docs/*.test.mjs`

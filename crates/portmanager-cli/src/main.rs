@@ -144,6 +144,7 @@ enum OperationsSubcommand {
     List(OperationsListArgs),
     PersistenceDecisionPack(OperationsPersistenceDecisionPackArgs),
     PersistenceReadiness(OperationsPersistenceReadinessArgs),
+    SecondTargetPolicyPack(OperationsSecondTargetPolicyPackArgs),
 }
 
 #[derive(Args)]
@@ -554,6 +555,14 @@ struct OperationsDeploymentBoundaryDecisionPackArgs {
 }
 
 #[derive(Args, Clone)]
+struct OperationsSecondTargetPolicyPackArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
 struct OperationsBatchApplyPolicyArgs {
     #[arg(long = "host-id")]
     host_ids: Vec<String>,
@@ -735,6 +744,9 @@ async fn execute(cli: Cli) -> ExecutionResult {
             }
             OperationsSubcommand::PersistenceReadiness(args) => {
                 run_operations_persistence_readiness(args).await
+            }
+            OperationsSubcommand::SecondTargetPolicyPack(args) => {
+                run_operations_second_target_policy_pack(args).await
             }
         },
         Commands::RollbackPoints(command) => match command.command {
@@ -1409,6 +1421,25 @@ async fn run_operations_deployment_boundary_decision_pack(
     }
 }
 
+async fn run_operations_second_target_policy_pack(
+    args: OperationsSecondTargetPolicyPackArgs,
+) -> ExecutionResult {
+    match fetch_second_target_policy_pack(&Client::new(), &args.controller_base_url).await {
+        Ok(pack) => {
+            if args.json {
+                ExecutionResult::success_json(&pack)
+            } else {
+                ExecutionResult::success_text(format_second_target_policy_pack_text(&pack))
+            }
+        }
+        Err(error) => json_or_text_error_flag(
+            args.json,
+            error,
+            "second target policy pack fetch failed".to_string(),
+        ),
+    }
+}
+
 async fn run_operations_batch_apply_policy(
     args: OperationsBatchApplyPolicyArgs,
 ) -> ExecutionResult {
@@ -1978,6 +2009,44 @@ fn format_decision_criteria_block(title: &str, criteria: &Value) -> String {
     }
 }
 
+fn format_target_profile_summaries(title: &str, profiles: &Value) -> String {
+    let lines = profiles
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|profile| {
+            format!(
+                "- {} ({}) :: {}",
+                profile["id"].as_str().unwrap_or("unknown"),
+                profile["status"].as_str().unwrap_or("unknown"),
+                profile["label"].as_str().unwrap_or("unknown")
+            )
+        })
+        .collect::<Vec<_>>();
+
+    if lines.is_empty() {
+        format!("{}:\n- none", title)
+    } else {
+        format!("{}:\n{}", title, lines.join("\n"))
+    }
+}
+
+fn format_string_list_block(title: &str, values: &Value) -> String {
+    let lines = values
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .map(|value| format!("- {value}"))
+        .collect::<Vec<_>>();
+
+    if lines.is_empty() {
+        format!("{}:\n- none", title)
+    } else {
+        format!("{}:\n{}", title, lines.join("\n"))
+    }
+}
+
 fn format_consumer_boundary_decision_pack_text(pack: &Value) -> String {
     let action_lines = pack["nextActions"]
         .as_array()
@@ -2005,6 +2074,39 @@ fn format_consumer_boundary_decision_pack_text(pack: &Value) -> String {
         },
         pack["summary"].as_str().unwrap_or("no summary"),
         action_block,
+        format_decision_criteria_block("Satisfied Criteria", &pack["satisfiedCriteria"]),
+        format_decision_criteria_block("Blocking Criteria", &pack["blockingCriteria"])
+    )
+}
+
+fn format_second_target_policy_pack_text(pack: &Value) -> String {
+    let action_lines = pack["nextActions"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|action| format!("- {}", action.as_str().unwrap_or("unknown")))
+        .collect::<Vec<_>>();
+
+    let action_block = if action_lines.is_empty() {
+        "Next Actions:\n- none".to_string()
+    } else {
+        format!("Next Actions:\n{}", action_lines.join("\n"))
+    };
+
+    format!(
+        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}",
+        pack["lockedTargetProfileId"].as_str().unwrap_or("unknown"),
+        pack["reviewOwner"].as_str().unwrap_or("unknown"),
+        pack["decisionState"].as_str().unwrap_or("unknown"),
+        if pack["expansionReviewRequired"].as_bool().unwrap_or(false) {
+            "yes"
+        } else {
+            "no"
+        },
+        pack["summary"].as_str().unwrap_or("no summary"),
+        action_block,
+        format_target_profile_summaries("Supported Targets", &pack["supportedTargetProfiles"]),
+        format_string_list_block("Candidate Targets", &pack["candidateTargetProfileIds"]),
         format_decision_criteria_block("Satisfied Criteria", &pack["satisfiedCriteria"]),
         format_decision_criteria_block("Blocking Criteria", &pack["blockingCriteria"])
     )
@@ -2755,6 +2857,17 @@ async fn fetch_deployment_boundary_decision_pack(
 ) -> Result<Value, JsonErrorOutput> {
     let url = format!(
         "{}/deployment-boundary-decision-pack",
+        controller_base_url.trim_end_matches('/')
+    );
+    request_json(client.get(url), None, None).await
+}
+
+async fn fetch_second_target_policy_pack(
+    client: &Client,
+    controller_base_url: &str,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!(
+        "{}/second-target-policy-pack",
         controller_base_url.trim_end_matches('/')
     );
     request_json(client.get(url), None, None).await
