@@ -1,7 +1,7 @@
 # Interface Document
 
-Updated: 2026-04-20
-Version: v0.3.14-confidence-review-helper
+Updated: 2026-04-21
+Version: v0.3.16-confidence-progress-refresh
 
 ## English
 
@@ -52,22 +52,25 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - The repository now also has one canonical Milestone 2 confidence routine: `pnpm milestone:verify:confidence`.
 - The repository now also has one repo-native Milestone 2 history-import command: `pnpm milestone:sync:confidence-history`.
 - The repository now also has one repo-native Milestone 2 developer review digest: `pnpm milestone:review:confidence`.
+- The repository now also has one repo-native Milestone 2 promotion review helper: `pnpm milestone:review:promotion-ready`.
 - The main branch CI mirror for that gate is `.github/workflows/mainline-acceptance.yml`.
 - That workflow keeps `pnpm acceptance:verify` on the standing PR path and runs `pnpm milestone:verify:confidence` on `push main`, `workflow_dispatch`, and the daily scheduled history run.
 - The confidence routine now writes `.portmanager/reports/milestone-confidence-report.json`, `.portmanager/reports/milestone-confidence-history.json`, and `.portmanager/reports/milestone-confidence-summary.md` with CI traceability fields for `eventName`, `ref`, `sha`, `runId`, `runAttempt`, and `workflow`; the confidence job restores and saves the history bundle across runs, uploads that bundle as a CI artifact for developer inspection, and publishes the same markdown summary directly in the GitHub Actions job summary.
 - The sync command reads those completed CI bundles back through authenticated `gh` access with `repo` scope, imports completed qualified runs including failures, dedupes by stable history entry id, and rewrites the same local history and summary files for developer review.
 - The review-digest command compares that synced local history bundle with the tracked `docs-site/data/milestone-confidence-progress.ts` publication artifact, writes `.portmanager/reports/milestone-confidence-review.md`, distinguishes countdown alignment from full local visibility-only drift, and only turns published-countdown mismatch into a failure when `--require-published-countdown-match` is explicitly requested.
+- The promotion-review helper composes the sync and review-digest steps for the default developer-review flow, and only refreshes the tracked public artifact when `--refresh-published-artifact` is passed explicitly.
 - The confidence history now distinguishes qualified Milestone 2 promotion evidence from local visibility-only runs, persists `latestQualifiedRun` plus visibility-only breakdown metadata, and classifies readiness as `local-only`, `building-history`, or `promotion-ready` against one explicit rule: `7` qualified runs plus `3` consecutive qualified passes from `push`, `workflow_dispatch`, or `schedule` on `refs/heads/main`.
 - The docs site now also publishes that synced review state through `/en/roadmap/development-progress` and `/zh/roadmap/development-progress`, backed by generated milestone confidence data and previewed directly on roadmap home.
 - Default docs publication now reuses the committed `docs-site/data/milestone-confidence-progress.ts` artifact; only `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` is allowed to republish that tracked snapshot from local `.portmanager` history.
 - Unit 0 is already achieved and should be treated as mandatory baseline discipline through `pnpm acceptance:verify`, `mainline-acceptance`, and `docs-pages`.
 - This gate proves current code health across tests, type checks, Rust workspace tests, contract drift checks, docs-site build, and milestone verification.
 - Fresh local proof on `2026-04-17`: `pnpm acceptance:verify` passes after the Unit 4 agent-service delivery and Unit 5 docs sync.
-- Fresh promotion-ready publication refresh on `2026-04-20`: after pulling the latest `main`, `pnpm milestone:sync:confidence-history -- --limit 20` imported enough qualified `mainline-acceptance` runs into local review to meet the promotion threshold, `pnpm milestone:review:confidence` first exposed published countdown drift, and `docs:generate:refresh-confidence` then republished the tracked docs artifact. Exact live counters and the latest qualified run now live in the generated development-progress surface plus the tracked confidence artifact, not as brittle interface-doc literals.
+- Fresh GitHub-hosted acceptance completion proof on `2026-04-21`: local `corepack pnpm acceptance:verify` still passed, `docs-pages` run `24702941963` passed, and `mainline-acceptance` run `24702941958` passed after publishing the refreshed confidence-progress artifact.
+- Fresh promotion-ready publication refresh on `2026-04-21`: after pulling the latest `main`, `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` synced completed `mainline-acceptance` runs through authenticated `gh`, wrote the review digest, and republished the tracked docs artifact from the same completed workflow evidence. Exact live counters and the latest qualified run now live in the generated development-progress surface plus the tracked confidence artifact, not as brittle interface-doc literals.
 - Fresh verification hardening on `2026-04-18`: development-progress docs validation now matches `scripts/docs/extract-locales.mjs` by accepting the committed generated confidence snapshot when `.portmanager` history is absent, so a fresh machine no longer fails the standing gate on an ignored local-only file.
 - Fresh verification hardening on `2026-04-18`: the same development-progress docs validation also no longer requires committed docs-site progress data to match a newer ignored local `.portmanager` history snapshot, so the standing gate remains stable until docs generation is intentionally rerun.
 - The confidence routine extends that baseline with the remote-backup replay proof on the same accepted live slice. It does **not** mean Milestone 2 reliability wording can broaden automatically; continued green history and deliberate human review are still required.
-- Current readiness truth after that sync is now `promotion-ready` with promotion thresholds met. The default local review flow now has one repo-native helper, `pnpm milestone:review:promotion-ready -- --limit 20`, which syncs history and writes the review digest before any explicit refresh decision; the tracked public snapshot still moves only through the explicit docs command when review agrees. Exact live counters stay on the development-progress page and tracked confidence artifact, while this interface guide keeps the threshold-met conclusion stable.
+- Current readiness truth after that review remains `promotion-ready` with promotion thresholds met. The default local review flow now starts from `pnpm milestone:review:promotion-ready -- --limit 20`, which syncs history and writes the review digest before any explicit refresh decision; the tracked public snapshot still moves only through the same helper plus `--refresh-published-artifact` when review agrees. Exact live counters stay on the development-progress page and tracked confidence artifact, while this interface guide keeps the threshold-met conclusion stable.
 
 ### Current delivery status
 - `Unit 1`: complete. Controller `hosts`, `bridge-rules`, and `exposure-policies` now exist as real source-of-truth resources.
@@ -86,7 +89,8 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 slice shipped`: synced and local confidence summaries now separate `Latest Run` from `Latest Qualified Run` and count visibility-only local versus non-qualified remote runs, so developer review stays truthful after local reruns.
 - `Milestone 2 slice shipped`: the docs site now publishes the same synced confidence snapshot as a first-class development-progress page and roadmap-home preview for public developer review.
 - `Milestone 2 slice shipped`: `pnpm milestone:review:confidence` now gives developers one repo-native digest that compares synced local readiness with the tracked public progress artifact, writes `.portmanager/reports/milestone-confidence-review.md`, and keeps countdown drift separate from visibility-only drift during milestone review.
-- `Next lane`: Milestone 2 promotion-ready wording review on the same live host / rule / policy slice by reviewing the synced summary's latest-qualified signal, `pnpm milestone:review:confidence`, the verification report, and the public progress page, refreshing the tracked public snapshot only through the explicit docs command when review agrees, and keeping qualified history green while human milestone-language review stays deliberate.
+- `Milestone 2 slice shipped`: `pnpm milestone:review:promotion-ready` now gives developers one repo-native helper that composes history sync plus review-digest generation, and only republishes the tracked public snapshot when `--refresh-published-artifact` is requested explicitly.
+- `Next lane`: Milestone 2 promotion-ready wording review on the same live host / rule / policy slice by running `pnpm milestone:review:promotion-ready -- --limit 20`, reviewing the synced summary's latest-qualified signal plus the verification report and the public progress page, refreshing the tracked public snapshot only through the same helper plus `--refresh-published-artifact` when review agrees, and keeping qualified history green while human milestone-language review stays deliberate.
 
 ## 中文
 
@@ -137,22 +141,25 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - 当前仓库也已经具备一条规范的 Milestone 2 confidence routine：`pnpm milestone:verify:confidence`。
 - 当前仓库也已经具备一条 repo-native 的 Milestone 2 history-import 命令：`pnpm milestone:sync:confidence-history`。
 - 当前仓库也已经具备一条 repo-native 的 Milestone 2 开发者复核摘要命令：`pnpm milestone:review:confidence`。
+- 当前仓库也已经具备一条 repo-native 的 Milestone 2 promotion review helper：`pnpm milestone:review:promotion-ready`。
 - 该 gate 在主分支上的 CI 镜像为 `.github/workflows/mainline-acceptance.yml`。
 - 这条 workflow 会继续把 `pnpm acceptance:verify` 保留在 PR 路径上，并在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上运行 `pnpm milestone:verify:confidence`。
 - 这条 confidence routine 现在还会写出 `.portmanager/reports/milestone-confidence-report.json`、`.portmanager/reports/milestone-confidence-history.json` 与 `.portmanager/reports/milestone-confidence-summary.md`，并附带 `eventName`、`ref`、`sha`、`runId`、`runAttempt`、`workflow` 等 CI traceability 字段；confidence job 还会在各次运行之间恢复并保存这组 history bundle、上传成 CI artifact，并把同一份 markdown summary 直接发布到 GitHub Actions job summary 供开发者核对。
 - 这条 sync 命令会通过已认证且具备 `repo` scope 的 `gh` 读取这些已完成 CI bundle，把包含失败 run 在内的已完成 qualified 历史导回本地，按稳定 history entry id 去重，并重写同一份本地 history 与 summary 文件供开发者复核。
 - 这条 review-digest 命令会把同步后的本地 history bundle 与已跟踪 `docs-site/data/milestone-confidence-progress.ts` 发布产物直接对比，写出 `.portmanager/reports/milestone-confidence-review.md`，把 countdown 对齐状态与完整本地 visibility-only 漂移拆开汇报，并且只在显式传入 `--require-published-countdown-match` 时才把公开倒计时不一致转成失败。
+- 这条 promotion-review helper 会把 sync 与 review-digest 串成默认开发者复核链路，并且只有在显式传入 `--refresh-published-artifact` 时才会刷新被跟踪公开 artifact。
 - 这组 confidence history 现在还会把真正属于 Milestone 2 readiness 推进的 qualified run 与本地可见性 run 区分开，持久化 `latestQualifiedRun` 与 visibility-only breakdown 元数据，并按照 `local-only`、`building-history`、`promotion-ready` 三种状态汇总 readiness；统一阈值为 `push`、`workflow_dispatch`、`schedule` on `refs/heads/main` 的 `7` 次 qualified run 加 `3` 次连续 qualified pass。
 - docs-site 现在也会通过 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress` 公开这份同步后的复核状态，并在 roadmap 首页直接预览同一份 milestone confidence 快照。
 - 默认 docs 发布现在会复用已提交的 `docs-site/data/milestone-confidence-progress.ts`；只有 `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence` 才允许把本地 `.portmanager` history 重新发布成新的被跟踪快照。
 - Unit 0 现在已经成立，应通过 `pnpm acceptance:verify`、`mainline-acceptance` 与 `docs-pages` 被视为必须持续保持的基线纪律。
 - 它覆盖当前代码的测试、类型检查、Rust workspace 测试、契约漂移检查、docs-site 构建与 milestone 验证。
 - 本地最新证明也发生在 `2026-04-17`：Unit 4 agent-service 交付与 Unit 5 文档同步之后，`pnpm acceptance:verify` 已重新通过。
-- `2026-04-20` 的 promotion-ready 发布刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:sync:confidence-history -- --limit 20` 已成功把足够多的 qualified `mainline-acceptance` 运行导入本地复核以满足 promotion 门槛，`pnpm milestone:review:confidence` 先暴露公开倒计时漂移，`docs:generate:refresh-confidence` 随后把被跟踪 docs 产物刷新到同一份同步状态；精确实时计数与最新 qualified run 现在统一以下发到 development-progress 页面与被跟踪 confidence artifact 为准，而不再写死在接口说明里。
+- `2026-04-21` 的 GitHub 托管验收闭环也已经成立：本地 `corepack pnpm acceptance:verify` 继续通过，刷新 confidence-progress artifact 之后的 `docs-pages` run `24702941963` 与 `mainline-acceptance` run `24702941958` 也继续通过。
+- `2026-04-21` 的 promotion-ready 发布刷新也已经成立：拉取最新 `main` 之后，`pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` 已通过已认证 `gh` 同步 completed `mainline-acceptance` 运行、写出 review digest，并把被跟踪 docs 产物刷新到同一份已完成 workflow 证据；精确实时计数与最新 qualified run 现在统一以下发到 development-progress 页面与被跟踪 confidence artifact 为准，而不再写死在接口说明里。
 - `2026-04-18` 的验证加固也已经完成：development-progress docs 校验现在已经与 `scripts/docs/extract-locales.mjs` 的发布契约保持一致，在 `.portmanager` 历史缺失时会接受已提交的 generated confidence snapshot，因此一台全新的机器不再因为一个被忽略的本地文件而误报 gate 失败。
 - `2026-04-18` 的验证加固还继续补齐了一层：同一条 development-progress docs 校验不再要求已提交的 docs-site progress data 必须与一个更新的、被忽略的本地 `.portmanager` 历史快照完全相等，因此在未主动重跑 docs 生成前，standing gate 仍然保持稳定。
 - 这条 confidence routine 会在同一条已验收 live 切片上继续叠加 remote-backup replay proof，但它**并不**意味着 Milestone 2 可靠性文案可以自动放宽；仍然需要持续为绿的历史与谨慎的人工复核。
-- 同步后的当前 readiness 真相现在已经是 `promotion-ready`，promotion 门槛也已经满足；当前默认本地复核链路也已经有一条 repo-native helper：`pnpm milestone:review:promotion-ready -- --limit 20`，它会先同步 history、再写出 review digest，然后才让开发者决定是否使用显式 docs 命令刷新公开快照。精确实时计数统一留给 development-progress 页面与被跟踪 confidence artifact，而这份接口说明保留更稳定的 threshold-met 结论。倒计时已经闭环，因此剩余工作是持续保持 gate 健康并谨慎复核文案，而不是继续累积 readiness run。
+- 同步后的当前 readiness 真相现在已经是 `promotion-ready`，promotion 门槛也已经满足；当前默认本地复核链路现在会从 `pnpm milestone:review:promotion-ready -- --limit 20` 开始，它会先同步 history、再写出 review digest，然后才让开发者决定是否通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照。精确实时计数统一留给 development-progress 页面与被跟踪 confidence artifact，而这份接口说明保留更稳定的 threshold-met 结论。倒计时已经闭环，因此剩余工作是持续保持 gate 健康并谨慎复核文案，而不是继续累积 readiness run。
 
 ### 当前交付状态
 - `Unit 1`：已完成。controller 的 `hosts`、`bridge-rules`、`exposure-policies` 真源资源已经落地。
@@ -170,4 +177,5 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 - `Milestone 2 切片已交付`：同步后与本地的 confidence summary 现在会把 `Latest Run` 与 `Latest Qualified Run` 分开显示，并统计本地 visibility-only 与非 qualified 远端 run，让开发者在本地 rerun 之后仍然能看到真实主线证据。
 - `Milestone 2 切片已交付`：docs-site 现在也会把同一份同步后的 confidence snapshot 发布成一级开发者进度页面，并在 roadmap 首页直接公开预览。
 - `Milestone 2 切片已交付`：`pnpm milestone:review:confidence` 现在已经给开发者补上一条 repo-native 复核摘要命令，用来直接对比同步后的本地 readiness 与已跟踪公开 progress artifact，写出 `.portmanager/reports/milestone-confidence-review.md`，并把 countdown 漂移与 visibility-only 漂移分开汇报。
-- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：复核同步后 summary 的 latest-qualified 信号、`pnpm milestone:review:confidence`、验证报告与公开 progress page，只在人工复核同意时用显式 docs 命令刷新公开快照，并保持 qualified history 持续转绿。
+- `Milestone 2 切片已交付`：`pnpm milestone:review:promotion-ready` 现在已经给开发者补上一条 repo-native helper，把 history sync 与 review digest 串成同一条默认复核链路，并且只在显式传入 `--refresh-published-artifact` 时刷新被跟踪公开 artifact。
+- `下一主线`：继续在同一条 live host / rule / policy 切片上推进 Milestone 2 的 promotion-ready 文案复核：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，复核同步后 summary 的 latest-qualified 信号、验证报告与公开 progress page，只在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 刷新公开快照，并保持 qualified history 持续转绿。
