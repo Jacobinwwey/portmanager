@@ -1,7 +1,7 @@
 # PortManager Real-Machine Verification Report
 
 Updated: 2026-04-20
-Version: v0.2.3-confidence-promotion-ready
+Version: v0.2.4-confidence-promotion-ready-helper-refresh
 
 ## English
 
@@ -11,15 +11,14 @@ It exists so that acceptance truth, confidence truth, and docs-publication truth
 
 ### Verification session
 The latest recorded verification session for this report happened on `2026-04-20`.
-It combined a Windows development-machine replay against the latest local `main` with a GitHub-hosted confirmation pass after forcing JavaScript-based workflow actions onto Node 24, then a latest-main sync refresh that republished the tracked confidence-progress artifact from the completed `mainline-acceptance` history.
+It combined a Windows development-machine replay against the latest local `main`, a GitHub-hosted confirmation pass after forcing JavaScript-based workflow actions onto Node 24, and a latest-main helper refresh that used `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` to sync completed `mainline-acceptance` history, write the review digest, and republish the tracked confidence-progress artifact from the same completed workflow evidence.
 
 Commands executed:
 - `corepack pnpm acceptance:verify`
 - `pnpm milestone:verify:confidence`
-- `pnpm milestone:sync:confidence-history -- --limit 20`
-- `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
-- GitHub Actions run `24645898239` for `mainline-acceptance`
-- GitHub Actions run `24645898212` for `docs-pages`
+- `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
+- GitHub Actions run `24648911705` for `mainline-acceptance`
+- GitHub Actions run `24648911717` for `docs-pages`
 
 ### What each command proves
 - `corepack pnpm acceptance:verify`
@@ -29,36 +28,35 @@ Commands executed:
   - writes `.portmanager/reports/milestone-confidence-report.json`
   - appends `.portmanager/reports/milestone-confidence-history.json`
   - renders `.portmanager/reports/milestone-confidence-summary.md`
-- `pnpm milestone:sync:confidence-history -- --limit 20`
-  - imports completed `mainline-acceptance` confidence bundles from GitHub Actions into local `.portmanager/reports/`
-  - keeps local developer review aligned with mainline evidence rather than local-only reruns
-- `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
-  - intentionally republishes the tracked docs artifact `docs-site/data/milestone-confidence-progress.ts` from the synced local history
-  - records the current published readiness snapshot without letting normal docs builds drift every time local `.portmanager` history changes
-- GitHub Actions run `24645898239` for `mainline-acceptance`
+- `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
+  - syncs completed `mainline-acceptance` confidence bundles from GitHub Actions into local `.portmanager/reports/`
+  - writes `.portmanager/reports/milestone-confidence-review.md` through the existing review-digest path
+  - intentionally republishes the tracked docs artifact `docs-site/data/milestone-confidence-progress.ts` only through the explicit refresh contract behind the helper flag
+  - proves the synced local review and the published confidence snapshot now match on the same completed workflow evidence
+- GitHub Actions run `24648911705` for `mainline-acceptance`
   - proves the standing CI acceptance gate still passes after the workflow migration away from `pnpm/action-setup`
   - proves `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` does not break the accepted control-plane proof or the confidence routine
-- GitHub Actions run `24645898212` for `docs-pages`
+- GitHub Actions run `24648911717` for `docs-pages`
   - proves the published docs build and Pages deployment still succeed after the same Node 24 forcing change
   - proves the docs publication workflow remains operational alongside the standing acceptance gate
 
 ### Evidence frozen by this report
 - Local acceptance gate: passed
 - Local confidence routine: passed
-- Synced mainline evidence: imported successfully
-- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`, `24646810439/1`, `24647442700/1`, `24648118236/1`
+- Helper sync and explicit refresh: passed
+- Imported qualified workflow runs now tracked: `24595022905/1`, `24645377989/1`, `24645746838/1`, `24645898239/1`, `24646210070/1`, `24646810439/1`, `24647442700/1`, `24648118236/1`, `24648519364/1`, `24648911705/1`
 - Imported qualified workflow: `mainline-acceptance`
 - Imported qualified event: `push`
 - Current published readiness state: `promotion-ready`
-- Current published qualified runs: `8/7`
-- Current published qualified consecutive passes: `8/3`
+- Current published qualified runs: `10/7`
+- Current published qualified consecutive passes: `10/3`
 - Current published remaining qualified runs: `0`
-- Current published tracked runs: `14`
+- Current published tracked runs: `16`
 - Current published local visibility-only runs: `6`
-- Current published latest qualified run: `24648118236/1`
-- Current published latest qualified SHA: `40780ac3b283`
-- GitHub-hosted `mainline-acceptance` run: `24648118236` passed
-- GitHub-hosted `docs-pages` run: `24645898212` passed
+- Current published latest qualified run: `24648911705/1`
+- Current published latest qualified SHA: `d7b90cdcba4f`
+- GitHub-hosted `mainline-acceptance` run: `24648911705` passed
+- GitHub-hosted `docs-pages` run: `24648911717` passed
 - Node 24 forced-action trial: passed
 - Remaining warning source: GitHub official action metadata still declaring `node20`
 - Review digest after explicit refresh: aligned
@@ -68,7 +66,7 @@ Commands executed:
 - The standing acceptance contract is now complete and currently healthy across both the local gate and the GitHub-hosted gate.
 - The docs publication gate is also complete and currently healthy on GitHub Pages after the Node 24 forcing trial.
 - Milestone 2 confidence maintenance is real and operational, and promotion criteria are now met.
-- The current truthful public wording is now `promotion-ready` after the explicit refresh path republished the tracked artifact.
+- The current truthful public wording is now `promotion-ready` after the helper-driven explicit refresh path republished the tracked artifact.
 - Human milestone-language review is now allowed; the remaining public lane is deliberate wording tightening plus sustained gate health.
 - The latest visible local run is intentionally separated from the latest qualified mainline run, so local reruns no longer erase mainline review evidence.
 - The remaining Node 20 deprecation annotations are now upstream-only warning debt in GitHub official actions; they no longer indicate a repo-local acceptance or publication failure.
@@ -82,28 +80,27 @@ Commands executed:
   - `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
 - Publication rule:
   - only run the explicit refresh command after a deliberate verification or sync step whose evidence should become the new public snapshot
-  - use `pnpm milestone:review:confidence` first if you need one repo-native comparison between synced local history and the tracked public artifact before deciding whether publication should move
+  - use `pnpm milestone:review:promotion-ready -- --limit 20` as the default helper before deciding whether publication should move; use `pnpm milestone:review:confidence` directly only when local history is already synced and you want the digest alone
 - Why this rule exists:
   - local `.portmanager` history is machine-local and intentionally ignored by Git
   - allowing every docs build to rewrite the tracked confidence artifact from local history causes noisy diffs and publication drift
   - the tracked docs artifact must change only when publication intent is explicit
 
-### Default developer review digest
-- Default local review sequence after sync:
-  - `pnpm milestone:sync:confidence-history -- --limit 20`
-  - `pnpm milestone:review:confidence`
-- What the review-digest command adds:
-  - writes `.portmanager/reports/milestone-confidence-review.md`
-  - compares synced local readiness with tracked `docs-site/data/milestone-confidence-progress.ts`
+### Default developer review helper
+- Default local review sequence after completed mainline runs:
+  - `pnpm milestone:review:promotion-ready -- --limit 20`
+- What the helper adds:
+  - syncs completed `mainline-acceptance` history back into local `.portmanager/reports/`
+  - writes `.portmanager/reports/milestone-confidence-review.md` through the existing `pnpm milestone:review:confidence` path
   - reports countdown alignment separately from full local visibility-only drift
-  - keeps strict published-countdown failure opt-in behind `--require-published-countdown-match`
-- Publication rule after that digest:
-  - after the digest exposes drift and human review agrees, refresh the tracked docs artifact explicitly; this exact order republished the `promotion-ready` snapshot on `2026-04-20`
+  - keeps tracked-artifact publication behind the explicit `--refresh-published-artifact` flag
+- Publication rule after that helper review:
+  - when the helper exposes countdown drift and human review agrees, rerun `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`; this exact order republished the aligned `promotion-ready` snapshot on `2026-04-20`
 
 ### Review protocol
 - Read the GitHub Actions `mainline-acceptance` summary first when reviewing readiness accumulation.
-- Sync completed confidence history back into local `.portmanager/reports/`.
-- Run `pnpm milestone:review:confidence` so `.portmanager/reports/milestone-confidence-review.md` records whether the published countdown is aligned or only visibility-drifted.
+- Run `pnpm milestone:review:promotion-ready -- --limit 20` so completed mainline history syncs back into local `.portmanager/reports/` and `.portmanager/reports/milestone-confidence-review.md` records whether the published countdown is aligned or only visibility-drifted.
+- If the public snapshot should move, rerun the same helper with `--refresh-published-artifact`.
 - Compare the synced local summary, the tracked docs confidence artifact, and the public development-progress page together.
 - Use `Latest Qualified Run` plus the visibility breakdown for milestone-language review, not raw local rerun recency.
 
@@ -115,15 +112,14 @@ Commands executed:
 
 ### 验证会话
 本报告对应的最新验证会话发生在 `2026-04-20`。
-这次会话同时包含一轮针对最新本地 `main` 的 Windows 开发机重放，以及一轮在 GitHub 托管 runner 上、强制 JavaScript workflow actions 运行于 Node 24 之后的确认性验证。
+这次会话同时包含一轮针对最新本地 `main` 的 Windows 开发机重放、一轮在 GitHub 托管 runner 上强制 JavaScript workflow actions 运行于 Node 24 之后的确认性验证，以及一轮通过 `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` 完成的 helper 刷新，用同一组已完成 workflow 证据同步 history、写出 digest 并重发被跟踪 confidence-progress artifact。
 
 本次执行命令：
 - `corepack pnpm acceptance:verify`
 - `pnpm milestone:verify:confidence`
-- `pnpm milestone:sync:confidence-history -- --limit 20`
-- `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
-- `mainline-acceptance` 的 GitHub Actions run `24645898239`
-- `docs-pages` 的 GitHub Actions run `24645898212`
+- `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
+- `mainline-acceptance` 的 GitHub Actions run `24648911705`
+- `docs-pages` 的 GitHub Actions run `24648911717`
 
 ### 各命令分别证明什么
 - `corepack pnpm acceptance:verify`
@@ -133,36 +129,35 @@ Commands executed:
   - 会写出 `.portmanager/reports/milestone-confidence-report.json`
   - 会追加 `.portmanager/reports/milestone-confidence-history.json`
   - 会渲染 `.portmanager/reports/milestone-confidence-summary.md`
-- `pnpm milestone:sync:confidence-history -- --limit 20`
+- `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
   - 会把 GitHub Actions 已完成的 `mainline-acceptance` confidence bundle 导入本地 `.portmanager/reports/`
-  - 让本地开发者复核继续对齐主线证据，而不是被本地 rerun 噪声带偏
-- `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
-  - 会把同步后的本地 history 显式发布到已跟踪的 docs 产物 `docs-site/data/milestone-confidence-progress.ts`
-  - 让当前公开 readiness 快照被有意刷新，而不是让普通 docs build 随着本地 `.portmanager` 历史变化不断漂移
-- GitHub Actions run `24645898239`
+  - 会通过既有 review-digest 路径写出 `.portmanager/reports/milestone-confidence-review.md`
+  - 只会在 helper 显式刷新 flag 允许时，按原有发布契约重发 `docs-site/data/milestone-confidence-progress.ts`
+  - 证明同步后的本地复核与公开 confidence 快照现在已经建立在同一份已完成 workflow 证据之上
+- GitHub Actions run `24648911705`
   - 证明在 workflow 从 `pnpm/action-setup` 迁出之后，常驻 CI acceptance gate 仍然通过
   - 证明 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` 不会破坏已验收控制平面证明链路或 confidence routine
-- GitHub Actions run `24645898212`
+- GitHub Actions run `24648911717`
   - 证明在同一轮 Node 24 强制试跑之后，公开 docs build 与 Pages 部署仍然成功
   - 证明 docs 发布工作流与常驻 acceptance gate 现在可以同时保持健康
 
 ### 本报告冻结的证据
 - 本地 acceptance gate：已通过
 - 本地 confidence routine：已通过
-- 主线 evidence 同步：已成功导入
-- 已导入并纳入跟踪的 qualified workflow runs：`24595022905/1`、`24645377989/1`、`24645746838/1`、`24645898239/1`、`24646210070/1`、`24646810439/1`、`24647442700/1`、`24648118236/1`
+- helper 同步与显式刷新：已通过
+- 已导入并纳入跟踪的 qualified workflow runs：`24595022905/1`、`24645377989/1`、`24645746838/1`、`24645898239/1`、`24646210070/1`、`24646810439/1`、`24647442700/1`、`24648118236/1`、`24648519364/1`、`24648911705/1`
 - 已导入 qualified workflow：`mainline-acceptance`
 - 已导入 qualified event：`push`
 - 当前公开 readiness 状态：`promotion-ready`
-- 当前公开 qualified runs：`8/7`
-- 当前公开 qualified consecutive passes：`8/3`
+- 当前公开 qualified runs：`10/7`
+- 当前公开 qualified consecutive passes：`10/3`
 - 当前公开 remaining qualified runs：`0`
-- 当前公开 tracked runs：`14`
+- 当前公开 tracked runs：`16`
 - 当前公开 local visibility-only runs：`6`
-- 当前公开 latest qualified run：`24648118236/1`
-- 当前公开 latest qualified SHA：`40780ac3b283`
-- GitHub 托管 `mainline-acceptance` run：`24648118236` 已通过
-- GitHub 托管 `docs-pages` run：`24645898212` 已通过
+- 当前公开 latest qualified run：`24648911705/1`
+- 当前公开 latest qualified SHA：`d7b90cdcba4f`
+- GitHub 托管 `mainline-acceptance` run：`24648911705` 已通过
+- GitHub 托管 `docs-pages` run：`24648911717` 已通过
 - Node 24 强制 action 试跑：已通过
 - 剩余 warning 来源：GitHub 官方 action 元数据仍声明 `node20`
 - 显式刷新后的 review digest：已对齐
@@ -172,7 +167,7 @@ Commands executed:
 - 常驻 acceptance 契约现在已经在本地 gate 与 GitHub 托管 gate 两端同时闭环，并且当前健康。
 - docs 发布 gate 也已经在 Node 24 强制试跑之后继续保持完整与健康。
 - Milestone 2 的 confidence 维护已经真实落地且可操作，而且 promotion 条件现在已经满足。
-- 当前对外公开的真实表述已经在显式刷新之后进入 `promotion-ready`。
+- 当前对外公开的真实表述已经在 helper 驱动的显式刷新之后进入 `promotion-ready`。
 - 当前已经允许人工里程碑文案复核；剩余公开主线是谨慎收窄文案并持续保持 gate 健康。
 - 最新可见 local run 现在被刻意与最新 qualified mainline run 分离，因此本地 rerun 不会再抹掉主线复核证据。
 - 当前剩余的 Node 20 退役 annotation 已经收敛为 GitHub 官方 action 的上游 warning debt，不再代表 repo 本地 acceptance 或 docs publication 失败。
@@ -186,27 +181,26 @@ Commands executed:
   - `pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence`
 - 发布规则：
   - 只有在一次有意的 verification 或 sync 之后，才运行这条显式刷新命令，把那次证据提升为新的公开快照
-  - 如果需要在决定是否刷新公开快照前先做一次 repo-native 对比，应先执行 `pnpm milestone:review:confidence`
+  - 默认应先执行 `pnpm milestone:review:promotion-ready -- --limit 20` 这条 helper 再决定公开快照是否前进；只有在本地 history 已经同步完成、且只需要 digest 时，才直接执行 `pnpm milestone:review:confidence`
 - 这条规则存在的原因：
   - 本地 `.portmanager` history 是 machine-local 文件，并且刻意被 Git 忽略
   - 如果允许每次 docs build 都直接用本地 history 改写已跟踪 confidence artifact，就会造成噪音 diff 与发布漂移
   - 已跟踪 docs artifact 只能在“明确有发布意图”的时候变化
 
-### 默认开发者复核摘要
-- sync 之后的默认本地复核顺序：
-  - `pnpm milestone:sync:confidence-history -- --limit 20`
-  - `pnpm milestone:review:confidence`
-- 这条 review-digest 命令补上的信息：
-  - 写出 `.portmanager/reports/milestone-confidence-review.md`
-  - 直接对比同步后的本地 readiness 与已跟踪 `docs-site/data/milestone-confidence-progress.ts`
+### 默认开发者复核 helper
+- completed mainline runs 之后的默认本地复核顺序：
+  - `pnpm milestone:review:promotion-ready -- --limit 20`
+- 这条 helper 补上的信息：
+  - 把已完成 `mainline-acceptance` history 同步回本地 `.portmanager/reports/`
+  - 通过既有 `pnpm milestone:review:confidence` 路径写出 `.portmanager/reports/milestone-confidence-review.md`
   - 把 countdown 对齐状态与完整本地 visibility-only 漂移拆开汇报
-  - 只在显式传入 `--require-published-countdown-match` 时才把公开倒计时不一致变成失败
-- digest 之后的发布规则：
-  - 只有当 digest 结论与人工复核都认为公开快照应该变化时，才显式刷新已跟踪 docs artifact；`2026-04-20` 的 `promotion-ready` 快照就是按这个顺序重发的
+  - 只有显式加上 `--refresh-published-artifact` 时，才会推进被跟踪公开 artifact
+- helper 之后的发布规则：
+  - 只有当 helper 结论与人工复核都认为公开快照应该变化时，才重新执行 `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`；`2026-04-20` 的对齐 `promotion-ready` 快照就是按这个顺序重发的
 
 ### 复核协议
 - 在判断 readiness 累积时，先看 GitHub Actions `mainline-acceptance` summary。
-- 把已完成 confidence history 同步回本地 `.portmanager/reports/`。
-- 执行 `pnpm milestone:review:confidence`，让 `.portmanager/reports/milestone-confidence-review.md` 先记录公开倒计时是否真正对齐、还是只有 visibility-only 漂移。
+- 先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，让已完成 confidence history 回到本地 `.portmanager/reports/`，并让 `.portmanager/reports/milestone-confidence-review.md` 先记录公开倒计时是否真正对齐、还是只有 visibility-only 漂移。
+- 如果公开快照应该前进，就在人工复核同意后重跑同一条 helper 并加上 `--refresh-published-artifact`。
 - 同时对比同步后的本地 summary、已跟踪 docs confidence artifact 与公开 development-progress 页面。
 - 在评审里程碑文案时，应优先使用 `Latest Qualified Run` 与 visibility breakdown，而不是只看最近一次本地 rerun。
