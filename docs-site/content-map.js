@@ -247,6 +247,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'debian-12-bootstrap-proof-capture',
+    sourcePath: 'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md',
+    route: 'operations/debian-12-bootstrap-proof-capture',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Debian 12 Bootstrap Proof Capture',
+      zh: 'Debian 12 Bootstrap 证明采集'
+    }
+  },
+  {
     id: 'overview-design-baseline',
     sourcePath: 'docs/design/portmanager-overview-design-baseline.md',
     route: 'architecture/overview-design-baseline',

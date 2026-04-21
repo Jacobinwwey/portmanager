@@ -52,6 +52,26 @@ export interface SecondTargetReviewPacketTemplate {
   requiredEvidence: SecondTargetReviewPacketRequirement[]
 }
 
+export type SecondTargetBootstrapProofArtifactId =
+  | 'bootstrap_operation_id'
+  | 'bootstrap_result_summary'
+  | 'audit_reference'
+  | 'target_profile_confirmation'
+
+export interface SecondTargetBootstrapProofArtifact {
+  id: SecondTargetBootstrapProofArtifactId
+  label: string
+  summary: string
+}
+
+export interface SecondTargetBootstrapProofCapture {
+  candidateTargetProfileId: string
+  guidePath: string
+  summary: string
+  requiredArtifacts: SecondTargetBootstrapProofArtifact[]
+  sources: string[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -81,12 +101,41 @@ export interface SecondTargetPolicyPack {
   summary: string
   nextActions: string[]
   reviewPacketTemplate: SecondTargetReviewPacketTemplate
+  bootstrapProofCapture: SecondTargetBootstrapProofCapture
   satisfiedCriteria: SecondTargetPolicyCriterion[]
   blockingCriteria: SecondTargetPolicyCriterion[]
   evidenceItems: SecondTargetPolicyEvidenceItem[]
 }
 
 const reviewPacketTemplatePath = 'docs/operations/portmanager-debian-12-review-packet-template.md'
+const bootstrapProofCaptureGuidePath =
+  'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md'
+
+const bootstrapProofArtifactMetadata: Record<
+  SecondTargetBootstrapProofArtifactId,
+  { label: string; summary: string }
+> = {
+  bootstrap_operation_id: {
+    label: 'Bootstrap operation id',
+    summary:
+      'Capture the bootstrap operation id so every later proof reference points to one bounded controller record.'
+  },
+  bootstrap_result_summary: {
+    label: 'Bootstrap result summary',
+    summary:
+      'Capture the terminal bootstrap result summary that states whether the candidate host reached ready or stayed degraded.'
+  },
+  audit_reference: {
+    label: 'Audit or replay reference',
+    summary:
+      'Capture one linked event replay or audit-index reference that preserves the bootstrap evidence bundle.'
+  },
+  target_profile_confirmation: {
+    label: 'Target profile confirmation',
+    summary:
+      'Capture confirmation that the candidate host stayed on debian-12-systemd-tailscale for the same bootstrap proof.'
+  }
+}
 
 const criterionMetadata: Record<
   SecondTargetPolicyCriterionId,
@@ -176,6 +225,18 @@ function reviewPacketRequirement(
     label: criterionMetadata[criterionId].label,
     summary,
     sources
+  }
+}
+
+function bootstrapProofArtifact(
+  id: SecondTargetBootstrapProofArtifactId
+): SecondTargetBootstrapProofArtifact {
+  const metadata = bootstrapProofArtifactMetadata[id]
+
+  return {
+    id,
+    label: metadata.label,
+    summary: metadata.summary
   }
 }
 
@@ -516,6 +577,32 @@ function buildReviewPacketTemplate(
   }
 }
 
+function buildBootstrapProofCapture(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetBootstrapProofCapture {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+
+  return {
+    candidateTargetProfileId,
+    guidePath: bootstrapProofCaptureGuidePath,
+    summary:
+      `Bootstrap-proof capture stays explicit for ${candidateTargetProfileId}: use one bounded guide before bootstrap parity can move beyond review-prep.`,
+    requiredArtifacts: [
+      bootstrapProofArtifact('bootstrap_operation_id'),
+      bootstrapProofArtifact('bootstrap_result_summary'),
+      bootstrapProofArtifact('audit_reference'),
+      bootstrapProofArtifact('target_profile_confirmation')
+    ],
+    sources: [
+      bootstrapProofCaptureGuidePath,
+      reviewPacketTemplatePath,
+      'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+      'apps/controller/src/controller-server.ts',
+      'apps/controller/src/controller-domain-service.ts'
+    ]
+  }
+}
+
 export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySnapshot {
   const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
     summarizeTargetProfile(profile.id)
@@ -565,6 +652,7 @@ export function buildSecondTargetPolicyPack(
     summary: buildSummary(decisionState, blockingCriteria),
     nextActions: buildNextActions(snapshot, decisionState),
     reviewPacketTemplate: buildReviewPacketTemplate(snapshot),
+    bootstrapProofCapture: buildBootstrapProofCapture(snapshot),
     satisfiedCriteria,
     blockingCriteria,
     evidenceItems: (snapshot.evidenceItems ?? []).map((item) => ({

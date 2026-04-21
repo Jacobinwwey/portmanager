@@ -115,6 +115,26 @@ test('default second target policy pack lands governance artifacts while transpo
     /docs\/operations\/portmanager-debian-12-review-packet-template\.md/u
   )
   assert.equal(pack.reviewPacketTemplate.requiredEvidence.length >= 5, true)
+  assert.equal(pack.bootstrapProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+  assert.match(
+    pack.bootstrapProofCapture.guidePath,
+    /docs\/operations\/portmanager-debian-12-bootstrap-proof-capture\.md/u
+  )
+  assert.equal(pack.bootstrapProofCapture.requiredArtifacts.length >= 4, true)
+  assert.equal(
+    pack.bootstrapProofCapture.requiredArtifacts.some(
+      (item) =>
+        item.id === 'bootstrap_operation_id' &&
+        item.summary.includes('bootstrap operation id')
+    ),
+    true
+  )
+  assert.equal(
+    pack.bootstrapProofCapture.sources.some((source) =>
+      source.endsWith('docs/operations/portmanager-debian-12-bootstrap-proof-capture.md')
+    ),
+    true
+  )
   assert.equal(
     pack.reviewPacketTemplate.requiredEvidence.some(
       (item) =>
@@ -201,6 +221,17 @@ test('controller server exposes second target policy pack as explicit controller
             sources: string[]
           }>
         }
+        bootstrapProofCapture: {
+          candidateTargetProfileId: string
+          guidePath: string
+          summary: string
+          requiredArtifacts: Array<{
+            id: string
+            label: string
+            summary: string
+          }>
+          sources: string[]
+        }
         satisfiedCriteria: Array<{ id: string; label: string }>
         blockingCriteria: Array<{ id: string; label: string }>
         evidenceItems: Array<{
@@ -229,6 +260,24 @@ test('controller server exposes second target policy pack as explicit controller
         /docs\/operations\/portmanager-debian-12-review-packet-template\.md/u
       )
       assert.equal(payload.reviewPacketTemplate.requiredEvidence.length >= 5, true)
+      assert.equal(payload.bootstrapProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+      assert.match(
+        payload.bootstrapProofCapture.guidePath,
+        /docs\/operations\/portmanager-debian-12-bootstrap-proof-capture\.md/u
+      )
+      assert.equal(payload.bootstrapProofCapture.requiredArtifacts.length >= 4, true)
+      assert.equal(
+        payload.bootstrapProofCapture.requiredArtifacts.some(
+          (item) => item.id === 'bootstrap_operation_id'
+        ),
+        true
+      )
+      assert.equal(
+        payload.bootstrapProofCapture.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-bootstrap-proof-capture.md')
+        ),
+        true
+      )
       assert.match(payload.summary, /stay on hold/i)
       assert.equal(payload.nextActions.length >= 2, true)
       assert.equal(

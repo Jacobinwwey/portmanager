@@ -37,6 +37,8 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /Evidence ledger/i)
   assert.match(html, /Review packet template/i)
   assert.match(html, /portmanager-debian-12-review-packet-template\.md/i)
+  assert.match(html, /Bootstrap proof capture/i)
+  assert.match(html, /portmanager-debian-12-bootstrap-proof-capture\.md/i)
   assert.match(html, /portmanager-debian-12-acceptance-recipe\.md/i)
   assert.match(html, /review prep/i)
   assert.match(html, /controller_embedded/i)
@@ -471,6 +473,22 @@ test('overview loader keeps consumer boundary base path when building controller
               }
             ]
           },
+          bootstrapProofCapture: {
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
+            guidePath: 'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md',
+            summary: 'bootstrap proof capture guide exists',
+            requiredArtifacts: [
+              {
+                id: 'bootstrap_operation_id',
+                label: 'Bootstrap operation id',
+                summary: 'capture bootstrap operation id'
+              }
+            ],
+            sources: [
+              'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md',
+              'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+            ]
+          },
           evidenceItems: [
             {
               criterionId: 'docs_contract_ready',
@@ -711,6 +729,19 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
                 sources: ['docs/operations/portmanager-debian-12-review-packet-template.md']
               }
             ]
+          },
+          bootstrapProofCapture: {
+            candidateTargetProfileId: 'debian-12-systemd-tailscale',
+            guidePath: 'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md',
+            summary: 'bootstrap proof capture guide exists',
+            requiredArtifacts: [
+              {
+                id: 'bootstrap_operation_id',
+                label: 'Bootstrap operation id',
+                summary: 'capture bootstrap operation id'
+              }
+            ],
+            sources: ['docs/operations/portmanager-debian-12-bootstrap-proof-capture.md']
           },
           evidenceItems: [
             {

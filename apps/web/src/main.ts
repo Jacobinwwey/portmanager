@@ -1530,6 +1530,43 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         }
       ]
     },
+    bootstrapProofCapture: {
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      guidePath: 'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md',
+      summary:
+        'Bootstrap-proof capture stays explicit for debian-12-systemd-tailscale before bootstrap parity can move.',
+      requiredArtifacts: [
+        {
+          id: 'bootstrap_operation_id',
+          label: 'Bootstrap operation id',
+          summary:
+            'Capture the bootstrap operation id so one bounded controller record anchors the Debian 12 proof.'
+        },
+        {
+          id: 'bootstrap_result_summary',
+          label: 'Bootstrap result summary',
+          summary:
+            'Capture the terminal bootstrap result summary that states whether the candidate host reached ready.'
+        },
+        {
+          id: 'audit_reference',
+          label: 'Audit or replay reference',
+          summary:
+            'Capture one linked event replay or audit-index reference that preserves the bootstrap evidence bundle.'
+        },
+        {
+          id: 'target_profile_confirmation',
+          label: 'Target profile confirmation',
+          summary:
+            'Capture confirmation that the candidate host stayed on debian-12-systemd-tailscale for the same proof.'
+        }
+      ],
+      sources: [
+        'docs/operations/portmanager-debian-12-bootstrap-proof-capture.md',
+        'docs/operations/portmanager-debian-12-review-packet-template.md',
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md'
+      ]
+    },
     satisfiedCriteria: [
       {
         id: 'locked_target_registry',
@@ -3472,6 +3509,40 @@ function SecondTargetPolicyCard(props: {
             )
           )
         : emptyState('No review-packet requirements recorded yet.', 'empty')
+    ]),
+    h('section', { className: 'pm-card', key: 'bootstrap-proof-capture' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Bootstrap proof capture',
+        detail: props.pack.bootstrapProofCapture.candidateTargetProfileId
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Guide Path', props.pack.bootstrapProofCapture.guidePath),
+        kvRow(
+          'Required Artifacts',
+          String(props.pack.bootstrapProofCapture.requiredArtifacts.length)
+        )
+      ]),
+      h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.bootstrapProofCapture.summary),
+      props.pack.bootstrapProofCapture.requiredArtifacts.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.bootstrapProofCapture.requiredArtifacts.map((item) =>
+              h('li', { className: 'pm-list-item', key: item.id }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, item.summary)
+              ])
+            )
+          )
+        : emptyState('No bootstrap-proof artifacts recorded yet.', 'empty'),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'sources' },
+        props.pack.bootstrapProofCapture.sources.length > 0
+          ? `Sources: ${props.pack.bootstrapProofCapture.sources.join(', ')}`
+          : 'Sources: none'
+      )
     ]),
     criteriaList(
       'Satisfied criteria',

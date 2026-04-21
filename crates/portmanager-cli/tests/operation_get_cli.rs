@@ -1427,6 +1427,22 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                         }
                     ]
                 },
+                "bootstrapProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md",
+                    "summary": "bootstrap proof capture guide exists",
+                    "requiredArtifacts": [
+                        {
+                            "id": "bootstrap_operation_id",
+                            "label": "Bootstrap operation id",
+                            "summary": "capture bootstrap operation id"
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md",
+                        "docs/operations/portmanager-debian-12-acceptance-recipe.md"
+                    ]
+                },
                 "evidenceItems": [
                     {
                         "criterionId": "docs_contract_ready",
@@ -1493,9 +1509,12 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("debian-12-systemd-tailscale"));
     assert!(stdout.contains("Evidence Ledger"));
     assert!(stdout.contains("Review Packet Template"));
+    assert!(stdout.contains("Bootstrap Proof Capture"));
+    assert!(stdout.contains("portmanager-debian-12-bootstrap-proof-capture.md"));
     assert!(stdout.contains("portmanager-debian-12-review-packet-template.md"));
     assert!(stdout.contains("portmanager-debian-12-acceptance-recipe.md"));
     assert!(stdout.contains("bootstrap_transport_parity"));
+    assert!(stdout.contains("bootstrap_operation_id"));
 }
 
 #[test]
@@ -1537,6 +1556,21 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                             "summary": "capture bootstrap packet evidence",
                             "sources": ["docs/operations/portmanager-debian-12-review-packet-template.md"]
                         }
+                    ]
+                },
+                "bootstrapProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md",
+                    "summary": "bootstrap proof capture guide exists",
+                    "requiredArtifacts": [
+                        {
+                            "id": "bootstrap_operation_id",
+                            "label": "Bootstrap operation id",
+                            "summary": "capture bootstrap operation id"
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md"
                     ]
                 },
                 "evidenceItems": [

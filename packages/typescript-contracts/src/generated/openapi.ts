@@ -1497,6 +1497,20 @@ export interface components {
             hostId: string;
             observedStateHash: string;
         };
+        SecondTargetBootstrapProofArtifact: {
+            id: components["schemas"]["SecondTargetBootstrapProofArtifactId"];
+            label: string;
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetBootstrapProofArtifactId: "bootstrap_operation_id" | "bootstrap_result_summary" | "audit_reference" | "target_profile_confirmation";
+        SecondTargetBootstrapProofCapture: {
+            candidateTargetProfileId: string;
+            guidePath: string;
+            requiredArtifacts: components["schemas"]["SecondTargetBootstrapProofArtifact"][];
+            sources: string[];
+            summary: string;
+        };
         SecondTargetPolicyCriterion: {
             id: components["schemas"]["SecondTargetPolicyCriterionId"];
             label: string;
@@ -1517,6 +1531,7 @@ export interface components {
         SecondTargetPolicyEvidenceState: "landed" | "review_prep" | "planned";
         SecondTargetPolicyPack: {
             blockingCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
+            bootstrapProofCapture: components["schemas"]["SecondTargetBootstrapProofCapture"];
             candidateTargetProfileIds: string[];
             candidateTargetProfiles: components["schemas"]["TargetProfileSummary"][];
             decisionState: components["schemas"]["SecondTargetPolicyDecisionState"];
@@ -1635,6 +1650,9 @@ export type RollbackPoint = components['schemas']['RollbackPoint'];
 export type RunBackupRequest = components['schemas']['RunBackupRequest'];
 export type RunDiagnosticsRequest = components['schemas']['RunDiagnosticsRequest'];
 export type RunDriftCheckRequest = components['schemas']['RunDriftCheckRequest'];
+export type SecondTargetBootstrapProofArtifact = components['schemas']['SecondTargetBootstrapProofArtifact'];
+export type SecondTargetBootstrapProofArtifactId = components['schemas']['SecondTargetBootstrapProofArtifactId'];
+export type SecondTargetBootstrapProofCapture = components['schemas']['SecondTargetBootstrapProofCapture'];
 export type SecondTargetPolicyCriterion = components['schemas']['SecondTargetPolicyCriterion'];
 export type SecondTargetPolicyCriterionId = components['schemas']['SecondTargetPolicyCriterionId'];
 export type SecondTargetPolicyDecisionState = components['schemas']['SecondTargetPolicyDecisionState'];

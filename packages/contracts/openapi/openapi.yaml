@@ -1378,6 +1378,7 @@ components:
           summary,
           nextActions,
           reviewPacketTemplate,
+          bootstrapProofCapture,
           satisfiedCriteria,
           blockingCriteria,
           evidenceItems
@@ -1413,6 +1414,8 @@ components:
             type: string
         reviewPacketTemplate:
           $ref: '#/components/schemas/SecondTargetReviewPacketTemplate'
+        bootstrapProofCapture:
+          $ref: '#/components/schemas/SecondTargetBootstrapProofCapture'
         satisfiedCriteria:
           type: array
           items:
@@ -1472,6 +1475,43 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetReviewPacketRequirement'
+    SecondTargetBootstrapProofArtifactId:
+      type: string
+      enum:
+        [
+          bootstrap_operation_id,
+          bootstrap_result_summary,
+          audit_reference,
+          target_profile_confirmation
+        ]
+    SecondTargetBootstrapProofArtifact:
+      type: object
+      required: [id, label, summary]
+      properties:
+        id:
+          $ref: '#/components/schemas/SecondTargetBootstrapProofArtifactId'
+        label:
+          type: string
+        summary:
+          type: string
+    SecondTargetBootstrapProofCapture:
+      type: object
+      required: [candidateTargetProfileId, guidePath, summary, requiredArtifacts, sources]
+      properties:
+        candidateTargetProfileId:
+          type: string
+        guidePath:
+          type: string
+        summary:
+          type: string
+        requiredArtifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetBootstrapProofArtifact'
+        sources:
+          type: array
+          items:
+            type: string
     RollbackPoint:
       type: object
       required: [id, hostId, operationId, createdAt, state]
