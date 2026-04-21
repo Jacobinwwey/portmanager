@@ -129,9 +129,42 @@ test('buildConfidenceReview distinguishes local visibility drift from countdown 
   assert.equal(review.countdownAligned, true)
   assert.equal(review.fullSnapshotAligned, false)
   assert.equal(review.publicationDriftKind, 'local-visibility-drift')
+  assert.equal(review.publicClaimClass, 'building-history')
+  assert.equal(review.wordingReviewAllowed, false)
   assert.match(
     review.recommendation,
     /Published countdown still matches local mainline evidence/
+  )
+})
+
+test('buildConfidenceReview marks promotion-ready countdown drift as refresh-required claim posture', () => {
+  const publishedSnapshot = buildHistorySnapshotFromEntries({
+    label: 'Milestone confidence verification',
+    entries: createQualifiedReports(7).map((report) => buildHistoryEntry(report)),
+    updatedAt: '2026-04-20T03:06:00.000Z'
+  })
+  const localSnapshot = buildHistorySnapshotFromEntries({
+    label: 'Milestone confidence verification',
+    entries: createQualifiedReports(8).map((report) => buildHistoryEntry(report)),
+    updatedAt: '2026-04-20T03:08:00.000Z'
+  })
+
+  const review = buildConfidenceReview({
+    historySnapshot: localSnapshot,
+    publishedProgress: snapshotToPublished(publishedSnapshot),
+    generatedAt: '2026-04-20T03:20:00.000Z'
+  })
+
+  assert.equal(review.publicationDriftKind, 'countdown-drift')
+  assert.equal(review.publicClaimClass, 'promotion-ready-refresh-required')
+  assert.equal(review.wordingReviewAllowed, false)
+  assert.match(
+    review.recommendation,
+    /Refresh the tracked confidence artifact before narrowing public milestone wording/
+  )
+  assert.match(
+    review.requiredNextAction,
+    /pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact/
   )
 })
 
@@ -242,6 +275,19 @@ function createReport({
       }
     ]
   }
+}
+
+function createQualifiedReports(count: number) {
+  return Array.from({ length: count }, (_, index) =>
+    createReport({
+      completedAt: `2026-04-20T03:${String(index).padStart(2, '0')}:53.000Z`,
+      startedAt: `2026-04-20T03:${String(index).padStart(2, '0')}:11.000Z`,
+      runId: String(24646000000 + index),
+      sha: `abcdef1234567890${String(index).padStart(2, '0')}`,
+      eventName: 'push',
+      ok: true
+    })
+  )
 }
 
 function snapshotToPublished(snapshot) {

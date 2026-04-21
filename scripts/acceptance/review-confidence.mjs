@@ -23,6 +23,8 @@ const defaultVerificationReportPath = path.join(
 const DEFAULT_SYNC_COMMAND = 'pnpm milestone:sync:confidence-history -- --limit 20'
 const DEFAULT_REFRESH_COMMAND =
   'pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence'
+const DEFAULT_PROMOTION_REVIEW_COMMAND =
+  'pnpm milestone:review:promotion-ready -- --limit 20'
 
 export function parseArgs(argv) {
   const options = {
@@ -190,6 +192,78 @@ function buildPublicationDriftKind({ countdownAligned, fullSnapshotAligned }) {
   return 'countdown-drift'
 }
 
+function promotionThresholdsMet(readiness) {
+  return (
+    readiness.status === 'promotion-ready' &&
+    readiness.remainingQualifiedRuns === 0 &&
+    readiness.remainingConsecutivePasses === 0
+  )
+}
+
+export function buildPromotionClaimPosture(review) {
+  const thresholdsMet = promotionThresholdsMet(review.local.readiness)
+  const baseBlockedClaims = [
+    'Milestone 2 is complete.',
+    'Toward C is active.'
+  ]
+
+  if (!thresholdsMet) {
+    return {
+      publicClaimClass: review.local.readiness.status,
+      wordingReviewAllowed: false,
+      localEvidenceClaim: 'Milestone 2 is not promotion-ready in synced local evidence yet.',
+      publicWordingClaim:
+        'Public roadmap wording must stay below promotion-ready until the qualified-run gap reaches zero.',
+      requiredNextAction:
+        'Keep `pnpm milestone:verify:confidence` and `pnpm acceptance:verify` green until the remaining qualified-run gap closes.',
+      blockedClaims: [
+        'Milestone 2 is promotion-ready.',
+        ...baseBlockedClaims
+      ]
+    }
+  }
+
+  if (!review.countdownAligned) {
+    return {
+      publicClaimClass: 'promotion-ready-refresh-required',
+      wordingReviewAllowed: false,
+      localEvidenceClaim: 'Milestone 2 is promotion-ready in synced local evidence.',
+      publicWordingClaim:
+        'Public roadmap wording must not imply the latest qualified counters until the tracked confidence artifact is refreshed.',
+      requiredNextAction:
+        `Refresh the tracked confidence artifact through \`${DEFAULT_PROMOTION_REVIEW_COMMAND} --refresh-published-artifact\` before narrowing public milestone wording.`,
+      blockedClaims: [
+        'Public pages already show the latest qualified run.',
+        ...baseBlockedClaims
+      ]
+    }
+  }
+
+  if (!review.fullSnapshotAligned) {
+    return {
+      publicClaimClass: 'promotion-ready-local-visibility-drift',
+      wordingReviewAllowed: true,
+      localEvidenceClaim: 'Milestone 2 is promotion-ready in synced local evidence.',
+      publicWordingClaim:
+        'Public roadmap wording may stay at promotion-ready because the qualified countdown is aligned; refresh only if visibility-only details should match local review noise.',
+      requiredNextAction:
+        'Review milestone wording against the verification report and helper outputs before merging public wording changes.',
+      blockedClaims: baseBlockedClaims
+    }
+  }
+
+  return {
+    publicClaimClass: 'promotion-ready-reviewed',
+    wordingReviewAllowed: true,
+    localEvidenceClaim: 'Milestone 2 is promotion-ready in synced local evidence.',
+    publicWordingClaim:
+      'Public roadmap wording may stay at promotion-ready while exact counters remain on the development-progress page and tracked confidence artifact.',
+    requiredNextAction:
+      'Review milestone wording against the verification report and helper outputs before merging public wording changes.',
+    blockedClaims: baseBlockedClaims
+  }
+}
+
 export function buildConfidenceReview({
   historySnapshot,
   publishedProgress,
@@ -233,11 +307,20 @@ export function buildConfidenceReview({
     countdownAligned,
     fullSnapshotAligned
   })
+  const claimPosture = buildPromotionClaimPosture({
+    local: localSnapshot,
+    published: publishedSnapshot,
+    countdownAligned,
+    fullSnapshotAligned
+  })
 
   let recommendation =
     'Keep milestone wording conservative until remaining qualified runs reach zero.'
 
-  if (historySnapshot.readiness.status === 'promotion-ready') {
+  if (historySnapshot.readiness.status === 'promotion-ready' && !countdownAligned) {
+    recommendation =
+      'Refresh the tracked confidence artifact before narrowing public milestone wording.'
+  } else if (historySnapshot.readiness.status === 'promotion-ready') {
     recommendation =
       'Read the verification report and review milestone wording with human judgment.'
   } else if (publicationDriftKind === 'local-visibility-drift') {
@@ -261,7 +344,8 @@ export function buildConfidenceReview({
     fullSnapshotAligned,
     local: localSnapshot,
     published: publishedSnapshot,
-    recommendation
+    recommendation,
+    ...claimPosture
   }
 }
 
@@ -297,6 +381,11 @@ export function renderConfidenceReview(review) {
     '',
     '## Review Posture',
     `- Recommendation: ${review.recommendation}`,
+    `- Human wording review allowed: ${review.wordingReviewAllowed ? 'yes' : 'no'}`,
+    `- Public claim class: ${review.publicClaimClass}`,
+    `- Local evidence claim: ${review.localEvidenceClaim}`,
+    `- Public wording claim: ${review.publicWordingClaim}`,
+    `- Next required action: ${review.requiredNextAction}`,
     `- Sync command: ${review.syncCommand}`,
     `- Refresh command: ${review.refreshCommand}`
   ]
@@ -307,8 +396,12 @@ export function renderConfidenceReview(review) {
     )
   } else {
     lines.push(
-      '- Promotion thresholds are met. Human milestone-language review is now allowed.'
+      `- Promotion thresholds are met. Human milestone-language review is ${review.wordingReviewAllowed ? 'now allowed' : 'still blocked until the tracked public artifact is refreshed'}.`
     )
+  }
+
+  for (const blockedClaim of review.blockedClaims) {
+    lines.push(`- Blocked claim: ${blockedClaim}`)
   }
 
   lines.push('')

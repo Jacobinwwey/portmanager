@@ -389,8 +389,9 @@ const reviewChecklist = computed(() => props.locale === 'zh'
     ? [
         '先在 GitHub Actions 查看 `mainline-acceptance` job summary，再回到这个页面核对同一份 promotion-ready 计数。',
         '在本地主线执行 `pnpm milestone:review:promotion-ready -- --limit 20`，用一条 repo-native helper 同步 completed mainline bundle 并写出 review digest。',
-        '先读 `.portmanager/reports/milestone-wording-review.md`，确认 `Wording review allowed`、source surfaces 与文案护栏。',
+        '先读 `.portmanager/reports/milestone-wording-review.md`，确认 `Public claim class`、`Wording review allowed`、source surfaces 与文案护栏。',
         '如果 checklist 或 digest 先暴露 countdown 漂移，再决定是否通过同一条 helper 加上 `--refresh-published-artifact` 推进公开快照。',
+        '当 helper 给出 `promotion-ready-refresh-required` 时，先刷新被跟踪公开 artifact，再让人工里程碑文案继续收窄。',
         'promotion 门槛已经满足；继续保持 `pnpm milestone:verify:confidence` 与 `pnpm acceptance:verify` 为绿，同时让人工里程碑文案复核逐步收窄表述。'
       ]
     : [
@@ -404,8 +405,9 @@ const reviewChecklist = computed(() => props.locale === 'zh'
     ? [
         'Read the GitHub Actions `mainline-acceptance` job summary first, then confirm the same promotion-ready counters on this page.',
         'Run `pnpm milestone:review:promotion-ready -- --limit 20` on local main to sync completed mainline bundles and write the review digest in one repo-native step.',
-        'Read `.portmanager/reports/milestone-wording-review.md` next, so `Wording review allowed`, source surfaces, and guardrails are frozen in one local checklist.',
+        'Read `.portmanager/reports/milestone-wording-review.md` next, so `Public claim class`, `Wording review allowed`, source surfaces, and guardrails are frozen in one local checklist.',
         'If the checklist or digest exposes countdown drift first, decide whether the same helper should rerun with `--refresh-published-artifact` to move the public artifact.',
+        'When the helper reports `promotion-ready-refresh-required`, refresh the tracked public artifact before narrowing milestone wording further.',
         'The promotion threshold is already met; keep both `pnpm milestone:verify:confidence` and `pnpm acceptance:verify` green while human milestone-language review narrows wording deliberately.'
       ]
     : [
@@ -422,7 +424,8 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `当前公开状态已经是 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
         `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；promotion 门槛已经满足。`,
-        '默认复核顺序已经收敛为执行 `pnpm milestone:review:promotion-ready -- --limit 20`，由 helper 内部同步 history、写出 `pnpm milestone:review:confidence`，并额外生成 `.portmanager/reports/milestone-wording-review.md` 供人工文案复核。',
+        '默认复核顺序已经收敛为执行 `pnpm milestone:review:promotion-ready -- --limit 20`，由 helper 内部同步 history、写出 `pnpm milestone:review:confidence`，并额外生成带 `Public claim class` 的 `.portmanager/reports/milestone-wording-review.md` 供人工文案复核。',
+        'helper 现在会把 `promotion-ready-reviewed` 与 `promotion-ready-refresh-required` 明确区分开，避免把本地 promotion-ready 证据误读成公开页面已经同步到最新 counters。',
         `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前主线已从倒计时积累收窄为文案复核与 gate 持续健康，而不是继续补 readiness 脚手架。`
       ]
     : [
@@ -435,7 +438,8 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
     ? [
         `Current public status is now \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
         `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the promotion threshold is met.`,
-        'The default review flow now starts with `pnpm milestone:review:promotion-ready -- --limit 20`, letting the helper sync history, write `pnpm milestone:review:confidence`, and emit `.portmanager/reports/milestone-wording-review.md` before any explicit refresh decision.',
+        'The default review flow now starts with `pnpm milestone:review:promotion-ready -- --limit 20`, letting the helper sync history, write `pnpm milestone:review:confidence`, and emit `.portmanager/reports/milestone-wording-review.md` with an explicit `Public claim class` before any refresh decision.',
+        'The helper now separates `promotion-ready-reviewed` from `promotion-ready-refresh-required`, so local promotion-ready evidence cannot be misread as public-artifact alignment.',
         `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active lane has narrowed from countdown accumulation to wording review plus sustained gate health.`
       ]
     : [
@@ -448,11 +452,11 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
 
 const currentDirectionDocs = computed(() => [
   {
-    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-review-report-requirements.md'),
+    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-claim-matrix-requirements.md'),
     label: copy.value.currentDirectionRequirementsLink
   },
   {
-    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m2-confidence-wording-review-report-plan.md'),
+    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m2-confidence-wording-claim-matrix-plan.md'),
     label: copy.value.currentDirectionPlanLink
   },
   {

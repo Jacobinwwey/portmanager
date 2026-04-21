@@ -194,9 +194,37 @@ test('buildMilestoneWordingReview renders human review checklist from aligned pr
 
   assert.equal(wordingReview.allowed, true)
   assert.match(wordingReview.content, /Wording review allowed: yes/)
+  assert.match(wordingReview.content, /Public claim class: promotion-ready-reviewed/)
+  assert.match(
+    wordingReview.content,
+    /Public wording claim: Public roadmap wording may stay at promotion-ready while exact counters remain on the development-progress page and tracked confidence artifact\./
+  )
   assert.match(wordingReview.content, /Do not claim Milestone 2 is complete solely from confidence thresholds\./)
   assert.match(wordingReview.content, /README\.md/)
   assert.match(wordingReview.content, /docs\/specs\/portmanager-milestones\.md/)
+})
+
+test('buildMilestoneWordingReview marks countdown drift as refresh-required public claim posture', () => {
+  const wordingReview = buildMilestoneWordingReview({
+    review: createReviewResult({
+      publicationDriftKind: 'countdown-drift',
+      countdownAligned: false,
+      fullSnapshotAligned: false
+    }).review,
+    wordingReviewPath: '/tmp/milestone-wording-review.md',
+    generatedAt: '2026-04-21T04:10:00.000Z'
+  })
+
+  assert.equal(wordingReview.allowed, false)
+  assert.match(wordingReview.content, /Public claim class: promotion-ready-refresh-required/)
+  assert.match(
+    wordingReview.content,
+    /Required next action: Refresh the tracked confidence artifact through `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` before narrowing public milestone wording\./
+  )
+  assert.match(
+    wordingReview.content,
+    /Blocked claim: Public pages already show the latest qualified run\./
+  )
 })
 
 function createReviewResult({
@@ -233,6 +261,13 @@ function createReviewResult({
           }
         }
       },
+      publicClaimClass: countdownAligned
+        ? 'promotion-ready-reviewed'
+        : 'promotion-ready-refresh-required',
+      wordingReviewAllowed: countdownAligned,
+      requiredNextAction: countdownAligned
+        ? 'Review milestone wording against the verification report and helper outputs before merging public wording changes.'
+        : 'Refresh the tracked confidence artifact through `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact` before narrowing public milestone wording.',
       published: {
         readiness: {
           status: 'promotion-ready',

@@ -33,7 +33,7 @@ status: active
 - `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
   - 会把 GitHub Actions 已完成的 `mainline-acceptance` confidence bundle 导入本地 `.portmanager/reports/`
   - 会通过既有 review-digest 路径写出 `.portmanager/reports/milestone-confidence-review.md`
-  - 还会写出 `.portmanager/reports/milestone-wording-review.md`，把人工里程碑文案复核需要的清单冻结在本地
+  - 还会写出 `.portmanager/reports/milestone-wording-review.md`，把人工里程碑文案复核需要的清单、`Public claim class` 与 `Required next action` 一起冻结在本地
   - 只会在 helper 显式刷新 flag 允许时，按原有发布契约重发 `docs-site/data/milestone-confidence-progress.ts`
   - 证明同步后的本地复核与公开 confidence 快照现在已经建立在同一份已完成 workflow 证据之上
   - 证明被跟踪公开 artifact 现在已经携带最新 qualified run `24702941958/1` 与 `16/7` qualified runs
@@ -70,7 +70,7 @@ status: active
 - docs 发布 gate 也已经在最新这轮公开快照重放之后继续保持完整与健康。
 - Milestone 2 的 confidence 维护已经真实落地且可操作，而且 promotion 条件现在已经满足。
 - 当前对外公开的真实表述已经在 helper 驱动的显式刷新之后进入最新同步的 `promotion-ready` `16/7` 快照。
-- 当前已经允许人工里程碑文案复核；剩余公开主线是参考 `.portmanager/reports/milestone-wording-review.md` 谨慎收窄文案并持续保持 gate 健康。
+- 当前已经允许人工里程碑文案复核；剩余公开主线是参考带 `Public claim class` 的 `.portmanager/reports/milestone-wording-review.md` 谨慎收窄文案并持续保持 gate 健康。
 - 最新可见 local run 现在被刻意与最新 qualified mainline run 分离，因此本地 rerun 不会再抹掉主线复核证据。
 - 当前剩余的 Node 20 退役 annotation 已经收敛为 GitHub 官方 action 的上游 warning debt，不再代表 repo 本地 acceptance 或 docs publication 失败。
 
@@ -95,7 +95,7 @@ status: active
 - 这条 helper 补上的信息：
   - 把已完成 `mainline-acceptance` history 同步回本地 `.portmanager/reports/`
   - 通过既有 `pnpm milestone:review:confidence` 路径写出 `.portmanager/reports/milestone-confidence-review.md`
-  - 写出 `.portmanager/reports/milestone-wording-review.md`，让人工文案复核在一份本地清单里看到最新 gate、护栏与 source surfaces
+  - 写出 `.portmanager/reports/milestone-wording-review.md`，让人工文案复核在一份本地清单里看到最新 gate、护栏、source surfaces 与 claim posture
   - 把 countdown 对齐状态与完整本地 visibility-only 漂移拆开汇报
   - 只有显式加上 `--refresh-published-artifact` 时，才会推进被跟踪公开 artifact
 - helper 之后的发布规则：
@@ -103,7 +103,7 @@ status: active
 
 ### 复核协议
 - 在判断 readiness 累积时，先看 GitHub Actions `mainline-acceptance` summary。
-- 先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，让已完成 confidence history 回到本地 `.portmanager/reports/`，并让 `.portmanager/reports/milestone-confidence-review.md` 先记录公开倒计时是否真正对齐、还是只有 visibility-only 漂移，同时写出 `.portmanager/reports/milestone-wording-review.md` 供人工文案复核。
-- 如果公开快照应该前进，就在人工复核同意后重跑同一条 helper 并加上 `--refresh-published-artifact`。
+- 先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，让已完成 confidence history 回到本地 `.portmanager/reports/`，并让 `.portmanager/reports/milestone-confidence-review.md` 先记录公开倒计时是否真正对齐、还是只有 visibility-only 漂移，同时写出带 `Public claim class` 的 `.portmanager/reports/milestone-wording-review.md` 供人工文案复核。
+- 如果 helper 报告 `promotion-ready-refresh-required` 且公开快照应该前进，就在人工复核同意后重跑同一条 helper 并加上 `--refresh-published-artifact`。
 - 同时对比同步后的本地 summary、wording-review 清单、已跟踪 docs confidence artifact 与公开 development-progress 页面。
 - 在评审里程碑文案时，应优先使用 `Latest Qualified Run` 与 visibility breakdown，而不是只看最近一次本地 rerun。

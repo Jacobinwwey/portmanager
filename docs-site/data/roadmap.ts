@@ -209,6 +209,7 @@ export const roadmapDeveloperProgress = {
         en: [
           'Milestone 2 promotion-ready wording review is now the active lane, not Milestone 1 parity recovery and not more confidence scaffolding.',
           'The wording-review checklist now exists as `.portmanager/reports/milestone-wording-review.md`, so developers no longer have to reconstruct guardrails by hand from scattered docs.',
+          'That same helper output now distinguishes `promotion-ready-reviewed` from `promotion-ready-refresh-required`, so local promotion-ready evidence cannot be misread as public-artifact alignment.',
           'Configured, failed, and local-only GitHub backup paths now all exist inside one durable replay proof on the same live slice; remaining work is confidence maintenance, not first delivery.',
           'Controller `GET /diagnostics` now filters by `state`, and Web host detail now groups latest diagnostics, degraded diagnostics history, and recovery-ready successful evidence on the same live host/rule/policy slice.',
           'The remaining architecture gap is no longer proof orchestration, missing history scaffolding, missing local import plumbing, missing review-signal truth, or published-artifact drift; the canonical routine, persisted bundle, sync command, latest-qualified summary view, review digest, and public progress page already exist, and the remaining work is deliberate milestone-language review plus sustained gate health.',
@@ -217,6 +218,7 @@ export const roadmapDeveloperProgress = {
         zh: [
           '当前主线已经转到 Milestone 2 的 promotion-ready 文案复核，而不再是 Milestone 1 一致性补洞，也不再是继续补 confidence 脚手架。',
           '`.portmanager/reports/milestone-wording-review.md` 现在已经落地，开发者不再需要从分散文档里手动拼接文案护栏。',
+          '这份 helper 输出现在还会区分 `promotion-ready-reviewed` 与 `promotion-ready-refresh-required`，避免把本地 promotion-ready 证据误读成公开 artifact 已经对齐。',
           'configured、failed、local-only 三类 GitHub backup 路径现在都已经落在同一条 durable replay proof 的 live 切片上；剩余工作不再是首次交付，而是常态化维持与可信度加深。',
           'controller `GET /diagnostics` 现在支持 `state` 过滤，Web host detail 也已经在同一条 live host/rule/policy 切片上分组展示最新诊断、degraded diagnostics history 与 recovery-ready 成功证据。',
           '剩余架构缺口已经不再是证明编排、历史脚手架缺失、本地导入路径缺失、summary 复核语义缺失，或公开 artifact 漂移；规范 confidence routine、持久 history bundle、sync 命令、latest-qualified summary 视图、review digest 与公开 progress page 都已存在，剩余工作已经收窄为谨慎推进里程碑文案复核并持续保持 gate 健康。',
@@ -236,7 +238,7 @@ export const roadmapDeveloperProgress = {
           'Keep Unit 0 green now that the qualified-history threshold is met and the published state is `promotion-ready`.',
           'Run `pnpm milestone:review:promotion-ready -- --limit 20` after completed mainline runs so local readiness review syncs real workflow evidence, writes the digest, and updates `.portmanager/reports/milestone-wording-review.md` in one repo-native step; the current synced and published state is already above the `promotion-ready` threshold, and exact live counters stay on the confidence artifact plus development-progress page.',
           'Keep `pnpm milestone:verify:confidence` green on `push main`, `workflow_dispatch`, and the daily scheduled history lane while synced summaries and human review drive milestone-language decisions.',
-          'Use `pnpm milestone:review:promotion-ready -- --limit 20` as the default review entrypoint before any public wording move; it syncs completed history, writes the `pnpm milestone:review:confidence` digest internally, refreshes `.portmanager/reports/milestone-wording-review.md`, and keeps artifact publication behind the same helper plus `--refresh-published-artifact` when review agrees.',
+          'Use `pnpm milestone:review:promotion-ready -- --limit 20` as the default review entrypoint before any public wording move; it syncs completed history, writes the `pnpm milestone:review:confidence` digest internally, refreshes `.portmanager/reports/milestone-wording-review.md`, labels the current claim posture, and keeps artifact publication behind the same helper plus `--refresh-published-artifact` when review agrees.',
           'Review the workflow job summary, uploaded confidence-history bundle, synced local `.portmanager/reports/milestone-confidence-summary.md`, `.portmanager/reports/milestone-wording-review.md`, and the verification report together, and use `Latest Qualified Run` plus the visibility breakdown instead of raw CI logs to judge readiness accumulation.',
           'Protect the lighter Unit 0 branch gate while the heavier confidence routine keeps collecting evidence.',
           'Keep remote-backup evidence aligned across controller, CLI, web, and agent instead of letting the routine drift from the accepted slice.',
@@ -246,7 +248,7 @@ export const roadmapDeveloperProgress = {
           '当前 promotion-ready 门槛已经满足，继续把 Unit 0 保持为绿。',
           '在主线出现已完成 run 之后执行 `pnpm milestone:review:promotion-ready -- --limit 20`，让本地 readiness 复核在一条 repo-native helper 里同时同步真实 workflow 证据、写出 digest，并刷新 `.portmanager/reports/milestone-wording-review.md`，而不只依赖本地 history；当前同步后与公开状态都已经稳定保持在 `promotion-ready` 门槛之上，精确实时计数统一留给 confidence artifact 与 development-progress 页面。' ,
           '继续让 `pnpm milestone:verify:confidence` 在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上持续转绿，同时让同步后的 summary 与人工复核共同驱动里程碑文案决策。',
-          '在任何公开文案变动前先执行 `pnpm milestone:review:promotion-ready -- --limit 20` 作为默认复核入口；这条 helper 会在内部同步 completed history、写出 `pnpm milestone:review:confidence` digest、刷新 `.portmanager/reports/milestone-wording-review.md`，而公开 artifact 只会在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 前进。',
+          '在任何公开文案变动前先执行 `pnpm milestone:review:promotion-ready -- --limit 20` 作为默认复核入口；这条 helper 会在内部同步 completed history、写出 `pnpm milestone:review:confidence` digest、刷新带 claim posture 的 `.portmanager/reports/milestone-wording-review.md`，而公开 artifact 只会在人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 前进。',
           '优先同时查看 workflow job summary、上传后的 confidence-history bundle、同步后的本地 `.portmanager/reports/milestone-confidence-summary.md`、`.portmanager/reports/milestone-wording-review.md` 与验证报告，并直接使用 `Latest Qualified Run` 与 visibility breakdown，而不是继续只靠原始 CI 日志判断 readiness 积累。',
           '在更重的 confidence routine 继续收集证据时，保住更轻的 Unit 0 分支 gate 不被重新定义。',
           '继续让 controller、CLI、web、agent 共享同一套 remote-backup 证据，而不是让新的 routine 偏离已验收切片。',
@@ -412,7 +414,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         'Build Milestone 2 on the completed Unit 0 through Unit 5 lane instead of reopening Milestone 1 parity work.',
         'Keep configured, failed, and local-only backup evidence aligned across controller, CLI, web, and agent.',
         'Keep `pnpm milestone:verify:confidence` green on the same accepted agent-backed slice.',
-        'Use `pnpm milestone:review:promotion-ready -- --limit 20`, `.portmanager/reports/milestone-wording-review.md`, `Latest Qualified Run`, and the visibility breakdown in synced/local summaries plus the public development-progress page during developer review.',
+        'Use `pnpm milestone:review:promotion-ready -- --limit 20`, `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, `Latest Qualified Run`, and the visibility breakdown in synced/local summaries plus the public development-progress page during developer review.',
         'Refresh the tracked public confidence artifact only through the same helper plus `--refresh-published-artifact` when the digest and human review agree.',
         'Do not treat promotion-ready as automatic Toward C activation; keep one evidence model and one acceptance gate across controller, CLI, web, and agent.'
       ],
@@ -420,7 +422,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
         '把 Milestone 2 建立在已经完成的 Unit 0 到 Unit 5 主线之上，而不是重新打开 Milestone 1 的表面补洞。',
         '继续让 controller、CLI、web、agent 在 configured、failed、local-only 三类 backup 证据上保持一致。',
         '继续让 `pnpm milestone:verify:confidence` 在同一条已验收 live agent-backed 切片上保持为绿。',
-        '在开发者复核时直接使用 `pnpm milestone:review:promotion-ready -- --limit 20`、`.portmanager/reports/milestone-wording-review.md`、同步后与本地 summary 里的 `Latest Qualified Run`、visibility breakdown 与公开 development-progress 页面。',
+        '在开发者复核时直接使用 `pnpm milestone:review:promotion-ready -- --limit 20`、带 `Public claim class` 的 `.portmanager/reports/milestone-wording-review.md`、同步后与本地 summary 里的 `Latest Qualified Run`、visibility breakdown 与公开 development-progress 页面。',
         '只有在 digest 与人工复核共同同意时，才通过同一条 helper 加上 `--refresh-published-artifact` 刷新被跟踪公开 confidence artifact。',
         '不要把 promotion-ready 误解成 Toward C 自动启动；继续让 controller、CLI、web、agent 共用同一套证据模型与同一条验收 gate。'
       ]

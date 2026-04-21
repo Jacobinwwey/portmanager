@@ -33,7 +33,7 @@ Commands executed:
 - `pnpm milestone:review:promotion-ready -- --limit 20 --refresh-published-artifact`
   - syncs completed `mainline-acceptance` confidence bundles from GitHub Actions into local `.portmanager/reports/`
   - writes `.portmanager/reports/milestone-confidence-review.md` through the existing review-digest path
-  - writes `.portmanager/reports/milestone-wording-review.md` as the local wording-review checklist for human milestone-language decisions
+  - writes `.portmanager/reports/milestone-wording-review.md` as the local wording-review checklist for human milestone-language decisions, including `Public claim class` and `Required next action`
   - intentionally republishes the tracked docs artifact `docs-site/data/milestone-confidence-progress.ts` only through the explicit refresh contract behind the helper flag
   - proves the synced local review and the published confidence snapshot now match on the same completed workflow evidence
   - proves the tracked public artifact now carries latest qualified run `24702941958/1` and `16/7` qualified runs
@@ -70,7 +70,7 @@ Commands executed:
 - The docs publication gate is also complete and currently healthy on GitHub Pages after the refreshed artifact replay.
 - Milestone 2 confidence maintenance is real and operational, and promotion criteria are now met.
 - The current truthful public wording is now `promotion-ready` after the helper-driven explicit refresh path republished the tracked artifact to the latest synced `16/7` snapshot.
-- Human milestone-language review is now allowed; the remaining public lane is deliberate wording tightening plus sustained gate health, guided by `.portmanager/reports/milestone-wording-review.md`.
+- Human milestone-language review is now allowed only when the helper claim posture stays reviewable; the remaining public lane is deliberate wording tightening plus sustained gate health, guided by `.portmanager/reports/milestone-wording-review.md`, `Public claim class`, and `Required next action`.
 - The latest visible local run is intentionally separated from the latest qualified mainline run, so local reruns no longer erase mainline review evidence.
 - The remaining Node 20 deprecation annotations are now upstream-only warning debt in GitHub official actions; they no longer indicate a repo-local acceptance or publication failure.
 
@@ -95,7 +95,7 @@ Commands executed:
 - What the helper adds:
   - syncs completed `mainline-acceptance` history back into local `.portmanager/reports/`
   - writes `.portmanager/reports/milestone-confidence-review.md` through the existing `pnpm milestone:review:confidence` path
-  - writes `.portmanager/reports/milestone-wording-review.md` so human wording review sees the latest gate, guardrails, and source surfaces in one local artifact
+  - writes `.portmanager/reports/milestone-wording-review.md` so human wording review sees the latest gate, guardrails, source surfaces, and claim posture in one local artifact
   - reports countdown alignment separately from full local visibility-only drift
   - keeps tracked-artifact publication behind the explicit `--refresh-published-artifact` flag
 - Publication rule after that helper review:
@@ -103,7 +103,7 @@ Commands executed:
 
 ### Review protocol
 - Read the GitHub Actions `mainline-acceptance` summary first when reviewing readiness accumulation.
-- Run `pnpm milestone:review:promotion-ready -- --limit 20` so completed mainline history syncs back into local `.portmanager/reports/`, `.portmanager/reports/milestone-confidence-review.md` records whether the published countdown is aligned or only visibility-drifted, and `.portmanager/reports/milestone-wording-review.md` freezes the wording-review checklist.
-- If the public snapshot should move, rerun the same helper with `--refresh-published-artifact`.
+- Run `pnpm milestone:review:promotion-ready -- --limit 20` so completed mainline history syncs back into local `.portmanager/reports/`, `.portmanager/reports/milestone-confidence-review.md` records whether the published countdown is aligned or only visibility-drifted, and `.portmanager/reports/milestone-wording-review.md` freezes the wording-review checklist plus `Public claim class`.
+- If the helper reports `promotion-ready-refresh-required` and the public snapshot should move, rerun the same helper with `--refresh-published-artifact`.
 - Compare the synced local summary, the wording-review checklist, the tracked docs confidence artifact, and the public development-progress page together.
 - Use `Latest Qualified Run` plus the visibility breakdown for milestone-language review, not raw local rerun recency.

@@ -3,7 +3,10 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { reviewConfidence } from './review-confidence.mjs'
+import {
+  buildPromotionClaimPosture,
+  reviewConfidence
+} from './review-confidence.mjs'
 import { syncConfidenceHistory } from './sync-confidence-history.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -179,11 +182,7 @@ export function buildMilestoneWordingReview({
   generatedAt = new Date().toISOString(),
   wordingSurfaces = DEFAULT_WORDING_SURFACES
 }) {
-  const wordingReviewAllowed =
-    review.local.readiness.status === 'promotion-ready' &&
-    review.countdownAligned &&
-    review.local.readiness.remainingQualifiedRuns === 0 &&
-    review.local.readiness.remainingConsecutivePasses === 0
+  const claimPosture = buildPromotionClaimPosture(review)
   const lines = [
     '# Milestone Wording Review Checklist',
     '',
@@ -202,7 +201,14 @@ export function buildMilestoneWordingReview({
     `- Latest qualified SHA: ${formatSha(review.local.latestQualifiedRun)}`,
     `- Published countdown aligned: ${review.countdownAligned ? 'yes' : 'no'}`,
     `- Full snapshot aligned: ${review.fullSnapshotAligned ? 'yes' : 'no'}`,
-    `- Wording review allowed: ${wordingReviewAllowed ? 'yes' : 'no'}`,
+    `- Wording review allowed: ${claimPosture.wordingReviewAllowed ? 'yes' : 'no'}`,
+    '',
+    '## Claim Posture',
+    `- Public claim class: ${claimPosture.publicClaimClass}`,
+    `- Local evidence claim: ${claimPosture.localEvidenceClaim}`,
+    `- Public wording claim: ${claimPosture.publicWordingClaim}`,
+    `- Required next action: ${claimPosture.requiredNextAction}`,
+    ...claimPosture.blockedClaims.map((claim) => `- Blocked claim: ${claim}`),
     '',
     '## Human Review Checklist',
     '- [ ] Keep Milestone 1 wording at accepted public-surface truth.',
@@ -219,7 +225,7 @@ export function buildMilestoneWordingReview({
   ]
 
   return {
-    allowed: wordingReviewAllowed,
+    allowed: claimPosture.wordingReviewAllowed,
     path: wordingReviewPath,
     content: `${lines.join('\n')}\n`
   }
@@ -311,6 +317,7 @@ export function renderPromotionReadyReview(result) {
     `Refreshed published artifact: ${result.refreshedArtifact ? 'yes' : 'no'}`,
     `Qualified countdown aligned: ${result.finalReview.review.countdownAligned ? 'yes' : 'no'}`,
     `Full snapshot aligned: ${result.finalReview.review.fullSnapshotAligned ? 'yes' : 'no'}`,
+    `Public claim class: ${result.finalReview.review.publicClaimClass}`,
     `Review path: ${result.finalReview.review.reviewPath}`,
     `Wording review path: ${result.wordingReview?.path ?? 'skipped'}`
   ].join('\n')
