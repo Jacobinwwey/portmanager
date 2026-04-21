@@ -2114,6 +2114,88 @@ fn format_second_target_review_packet_block(review_packet_template: &Value) -> S
     )
 }
 
+fn format_second_target_review_packet_readiness_block(review_packet_readiness: &Value) -> String {
+    let guide_coverage = format!(
+        "{}/{}",
+        review_packet_readiness["guideCoverage"]["available"]
+            .as_u64()
+            .unwrap_or(0),
+        review_packet_readiness["guideCoverage"]["expected"]
+            .as_u64()
+            .unwrap_or(0)
+    );
+    let artifact_coverage = format!(
+        "{}/{}",
+        review_packet_readiness["artifactCoverage"]["available"]
+            .as_u64()
+            .unwrap_or(0),
+        review_packet_readiness["artifactCoverage"]["expected"]
+            .as_u64()
+            .unwrap_or(0)
+    );
+    let missing_guide_lines = review_packet_readiness["guideCoverage"]["missingPaths"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|path| path.as_str())
+        .map(|path| format!("- {}", path))
+        .collect::<Vec<_>>();
+    let missing_guide_block = if missing_guide_lines.is_empty() {
+        "Missing Guide Paths:\n- none".to_string()
+    } else {
+        format!("Missing Guide Paths:\n{}", missing_guide_lines.join("\n"))
+    };
+    let missing_artifact_lines = review_packet_readiness["artifactCoverage"]["missingArtifactIds"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|artifact_id| artifact_id.as_str())
+        .map(|artifact_id| format!("- {}", artifact_id))
+        .collect::<Vec<_>>();
+    let missing_artifact_block = if missing_artifact_lines.is_empty() {
+        "Missing Artifact Ids:\n- none".to_string()
+    } else {
+        format!("Missing Artifact Ids:\n{}", missing_artifact_lines.join("\n"))
+    };
+    let next_unit_lines = review_packet_readiness["nextExecutionUnits"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|unit| {
+            format!(
+                "- {} :: {} :: {}",
+                unit["id"].as_str().unwrap_or("unknown"),
+                unit["title"].as_str().unwrap_or("unknown"),
+                unit["summary"].as_str().unwrap_or("no summary")
+            )
+        })
+        .collect::<Vec<_>>();
+    let next_unit_block = if next_unit_lines.is_empty() {
+        "Next Execution Units:\n- none".to_string()
+    } else {
+        format!("Next Execution Units:\n{}", next_unit_lines.join("\n"))
+    };
+
+    format!(
+        "Review Packet Readiness:\nCandidate Target: {}\nState: {}\nGuide Coverage: {}\nArtifact Coverage: {}\nSummary: {}\nRequired Next Action: {}\n{}\n{}\n{}",
+        review_packet_readiness["candidateTargetProfileId"]
+            .as_str()
+            .unwrap_or("unknown"),
+        review_packet_readiness["state"].as_str().unwrap_or("unknown"),
+        guide_coverage,
+        artifact_coverage,
+        review_packet_readiness["summary"]
+            .as_str()
+            .unwrap_or("no summary"),
+        review_packet_readiness["requiredNextAction"]
+            .as_str()
+            .unwrap_or("no action guidance"),
+        missing_guide_block,
+        missing_artifact_block,
+        next_unit_block
+    )
+}
+
 fn format_second_target_bootstrap_proof_capture_block(bootstrap_proof_capture: &Value) -> String {
     let required_lines = bootstrap_proof_capture["requiredArtifacts"]
         .as_array()
@@ -2416,7 +2498,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
     };
 
     format!(
-        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}",
+        "Locked Target Profile: {}\nReview Owner: {}\nDecision State: {}\nExpansion Review Required: {}\nSummary: {}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}",
         pack["lockedTargetProfileId"].as_str().unwrap_or("unknown"),
         pack["reviewOwner"].as_str().unwrap_or("unknown"),
         pack["decisionState"].as_str().unwrap_or("unknown"),
@@ -2430,6 +2512,7 @@ fn format_second_target_policy_pack_text(pack: &Value) -> String {
         format_target_profile_summaries("Supported Targets", &pack["supportedTargetProfiles"]),
         format_target_profile_summaries("Candidate Targets", &pack["candidateTargetProfiles"]),
         format_second_target_evidence_block("Evidence Ledger", &pack["evidenceItems"]),
+        format_second_target_review_packet_readiness_block(&pack["reviewPacketReadiness"]),
         format_second_target_review_packet_block(&pack["reviewPacketTemplate"]),
         format_second_target_bootstrap_proof_capture_block(&pack["bootstrapProofCapture"]),
         format_second_target_steady_state_proof_capture_block(&pack["steadyStateProofCapture"]),

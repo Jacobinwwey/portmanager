@@ -1414,6 +1414,31 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                     "Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.",
                     "Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim."
                 ],
+                "reviewPacketReadiness": {
+                    "state": "capture_required",
+                    "summary": "Review-packet guide set is complete, but no Debian 12 execution artifacts are captured yet.",
+                    "requiredNextAction": "Execute one Debian 12 review packet before changing any parity claim.",
+                    "guideCoverage": {
+                        "available": 6,
+                        "expected": 6,
+                        "missingPaths": []
+                    },
+                    "artifactCoverage": {
+                        "available": 0,
+                        "expected": 20,
+                        "missingArtifactIds": [
+                            "bootstrap_operation_id",
+                            "bootstrap_result_summary"
+                        ]
+                    },
+                    "nextExecutionUnits": [
+                        {
+                            "id": "unit_63",
+                            "title": "Review-packet readiness pack",
+                            "summary": "Publish capture state, artifact coverage, and next-unit truth."
+                        }
+                    ]
+                },
                 "reviewPacketTemplate": {
                     "candidateTargetProfileId": "debian-12-systemd-tailscale",
                     "templatePath": "docs/operations/portmanager-debian-12-review-packet-template.md",
@@ -1572,6 +1597,10 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("Candidate Targets"));
     assert!(stdout.contains("debian-12-systemd-tailscale"));
     assert!(stdout.contains("Evidence Ledger"));
+    assert!(stdout.contains("Review Packet Readiness"));
+    assert!(stdout.contains("Guide Coverage: 6/6"));
+    assert!(stdout.contains("Artifact Coverage: 0/20"));
+    assert!(stdout.contains("unit_63"));
     assert!(stdout.contains("Review Packet Template"));
     assert!(stdout.contains("Bootstrap Proof Capture"));
     assert!(stdout.contains("Steady-State Proof Capture"));
@@ -1621,6 +1650,28 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                 "expansionReviewRequired": false,
                 "summary": "second target policy pack is alive",
                 "nextActions": ["keep supported targets locked"],
+                "reviewPacketReadiness": {
+                    "state": "capture_required",
+                    "summary": "guides complete, artifact capture pending",
+                    "requiredNextAction": "execute one review packet",
+                    "guideCoverage": {
+                        "available": 6,
+                        "expected": 6,
+                        "missingPaths": []
+                    },
+                    "artifactCoverage": {
+                        "available": 0,
+                        "expected": 20,
+                        "missingArtifactIds": ["bootstrap_operation_id"]
+                    },
+                    "nextExecutionUnits": [
+                        {
+                            "id": "unit_63",
+                            "title": "Review-packet readiness pack",
+                            "summary": "publish coverage truth"
+                        }
+                    ]
+                },
                 "reviewPacketTemplate": {
                     "candidateTargetProfileId": "debian-12-systemd-tailscale",
                     "templatePath": "docs/operations/portmanager-debian-12-review-packet-template.md",

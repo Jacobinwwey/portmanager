@@ -124,6 +124,8 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Land confidence-publication-refresh-maintenance implementation plan: `docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md`
 - [x] Land Milestone 3 Toward C enablement requirements doc: `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md`
 - [x] Land Milestone 3 Toward C enablement implementation plan: `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`
+- [x] Land Milestone 3 review-packet readiness requirements doc: `docs/brainstorms/2026-04-21-portmanager-m3-review-packet-readiness-requirements.md`
+- [x] Land Milestone 3 review-packet readiness implementation plan: `docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -247,4 +249,6 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] 落盘 confidence-publication-refresh-maintenance 实现计划：`docs/plans/2026-04-21-portmanager-m2-confidence-publication-refresh-maintenance-plan.md`
 - [x] 落盘 Milestone 3 Toward C enablement 需求文档：`docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md`
 - [x] 落盘 Milestone 3 Toward C enablement 实现计划：`docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md`
+- [x] 落盘 Milestone 3 review-packet readiness 需求文档：`docs/brainstorms/2026-04-21-portmanager-m3-review-packet-readiness-requirements.md`
+- [x] 落盘 Milestone 3 review-packet readiness 实现计划：`docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

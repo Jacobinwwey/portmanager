@@ -124,7 +124,16 @@ test('roadmap publishes a development-progress page backed by live milestone con
     milestoneConfidenceComponent,
     /2026-04-21-portmanager-m3-toward-c-enablement-plan\.md/
   )
+  assert.match(
+    milestoneConfidenceComponent,
+    /2026-04-21-portmanager-m3-review-packet-readiness-requirements\.md/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /2026-04-21-portmanager-m3-review-packet-readiness-plan\.md/
+  )
   assert.match(milestoneConfidenceComponent, /Phase 0 enablement/)
+  assert.match(milestoneConfidenceComponent, /Units 63 through 69/)
   assert.match(milestoneConfidenceComponent, /Unit 57 audit\/event boundary/)
   assert.match(milestoneConfidenceComponent, /Unit 58 target-profile abstraction/)
   assert.match(milestoneConfidenceComponent, /Unit 60 consumer-boundary split criteria/)
@@ -140,7 +149,11 @@ test('roadmap publishes a development-progress page backed by live milestone con
     /\.portmanager\/reports\/milestone-wording-review\.md/
   )
   assert.match(roadmapData, /Units 51 through 62/)
+  assert.match(roadmapData, /Units 63 through 69/)
   assert.match(roadmapData, /debian-12-systemd-tailscale/)
+  assert.match(roadmapData, /review-packet readiness/i)
+  assert.match(roadmapData, /guide coverage/i)
+  assert.match(roadmapData, /artifact coverage/i)
   assert.match(roadmapData, /consumer-boundary-decision-pack/)
   assert.match(roadmapData, /deployment-boundary-decision-pack/)
   assert.match(roadmapData, /consumer-boundary split criteria/)
@@ -236,7 +249,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
-  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-toward-c-enablement-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-review-packet-readiness-plan\.md/)
   assert.match(roadmapComponent, /lane\.items\.length > 0/)
   assert.match(roadmapComponent, /milestone-confidence-bundle-\*/)
   assert.match(roadmapComponent, /Required next action/)

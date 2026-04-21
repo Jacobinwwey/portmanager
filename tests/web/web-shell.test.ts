@@ -35,6 +35,10 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /Persistence readiness/i)
   assert.match(html, /Consumer boundary split criteria/i)
   assert.match(html, /Evidence ledger/i)
+  assert.match(html, /Review packet readiness/i)
+  assert.match(html, /Guide coverage/i)
+  assert.match(html, /Artifact coverage/i)
+  assert.match(html, /unit_63/i)
   assert.match(html, /Review packet template/i)
   assert.match(html, /portmanager-debian-12-review-packet-template\.md/i)
   assert.match(html, /Bootstrap proof capture/i)
@@ -468,6 +472,35 @@ test('overview loader keeps consumer boundary base path when building controller
             'Keep debian-12-systemd-tailscale in review-prep until transport, recovery, docs, acceptance, and ownership evidence are all real.',
             'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
           ],
+          reviewPacketReadiness: {
+            state: 'capture_required',
+            summary:
+              'Review-packet guide set is complete, but no Debian 12 execution artifacts are captured yet.',
+            requiredNextAction:
+              'Execute one Debian 12 review packet before changing any parity claim.',
+            guideCoverage: {
+              available: 6,
+              expected: 6,
+              missingPaths: []
+            },
+            artifactCoverage: {
+              available: 0,
+              expected: 20,
+              missingArtifactIds: [
+                'bootstrap_operation_id',
+                'bootstrap_result_summary',
+                'audit_reference',
+                'target_profile_confirmation'
+              ]
+            },
+            nextExecutionUnits: [
+              {
+                id: 'unit_63',
+                title: 'Review-packet readiness pack',
+                summary: 'Publish capture state, artifact coverage, and next-unit truth.'
+              }
+            ]
+          },
           reviewPacketTemplate: {
             candidateTargetProfileId: 'debian-12-systemd-tailscale',
             templatePath: 'docs/operations/portmanager-debian-12-review-packet-template.md',
@@ -757,6 +790,28 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
           expansionReviewRequired: false,
           summary: 'second target policy pack is alive',
           nextActions: ['keep supported targets locked'],
+          reviewPacketReadiness: {
+            state: 'capture_required',
+            summary: 'guides complete, artifact capture pending',
+            requiredNextAction: 'execute one review packet',
+            guideCoverage: {
+              available: 6,
+              expected: 6,
+              missingPaths: []
+            },
+            artifactCoverage: {
+              available: 0,
+              expected: 20,
+              missingArtifactIds: ['bootstrap_operation_id']
+            },
+            nextExecutionUnits: [
+              {
+                id: 'unit_63',
+                title: 'Review-packet readiness pack',
+                summary: 'publish coverage truth'
+              }
+            ]
+          },
           reviewPacketTemplate: {
             candidateTargetProfileId: 'debian-12-systemd-tailscale',
             templatePath: 'docs/operations/portmanager-debian-12-review-packet-template.md',

@@ -109,6 +109,39 @@ test('default second target policy pack lands governance artifacts while transpo
 
   assert.equal(pack.decisionState, 'hold')
   assert.equal(pack.expansionReviewRequired, false)
+  assert.equal(pack.reviewPacketReadiness.state, 'capture_required')
+  assert.equal(pack.reviewPacketReadiness.guideCoverage.available, 6)
+  assert.equal(pack.reviewPacketReadiness.guideCoverage.expected, 6)
+  assert.deepEqual(pack.reviewPacketReadiness.guideCoverage.missingPaths, [])
+  assert.equal(pack.reviewPacketReadiness.artifactCoverage.available, 0)
+  assert.equal(pack.reviewPacketReadiness.artifactCoverage.expected, 20)
+  assert.equal(
+    pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes(
+      'bootstrap_operation_id'
+    ),
+    true
+  )
+  assert.equal(
+    pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes(
+      'rollback_operation_id'
+    ),
+    true
+  )
+  assert.match(pack.reviewPacketReadiness.summary, /guide set is complete/i)
+  assert.match(pack.reviewPacketReadiness.requiredNextAction, /review packet/i)
+  assert.equal(pack.reviewPacketReadiness.nextExecutionUnits.length >= 7, true)
+  assert.equal(
+    pack.reviewPacketReadiness.nextExecutionUnits.some(
+      (unit) => unit.id === 'unit_63' && /review-packet readiness/i.test(unit.title)
+    ),
+    true
+  )
+  assert.equal(
+    pack.reviewPacketReadiness.nextExecutionUnits.some(
+      (unit) => unit.id === 'unit_69' && /review closeout/i.test(unit.title)
+    ),
+    true
+  )
   assert.equal(pack.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
   assert.match(
     pack.reviewPacketTemplate.templatePath,
@@ -263,6 +296,22 @@ test('default second target policy pack lands governance artifacts while transpo
   assert.doesNotMatch(pack.summary, /docs contract ready/i)
 })
 
+test('second target review packet readiness shows partial capture when artifact execution has started', () => {
+  const pack = buildSecondTargetPolicyPack({
+    ...createDefaultSecondTargetPolicySnapshot(),
+    capturedReviewArtifactIds: ['bootstrap_operation_id', 'bootstrap_result_summary']
+  })
+
+  assert.equal(pack.reviewPacketReadiness.state, 'capture_in_progress')
+  assert.equal(pack.reviewPacketReadiness.artifactCoverage.available, 2)
+  assert.equal(pack.reviewPacketReadiness.artifactCoverage.expected, 20)
+  assert.equal(
+    pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes('audit_reference'),
+    true
+  )
+  assert.match(pack.reviewPacketReadiness.summary, /capture is in progress/i)
+})
+
 test('controller server exposes second target policy pack as explicit controller contract', async () => {
   const { directory, databasePath } = tempDbPath()
 
@@ -286,6 +335,26 @@ test('controller server exposes second target policy pack as explicit controller
         expansionReviewRequired: boolean
         summary: string
         nextActions: string[]
+        reviewPacketReadiness: {
+          state: string
+          summary: string
+          requiredNextAction: string
+          guideCoverage: {
+            available: number
+            expected: number
+            missingPaths: string[]
+          }
+          artifactCoverage: {
+            available: number
+            expected: number
+            missingArtifactIds: string[]
+          }
+          nextExecutionUnits: Array<{
+            id: string
+            title: string
+            summary: string
+          }>
+        }
         reviewPacketTemplate: {
           candidateTargetProfileId: string
           templatePath: string
@@ -374,6 +443,22 @@ test('controller server exposes second target policy pack as explicit controller
       assert.deepEqual(payload.candidateTargetProfileIds, ['debian-12-systemd-tailscale'])
       assert.equal(payload.decisionState, 'hold')
       assert.equal(payload.expansionReviewRequired, false)
+      assert.equal(payload.reviewPacketReadiness.state, 'capture_required')
+      assert.equal(payload.reviewPacketReadiness.guideCoverage.available, 6)
+      assert.equal(payload.reviewPacketReadiness.guideCoverage.expected, 6)
+      assert.equal(payload.reviewPacketReadiness.artifactCoverage.available, 0)
+      assert.equal(payload.reviewPacketReadiness.artifactCoverage.expected, 20)
+      assert.equal(
+        payload.reviewPacketReadiness.artifactCoverage.missingArtifactIds.includes(
+          'bootstrap_operation_id'
+        ),
+        true
+      )
+      assert.equal(payload.reviewPacketReadiness.nextExecutionUnits.length >= 7, true)
+      assert.equal(
+        payload.reviewPacketReadiness.nextExecutionUnits.some((unit) => unit.id === 'unit_63'),
+        true
+      )
       assert.equal(payload.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
       assert.match(
         payload.reviewPacketTemplate.templatePath,

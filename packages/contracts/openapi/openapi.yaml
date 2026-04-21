@@ -1377,6 +1377,7 @@ components:
           expansionReviewRequired,
           summary,
           nextActions,
+          reviewPacketReadiness,
           reviewPacketTemplate,
           bootstrapProofCapture,
           steadyStateProofCapture,
@@ -1416,6 +1417,8 @@ components:
           type: array
           items:
             type: string
+        reviewPacketReadiness:
+          $ref: '#/components/schemas/SecondTargetReviewPacketReadiness'
         reviewPacketTemplate:
           $ref: '#/components/schemas/SecondTargetReviewPacketTemplate'
         bootstrapProofCapture:
@@ -1473,6 +1476,103 @@ components:
           type: array
           items:
             type: string
+    SecondTargetReviewArtifactId:
+      type: string
+      enum:
+        [
+          bootstrap_operation_id,
+          bootstrap_result_summary,
+          audit_reference,
+          target_profile_confirmation,
+          post_mutation_operation_id,
+          health_capture,
+          runtime_state_capture,
+          controller_audit_reference,
+          backup_bearing_mutation_id,
+          backup_manifest_path,
+          remote_backup_result,
+          restore_readiness_reference,
+          diagnostics_operation_id,
+          diagnostics_artifact_paths,
+          controller_event_reference,
+          drift_operator_note,
+          rollback_point_id,
+          rollback_operation_id,
+          rollback_result_summary,
+          post_rollback_diagnostics_linkage
+        ]
+    SecondTargetReviewPacketReadinessState:
+      type: string
+      enum: [guide_set_incomplete, capture_required, capture_in_progress, packet_ready]
+    SecondTargetReviewPacketCoverage:
+      type: object
+      required: [available, expected]
+      properties:
+        available:
+          type: integer
+          minimum: 0
+        expected:
+          type: integer
+          minimum: 0
+    SecondTargetReviewPacketGuideCoverage:
+      allOf:
+        - $ref: '#/components/schemas/SecondTargetReviewPacketCoverage'
+        - type: object
+          required: [missingPaths]
+          properties:
+            missingPaths:
+              type: array
+              items:
+                type: string
+    SecondTargetReviewPacketArtifactCoverage:
+      allOf:
+        - $ref: '#/components/schemas/SecondTargetReviewPacketCoverage'
+        - type: object
+          required: [missingArtifactIds]
+          properties:
+            missingArtifactIds:
+              type: array
+              items:
+                $ref: '#/components/schemas/SecondTargetReviewArtifactId'
+    SecondTargetNextExecutionUnit:
+      type: object
+      required: [id, title, summary]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+    SecondTargetReviewPacketReadiness:
+      type: object
+      required:
+        [
+          candidateTargetProfileId,
+          state,
+          summary,
+          requiredNextAction,
+          guideCoverage,
+          artifactCoverage,
+          nextExecutionUnits
+        ]
+      properties:
+        candidateTargetProfileId:
+          type: string
+        state:
+          $ref: '#/components/schemas/SecondTargetReviewPacketReadinessState'
+        summary:
+          type: string
+        requiredNextAction:
+          type: string
+        guideCoverage:
+          $ref: '#/components/schemas/SecondTargetReviewPacketGuideCoverage'
+        artifactCoverage:
+          $ref: '#/components/schemas/SecondTargetReviewPacketArtifactCoverage'
+        nextExecutionUnits:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetNextExecutionUnit'
     SecondTargetReviewPacketTemplate:
       type: object
       required: [candidateTargetProfileId, templatePath, summary, requiredEvidence]

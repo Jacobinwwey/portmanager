@@ -152,6 +152,48 @@ export interface SecondTargetRollbackProofCapture {
   sources: string[]
 }
 
+export type SecondTargetReviewArtifactId =
+  | SecondTargetBootstrapProofArtifactId
+  | SecondTargetSteadyStateProofArtifactId
+  | SecondTargetBackupRestoreProofArtifactId
+  | SecondTargetDiagnosticsProofArtifactId
+  | SecondTargetRollbackProofArtifactId
+
+export type SecondTargetReviewPacketReadinessState =
+  | 'guide_set_incomplete'
+  | 'capture_required'
+  | 'capture_in_progress'
+  | 'packet_ready'
+
+export interface SecondTargetReviewPacketCoverage {
+  available: number
+  expected: number
+}
+
+export interface SecondTargetReviewPacketGuideCoverage extends SecondTargetReviewPacketCoverage {
+  missingPaths: string[]
+}
+
+export interface SecondTargetReviewPacketArtifactCoverage extends SecondTargetReviewPacketCoverage {
+  missingArtifactIds: SecondTargetReviewArtifactId[]
+}
+
+export interface SecondTargetNextExecutionUnit {
+  id: string
+  title: string
+  summary: string
+}
+
+export interface SecondTargetReviewPacketReadiness {
+  candidateTargetProfileId: string
+  state: SecondTargetReviewPacketReadinessState
+  summary: string
+  requiredNextAction: string
+  guideCoverage: SecondTargetReviewPacketGuideCoverage
+  artifactCoverage: SecondTargetReviewPacketArtifactCoverage
+  nextExecutionUnits: SecondTargetNextExecutionUnit[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -167,6 +209,8 @@ export interface SecondTargetPolicySnapshot {
   docsContractReady: boolean
   acceptanceRecipeReady: boolean
   operatorOwnershipDefined: boolean
+  reviewPacketGuidePaths?: string[]
+  capturedReviewArtifactIds?: SecondTargetReviewArtifactId[]
   evidenceItems?: SecondTargetPolicyEvidenceItem[]
 }
 
@@ -180,6 +224,7 @@ export interface SecondTargetPolicyPack {
   expansionReviewRequired: boolean
   summary: string
   nextActions: string[]
+  reviewPacketReadiness: SecondTargetReviewPacketReadiness
   reviewPacketTemplate: SecondTargetReviewPacketTemplate
   bootstrapProofCapture: SecondTargetBootstrapProofCapture
   steadyStateProofCapture: SecondTargetSteadyStateProofCapture
@@ -202,6 +247,80 @@ const diagnosticsProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-diagnostics-proof-capture.md'
 const rollbackProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-rollback-proof-capture.md'
+const reviewPacketGuidePaths = [
+  reviewPacketTemplatePath,
+  bootstrapProofCaptureGuidePath,
+  steadyStateProofCaptureGuidePath,
+  backupRestoreProofCaptureGuidePath,
+  diagnosticsProofCaptureGuidePath,
+  rollbackProofCaptureGuidePath
+] as const satisfies readonly string[]
+const allReviewPacketArtifactIds: SecondTargetReviewArtifactId[] = [
+  'bootstrap_operation_id',
+  'bootstrap_result_summary',
+  'audit_reference',
+  'target_profile_confirmation',
+  'post_mutation_operation_id',
+  'health_capture',
+  'runtime_state_capture',
+  'controller_audit_reference',
+  'backup_bearing_mutation_id',
+  'backup_manifest_path',
+  'remote_backup_result',
+  'restore_readiness_reference',
+  'diagnostics_operation_id',
+  'diagnostics_artifact_paths',
+  'controller_event_reference',
+  'drift_operator_note',
+  'rollback_point_id',
+  'rollback_operation_id',
+  'rollback_result_summary',
+  'post_rollback_diagnostics_linkage'
+]
+const nextExecutionUnits: SecondTargetNextExecutionUnit[] = [
+  {
+    id: 'unit_63',
+    title: 'Review-packet readiness pack',
+    summary:
+      'Publish guide coverage, artifact coverage, required next action, and next-unit truth across controller, CLI, web, and roadmap surfaces.'
+  },
+  {
+    id: 'unit_64',
+    title: 'Bootstrap packet execution',
+    summary:
+      'Capture bootstrap operation id, result summary, audit linkage, and target-profile confirmation in one Debian 12 review packet.'
+  },
+  {
+    id: 'unit_65',
+    title: 'Steady-state packet execution',
+    summary:
+      'Capture one post-bootstrap mutation plus linked /health, /runtime-state, and controller audit evidence.'
+  },
+  {
+    id: 'unit_66',
+    title: 'Backup-and-restore packet execution',
+    summary:
+      'Capture one backup-bearing mutation, backup manifest lineage, remote-backup result, and restore-readiness linkage.'
+  },
+  {
+    id: 'unit_67',
+    title: 'Diagnostics packet execution',
+    summary:
+      'Capture one diagnostics operation id, artifact bundle, controller event linkage, and operator drift note.'
+  },
+  {
+    id: 'unit_68',
+    title: 'Rollback packet execution',
+    summary:
+      'Capture rollback-point linkage, rollback result summary, and post-rollback diagnostics evidence in the same bounded packet.'
+  },
+  {
+    id: 'unit_69',
+    title: 'Second-target review closeout',
+    summary:
+      'Re-read /second-target-policy-pack, confirm parity truth, and open review only after the complete Debian 12 packet is preserved.'
+  }
+]
 
 const bootstrapProofArtifactMetadata: Record<
   SecondTargetBootstrapProofArtifactId,
@@ -561,7 +680,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
         'tests/controller/host-rule-policy.test.ts',
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
-        'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
+        'docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md'
       ]
     ),
     evidenceItem(
@@ -572,7 +691,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
         steadyStateProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
-        'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
+        'docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md'
       ]
     ),
     evidenceItem(
@@ -594,7 +713,7 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
         diagnosticsProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
-        'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
+        'docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md'
       ]
     ),
     evidenceItem(
@@ -665,6 +784,10 @@ function criterionFrom(
     label: metadata.label,
     reason: satisfied ? metadata.satisfiedReason : metadata.missingReason
   }
+}
+
+function uniqueItems<T>(items: readonly T[]) {
+  return [...new Set(items)]
 }
 
 function joinCriterionLabels(criteriaList: SecondTargetPolicyCriterion[]) {
@@ -762,6 +885,128 @@ function buildNextActions(
     'Declare one explicit second-target candidate before discussing broader platform support.',
     'Prove bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity before any second-target support claim.'
   ]
+}
+
+function resolvedReviewPacketGuidePaths(snapshot: SecondTargetPolicySnapshot) {
+  if ((snapshot.reviewPacketGuidePaths?.length ?? 0) > 0) {
+    return uniqueItems(snapshot.reviewPacketGuidePaths ?? [])
+  }
+
+  return [...reviewPacketGuidePaths]
+}
+
+function resolvedCapturedReviewArtifactIds(snapshot: SecondTargetPolicySnapshot) {
+  return uniqueItems(snapshot.capturedReviewArtifactIds ?? [])
+}
+
+function buildReviewPacketGuideCoverage(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetReviewPacketGuideCoverage {
+  const availablePaths = resolvedReviewPacketGuidePaths(snapshot)
+
+  return {
+    available: availablePaths.length,
+    expected: reviewPacketGuidePaths.length,
+    missingPaths: reviewPacketGuidePaths.filter((path) => !availablePaths.includes(path))
+  }
+}
+
+function buildReviewPacketArtifactCoverage(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetReviewPacketArtifactCoverage {
+  const capturedArtifactIds = resolvedCapturedReviewArtifactIds(snapshot)
+
+  return {
+    available: capturedArtifactIds.length,
+    expected: allReviewPacketArtifactIds.length,
+    missingArtifactIds: allReviewPacketArtifactIds.filter(
+      (artifactId) => !capturedArtifactIds.includes(artifactId)
+    )
+  }
+}
+
+function reviewPacketReadinessStateFrom(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetReviewPacketReadinessState {
+  const guideCoverage = buildReviewPacketGuideCoverage(snapshot)
+  const artifactCoverage = buildReviewPacketArtifactCoverage(snapshot)
+
+  if (guideCoverage.missingPaths.length > 0) {
+    return 'guide_set_incomplete'
+  }
+
+  if (artifactCoverage.available === 0) {
+    return 'capture_required'
+  }
+
+  if (artifactCoverage.available < artifactCoverage.expected) {
+    return 'capture_in_progress'
+  }
+
+  return 'packet_ready'
+}
+
+function buildReviewPacketReadiness(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetReviewPacketReadiness {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+  const guideCoverage = buildReviewPacketGuideCoverage(snapshot)
+  const artifactCoverage = buildReviewPacketArtifactCoverage(snapshot)
+  const state = reviewPacketReadinessStateFrom(snapshot)
+
+  if (state === 'guide_set_incomplete') {
+    return {
+      candidateTargetProfileId,
+      state,
+      summary:
+        `Review-packet guide set is incomplete for ${candidateTargetProfileId}; keep the candidate on hold until every capture guide and the template path exist together.`,
+      requiredNextAction:
+        'Finish the missing review-packet guide paths before starting any Debian 12 parity execution.',
+      guideCoverage,
+      artifactCoverage,
+      nextExecutionUnits: nextExecutionUnits.map((unit) => ({ ...unit }))
+    }
+  }
+
+  if (state === 'packet_ready') {
+    return {
+      candidateTargetProfileId,
+      state,
+      summary:
+        `Review-packet artifact coverage is complete for ${candidateTargetProfileId}; re-read /second-target-policy-pack and open second-target review instead of inventing new guide work.`,
+      requiredNextAction:
+        'Open bounded second-target review and confirm every parity criterion against the preserved Debian 12 packet.',
+      guideCoverage,
+      artifactCoverage,
+      nextExecutionUnits: nextExecutionUnits.map((unit) => ({ ...unit }))
+    }
+  }
+
+  if (state === 'capture_in_progress') {
+    return {
+      candidateTargetProfileId,
+      state,
+      summary:
+        `Review-packet capture is in progress for ${candidateTargetProfileId}; guide coverage is complete, but some Debian 12 execution artifacts are still missing from the bounded packet.`,
+      requiredNextAction:
+        'Finish the remaining Debian 12 packet artifacts before moving any parity criterion or support claim.',
+      guideCoverage,
+      artifactCoverage,
+      nextExecutionUnits: nextExecutionUnits.map((unit) => ({ ...unit }))
+    }
+  }
+
+  return {
+    candidateTargetProfileId,
+    state,
+    summary:
+      `Review-packet guide set is complete for ${candidateTargetProfileId}, but no Debian 12 execution artifacts are captured yet. Current truth is template-ready, not packet-ready.`,
+    requiredNextAction:
+      'Execute one bounded Debian 12 review packet before changing any bootstrap, steady-state, backup, diagnostics, or rollback parity claim.',
+    guideCoverage,
+    artifactCoverage,
+    nextExecutionUnits: nextExecutionUnits.map((unit) => ({ ...unit }))
+  }
 }
 
 function buildReviewPacketTemplate(
@@ -983,6 +1228,8 @@ export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySna
     docsContractReady: true,
     acceptanceRecipeReady: true,
     operatorOwnershipDefined: true,
+    reviewPacketGuidePaths: [...reviewPacketGuidePaths],
+    capturedReviewArtifactIds: [],
     evidenceItems
   }
 }
@@ -1008,6 +1255,7 @@ export function buildSecondTargetPolicyPack(
     expansionReviewRequired: decisionState === 'review_required',
     summary: buildSummary(decisionState, blockingCriteria),
     nextActions: buildNextActions(snapshot, decisionState),
+    reviewPacketReadiness: buildReviewPacketReadiness(snapshot),
     reviewPacketTemplate: buildReviewPacketTemplate(snapshot),
     bootstrapProofCapture: buildBootstrapProofCapture(snapshot),
     steadyStateProofCapture: buildSteadyStateProofCapture(snapshot),

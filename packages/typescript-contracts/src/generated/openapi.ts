@@ -1539,6 +1539,11 @@ export interface components {
             sources: string[];
             summary: string;
         };
+        SecondTargetNextExecutionUnit: {
+            id: string;
+            summary: string;
+            title: string;
+        };
         SecondTargetPolicyCriterion: {
             id: components["schemas"]["SecondTargetPolicyCriterionId"];
             label: string;
@@ -1572,6 +1577,7 @@ export interface components {
             nextActions: string[];
             /** @enum {string} */
             reviewOwner: "controller";
+            reviewPacketReadiness: components["schemas"]["SecondTargetReviewPacketReadiness"];
             reviewPacketTemplate: components["schemas"]["SecondTargetReviewPacketTemplate"];
             rollbackProofCapture: components["schemas"]["SecondTargetRollbackProofCapture"];
             satisfiedCriteria: components["schemas"]["SecondTargetPolicyCriterion"][];
@@ -1579,6 +1585,29 @@ export interface components {
             summary: string;
             supportedTargetProfiles: components["schemas"]["TargetProfileSummary"][];
         };
+        /** @enum {string} */
+        SecondTargetReviewArtifactId: "bootstrap_operation_id" | "bootstrap_result_summary" | "audit_reference" | "target_profile_confirmation" | "post_mutation_operation_id" | "health_capture" | "runtime_state_capture" | "controller_audit_reference" | "backup_bearing_mutation_id" | "backup_manifest_path" | "remote_backup_result" | "restore_readiness_reference" | "diagnostics_operation_id" | "diagnostics_artifact_paths" | "controller_event_reference" | "drift_operator_note" | "rollback_point_id" | "rollback_operation_id" | "rollback_result_summary" | "post_rollback_diagnostics_linkage";
+        SecondTargetReviewPacketArtifactCoverage: components["schemas"]["SecondTargetReviewPacketCoverage"] & {
+            missingArtifactIds: components["schemas"]["SecondTargetReviewArtifactId"][];
+        };
+        SecondTargetReviewPacketCoverage: {
+            available: number;
+            expected: number;
+        };
+        SecondTargetReviewPacketGuideCoverage: components["schemas"]["SecondTargetReviewPacketCoverage"] & {
+            missingPaths: string[];
+        };
+        SecondTargetReviewPacketReadiness: {
+            artifactCoverage: components["schemas"]["SecondTargetReviewPacketArtifactCoverage"];
+            candidateTargetProfileId: string;
+            guideCoverage: components["schemas"]["SecondTargetReviewPacketGuideCoverage"];
+            nextExecutionUnits: components["schemas"]["SecondTargetNextExecutionUnit"][];
+            requiredNextAction: string;
+            state: components["schemas"]["SecondTargetReviewPacketReadinessState"];
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetReviewPacketReadinessState: "guide_set_incomplete" | "capture_required" | "capture_in_progress" | "packet_ready";
         SecondTargetReviewPacketRequirement: {
             criterionId: components["schemas"]["SecondTargetPolicyCriterionId"];
             label: string;
@@ -1719,12 +1748,19 @@ export type SecondTargetBootstrapProofCapture = components['schemas']['SecondTar
 export type SecondTargetDiagnosticsProofArtifact = components['schemas']['SecondTargetDiagnosticsProofArtifact'];
 export type SecondTargetDiagnosticsProofArtifactId = components['schemas']['SecondTargetDiagnosticsProofArtifactId'];
 export type SecondTargetDiagnosticsProofCapture = components['schemas']['SecondTargetDiagnosticsProofCapture'];
+export type SecondTargetNextExecutionUnit = components['schemas']['SecondTargetNextExecutionUnit'];
 export type SecondTargetPolicyCriterion = components['schemas']['SecondTargetPolicyCriterion'];
 export type SecondTargetPolicyCriterionId = components['schemas']['SecondTargetPolicyCriterionId'];
 export type SecondTargetPolicyDecisionState = components['schemas']['SecondTargetPolicyDecisionState'];
 export type SecondTargetPolicyEvidenceItem = components['schemas']['SecondTargetPolicyEvidenceItem'];
 export type SecondTargetPolicyEvidenceState = components['schemas']['SecondTargetPolicyEvidenceState'];
 export type SecondTargetPolicyPack = components['schemas']['SecondTargetPolicyPack'];
+export type SecondTargetReviewArtifactId = components['schemas']['SecondTargetReviewArtifactId'];
+export type SecondTargetReviewPacketArtifactCoverage = components['schemas']['SecondTargetReviewPacketArtifactCoverage'];
+export type SecondTargetReviewPacketCoverage = components['schemas']['SecondTargetReviewPacketCoverage'];
+export type SecondTargetReviewPacketGuideCoverage = components['schemas']['SecondTargetReviewPacketGuideCoverage'];
+export type SecondTargetReviewPacketReadiness = components['schemas']['SecondTargetReviewPacketReadiness'];
+export type SecondTargetReviewPacketReadinessState = components['schemas']['SecondTargetReviewPacketReadinessState'];
 export type SecondTargetReviewPacketRequirement = components['schemas']['SecondTargetReviewPacketRequirement'];
 export type SecondTargetReviewPacketTemplate = components['schemas']['SecondTargetReviewPacketTemplate'];
 export type SecondTargetRollbackProofArtifact = components['schemas']['SecondTargetRollbackProofArtifact'];

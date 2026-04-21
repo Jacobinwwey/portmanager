@@ -607,7 +607,7 @@ const confidenceWordingBadge = computed(
   () => confidenceProgress.wordingReview?.publicClaimClass ?? 'unavailable'
 )
 const reviewDigestPlanSourceLink = githubSourceLink(
-  'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
+  'docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md'
 )
 
 function stageLabel(stage: string) {

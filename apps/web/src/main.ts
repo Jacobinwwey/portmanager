@@ -1472,6 +1472,89 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
       'Keep debian-12-systemd-tailscale in review-prep until bootstrap transport, steady-state transport, backup and restore, diagnostics, and rollback parity are all real.',
       'Keep docs contract, acceptance recipe, and operator ownership artifacts aligned with parity evidence while the candidate stays on hold.'
     ],
+    reviewPacketReadiness: {
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      state: 'capture_required',
+      summary:
+        'Review-packet guide set is complete for debian-12-systemd-tailscale, but no Debian 12 execution artifacts are captured yet. Current truth is template-ready, not packet-ready.',
+      requiredNextAction:
+        'Execute one bounded Debian 12 review packet before changing any bootstrap, steady-state, backup, diagnostics, or rollback parity claim.',
+      guideCoverage: {
+        available: 6,
+        expected: 6,
+        missingPaths: []
+      },
+      artifactCoverage: {
+        available: 0,
+        expected: 20,
+        missingArtifactIds: [
+          'bootstrap_operation_id',
+          'bootstrap_result_summary',
+          'audit_reference',
+          'target_profile_confirmation',
+          'post_mutation_operation_id',
+          'health_capture',
+          'runtime_state_capture',
+          'controller_audit_reference',
+          'backup_bearing_mutation_id',
+          'backup_manifest_path',
+          'remote_backup_result',
+          'restore_readiness_reference',
+          'diagnostics_operation_id',
+          'diagnostics_artifact_paths',
+          'controller_event_reference',
+          'drift_operator_note',
+          'rollback_point_id',
+          'rollback_operation_id',
+          'rollback_result_summary',
+          'post_rollback_diagnostics_linkage'
+        ]
+      },
+      nextExecutionUnits: [
+        {
+          id: 'unit_63',
+          title: 'Review-packet readiness pack',
+          summary:
+            'Publish guide coverage, artifact coverage, required next action, and next-unit truth across controller, CLI, web, and roadmap surfaces.'
+        },
+        {
+          id: 'unit_64',
+          title: 'Bootstrap packet execution',
+          summary:
+            'Capture bootstrap operation id, result summary, audit linkage, and target-profile confirmation in one Debian 12 review packet.'
+        },
+        {
+          id: 'unit_65',
+          title: 'Steady-state packet execution',
+          summary:
+            'Capture one post-bootstrap mutation plus linked /health, /runtime-state, and controller audit evidence.'
+        },
+        {
+          id: 'unit_66',
+          title: 'Backup-and-restore packet execution',
+          summary:
+            'Capture one backup-bearing mutation, backup manifest lineage, remote-backup result, and restore-readiness linkage.'
+        },
+        {
+          id: 'unit_67',
+          title: 'Diagnostics packet execution',
+          summary:
+            'Capture one diagnostics operation id, artifact bundle, controller event linkage, and operator drift note.'
+        },
+        {
+          id: 'unit_68',
+          title: 'Rollback packet execution',
+          summary:
+            'Capture rollback-point linkage, rollback result summary, and post-rollback diagnostics evidence in the same bounded packet.'
+        },
+        {
+          id: 'unit_69',
+          title: 'Second-target review closeout',
+          summary:
+            'Re-read /second-target-policy-pack, confirm parity truth, and open review only after the complete Debian 12 packet is preserved.'
+        }
+      ]
+    },
     reviewPacketTemplate: {
       candidateTargetProfileId: 'debian-12-systemd-tailscale',
       templatePath: 'docs/operations/portmanager-debian-12-review-packet-template.md',
@@ -3629,6 +3712,76 @@ function SecondTargetPolicyCard(props: {
             )
           )
         : emptyState('No second-target evidence ledger recorded yet.', 'empty')
+    ]),
+    h('section', { className: 'pm-card', key: 'review-packet-readiness' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Review packet readiness',
+        detail: props.pack.reviewPacketReadiness.state
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Candidate Target', props.pack.reviewPacketReadiness.candidateTargetProfileId),
+        kvRow(
+          'Guide Coverage',
+          `${props.pack.reviewPacketReadiness.guideCoverage.available}/${props.pack.reviewPacketReadiness.guideCoverage.expected}`
+        ),
+        kvRow(
+          'Artifact Coverage',
+          `${props.pack.reviewPacketReadiness.artifactCoverage.available}/${props.pack.reviewPacketReadiness.artifactCoverage.expected}`
+        )
+      ]),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'summary' },
+        props.pack.reviewPacketReadiness.summary
+      ),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'required-next-action' },
+        `Required next action: ${props.pack.reviewPacketReadiness.requiredNextAction}`
+      ),
+      props.pack.reviewPacketReadiness.guideCoverage.missingPaths.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'missing-guides' },
+            props.pack.reviewPacketReadiness.guideCoverage.missingPaths.map((path) =>
+              h('li', { className: 'pm-list-item', key: path }, [
+                h('div', { key: 'line1' }, path)
+              ])
+            )
+          )
+        : h(
+            'p',
+            { className: 'pm-microcopy', key: 'guide-complete' },
+            'Guide set complete for current review-prep scope.'
+          ),
+      props.pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'missing-artifacts' },
+            props.pack.reviewPacketReadiness.artifactCoverage.missingArtifactIds.map((artifactId) =>
+              h('li', { className: 'pm-list-item', key: artifactId }, [
+                h('div', { key: 'line1' }, artifactId)
+              ])
+            )
+          )
+        : h(
+            'p',
+            { className: 'pm-microcopy', key: 'artifact-complete' },
+            'Artifact coverage is complete for the current review packet.'
+          ),
+      props.pack.reviewPacketReadiness.nextExecutionUnits.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'next-units' },
+            props.pack.reviewPacketReadiness.nextExecutionUnits.map((unit) =>
+              h('li', { className: 'pm-list-item', key: unit.id }, [
+                h('div', { key: 'line1' }, `${unit.id} · ${unit.title}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, unit.summary)
+              ])
+            )
+          )
+        : emptyState('No next execution units recorded yet.', 'empty')
     ]),
     h('section', { className: 'pm-card', key: 'review-packet-template' }, [
       h(SectionHeading, {
