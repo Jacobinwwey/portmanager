@@ -187,6 +187,7 @@
           <li>{{ copy.reportFile }} <code>{{ progress.sourceFiles.reportPath }}</code></li>
           <li>{{ copy.reviewDigestFile }} <code>.portmanager/reports/milestone-confidence-review.md</code></li>
           <li>{{ copy.wordingReviewFile }} <code>.portmanager/reports/milestone-wording-review.md</code></li>
+          <li>{{ copy.reviewHelperLabel }} <code>pnpm milestone:review:promotion-ready -- --limit 20</code></li>
           <li>{{ copy.reviewCommandLabel }} <code>pnpm milestone:review:confidence</code></li>
           <li>{{ copy.publishedArtifact }} <code>{{ progress.publication.trackedDataPath }}</code></li>
           <li>{{ copy.refreshCommandLabel }} <code>{{ progress.publication.refreshCommand }}</code></li>
@@ -230,7 +231,7 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistTitle: '开发者复核动作',
       currentDirectionKicker: 'Current Direction',
       currentDirectionTitle: '当前复核方向',
-      currentDirectionEvidence: 'Review Pack',
+      currentDirectionEvidence: '公开快照刷新',
       currentDirectionRequirementsLink: '当前方向需求文档',
       currentDirectionPlanLink: '当前方向实现计划',
       currentDirectionVerificationLink: '真机验证报告',
@@ -241,6 +242,7 @@ const copy = computed(() => props.locale === 'zh'
       reportFile: 'Report：',
       reviewDigestFile: 'Review digest：',
       wordingReviewFile: 'Wording review：',
+      reviewHelperLabel: '默认复核 helper：',
       reviewCommandLabel: 'Review command：',
       publishedArtifact: 'Published artifact：',
       refreshCommandLabel: 'Refresh command：',
@@ -301,7 +303,7 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistTitle: 'Developer review actions',
       currentDirectionKicker: 'Current Direction',
       currentDirectionTitle: 'Current review direction',
-      currentDirectionEvidence: 'Review Pack',
+      currentDirectionEvidence: 'Publication Refresh',
       currentDirectionRequirementsLink: 'Current-direction requirements',
       currentDirectionPlanLink: 'Current-direction plan',
       currentDirectionVerificationLink: 'Verification report',
@@ -312,6 +314,7 @@ const copy = computed(() => props.locale === 'zh'
       reportFile: 'Report:',
       reviewDigestFile: 'Review digest:',
       wordingReviewFile: 'Wording review:',
+      reviewHelperLabel: 'Default review helper:',
       reviewCommandLabel: 'Review command:',
       publishedArtifact: 'Published artifact:',
       refreshCommandLabel: 'Refresh command:',
