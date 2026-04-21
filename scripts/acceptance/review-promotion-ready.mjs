@@ -29,15 +29,16 @@ const DEFAULT_REFRESH_COMMAND = [
   'docs:generate:refresh-confidence'
 ]
 const DEFAULT_WORDING_SURFACES = [
-  'README.md',
-  'TODO.md',
-  'Interface Document.md',
-  'docs/specs/portmanager-milestones.md',
-  'docs/specs/portmanager-v1-product-spec.md',
-  'docs/operations/portmanager-real-machine-verification-report.md',
-  'docs-site/data/roadmap.ts',
-  'docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue',
-  'docs-site/.vitepress/theme/components/RoadmapPage.vue'
+  { path: 'README.md', kind: 'root-summary' },
+  { path: 'TODO.md', kind: 'review-pack' },
+  { path: 'Interface Document.md', kind: 'interface-contract' },
+  { path: 'docs/specs/portmanager-milestones.md', kind: 'milestone-spec' },
+  { path: 'docs/specs/portmanager-v1-product-spec.md', kind: 'product-spec' },
+  { path: 'docs/operations/portmanager-real-machine-verification-report.md', kind: 'verification-report' },
+  { path: 'docs-site/data/milestone-confidence-progress.ts', kind: 'tracked-counter-source' },
+  { path: 'docs-site/data/roadmap.ts', kind: 'roadmap-data' },
+  { path: 'docs-site/.vitepress/theme/components/MilestoneConfidencePage.vue', kind: 'development-progress-page' },
+  { path: 'docs-site/.vitepress/theme/components/RoadmapPage.vue', kind: 'roadmap-home-page' }
 ]
 
 export function parseArgs(argv) {
@@ -176,6 +177,114 @@ function consecutiveLine(review) {
   return `${review.local.readiness.qualifiedConsecutivePasses}/${review.local.readiness.minimumConsecutivePasses}`
 }
 
+function rootSummaryClaimStatus(review) {
+  return review.local.readiness.status === 'promotion-ready'
+    ? 'promotion-ready-wording-only'
+    : 'below-promotion-ready-wording-only'
+}
+
+function rootSummaryInstruction(review) {
+  if (review.local.readiness.status === 'promotion-ready') {
+    return 'Keep public wording at promotion-ready or below on this surface; exact counters stay on the development-progress page and tracked confidence artifact.'
+  }
+
+  return 'Keep public wording below promotion-ready on this surface; exact counters stay on the development-progress page and tracked confidence artifact.'
+}
+
+function buildSourceSurfaceStatuses(review, wordingSurfaces = DEFAULT_WORDING_SURFACES) {
+  return wordingSurfaces.map((surface) => {
+    switch (surface.kind) {
+      case 'root-summary':
+        return {
+          path: surface.path,
+          claimStatus: rootSummaryClaimStatus(review),
+          reviewInstruction: rootSummaryInstruction(review)
+        }
+      case 'review-pack':
+        return {
+          path: surface.path,
+          claimStatus: 'helper-review-pack',
+          reviewInstruction:
+            'Keep helper-first review steps plus `Public claim class` and `Source surface status` visible for developers.'
+        }
+      case 'interface-contract':
+        return {
+          path: surface.path,
+          claimStatus: 'helper-contract',
+          reviewInstruction:
+            'Keep helper and publication rules exact on this surface; latest counters stay on the tracked confidence artifact instead of this interface summary.'
+        }
+      case 'milestone-spec':
+        return {
+          path: surface.path,
+          claimStatus: rootSummaryClaimStatus(review),
+          reviewInstruction:
+            'Keep threshold-met milestone wording deliberate on this surface; exact counters stay on the development-progress page and tracked confidence artifact.'
+        }
+      case 'product-spec':
+        return {
+          path: surface.path,
+          claimStatus: 'stable-product-boundary',
+          reviewInstruction:
+            'Keep the product boundary stable on this surface; do not introduce live readiness counters here.'
+        }
+      case 'verification-report':
+        return {
+          path: surface.path,
+          claimStatus: review.countdownAligned
+            ? 'published-evidence'
+            : 'published-evidence-before-refresh',
+          reviewInstruction: review.countdownAligned
+            ? 'Freeze the reviewed published snapshot here and keep it aligned with the tracked confidence artifact.'
+            : 'Freeze the last reviewed published snapshot here and record the refresh-required posture instead of inventing newer public counters.'
+        }
+      case 'tracked-counter-source':
+        return {
+          path: surface.path,
+          claimStatus: review.countdownAligned
+            ? 'tracked-counter-source'
+            : 'tracked-counter-refresh-required',
+          reviewInstruction: review.countdownAligned
+            ? 'Exact published counters belong here and on the development-progress page, not in root-doc prose.'
+            : 'Tracked public counters lag synced local evidence until the helper refreshes the published artifact.'
+        }
+      case 'roadmap-data':
+        return {
+          path: surface.path,
+          claimStatus: 'roadmap-copy-review-pack',
+          reviewInstruction:
+            'Keep roadmap prose pointing developers to `Public claim class`, `Source surface status`, and the development-progress page instead of hard-coded counters.'
+        }
+      case 'development-progress-page':
+        return {
+          path: surface.path,
+          claimStatus: review.countdownAligned
+            ? 'development-progress-counter-surface'
+            : 'development-progress-awaiting-refresh',
+          reviewInstruction: review.countdownAligned
+            ? 'This public page mirrors exact counters from the tracked confidence artifact and should keep developer review guidance visible.'
+            : 'This public page mirrors the tracked artifact and therefore stays behind synced local evidence until refresh.'
+        }
+      case 'roadmap-home-page':
+        return {
+          path: surface.path,
+          claimStatus: review.countdownAligned
+            ? 'roadmap-preview-surface'
+            : 'roadmap-preview-awaiting-refresh',
+          reviewInstruction: review.countdownAligned
+            ? 'This roadmap preview should mirror the tracked confidence artifact and link reviewers to the development-progress page plus review pack.'
+            : 'This roadmap preview should mirror the tracked public snapshot and avoid implying newer local counters before refresh.'
+        }
+      default:
+        return {
+          path: surface.path,
+          claimStatus: 'manual-review',
+          reviewInstruction: 'Review this surface manually against the helper outputs.'
+        }
+    }
+  })
+}
+
 export function buildMilestoneWordingReview({
   review,
   wordingReviewPath = defaultWordingReviewPath,
@@ -183,6 +292,7 @@ export function buildMilestoneWordingReview({
   wordingSurfaces = DEFAULT_WORDING_SURFACES
 }) {
   const claimPosture = buildPromotionClaimPosture(review)
+  const sourceSurfaceStatuses = buildSourceSurfaceStatuses(review, wordingSurfaces)
   const lines = [
     '# Milestone Wording Review Checklist',
     '',
@@ -210,6 +320,13 @@ export function buildMilestoneWordingReview({
     `- Required next action: ${claimPosture.requiredNextAction}`,
     ...claimPosture.blockedClaims.map((claim) => `- Blocked claim: ${claim}`),
     '',
+    '## Source Surface Status',
+    '| Surface | Claim status | Review instruction |',
+    '| --- | --- | --- |',
+    ...sourceSurfaceStatuses.map((surface) =>
+      `| ${surface.path} | ${surface.claimStatus} | ${surface.reviewInstruction} |`
+    ),
+    '',
     '## Human Review Checklist',
     '- [ ] Keep Milestone 1 wording at accepted public-surface truth.',
     '- [ ] Keep Milestone 2 wording at promotion-ready until human review deliberately narrows it.',
@@ -220,7 +337,7 @@ export function buildMilestoneWordingReview({
     '- [ ] Re-run `pnpm acceptance:verify` before merging wording changes.',
     '',
     '## Source Surfaces To Review',
-    ...wordingSurfaces.map((surface) => `- [ ] ${surface}`),
+    ...sourceSurfaceStatuses.map((surface) => `- [ ] ${surface.path}`),
     ''
   ]
 

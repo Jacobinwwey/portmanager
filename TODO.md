@@ -51,7 +51,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Milestone 2 acceptance closure: expand live degraded/recovery/diagnostics-history UX on the same host/rule/policy model.
 - [x] Milestone 2 acceptance closure: deliver real GitHub backup on top of the now-explicit remote-backup guidance surfaces.
 - [x] Milestone 2 reliability slice: replay configured, failed, and local-only required remote-backup evidence on the same live agent-backed host/rule flow across API, CLI, Web, and agent proof.
-- [x] Milestone 2 acceptance closure: keep qualified `pnpm milestone:verify:confidence` history green until the readiness summary reaches `promotion-ready` with `7` qualified runs plus `3` consecutive qualified passes. Current synced and published checkpoint on `2026-04-21`: `promotion-ready`, thresholds met, and the tracked public artifact now follows latest qualified run `24702941958/1` while exact live counters stay on the confidence artifact and development-progress page.
+- [x] Milestone 2 acceptance closure: keep qualified `pnpm milestone:verify:confidence` history green until the readiness summary reaches `promotion-ready` with `7` qualified runs plus `3` consecutive qualified passes. Current synced and published checkpoint on `2026-04-21`: `promotion-ready`, thresholds met, and exact live counters plus the latest qualified run now stay on the tracked confidence artifact and development-progress page instead of root-doc prose.
 - [x] Milestone 2 acceptance closure: land `pnpm milestone:verify:confidence` as the canonical composed routine while preserving `pnpm acceptance:verify` as the Unit 0 gate.
 - [x] Milestone 2 acceptance closure: wire the canonical confidence routine into `.github/workflows/mainline-acceptance.yml` for `push main`, `workflow_dispatch`, and the daily scheduled history lane.
 - [x] Milestone 2 acceptance closure: write `.portmanager/reports/milestone-confidence-report.json` from the canonical confidence routine with CI traceability metadata, and upload the same report from CI for developer inspection.
@@ -74,7 +74,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Unit 3: replace Web mock shells with controller-backed data and routes for `Hosts`, `Bridge Rules`, `Backups`, `Console`, and diagnostics detail.
 - [x] Unit 4: move the agent to the minimum `HTTP over Tailscale` steady-state service boundary while preserving artifact compatibility.
 - [x] Unit 5: rerun acceptance, sync roadmap and product docs, and then reassess Milestone 1 / 2 status language.
-- [ ] Next lane: run `pnpm milestone:review:promotion-ready -- --limit 20`, read `.portmanager/reports/milestone-wording-review.md` with `Public claim class`, the latest-qualified signal, the verification report, and the public development-progress page during developer review, rerun the same helper with `--refresh-published-artifact` when the helper reports `promotion-ready-refresh-required` and review agrees that publication should move, and keep qualified Milestone 2 confidence history green on the same live slice while human milestone-language review narrows wording.
+- [ ] Next lane: run `pnpm milestone:review:promotion-ready -- --limit 20`, read `.portmanager/reports/milestone-wording-review.md` with `Public claim class`, `Source surface status`, the latest-qualified signal, the verification report, and the public development-progress page during developer review, rerun the same helper with `--refresh-published-artifact` when the helper reports `promotion-ready-refresh-required` and review agrees that publication should move, and keep qualified Milestone 2 confidence history green on the same live slice while human milestone-language review narrows wording.
 
 ### Current direction documents
 - [x] Land requirements doc: `docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -101,6 +101,8 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Land confidence-wording-review-report implementation plan: `docs/plans/2026-04-21-portmanager-m2-confidence-wording-review-report-plan.md`
 - [x] Land confidence-wording-claim-matrix requirements doc: `docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-claim-matrix-requirements.md`
 - [x] Land confidence-wording-claim-matrix implementation plan: `docs/plans/2026-04-21-portmanager-m2-confidence-wording-claim-matrix-plan.md`
+- [x] Land confidence-wording-surface-status requirements doc: `docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-surface-status-requirements.md`
+- [x] Land confidence-wording-surface-status implementation plan: `docs/plans/2026-04-21-portmanager-m2-confidence-wording-surface-status-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -151,7 +153,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] 里程碑 2 验收闭环：继续在统一 host/rule/policy 模型上补强 live degraded/recovery/diagnostics-history UX。
 - [x] 里程碑 2 验收闭环：在已经显式化的远端备份提示表面之上，真正交付 GitHub backup。
 - [x] 里程碑 2 可靠性切片：在同一条 live agent-backed host/rule 流程上，围绕 configured、failed、local-only 三类 required remote-backup 证据重放 API、CLI、Web 与 agent proof。
-- [x] 里程碑 2 验收闭环：让 qualified `pnpm milestone:verify:confidence` 历史持续保持为绿，直到 readiness summary 以 `7` 次 qualified run 加 `3` 次连续 qualified pass 进入 `promotion-ready`，再决定 Milestone 2 文案何时可以无保留提升。当前同步与公开检查点都已在 `2026-04-21` 进入 `promotion-ready`，门槛已满足，而且被跟踪公开 artifact 已跟上最新 qualified run `24702941958/1`；精确实时计数统一通过 confidence artifact 与 development-progress 页面发布。
+- [x] 里程碑 2 验收闭环：让 qualified `pnpm milestone:verify:confidence` 历史持续保持为绿，直到 readiness summary 以 `7` 次 qualified run 加 `3` 次连续 qualified pass 进入 `promotion-ready`，再决定 Milestone 2 文案何时可以无保留提升。当前同步与公开检查点都已在 `2026-04-21` 进入 `promotion-ready`，门槛已满足，而且精确实时计数与最新 qualified run 已统一通过被跟踪 confidence artifact 与 development-progress 页面发布。
 - [x] 里程碑 2 验收闭环：落地 `pnpm milestone:verify:confidence` 作为规范组合 routine，同时保留 `pnpm acceptance:verify` 作为 Unit 0 gate。
 - [x] 里程碑 2 验收闭环：把规范 confidence routine 接入 `.github/workflows/mainline-acceptance.yml` 的 `push main`、`workflow_dispatch` 与每日 schedule 历史路径。
 - [x] 里程碑 2 验收闭环：让规范 confidence routine 写出带 CI traceability 元数据的 `.portmanager/reports/milestone-confidence-report.json`，并把同一份报告从 CI 上传给开发者核对。
@@ -174,7 +176,7 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] Unit 3：把 Web mock shell 切到 controller 实时数据与路由，补齐 `Hosts`、`Bridge Rules`、`Backups`、`Console`、diagnostics detail。
 - [x] Unit 4：在保持证据产物兼容的前提下，把 agent 推进到最小 `HTTP over Tailscale` 稳态服务边界。
 - [x] Unit 5：重新执行验收、同步 roadmap 与产品文档，再评估 Milestone 1 / 2 状态是否可以提升。
-- [ ] 下一主线：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，结合带 `Public claim class` 的 `.portmanager/reports/milestone-wording-review.md`、summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面做开发者判断，只在 helper 报告 `promotion-ready-refresh-required` 且人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 推进公开 confidence artifact，并继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，同时谨慎收窄里程碑文案。
+- [ ] 下一主线：先执行 `pnpm milestone:review:promotion-ready -- --limit 20`，结合带 `Public claim class` 与 `Source surface status` 的 `.portmanager/reports/milestone-wording-review.md`、summary 里的 latest-qualified 信号、验证报告与公开 development-progress 页面做开发者判断，只在 helper 报告 `promotion-ready-refresh-required` 且人工复核同意时通过同一条 helper 加上 `--refresh-published-artifact` 推进公开被跟踪 confidence artifact，并继续在同一条 live 切片上把 qualified Milestone 2 confidence history 持续保持为绿，同时谨慎收窄里程碑文案。
 
 ### 当前方向文档
 - [x] 落盘需求文档：`docs/brainstorms/2026-04-16-portmanager-mainline-progress-and-next-steps-requirements.md`
@@ -201,4 +203,6 @@ Version: v0.5.19-confidence-progress-refresh
 - [x] 落盘 confidence-wording-review-report 实现计划：`docs/plans/2026-04-21-portmanager-m2-confidence-wording-review-report-plan.md`
 - [x] 落盘 confidence-wording-claim-matrix 需求文档：`docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-claim-matrix-requirements.md`
 - [x] 落盘 confidence-wording-claim-matrix 实现计划：`docs/plans/2026-04-21-portmanager-m2-confidence-wording-claim-matrix-plan.md`
+- [x] 落盘 confidence-wording-surface-status 需求文档：`docs/brainstorms/2026-04-21-portmanager-m2-confidence-wording-surface-status-requirements.md`
+- [x] 落盘 confidence-wording-surface-status 实现计划：`docs/plans/2026-04-21-portmanager-m2-confidence-wording-surface-status-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

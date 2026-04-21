@@ -199,6 +199,15 @@ test('buildMilestoneWordingReview renders human review checklist from aligned pr
     wordingReview.content,
     /Public wording claim: Public roadmap wording may stay at promotion-ready while exact counters remain on the development-progress page and tracked confidence artifact\./
   )
+  assert.match(wordingReview.content, /## Source Surface Status/)
+  assert.match(
+    wordingReview.content,
+    /\| README\.md \| promotion-ready-wording-only \| Keep public wording at promotion-ready or below on this surface; exact counters stay on the development-progress page and tracked confidence artifact\. \|/
+  )
+  assert.match(
+    wordingReview.content,
+    /\| docs-site\/data\/milestone-confidence-progress\.ts \| tracked-counter-source \| Exact published counters belong here and on the development-progress page, not in root-doc prose\. \|/
+  )
   assert.match(wordingReview.content, /Do not claim Milestone 2 is complete solely from confidence thresholds\./)
   assert.match(wordingReview.content, /README\.md/)
   assert.match(wordingReview.content, /docs\/specs\/portmanager-milestones\.md/)
@@ -224,6 +233,10 @@ test('buildMilestoneWordingReview marks countdown drift as refresh-required publ
   assert.match(
     wordingReview.content,
     /Blocked claim: Public pages already show the latest qualified run\./
+  )
+  assert.match(
+    wordingReview.content,
+    /\| docs-site\/data\/milestone-confidence-progress\.ts \| tracked-counter-refresh-required \| Tracked public counters lag synced local evidence until the helper refreshes the published artifact\. \|/
   )
 })
 
