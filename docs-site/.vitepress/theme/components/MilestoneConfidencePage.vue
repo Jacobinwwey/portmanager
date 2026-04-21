@@ -283,7 +283,7 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistTitle: '开发者复核动作',
       currentDirectionKicker: 'Current Direction',
       currentDirectionTitle: '当前复核方向',
-      currentDirectionEvidence: '公开快照刷新',
+      currentDirectionEvidence: '有边界 review',
       currentDirectionRequirementsLink: '当前方向需求文档',
       currentDirectionPlanLink: '当前方向实现计划',
       currentDirectionVerificationLink: '真机验证报告',
@@ -389,7 +389,7 @@ const copy = computed(() => props.locale === 'zh'
       reviewChecklistTitle: 'Developer review actions',
       currentDirectionKicker: 'Current Direction',
       currentDirectionTitle: 'Current review direction',
-      currentDirectionEvidence: 'Publication Refresh',
+      currentDirectionEvidence: 'Bounded Review',
       currentDirectionRequirementsLink: 'Current-direction requirements',
       currentDirectionPlanLink: 'Current-direction plan',
       currentDirectionVerificationLink: 'Verification report',
@@ -569,7 +569,7 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
         `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；promotion 门槛已经满足。`,
         'Milestone 2 现在继续承担 guardrail 角色：当前 CI-first 复核先执行 `pnpm milestone:fetch:review-pack`，completed-mainline 复核仍然经过 `pnpm milestone:review:promotion-ready -- --limit 20`。',
         'Milestone 3 已经作为有边界的 `Phase 0 enablement` 打开；此前 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 记录的 Unit 51 到 Unit 62 enablement 基线继续成立，其中包含已落地的 Unit 57 audit/event boundary、Unit 58 target-profile abstraction rule、Unit 60 consumer-boundary split criteria、Unit 61 deployment-boundary decision pack、Unit 62 second-target policy pack，以及 `/consumer-boundary-decision-pack`、`/deployment-boundary-decision-pack`、`/persistence-decision-pack` 与 `/second-target-policy-pack` 四类 review surface。',
-        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前实现地图已经切到 \`docs/brainstorms/2026-04-21-portmanager-m3-review-packet-readiness-requirements.md\` 与 \`docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md\`：Unit 63 review-packet readiness 已落地，guide coverage 已完整，artifact coverage 仍然缺失，而 Units 63 through 69 现在会把 \`debian-12-systemd-tailscale\` 的下一段执行队列公开在 \`/second-target-policy-pack\` 上，同时继续保持 PostgreSQL backend 路径缺失与更广第二目标支持声明未成立的真相。`
+        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前实现地图已经切到 \`docs/brainstorms/2026-04-21-portmanager-m3-review-packet-readiness-requirements.md\` 与 \`docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md\`：Unit 63 到 Unit 69 现已全部落地，\`debian-12-systemd-tailscale\` 在 \`/second-target-policy-pack\` 下已经公开 guide coverage \`6/6\`、artifact coverage \`20/20\`、\`packet_ready\` 与 \`review_required\`，下一步已经收窄为有边界 second-target review adjudication 与任何仍然真实存在的 review-found delta，同时继续保持 PostgreSQL backend 路径缺失与更广第二目标支持声明未成立的真相。`
       ]
     : [
         `当前公开状态仍为 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
@@ -583,7 +583,7 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
         `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the promotion threshold is met.`,
         'Milestone 2 now stays in guardrail mode: current CI-first review starts with `pnpm milestone:fetch:review-pack`, and completed-mainline review still runs through `pnpm milestone:review:promotion-ready -- --limit 20`.',
         'Milestone 3 is now open as bounded `Phase 0 enablement`; the earlier `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` still define the landed Units 51 through 62 enablement baseline, including Unit 57 audit/event boundary decisions, Unit 58 target-profile abstraction rules, Unit 60 consumer-boundary split criteria, Unit 61 deployment-boundary decision pack, Unit 62 second-target policy pack, and the `/consumer-boundary-decision-pack`, `/deployment-boundary-decision-pack`, `/persistence-decision-pack`, plus `/second-target-policy-pack` review surfaces.',
-        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active implementation map now shifts to \`docs/brainstorms/2026-04-21-portmanager-m3-review-packet-readiness-requirements.md\` and \`docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md\`: Unit 63 review-packet readiness is landed, guide coverage is complete, artifact coverage is still missing, and Units 63 through 69 now publish the bounded next queue for \`debian-12-systemd-tailscale\` through \`/second-target-policy-pack\` while current code still lacks a PostgreSQL backend path and any broader second-target support claim.`
+        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active implementation map now shifts to \`docs/brainstorms/2026-04-21-portmanager-m3-review-packet-readiness-requirements.md\` and \`docs/plans/2026-04-21-portmanager-m3-review-packet-readiness-plan.md\`: Units 63 through 69 are now landed, \`debian-12-systemd-tailscale\` now publishes guide coverage \`6/6\`, artifact coverage \`20/20\`, \`packet_ready\`, and \`review_required\` through \`/second-target-policy-pack\`, and the next queue has collapsed into bounded second-target review adjudication plus any review-found delta while current code still lacks a PostgreSQL backend path and any broader second-target support claim.`
       ]
     : [
         `Current public status remains \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
