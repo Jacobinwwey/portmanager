@@ -135,7 +135,7 @@ flowchart LR
 - Error path: unreachable-agent degradation still stays explicit after seam extraction.
 - Regression: event replay, diagnostics filtering, and backup-aware destructive mutation remain intact.
 
-- [ ] **Unit 52: Gateway-Ready Consumer Boundary And Batch Operation Envelope**
+- [x] **Unit 52: Gateway-Ready Consumer Boundary And Batch Operation Envelope**
 
 **Goal:** Introduce one contract-first boundary that can later sit behind an API gateway and one auditable batch-operation envelope for multi-host work without claiming full fleet management yet.
 
@@ -145,9 +145,11 @@ flowchart LR
 
 **Files:**
 - Modify: `packages/contracts/openapi/openapi.yaml`
-- Modify: `packages/contracts/jsonschema/*.schema.json`
 - Modify: `packages/typescript-contracts/src/generated/*`
 - Modify: `apps/controller/src/controller-server.ts`
+- Modify: `apps/controller/src/controller-domain-service.ts`
+- Modify: `apps/controller/src/controller-read-model.ts`
+- Modify: `apps/controller/src/operation-store.ts`
 - Modify: `crates/portmanager-cli/src/main.rs`
 - Modify: `apps/web/src/main.ts`
 - Create: `tests/controller/batch-operations.test.ts`

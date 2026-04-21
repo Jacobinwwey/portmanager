@@ -226,6 +226,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OperationAccepted'
+  /batch-operations/exposure-policies/apply:
+    post:
+      tags: [operations]
+      summary: Apply host exposure policy across multiple hosts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchExposurePolicyApplyRequest'
+      responses:
+        '202':
+          description: Batch policy apply accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationAccepted'
   /health-checks:
     get:
       tags: [health-checks]
@@ -274,7 +291,11 @@ paths:
           in: query
           schema:
             type: string
-            enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, verify_rule, backup, diagnostics, rollback]
+            enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, batch_apply_policy, verify_rule, backup, diagnostics, rollback]
+        - name: parentOperationId
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Operation list
@@ -710,6 +731,30 @@ components:
           enum: [best_effort, required]
     ExposurePolicyUpdateRequest:
       $ref: '#/components/schemas/ExposurePolicy'
+    BatchExposurePolicyApplyRequest:
+      type: object
+      required: [hostIds, allowedSources, excludedPorts, samePortMirror, conflictPolicy, backupPolicy]
+      properties:
+        hostIds:
+          type: array
+          items:
+            type: string
+        allowedSources:
+          type: array
+          items:
+            type: string
+        excludedPorts:
+          type: array
+          items:
+            type: integer
+        samePortMirror:
+          type: boolean
+        conflictPolicy:
+          type: string
+          enum: [reject, replace_existing]
+        backupPolicy:
+          type: string
+          enum: [best_effort, required]
     HealthCheck:
       type: object
       required: [id, hostId, category, status, checkedAt]
@@ -742,13 +787,15 @@ components:
           type: string
         type:
           type: string
-          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, verify_rule, backup, diagnostics, rollback]
+          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, batch_apply_policy, verify_rule, backup, diagnostics, rollback]
         state:
           type: string
           enum: [queued, running, succeeded, failed, degraded, cancelled]
         hostId:
           type: string
         ruleId:
+          type: string
+        parentOperationId:
           type: string
         startedAt:
           type: string
@@ -780,6 +827,32 @@ components:
               $ref: '#/components/schemas/PortDiagnosticResult'
             snapshotResult:
               $ref: '#/components/schemas/WebSnapshotResult'
+            childOperations:
+              type: array
+              items:
+                $ref: '#/components/schemas/OperationSummary'
+            batchSummary:
+              $ref: '#/components/schemas/BatchOperationSummary'
+    BatchOperationSummary:
+      type: object
+      required: [totalTargets, succeededTargets, degradedTargets, failedTargets, targetHostIds]
+      properties:
+        totalTargets:
+          type: integer
+          minimum: 0
+        succeededTargets:
+          type: integer
+          minimum: 0
+        degradedTargets:
+          type: integer
+          minimum: 0
+        failedTargets:
+          type: integer
+          minimum: 0
+        targetHostIds:
+          type: array
+          items:
+            type: string
     OperationEvent:
       type: object
       required:
@@ -794,7 +867,7 @@ components:
           type: string
         operationType:
           type: string
-          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, verify_rule, backup, diagnostics, rollback]
+          enum: [create_host, probe_host, bootstrap_host, create_rule, update_rule, remove_rule, apply_policy, batch_apply_policy, verify_rule, backup, diagnostics, rollback]
         state:
           type: string
           enum: [queued, running, succeeded, failed, degraded, cancelled]

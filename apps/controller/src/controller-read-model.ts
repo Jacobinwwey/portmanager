@@ -1,5 +1,6 @@
 import type {
   BackupSummary,
+  BatchOperationSummary,
   BridgeRule,
   ExposurePolicy,
   HealthCheck,
@@ -39,6 +40,36 @@ function defaultExposurePolicy(hostId: string): ExposurePolicy {
     samePortMirror: false,
     conflictPolicy: 'reject',
     backupPolicy: 'best_effort'
+  }
+}
+
+function operationStartedAtValue(operation: Pick<OperationSummary, 'startedAt'>) {
+  const parsed = Date.parse(operation.startedAt)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function sortChildOperations(operations: OperationSummary[]) {
+  return [...operations].sort((left, right) => {
+    const startedAtDiff = operationStartedAtValue(left) - operationStartedAtValue(right)
+    if (startedAtDiff !== 0) {
+      return startedAtDiff
+    }
+
+    return left.id.localeCompare(right.id)
+  })
+}
+
+function buildBatchSummary(childOperations: OperationSummary[]): BatchOperationSummary {
+  const sortedChildren = sortChildOperations(childOperations)
+
+  return {
+    totalTargets: sortedChildren.length,
+    succeededTargets: sortedChildren.filter((operation) => operation.state === 'succeeded').length,
+    degradedTargets: sortedChildren.filter((operation) => operation.state === 'degraded').length,
+    failedTargets: sortedChildren.filter((operation) => operation.state === 'failed').length,
+    targetHostIds: sortedChildren
+      .map((operation) => operation.hostId)
+      .filter((hostId): hostId is string => Boolean(hostId))
   }
 }
 
@@ -87,7 +118,22 @@ export function createControllerReadModel(options: {
       }
     },
     getOperation(id) {
-      return store.getOperation(id)
+      const operation = store.getOperation(id)
+      if (!operation) {
+        return null
+      }
+
+      if (operation.type !== 'batch_apply_policy') {
+        return operation
+      }
+
+      const childOperations = sortChildOperations(store.listOperations({ parentOperationId: id }))
+
+      return {
+        ...operation,
+        childOperations,
+        batchSummary: buildBatchSummary(childOperations)
+      }
     },
     getRollbackPoint(id) {
       return store.getRollbackPoint(id)

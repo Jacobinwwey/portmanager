@@ -2599,6 +2599,9 @@ function HostDetailRail(props: { state: HostDetailState }) {
 }
 
 function OperationsMain(props: { state: OperationsState; selected: OperationInventoryEntry | null }) {
+  const batchSummary = props.selected?.operation.batchSummary
+  const childOperations = props.selected?.operation.childOperations ?? []
+
   return h('div', { className: 'pm-detail-grid' }, [
     h('section', { className: 'pm-card', key: 'inventory' }, [
       h(SectionHeading, {
@@ -2662,6 +2665,22 @@ function OperationsMain(props: { state: OperationsState; selected: OperationInve
           ])
         : emptyState('Select one operation to inspect initiator and replay path.')
     ]),
+    h('section', { className: 'pm-card', key: 'batch' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Batch target summary',
+        detail: batchSummary ? `${batchSummary.totalTargets} targets` : 'not a batch envelope'
+      }),
+      batchSummary
+        ? h('div', { className: 'pm-kv', key: 'kv' }, [
+            kvRow('Succeeded', `${batchSummary.succeededTargets} succeeded`),
+            kvRow('Degraded', `${batchSummary.degradedTargets} degraded`),
+            kvRow('Failed', `${batchSummary.failedTargets} failed`),
+            kvRow('Targets', batchSummary.targetHostIds.join(', ') || 'n/a'),
+            kvRow('Child Operations', String(childOperations.length))
+          ])
+        : emptyState('Selected operation does not publish batch target evidence.', 'empty')
+    ]),
     h('section', { className: 'pm-card', key: 'artifacts' }, [
       h(SectionHeading, {
         key: 'heading',
@@ -2686,7 +2705,7 @@ function OperationsMain(props: { state: OperationsState; selected: OperationInve
                     ])
                   )
                 )
-              : emptyState('No linked artifact paths were published for this operation.')
+              : emptyState('No linked artifact paths were published for this operation.', 'empty')
           ]
         : emptyState('Select one operation to inspect linked recovery evidence.')
     ])
@@ -2694,6 +2713,8 @@ function OperationsMain(props: { state: OperationsState; selected: OperationInve
 }
 
 function OperationsRail(props: { state: OperationsState; selected: OperationInventoryEntry | null }) {
+  const childOperations = props.selected?.operation.childOperations ?? []
+
   return h('div', { className: 'pm-panel-stack' }, [
     h('section', { className: 'pm-card', key: 'selected' }, [
       h(SectionHeading, {
@@ -2731,6 +2752,31 @@ function OperationsRail(props: { state: OperationsState; selected: OperationInve
             kvRow('Latest Event', props.state.timeline[0]?.summary ?? 'No events')
           ])
         : emptyState('No replay path until one operation is selected.')
+    ]),
+    h('section', { className: 'pm-card', key: 'children' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Per-host outcomes',
+        detail: props.selected ? `${childOperations.length} child operations` : 'no selection'
+      }),
+      childOperations.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            childOperations.map((operation) =>
+              h('li', { className: 'pm-list-item', key: operation.id }, [
+                h('div', { key: 'line1' }, `${operation.hostId ?? 'n/a'} · ${operation.type}`),
+                h(
+                  'div',
+                  { className: 'pm-microcopy', key: 'line2' },
+                  `${shortTime(operation.finishedAt)} · ${operation.parentOperationId ?? 'no parent'}`
+                ),
+                h('div', { key: 'line3' }, operation.resultSummary ?? 'No summary'),
+                h(StatusBadge, { key: 'badge', state: operation.state })
+              ])
+            )
+          )
+        : emptyState('Selected operation does not publish child outcome evidence.', 'empty')
     ])
   ])
 }
@@ -3232,8 +3278,8 @@ function kvRow(key: string, value: ReactNode) {
   ])
 }
 
-function emptyState(copy: string) {
-  return h('div', { className: 'pm-empty-state' }, copy)
+function emptyState(copy: string, key?: string) {
+  return h('div', { className: 'pm-empty-state', ...(key ? { key } : {}) }, copy)
 }
 
 type Tone = 'success' | 'info' | 'warn'

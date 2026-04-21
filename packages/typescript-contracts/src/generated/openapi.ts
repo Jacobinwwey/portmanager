@@ -85,6 +85,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/batch-operations/exposure-policies/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply host exposure policy across multiple hosts */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["BatchExposurePolicyApplyRequest"];
+                }
+            };
+            responses: {
+                /** @description Batch policy apply accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OperationAccepted"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/bridge-rules": {
         parameters: {
             query?: never;
@@ -659,9 +699,10 @@ export interface paths {
             parameters: {
                 query?: {
                     hostId?: string;
+                    parentOperationId?: string;
                     ruleId?: string;
                     state?: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
-                    type?: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
+                    type?: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "batch_apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
                 };
                 header?: never;
                 path?: never;
@@ -910,6 +951,23 @@ export interface components {
             /** @enum {string} */
             remoteTarget: "github";
         };
+        BatchExposurePolicyApplyRequest: {
+            allowedSources: string[];
+            /** @enum {string} */
+            backupPolicy: "best_effort" | "required";
+            /** @enum {string} */
+            conflictPolicy: "reject" | "replace_existing";
+            excludedPorts: number[];
+            hostIds: string[];
+            samePortMirror: boolean;
+        };
+        BatchOperationSummary: {
+            degradedTargets: number;
+            failedTargets: number;
+            succeededTargets: number;
+            targetHostIds: string[];
+            totalTargets: number;
+        };
         BootstrapHostRequest: {
             /** @enum {string} */
             backupPolicy?: "best_effort" | "required";
@@ -1009,6 +1067,8 @@ export interface components {
         };
         OperationDetail: components["schemas"]["OperationSummary"] & {
             backupId?: string;
+            batchSummary?: components["schemas"]["BatchOperationSummary"];
+            childOperations?: components["schemas"]["OperationSummary"][];
             diagnosticResult?: components["schemas"]["PortDiagnosticResult"];
             eventStreamUrl?: string;
             /** @enum {string} */
@@ -1027,7 +1087,7 @@ export interface components {
             level: "info" | "success" | "warn" | "error";
             operationId: string;
             /** @enum {string} */
-            operationType: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
+            operationType: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "batch_apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
             ruleId?: string;
             /** @enum {string} */
             state: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
@@ -1039,6 +1099,7 @@ export interface components {
             finishedAt?: string;
             hostId?: string;
             id: string;
+            parentOperationId?: string;
             resultSummary?: string;
             rollbackPointId?: string;
             ruleId?: string;
@@ -1047,7 +1108,7 @@ export interface components {
             /** @enum {string} */
             state: "queued" | "running" | "succeeded" | "failed" | "degraded" | "cancelled";
             /** @enum {string} */
-            type: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
+            type: "create_host" | "probe_host" | "bootstrap_host" | "create_rule" | "update_rule" | "remove_rule" | "apply_policy" | "batch_apply_policy" | "verify_rule" | "backup" | "diagnostics" | "rollback";
         };
         PortDiagnosticResult: {
             /** Format: date-time */
@@ -1136,6 +1197,8 @@ export interface components {
     pathItems: never;
 }
 export type BackupSummary = components['schemas']['BackupSummary'];
+export type BatchExposurePolicyApplyRequest = components['schemas']['BatchExposurePolicyApplyRequest'];
+export type BatchOperationSummary = components['schemas']['BatchOperationSummary'];
 export type BootstrapHostRequest = components['schemas']['BootstrapHostRequest'];
 export type BridgeRule = components['schemas']['BridgeRule'];
 export type CreateBridgeRuleRequest = components['schemas']['CreateBridgeRuleRequest'];

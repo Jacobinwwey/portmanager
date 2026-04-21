@@ -7,6 +7,7 @@ import type {
 } from '@portmanager/typescript-contracts'
 
 export type BackupSummary = components['schemas']['BackupSummary']
+export type BatchOperationSummary = components['schemas']['BatchOperationSummary']
 export type BridgeRule = components['schemas']['BridgeRule']
 export type ExposurePolicy = components['schemas']['ExposurePolicy']
 export type HealthCheck = components['schemas']['HealthCheck']
@@ -23,6 +24,7 @@ export type RollbackPoint = components['schemas']['RollbackPoint']
 
 export interface OperationListFilters {
   hostId?: string
+  parentOperationId?: string
   ruleId?: string
   type?: string
   state?: string
@@ -43,6 +45,7 @@ export interface EnqueueOperationInput {
   type: OperationDetail['type']
   initiator: NonNullable<OperationDetail['initiator']>
   hostId?: string
+  parentOperationId?: string
   ruleId?: string
 }
 
@@ -228,6 +231,7 @@ interface OperationRow {
   state: OperationDetail['state']
   initiator: NonNullable<OperationDetail['initiator']>
   host_id: string | null
+  parent_operation_id: string | null
   rule_id: string | null
   started_at: string
   finished_at: string | null
@@ -438,6 +442,7 @@ function rowToDetail(row: OperationRow): OperationDetail {
     state: row.state,
     initiator: row.initiator,
     hostId: row.host_id ?? undefined,
+    ...(row.parent_operation_id ? { parentOperationId: row.parent_operation_id } : {}),
     ruleId: row.rule_id ?? undefined,
     startedAt: row.started_at,
     finishedAt: row.finished_at ?? undefined,
@@ -470,6 +475,7 @@ function rowToSummary(row: OperationRow): OperationSummary {
     type: row.type,
     state: row.state,
     hostId: row.host_id ?? undefined,
+    ...(row.parent_operation_id ? { parentOperationId: row.parent_operation_id } : {}),
     ruleId: row.rule_id ?? undefined,
     startedAt: row.started_at,
     finishedAt: row.finished_at ?? undefined,
@@ -489,6 +495,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       state TEXT NOT NULL,
       initiator TEXT NOT NULL,
       host_id TEXT,
+      parent_operation_id TEXT,
       rule_id TEXT,
       started_at TEXT NOT NULL,
       finished_at TEXT,
@@ -575,6 +582,9 @@ export function createOperationStore(options: { databasePath: string }): Operati
     database.exec(`ALTER TABLE backups ADD COLUMN backup_mode TEXT`)
   } catch {}
   try {
+    database.exec(`ALTER TABLE operations ADD COLUMN parent_operation_id TEXT`)
+  } catch {}
+  try {
     database.exec(`ALTER TABLE hosts ADD COLUMN agent_version TEXT`)
   } catch {}
   try {
@@ -588,6 +598,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       state,
       initiator,
       host_id,
+      parent_operation_id,
       rule_id,
       started_at,
       finished_at,
@@ -597,7 +608,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       rollback_point_id,
       diagnostic_result_json,
       snapshot_result_json
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
   `)
 
   const getOperation = database.prepare(`
@@ -607,6 +618,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       state,
       initiator,
       host_id,
+      parent_operation_id,
       rule_id,
       started_at,
       finished_at,
@@ -627,6 +639,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       state,
       initiator,
       host_id,
+      parent_operation_id,
       rule_id,
       started_at,
       finished_at,
@@ -666,6 +679,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
       state,
       initiator,
       host_id,
+      parent_operation_id,
       rule_id,
       started_at,
       finished_at,
@@ -1036,6 +1050,7 @@ export function createOperationStore(options: { databasePath: string }): Operati
         'queued',
         input.initiator,
         input.hostId ?? null,
+        input.parentOperationId ?? null,
         input.ruleId ?? null,
         nowIso()
       )
@@ -1054,6 +1069,10 @@ export function createOperationStore(options: { databasePath: string }): Operati
         .map((row) => rowToSummary(row))
         .filter((row) => {
           if (filters?.hostId && row.hostId !== filters.hostId) {
+            return false
+          }
+
+          if (filters?.parentOperationId && row.parentOperationId !== filters.parentOperationId) {
             return false
           }
 

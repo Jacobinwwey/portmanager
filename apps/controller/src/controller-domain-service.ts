@@ -2,15 +2,26 @@ import type { ApplyDesiredStateSchema, RuntimeStateSchema } from '@portmanager/t
 
 import type { ControllerAgentClient } from './agent-client.ts'
 import type { LocalBackupPrimitive } from './local-backup-primitive.ts'
-import type { OperationExecutionResult } from './operation-runner.ts'
+import type { OperationExecutionResult, OperationRunner } from './operation-runner.ts'
 import type {
   BridgeRule,
   CreateBridgeRuleInput,
   ExposurePolicy,
+  OperationDetail,
   OperationStore
 } from './operation-store.ts'
 
 export interface ControllerDomainService {
+  applyExposurePolicyBatch(input: {
+    operationId: string
+    hostIds: string[]
+    allowedSources: string[]
+    excludedPorts: number[]
+    samePortMirror: boolean
+    conflictPolicy: ExposurePolicy['conflictPolicy']
+    backupPolicy: ExposurePolicy['backupPolicy']
+    initiator: NonNullable<OperationDetail['initiator']>
+  }): Promise<OperationExecutionResult>
   applyExposurePolicy(input: {
     operationId: string
     hostId: string
@@ -71,13 +82,16 @@ function hostLifecycleFromAgentState(agentState: RuntimeStateSchema['agentState'
 export function createControllerDomainService(options: {
   store: Pick<
     OperationStore,
+    | 'enqueueOperation'
     | 'createBridgeRule'
     | 'createHealthCheck'
     | 'createHost'
     | 'getBridgeRule'
     | 'getExposurePolicy'
     | 'getHost'
+    | 'getOperation'
     | 'listBridgeRules'
+    | 'listOperations'
     | 'replaceExposurePolicy'
     | 'updateBridgeRule'
     | 'updateHostRuntime'
@@ -85,8 +99,9 @@ export function createControllerDomainService(options: {
   agentClient: Pick<ControllerAgentClient, 'applyDesiredState' | 'collectRuntimeState'>
   agentEndpoints: Map<string, string>
   backupPrimitive: Pick<LocalBackupPrimitive, 'applyRollback' | 'runBackup'>
+  operationRunner: Pick<OperationRunner, 'run'>
 }): ControllerDomainService {
-  const { store, agentClient, agentEndpoints, backupPrimitive } = options
+  const { store, agentClient, agentEndpoints, backupPrimitive, operationRunner } = options
 
   function buildDesiredState(hostId: string): ApplyDesiredStateSchema {
     const policy = store.getExposurePolicy(hostId)
@@ -289,28 +304,94 @@ export function createControllerDomainService(options: {
     return collectAgentRuntime(input)
   }
 
-  return {
-    async applyExposurePolicy(input) {
-      store.replaceExposurePolicy({
-        hostId: input.hostId,
-        allowedSources: input.allowedSources,
-        excludedPorts: input.excludedPorts,
-        samePortMirror: input.samePortMirror,
-        conflictPolicy: input.conflictPolicy,
-        backupPolicy: input.backupPolicy
-      })
+  function createChildOperationId(hostId: string) {
+    return `op_apply_policy_${hostId}_${Date.now()}_${Math.floor(Math.random() * 1000)}`
+  }
 
-      const sync = await pushDesiredStateToAgent({
-        hostId: input.hostId,
-        operationId: input.operationId,
-        category: 'bridge_verify',
-        backupPolicy: input.backupPolicy
-      })
+  async function applyExposurePolicyInternal(input: {
+    operationId: string
+    hostId: string
+    allowedSources: string[]
+    excludedPorts: number[]
+    samePortMirror: boolean
+    conflictPolicy: ExposurePolicy['conflictPolicy']
+    backupPolicy: ExposurePolicy['backupPolicy']
+  }) {
+    store.replaceExposurePolicy({
+      hostId: input.hostId,
+      allowedSources: input.allowedSources,
+      excludedPorts: input.excludedPorts,
+      samePortMirror: input.samePortMirror,
+      conflictPolicy: input.conflictPolicy,
+      backupPolicy: input.backupPolicy
+    })
+
+    const sync = await pushDesiredStateToAgent({
+      hostId: input.hostId,
+      operationId: input.operationId,
+      category: 'bridge_verify',
+      backupPolicy: input.backupPolicy
+    })
+
+    return {
+      state: sync.state,
+      resultSummary: `policy applied for ${input.hostId}; ${sync.resultSummary}`
+    } satisfies OperationExecutionResult
+  }
+
+  return {
+    async applyExposurePolicyBatch(input) {
+      const childOperations: OperationDetail[] = []
+
+      for (const hostId of input.hostIds) {
+        const childOperationId = createChildOperationId(hostId)
+        store.enqueueOperation({
+          id: childOperationId,
+          type: 'apply_policy',
+          initiator: input.initiator,
+          hostId,
+          parentOperationId: input.operationId
+        })
+
+        try {
+          const childOperation = await operationRunner.run(childOperationId, async () =>
+            applyExposurePolicyInternal({
+              operationId: childOperationId,
+              hostId,
+              allowedSources: input.allowedSources,
+              excludedPorts: input.excludedPorts,
+              samePortMirror: input.samePortMirror,
+              conflictPolicy: input.conflictPolicy,
+              backupPolicy: input.backupPolicy
+            })
+          )
+          childOperations.push(childOperation)
+        } catch {
+          const failedChild = store.getOperation(childOperationId)
+          if (failedChild) {
+            childOperations.push(failedChild)
+          }
+        }
+      }
+
+      const succeededTargets = childOperations.filter(
+        (operation) => operation.state === 'succeeded'
+      ).length
+      const degradedTargets = childOperations.filter(
+        (operation) => operation.state === 'degraded'
+      ).length
+      const failedTargets = childOperations.filter((operation) => operation.state === 'failed').length
+      const state = degradedTargets > 0 || failedTargets > 0 ? 'degraded' : 'succeeded'
 
       return {
-        state: sync.state,
-        resultSummary: `policy applied for ${input.hostId}; ${sync.resultSummary}`
+        state,
+        resultSummary:
+          `batch policy applied for ${input.hostIds.length} hosts; ` +
+          `${succeededTargets} succeeded, ${degradedTargets} degraded, ${failedTargets} failed`
       }
+    },
+    async applyExposurePolicy(input) {
+      return applyExposurePolicyInternal(input)
     },
     async bootstrapHost(input) {
       const host = store.getHost(input.hostId)

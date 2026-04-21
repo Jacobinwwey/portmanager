@@ -68,6 +68,7 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Acceptance hardening: align development-progress docs validation with the committed generated confidence fallback so a fresh machine does not fail on missing ignored `.portmanager` history.
 - [x] Acceptance hardening: keep development-progress docs validation hermetic when ignored local `.portmanager` history is newer than committed docs-site progress data and `docs:generate` has not been rerun yet.
 - [x] Milestone 3 Unit 51: extract `controller-domain-service` and `controller-read-model` seams, move controller orchestration and host-detail composition behind explicit modules, and keep current HTTP contracts plus acceptance evidence unchanged.
+- [x] Milestone 3 Unit 52: add gateway-ready batch exposure-policy envelope, parent-child operation linkage, CLI batch apply flow, and Web batch outcome rendering without broadening supported target claims.
 
 ### Recommended execution order
 - [x] Unit 0: formalize the repeatable local and CI acceptance gate with `pnpm acceptance:verify` and `.github/workflows/mainline-acceptance.yml`, then keep it green on `main` while Unit 1 becomes the active lane.

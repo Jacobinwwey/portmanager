@@ -136,6 +136,7 @@ enum OperationSubcommand {
 
 #[derive(Subcommand)]
 enum OperationsSubcommand {
+    BatchApplyPolicy(OperationsBatchApplyPolicyArgs),
     List(OperationsListArgs),
 }
 
@@ -479,11 +480,39 @@ struct OperationsListArgs {
     #[arg(long)]
     host_id: Option<String>,
     #[arg(long)]
+    parent_operation_id: Option<String>,
+    #[arg(long)]
     rule_id: Option<String>,
     #[arg(long)]
     state: Option<String>,
     #[arg(long)]
     r#type: Option<String>,
+    #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
+    controller_base_url: String,
+}
+
+#[derive(Args, Clone)]
+struct OperationsBatchApplyPolicyArgs {
+    #[arg(long = "host-id")]
+    host_ids: Vec<String>,
+    #[arg(long = "allowed-source")]
+    allowed_sources: Vec<String>,
+    #[arg(long = "excluded-port")]
+    excluded_ports: Vec<u16>,
+    #[arg(long, default_value_t = false)]
+    same_port_mirror: bool,
+    #[arg(long)]
+    conflict_policy: ConflictPolicyArg,
+    #[arg(long)]
+    backup_policy: BackupPolicyArg,
+    #[arg(long)]
+    json: bool,
+    #[arg(long)]
+    wait: bool,
+    #[arg(long, default_value_t = 30_000)]
+    timeout_ms: u64,
+    #[arg(long, default_value_t = 250)]
+    poll_interval_ms: u64,
     #[arg(long, env = "PORTMANAGER_CONTROLLER_BASE_URL")]
     controller_base_url: String,
 }
@@ -617,6 +646,9 @@ async fn execute(cli: Cli) -> ExecutionResult {
             OperationSubcommand::Get(args) => run_operation_get(args).await,
         },
         Commands::Operations(command) => match command.command {
+            OperationsSubcommand::BatchApplyPolicy(args) => {
+                run_operations_batch_apply_policy(args).await
+            }
             OperationsSubcommand::List(args) => run_operations_list(args).await,
         },
         Commands::RollbackPoints(command) => match command.command {
@@ -1146,6 +1178,7 @@ async fn run_operations_list(args: OperationsListArgs) -> ExecutionResult {
         &Client::new(),
         &args.controller_base_url,
         args.host_id.as_deref(),
+        args.parent_operation_id.as_deref(),
         args.rule_id.as_deref(),
         args.state.as_deref(),
         args.r#type.as_deref(),
@@ -1162,7 +1195,7 @@ async fn run_operations_list(args: OperationsListArgs) -> ExecutionResult {
                     .flatten()
                     .map(|operation| {
                         format!(
-                            "{} {} {} {} {} {} {}",
+                            "{} {} {} {} {} {} {} {}",
                             operation["finishedAt"]
                                 .as_str()
                                 .or_else(|| operation["startedAt"].as_str())
@@ -1174,6 +1207,9 @@ async fn run_operations_list(args: OperationsListArgs) -> ExecutionResult {
                                 .as_str()
                                 .unwrap_or("missing summary"),
                             operation["backupId"].as_str().unwrap_or("backup n/a"),
+                            operation["parentOperationId"]
+                                .as_str()
+                                .unwrap_or("parent n/a"),
                             operation["rollbackPointId"]
                                 .as_str()
                                 .unwrap_or("rollback n/a"),
@@ -1188,6 +1224,43 @@ async fn run_operations_list(args: OperationsListArgs) -> ExecutionResult {
         Err(error) => {
             json_or_text_error_flag(args.json, error, "operation fetch failed".to_string())
         }
+    }
+}
+
+async fn run_operations_batch_apply_policy(args: OperationsBatchApplyPolicyArgs) -> ExecutionResult {
+    let client = Client::new();
+    let wait_options = WaitOptions {
+        json: args.json,
+        wait: args.wait,
+        timeout_ms: args.timeout_ms,
+        poll_interval_ms: args.poll_interval_ms,
+        controller_base_url: args.controller_base_url.clone(),
+    };
+
+    match apply_batch_exposure_policy(
+        &client,
+        &args.controller_base_url,
+        &args.host_ids,
+        &args.allowed_sources,
+        &args.excluded_ports,
+        args.same_port_mirror,
+        args.conflict_policy,
+        args.backup_policy,
+    )
+    .await
+    {
+        Ok(accepted) => complete_enqueued_operation(
+            &client,
+            &wait_options,
+            accepted,
+            "batch exposure policy apply",
+        )
+        .await,
+        Err(error) => json_or_text_error_flag(
+            args.json,
+            error,
+            "batch exposure policy apply failed".to_string(),
+        ),
     }
 }
 
@@ -1414,8 +1487,21 @@ async fn complete_enqueued_operation(
 }
 
 fn format_operation_detail_text(operation: &Value, default_id: &str) -> String {
+    let batch_summary = operation
+        .get("batchSummary")
+        .map(|summary| {
+            format!(
+                " targets={}/{} degraded={} failed={}",
+                summary["succeededTargets"].as_u64().unwrap_or_default(),
+                summary["totalTargets"].as_u64().unwrap_or_default(),
+                summary["degradedTargets"].as_u64().unwrap_or_default(),
+                summary["failedTargets"].as_u64().unwrap_or_default()
+            )
+        })
+        .unwrap_or_default();
+
     format!(
-        "{} {} {} {} {} {} {}",
+        "{} {} {} {} {} {} {}{}",
         operation["id"].as_str().unwrap_or(default_id),
         operation["type"].as_str().unwrap_or("unknown"),
         operation["state"].as_str().unwrap_or("unknown"),
@@ -1428,7 +1514,8 @@ fn format_operation_detail_text(operation: &Value, default_id: &str) -> String {
             .unwrap_or("rollback-n/a"),
         operation["eventStreamUrl"]
             .as_str()
-            .unwrap_or("/operations/events")
+            .unwrap_or("/operations/events"),
+        batch_summary
     )
 }
 
@@ -1933,6 +2020,35 @@ async fn set_exposure_policy(
     .await
 }
 
+async fn apply_batch_exposure_policy(
+    client: &Client,
+    controller_base_url: &str,
+    host_ids: &[String],
+    allowed_sources: &[String],
+    excluded_ports: &[u16],
+    same_port_mirror: bool,
+    conflict_policy: ConflictPolicyArg,
+    backup_policy: BackupPolicyArg,
+) -> Result<Value, JsonErrorOutput> {
+    let url = format!(
+        "{}/batch-operations/exposure-policies/apply",
+        controller_base_url.trim_end_matches('/')
+    );
+    request_json(
+        client.post(url).json(&json!({
+            "hostIds": host_ids,
+            "allowedSources": allowed_sources,
+            "excludedPorts": excluded_ports,
+            "samePortMirror": same_port_mirror,
+            "conflictPolicy": conflict_policy.as_controller_value(),
+            "backupPolicy": backup_policy.as_controller_value()
+        })),
+        None,
+        None,
+    )
+    .await
+}
+
 async fn fetch_health_checks(
     client: &Client,
     controller_base_url: &str,
@@ -2069,6 +2185,7 @@ async fn fetch_operations(
     client: &Client,
     controller_base_url: &str,
     host_id: Option<&str>,
+    parent_operation_id: Option<&str>,
     rule_id: Option<&str>,
     state: Option<&str>,
     operation_type: Option<&str>,
@@ -2077,6 +2194,9 @@ async fn fetch_operations(
     let mut query: Vec<(&str, &str)> = Vec::new();
     if let Some(host_id) = host_id {
         query.push(("hostId", host_id));
+    }
+    if let Some(parent_operation_id) = parent_operation_id {
+        query.push(("parentOperationId", parent_operation_id));
     }
     if let Some(rule_id) = rule_id {
         query.push(("ruleId", rule_id));

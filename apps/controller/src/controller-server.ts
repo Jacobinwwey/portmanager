@@ -158,7 +158,8 @@ export function createControllerServer(options: {
     store,
     agentClient,
     agentEndpoints,
-    backupPrimitive
+    backupPrimitive,
+    operationRunner: runner
   })
 
   const server = http.createServer((request, response) => {
@@ -559,10 +560,73 @@ export function createControllerServer(options: {
       return
     }
 
+    if (request.method === 'POST' && requestUrl.pathname === '/batch-operations/exposure-policies/apply') {
+      const payload = await readJsonBody(request)
+      const hostIds = parseStringArray(payload.hostIds)
+      const allowedSources = parseStringArray(payload.allowedSources)
+      const excludedPorts = parseNumberArray(payload.excludedPorts)
+      const samePortMirror =
+        typeof payload.samePortMirror === 'boolean' ? payload.samePortMirror : undefined
+      const conflictPolicy = parseConflictPolicy(payload.conflictPolicy)
+      const backupPolicy = parseBackupPolicy(payload.backupPolicy)
+      const uniqueHostIds = hostIds ? [...new Set(hostIds)] : null
+
+      if (
+        !hostIds ||
+        !allowedSources ||
+        !excludedPorts ||
+        samePortMirror === undefined ||
+        !conflictPolicy ||
+        !backupPolicy ||
+        hostIds.length === 0 ||
+        !uniqueHostIds ||
+        uniqueHostIds.length !== hostIds.length
+      ) {
+        sendJson(response, 400, { error: 'invalid_batch_exposure_policy_request' })
+        return
+      }
+
+      const validatedHostIds = uniqueHostIds
+      const missingHostIds = validatedHostIds.filter((hostId) => !readModel.getHost(hostId))
+      if (missingHostIds.length > 0) {
+        sendJson(response, 404, {
+          error: 'host_not_found',
+          hostIds: missingHostIds
+        })
+        return
+      }
+
+      const operationId = createOperationId('op_batch_apply_policy')
+      const accepted = store.enqueueOperation({
+        id: operationId,
+        type: 'batch_apply_policy',
+        initiator: 'web'
+      })
+
+      sendJson(response, 202, accepted)
+
+      queueMicrotask(() => {
+        void runner.run(operationId, async () => {
+          return domainService.applyExposurePolicyBatch({
+            operationId,
+            hostIds: validatedHostIds,
+            allowedSources,
+            excludedPorts,
+            samePortMirror,
+            conflictPolicy,
+            backupPolicy,
+            initiator: 'web'
+          })
+        })
+      })
+      return
+    }
+
     if (request.method === 'GET' && requestUrl.pathname === '/operations') {
       sendJson(response, 200, {
         items: readModel.listOperations({
           hostId: requestUrl.searchParams.get('hostId') ?? undefined,
+          parentOperationId: requestUrl.searchParams.get('parentOperationId') ?? undefined,
           ruleId: requestUrl.searchParams.get('ruleId') ?? undefined,
           state: requestUrl.searchParams.get('state') ?? undefined,
           type: requestUrl.searchParams.get('type') ?? undefined

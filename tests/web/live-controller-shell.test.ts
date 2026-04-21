@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createServer } from 'node:http'
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { mkdtempSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import { tmpdir } from 'node:os'
@@ -106,6 +106,87 @@ async function waitForTerminalOperation(baseUrl: string, operationId: string) {
   }
 
   throw new Error(`operation did not settle: ${operationId}`)
+}
+
+async function readJsonBody(request: IncomingMessage) {
+  const chunks: Buffer[] = []
+  for await (const chunk of request) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+
+  if (chunks.length === 0) {
+    return {}
+  }
+
+  return JSON.parse(Buffer.concat(chunks).toString('utf8')) as Record<string, unknown>
+}
+
+async function startAgentServer(hostId: string) {
+  const server = createServer(async (request: IncomingMessage, response: ServerResponse) => {
+    if (request.method === 'POST' && request.url === '/apply') {
+      const payload = await readJsonBody(request)
+      response.writeHead(200, { 'content-type': 'application/json' })
+      response.end(
+        JSON.stringify({
+          schemaVersion: '0.1.0',
+          operationId:
+            typeof payload.operationId === 'string' ? payload.operationId : `op_agent_${hostId}`,
+          type: 'apply',
+          state: 'succeeded',
+          hostId,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          resultSummary: `agent applied desired state for ${hostId}`
+        })
+      )
+      return
+    }
+
+    if (request.method === 'GET' && request.url === '/runtime-state') {
+      response.writeHead(200, { 'content-type': 'application/json' })
+      response.end(
+        JSON.stringify({
+          schemaVersion: '0.1.0',
+          hostId,
+          agentState: 'ready',
+          agentVersion: '0.1.0',
+          effectiveStateHash: `${hostId}_hash_001`,
+          health: {
+            summary: `agent ready for ${hostId}`,
+            signals: [
+              {
+                code: 'batch_apply_policy',
+                status: 'healthy',
+                message: hostId
+              }
+            ]
+          },
+          appliedRules: [],
+          updatedAt: new Date().toISOString()
+        })
+      )
+      return
+    }
+
+    response.writeHead(404, { 'content-type': 'application/json' })
+    response.end(JSON.stringify({ error: 'not_found' }))
+  })
+
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', reject)
+      resolve()
+    })
+  })
+
+  const address = server.address()
+  assert.ok(address && typeof address !== 'string')
+
+  return {
+    server,
+    port: address.port
+  }
 }
 
 test('web live loaders render controller-backed overview, host, rules, backups, and console surfaces', async () => {
@@ -415,6 +496,97 @@ test('web live loaders render successful GitHub backup status when remote backup
     }
   } finally {
     await closeHttpServer(github.server)
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('web operations page renders batch target summary and per-host outcomes', async () => {
+  const { directory, databasePath, artifactRoot } = tempPaths()
+
+  try {
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, artifactRoot })
+    const alphaAgent = await startAgentServer('host_alpha')
+    const betaAgent = await startAgentServer('host_beta')
+    const listening = await server.listen(0)
+
+    try {
+      store.createHost({
+        id: 'host_alpha',
+        name: 'Alpha Relay',
+        sshHost: '127.0.0.1',
+        sshPort: 22
+      })
+      store.createHost({
+        id: 'host_beta',
+        name: 'Beta Relay',
+        sshHost: '127.0.0.1',
+        sshPort: 22
+      })
+
+      for (const [hostId, desiredAgentPort] of [
+        ['host_alpha', alphaAgent.port],
+        ['host_beta', betaAgent.port]
+      ] as const) {
+        const bootstrapResponse = await fetch(`${listening.baseUrl}/hosts/${hostId}/bootstrap`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            sshUser: 'ubuntu',
+            desiredAgentPort,
+            backupPolicy: 'best_effort'
+          })
+        })
+        assert.equal(bootstrapResponse.status, 202)
+        const accepted = (await bootstrapResponse.json()) as { operationId: string }
+        await waitForTerminalOperation(listening.baseUrl, accepted.operationId)
+      }
+
+      betaAgent.server.close()
+
+      const batchResponse = await fetch(
+        `${listening.baseUrl}/batch-operations/exposure-policies/apply`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            hostIds: ['host_alpha', 'host_beta'],
+            allowedSources: ['tailscale', 'admin'],
+            excludedPorts: [22, 8443],
+            samePortMirror: true,
+            conflictPolicy: 'replace_existing',
+            backupPolicy: 'required'
+          })
+        }
+      )
+      assert.equal(batchResponse.status, 202)
+      const batchAccepted = (await batchResponse.json()) as { operationId: string }
+      await waitForTerminalOperation(listening.baseUrl, batchAccepted.operationId)
+
+      const operationsState = await loadOperationsState({
+        baseUrl: listening.baseUrl,
+        operationId: batchAccepted.operationId
+      })
+      assert.equal(operationsState.selectedOperationId, batchAccepted.operationId)
+
+      const html = renderToStaticMarkup(h(OperationsPage, { state: operationsState }))
+      assert.match(html, /Batch target summary/i)
+      assert.match(html, /Per-host outcomes/i)
+      assert.match(html, /1 succeeded/i)
+      assert.match(html, /1 degraded/i)
+      assert.match(html, /host_alpha/i)
+      assert.match(html, /host_beta/i)
+    } finally {
+      alphaAgent.server.close()
+      await server.close()
+      store.close()
+    }
+  } finally {
     rmSync(directory, { recursive: true, force: true })
   }
 })
