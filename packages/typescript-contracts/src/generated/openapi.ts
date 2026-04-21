@@ -1525,6 +1525,20 @@ export interface components {
             sources: string[];
             summary: string;
         };
+        SecondTargetDiagnosticsProofArtifact: {
+            id: components["schemas"]["SecondTargetDiagnosticsProofArtifactId"];
+            label: string;
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetDiagnosticsProofArtifactId: "diagnostics_operation_id" | "diagnostics_artifact_paths" | "controller_event_reference" | "drift_operator_note";
+        SecondTargetDiagnosticsProofCapture: {
+            candidateTargetProfileId: string;
+            guidePath: string;
+            requiredArtifacts: components["schemas"]["SecondTargetDiagnosticsProofArtifact"][];
+            sources: string[];
+            summary: string;
+        };
         SecondTargetPolicyCriterion: {
             id: components["schemas"]["SecondTargetPolicyCriterionId"];
             label: string;
@@ -1550,6 +1564,7 @@ export interface components {
             candidateTargetProfileIds: string[];
             candidateTargetProfiles: components["schemas"]["TargetProfileSummary"][];
             decisionState: components["schemas"]["SecondTargetPolicyDecisionState"];
+            diagnosticsProofCapture: components["schemas"]["SecondTargetDiagnosticsProofCapture"];
             evidenceItems: components["schemas"]["SecondTargetPolicyEvidenceItem"][];
             expansionReviewRequired: boolean;
             /** @enum {string} */
@@ -1686,6 +1701,9 @@ export type SecondTargetBackupRestoreProofCapture = components['schemas']['Secon
 export type SecondTargetBootstrapProofArtifact = components['schemas']['SecondTargetBootstrapProofArtifact'];
 export type SecondTargetBootstrapProofArtifactId = components['schemas']['SecondTargetBootstrapProofArtifactId'];
 export type SecondTargetBootstrapProofCapture = components['schemas']['SecondTargetBootstrapProofCapture'];
+export type SecondTargetDiagnosticsProofArtifact = components['schemas']['SecondTargetDiagnosticsProofArtifact'];
+export type SecondTargetDiagnosticsProofArtifactId = components['schemas']['SecondTargetDiagnosticsProofArtifactId'];
+export type SecondTargetDiagnosticsProofCapture = components['schemas']['SecondTargetDiagnosticsProofCapture'];
 export type SecondTargetPolicyCriterion = components['schemas']['SecondTargetPolicyCriterion'];
 export type SecondTargetPolicyCriterionId = components['schemas']['SecondTargetPolicyCriterionId'];
 export type SecondTargetPolicyDecisionState = components['schemas']['SecondTargetPolicyDecisionState'];

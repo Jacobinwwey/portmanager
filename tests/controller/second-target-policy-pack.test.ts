@@ -173,6 +173,25 @@ test('default second target policy pack lands governance artifacts while transpo
     ),
     true
   )
+  assert.equal(pack.diagnosticsProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+  assert.match(
+    pack.diagnosticsProofCapture.guidePath,
+    /docs\/operations\/portmanager-debian-12-diagnostics-proof-capture\.md/u
+  )
+  assert.equal(pack.diagnosticsProofCapture.requiredArtifacts.length >= 4, true)
+  assert.equal(
+    pack.diagnosticsProofCapture.requiredArtifacts.some(
+      (item) =>
+        item.id === 'diagnostics_artifact_paths' && item.summary.includes('artifact')
+    ),
+    true
+  )
+  assert.equal(
+    pack.diagnosticsProofCapture.sources.some((source) =>
+      source.endsWith('docs/operations/portmanager-debian-12-diagnostics-proof-capture.md')
+    ),
+    true
+  )
   assert.equal(
     pack.reviewPacketTemplate.requiredEvidence.some(
       (item) =>
@@ -292,6 +311,17 @@ test('controller server exposes second target policy pack as explicit controller
           }>
           sources: string[]
         }
+        diagnosticsProofCapture: {
+          candidateTargetProfileId: string
+          guidePath: string
+          summary: string
+          requiredArtifacts: Array<{
+            id: string
+            label: string
+            summary: string
+          }>
+          sources: string[]
+        }
         satisfiedCriteria: Array<{ id: string; label: string }>
         blockingCriteria: Array<{ id: string; label: string }>
         evidenceItems: Array<{
@@ -371,6 +401,24 @@ test('controller server exposes second target policy pack as explicit controller
       assert.equal(
         payload.backupRestoreProofCapture.sources.some((source) =>
           source.endsWith('docs/operations/portmanager-debian-12-backup-restore-proof-capture.md')
+        ),
+        true
+      )
+      assert.equal(payload.diagnosticsProofCapture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+      assert.match(
+        payload.diagnosticsProofCapture.guidePath,
+        /docs\/operations\/portmanager-debian-12-diagnostics-proof-capture\.md/u
+      )
+      assert.equal(payload.diagnosticsProofCapture.requiredArtifacts.length >= 4, true)
+      assert.equal(
+        payload.diagnosticsProofCapture.requiredArtifacts.some(
+          (item) => item.id === 'diagnostics_artifact_paths'
+        ),
+        true
+      )
+      assert.equal(
+        payload.diagnosticsProofCapture.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-diagnostics-proof-capture.md')
         ),
         true
       )

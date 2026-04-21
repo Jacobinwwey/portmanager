@@ -57,11 +57,23 @@ test('roadmap publishes a development-progress page backed by live milestone con
     'operations',
     'debian-12-backup-restore-proof-capture.md'
   )
+  const enDiagnosticsProofPagePath = path.join(
+    docsSiteRoot,
+    'en',
+    'operations',
+    'debian-12-diagnostics-proof-capture.md'
+  )
   const zhBackupRestoreProofPagePath = path.join(
     docsSiteRoot,
     'zh',
     'operations',
     'debian-12-backup-restore-proof-capture.md'
+  )
+  const zhDiagnosticsProofPagePath = path.join(
+    docsSiteRoot,
+    'zh',
+    'operations',
+    'debian-12-diagnostics-proof-capture.md'
   )
 
   assert.ok(existsSync(enPagePath), 'missing English development-progress roadmap page')
@@ -72,6 +84,8 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.ok(existsSync(zhSteadyStateProofPagePath), 'missing Chinese steady-state operations page')
   assert.ok(existsSync(enBackupRestoreProofPagePath), 'missing English backup-restore operations page')
   assert.ok(existsSync(zhBackupRestoreProofPagePath), 'missing Chinese backup-restore operations page')
+  assert.ok(existsSync(enDiagnosticsProofPagePath), 'missing English diagnostics operations page')
+  assert.ok(existsSync(zhDiagnosticsProofPagePath), 'missing Chinese diagnostics operations page')
   assert.ok(existsSync(generatedProgressDataPath), 'missing generated milestone confidence progress data file')
   assert.ok(existsSync(roadmapDataPath), 'missing roadmap data file')
 
@@ -121,6 +135,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(roadmapData, /portmanager-debian-12-bootstrap-proof-capture\.md/)
   assert.match(roadmapData, /portmanager-debian-12-steady-state-proof-capture\.md/)
   assert.match(roadmapData, /portmanager-debian-12-backup-restore-proof-capture\.md/)
+  assert.match(roadmapData, /portmanager-debian-12-diagnostics-proof-capture\.md/)
   assert.match(milestoneConfidenceComponent, /--skip-sync/)
   assert.match(milestoneConfidenceComponent, /Public claim class/)
   assert.match(milestoneConfidenceComponent, /Source surface status/)

@@ -18,7 +18,7 @@ status: active
 本文档不宣称等价证明已经通过。
 它只冻结在第二目标 review 能开启前必须完成的证明顺序与产物包。
 配套的 `docs/operations/portmanager-debian-12-review-packet-template.md` 会冻结这些产物该如何落盘记录。
-配套的 `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`、`docs/operations/portmanager-debian-12-steady-state-proof-capture.md` 与 `docs/operations/portmanager-debian-12-backup-restore-proof-capture.md` 会冻结 bootstrap、steady-state 与 backup 证据该如何采集。
+配套的 `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`、`docs/operations/portmanager-debian-12-steady-state-proof-capture.md`、`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md` 与 `docs/operations/portmanager-debian-12-diagnostics-proof-capture.md` 会冻结 bootstrap、steady-state、backup 与 diagnostics 证据该如何采集。
 当前仓库基线现在只支持 candidate host 的注册、probe 与 bootstrap 预演。
 它仍然不宣称 bootstrap parity 已通过，也不宣称 steady-state、backup、diagnostics 或 rollback parity 已通过。
 
@@ -57,6 +57,7 @@ status: active
 - bootstrap proof 指南路径：`docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`
 - steady-state proof 指南路径：`docs/operations/portmanager-debian-12-steady-state-proof-capture.md`
 - backup-restore proof 指南路径：`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`
+- diagnostics proof 指南路径：`docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`
 
 ### 退出规则
 只有在完整证据包真实存在且已经链接进 review packet 之后，才能把等价 criteria 标为 true。

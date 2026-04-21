@@ -1642,6 +1642,44 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         'docs/operations/portmanager-backup-rollback-policy.md'
       ]
     },
+    diagnosticsProofCapture: {
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      guidePath: 'docs/operations/portmanager-debian-12-diagnostics-proof-capture.md',
+      summary:
+        'Diagnostics proof capture stays explicit for debian-12-systemd-tailscale before diagnostics parity can move.',
+      requiredArtifacts: [
+        {
+          id: 'diagnostics_operation_id',
+          label: 'Diagnostics operation id',
+          summary:
+            'Capture one bounded diagnostics operation id so the Debian 12 proof stays anchored to one controller verification run.'
+        },
+        {
+          id: 'diagnostics_artifact_paths',
+          label: 'Diagnostics artifact paths',
+          summary:
+            'Capture the diagnostics artifact paths from the same run so webpage snapshots and machine-readable evidence stay linked.'
+        },
+        {
+          id: 'controller_event_reference',
+          label: 'Controller event reference',
+          summary:
+            'Capture one linked controller event replay or audit-index reference that ties the diagnostics run back to controller truth.'
+        },
+        {
+          id: 'drift_operator_note',
+          label: 'Drift operator note',
+          summary:
+            'Capture one short operator note for any drift, degraded verification, or no-drift conclusion from the same diagnostics packet.'
+        }
+      ],
+      sources: [
+        'docs/operations/portmanager-debian-12-diagnostics-proof-capture.md',
+        'docs/operations/portmanager-debian-12-review-packet-template.md',
+        'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+        'docs/operations/portmanager-backup-rollback-policy.md'
+      ]
+    },
     satisfiedCriteria: [
       {
         id: 'locked_target_registry',
@@ -3688,6 +3726,44 @@ function SecondTargetPolicyCard(props: {
         { className: 'pm-microcopy', key: 'sources' },
         props.pack.backupRestoreProofCapture.sources.length > 0
           ? `Sources: ${props.pack.backupRestoreProofCapture.sources.join(', ')}`
+          : 'Sources: none'
+      )
+    ]),
+    h('section', { className: 'pm-card', key: 'diagnostics-proof-capture' }, [
+      h(SectionHeading, {
+        key: 'heading',
+        title: 'Diagnostics proof capture',
+        detail: props.pack.diagnosticsProofCapture.candidateTargetProfileId
+      }),
+      h('div', { className: 'pm-kv', key: 'kv' }, [
+        kvRow('Guide Path', props.pack.diagnosticsProofCapture.guidePath),
+        kvRow(
+          'Required Artifacts',
+          String(props.pack.diagnosticsProofCapture.requiredArtifacts.length)
+        )
+      ]),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'summary' },
+        props.pack.diagnosticsProofCapture.summary
+      ),
+      props.pack.diagnosticsProofCapture.requiredArtifacts.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'list' },
+            props.pack.diagnosticsProofCapture.requiredArtifacts.map((item) =>
+              h('li', { className: 'pm-list-item', key: item.id }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, item.summary)
+              ])
+            )
+          )
+        : emptyState('No diagnostics-proof artifacts recorded yet.', 'empty'),
+      h(
+        'p',
+        { className: 'pm-microcopy', key: 'sources' },
+        props.pack.diagnosticsProofCapture.sources.length > 0
+          ? `Sources: ${props.pack.diagnosticsProofCapture.sources.join(', ')}`
           : 'Sources: none'
       )
     ]),

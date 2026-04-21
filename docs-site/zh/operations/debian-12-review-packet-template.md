@@ -55,4 +55,4 @@ status: active
 ### 发布规则
 - 在每个必需分区都拥有真实 artifact 链接之前，packet 只能停留在 review-prep。
 - 任何分区一旦回退，先更新 `/second-target-policy-pack`，并继续把支持声明锁在 Ubuntu。
-- 当证据变化时，把这份 packet 同步回 acceptance recipe、bootstrap proof 指南、steady-state proof 指南、backup-restore proof 指南与 operator ownership 文档。
+- 当证据变化时，把这份 packet 同步回 acceptance recipe、bootstrap proof 指南、steady-state proof 指南、backup-restore proof 指南、diagnostics proof 指南与 operator ownership 文档。

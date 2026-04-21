@@ -112,6 +112,26 @@ export interface SecondTargetBackupRestoreProofCapture {
   sources: string[]
 }
 
+export type SecondTargetDiagnosticsProofArtifactId =
+  | 'diagnostics_operation_id'
+  | 'diagnostics_artifact_paths'
+  | 'controller_event_reference'
+  | 'drift_operator_note'
+
+export interface SecondTargetDiagnosticsProofArtifact {
+  id: SecondTargetDiagnosticsProofArtifactId
+  label: string
+  summary: string
+}
+
+export interface SecondTargetDiagnosticsProofCapture {
+  candidateTargetProfileId: string
+  guidePath: string
+  summary: string
+  requiredArtifacts: SecondTargetDiagnosticsProofArtifact[]
+  sources: string[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -144,6 +164,7 @@ export interface SecondTargetPolicyPack {
   bootstrapProofCapture: SecondTargetBootstrapProofCapture
   steadyStateProofCapture: SecondTargetSteadyStateProofCapture
   backupRestoreProofCapture: SecondTargetBackupRestoreProofCapture
+  diagnosticsProofCapture: SecondTargetDiagnosticsProofCapture
   satisfiedCriteria: SecondTargetPolicyCriterion[]
   blockingCriteria: SecondTargetPolicyCriterion[]
   evidenceItems: SecondTargetPolicyEvidenceItem[]
@@ -156,6 +177,8 @@ const steadyStateProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-steady-state-proof-capture.md'
 const backupRestoreProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-backup-restore-proof-capture.md'
+const diagnosticsProofCaptureGuidePath =
+  'docs/operations/portmanager-debian-12-diagnostics-proof-capture.md'
 
 const bootstrapProofArtifactMetadata: Record<
   SecondTargetBootstrapProofArtifactId,
@@ -232,6 +255,32 @@ const backupRestoreProofArtifactMetadata: Record<
     label: 'Restore-readiness reference',
     summary:
       'Capture one rollback-point or restore-readiness reference tied to the same backup-bearing mutation without widening support claims.'
+  }
+}
+
+const diagnosticsProofArtifactMetadata: Record<
+  SecondTargetDiagnosticsProofArtifactId,
+  { label: string; summary: string }
+> = {
+  diagnostics_operation_id: {
+    label: 'Diagnostics operation id',
+    summary:
+      'Capture one bounded diagnostics operation id so the Debian 12 proof stays anchored to one controller verification run.'
+  },
+  diagnostics_artifact_paths: {
+    label: 'Diagnostics artifact paths',
+    summary:
+      'Capture the diagnostics artifact paths from the same run so webpage snapshots and machine-readable evidence stay linked.'
+  },
+  controller_event_reference: {
+    label: 'Controller event reference',
+    summary:
+      'Capture one linked controller event replay or audit-index reference that ties the diagnostics run back to controller truth.'
+  },
+  drift_operator_note: {
+    label: 'Drift operator note',
+    summary:
+      'Capture one short operator note for any drift, degraded verification, or no-drift conclusion from the same diagnostics packet.'
   }
 }
 
@@ -362,6 +411,18 @@ function backupRestoreProofArtifact(
   }
 }
 
+function diagnosticsProofArtifact(
+  id: SecondTargetDiagnosticsProofArtifactId
+): SecondTargetDiagnosticsProofArtifact {
+  const metadata = diagnosticsProofArtifactMetadata[id]
+
+  return {
+    id,
+    label: metadata.label,
+    summary: metadata.summary
+  }
+}
+
 function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceItem[] {
   return [
     evidenceItem(
@@ -467,8 +528,9 @@ function createDefaultSecondTargetEvidenceItems(): SecondTargetPolicyEvidenceIte
     evidenceItem(
       'diagnostics_parity',
       'planned',
-      'Diagnostics parity evidence is still pending for Debian 12.',
+      'Diagnostics parity is still pending for Debian 12 until one diagnostics artifact bundle and controller event reference are captured.',
       [
+        diagnosticsProofCaptureGuidePath,
         'docs/operations/portmanager-debian-12-acceptance-recipe.md',
         reviewPacketTemplatePath,
         'docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md'
@@ -685,6 +747,7 @@ function buildReviewPacketTemplate(
         'diagnostics_parity',
         'Capture diagnostics artifact paths plus linked controller event references for the candidate host after transport rehearsal.',
         [
+          diagnosticsProofCaptureGuidePath,
           reviewPacketTemplatePath,
           'docs/operations/portmanager-debian-12-acceptance-recipe.md',
           'docs/operations/portmanager-backup-rollback-policy.md'
@@ -780,6 +843,33 @@ function buildBackupRestoreProofCapture(
   }
 }
 
+function buildDiagnosticsProofCapture(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetDiagnosticsProofCapture {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+
+  return {
+    candidateTargetProfileId,
+    guidePath: diagnosticsProofCaptureGuidePath,
+    summary:
+      `Diagnostics proof capture stays explicit for ${candidateTargetProfileId}: preserve one diagnostics artifact bundle before diagnostics parity can move.`,
+    requiredArtifacts: [
+      diagnosticsProofArtifact('diagnostics_operation_id'),
+      diagnosticsProofArtifact('diagnostics_artifact_paths'),
+      diagnosticsProofArtifact('controller_event_reference'),
+      diagnosticsProofArtifact('drift_operator_note')
+    ],
+    sources: [
+      diagnosticsProofCaptureGuidePath,
+      reviewPacketTemplatePath,
+      'docs/operations/portmanager-debian-12-acceptance-recipe.md',
+      'docs/operations/portmanager-backup-rollback-policy.md',
+      'apps/controller/src/controller-server.ts',
+      'apps/controller/src/controller-domain-service.ts'
+    ]
+  }
+}
+
 export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySnapshot {
   const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
     summarizeTargetProfile(profile.id)
@@ -832,6 +922,7 @@ export function buildSecondTargetPolicyPack(
     bootstrapProofCapture: buildBootstrapProofCapture(snapshot),
     steadyStateProofCapture: buildSteadyStateProofCapture(snapshot),
     backupRestoreProofCapture: buildBackupRestoreProofCapture(snapshot),
+    diagnosticsProofCapture: buildDiagnosticsProofCapture(snapshot),
     satisfiedCriteria,
     blockingCriteria,
     evidenceItems: (snapshot.evidenceItems ?? []).map((item) => ({

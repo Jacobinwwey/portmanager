@@ -1381,6 +1381,7 @@ components:
           bootstrapProofCapture,
           steadyStateProofCapture,
           backupRestoreProofCapture,
+          diagnosticsProofCapture,
           satisfiedCriteria,
           blockingCriteria,
           evidenceItems
@@ -1422,6 +1423,8 @@ components:
           $ref: '#/components/schemas/SecondTargetSteadyStateProofCapture'
         backupRestoreProofCapture:
           $ref: '#/components/schemas/SecondTargetBackupRestoreProofCapture'
+        diagnosticsProofCapture:
+          $ref: '#/components/schemas/SecondTargetDiagnosticsProofCapture'
         satisfiedCriteria:
           type: array
           items:
@@ -1588,6 +1591,43 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetBackupRestoreProofArtifact'
+        sources:
+          type: array
+          items:
+            type: string
+    SecondTargetDiagnosticsProofArtifactId:
+      type: string
+      enum:
+        [
+          diagnostics_operation_id,
+          diagnostics_artifact_paths,
+          controller_event_reference,
+          drift_operator_note
+        ]
+    SecondTargetDiagnosticsProofArtifact:
+      type: object
+      required: [id, label, summary]
+      properties:
+        id:
+          $ref: '#/components/schemas/SecondTargetDiagnosticsProofArtifactId'
+        label:
+          type: string
+        summary:
+          type: string
+    SecondTargetDiagnosticsProofCapture:
+      type: object
+      required: [candidateTargetProfileId, guidePath, summary, requiredArtifacts, sources]
+      properties:
+        candidateTargetProfileId:
+          type: string
+        guidePath:
+          type: string
+        summary:
+          type: string
+        requiredArtifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetDiagnosticsProofArtifact'
         sources:
           type: array
           items:
