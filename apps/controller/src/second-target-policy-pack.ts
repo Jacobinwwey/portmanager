@@ -259,6 +259,8 @@ export interface SecondTargetLiveTransportFollowUp {
   guidePath: string
   artifactRootPattern: string
   currentRecordedAddress: string
+  capturedPacketRoot?: string
+  capturedAddress?: string
   summary: string
   requiredNextAction: string
   requiredArtifacts: SecondTargetLiveTransportFollowUpArtifact[]
@@ -282,6 +284,9 @@ export interface SecondTargetPolicySnapshot {
   operatorOwnershipDefined: boolean
   reviewPacketGuidePaths?: string[]
   capturedReviewArtifactIds?: SecondTargetReviewArtifactId[]
+  liveTransportCaptureArtifactRoot?: string
+  liveTransportCapturedAddress?: string
+  liveTransportCapturedArtifactIds?: SecondTargetLiveTransportFollowUpArtifactId[]
   evidenceItems?: SecondTargetPolicyEvidenceItem[]
 }
 
@@ -327,6 +332,8 @@ const liveTailscaleFollowUpGuidePath =
   'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md'
 const bootstrapCaptureArtifactRoot =
   'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21'
+const liveTailscaleFollowUpArtifactRootPrefix =
+  'docs/operations/artifacts/debian-12-live-tailscale-packet-'
 const liveTailscaleFollowUpArtifactRootPattern =
   'docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/'
 const preservedDockerBridgeAddress = '172.17.0.2'
@@ -697,6 +704,14 @@ const liveTransportFollowUpArtifactMetadata: Record<
       'Capture one controller audit-index or replay reference that links the live-Tailscale bootstrap and steady-state captures into one bounded packet.'
   }
 }
+
+const requiredLiveTransportFollowUpArtifactIds: SecondTargetLiveTransportFollowUpArtifactId[] = [
+  'candidate_host_with_tailscale_ip',
+  'bootstrap_operation_with_tailscale_transport',
+  'steady_state_health_with_tailscale_transport',
+  'steady_state_runtime_state_with_tailscale_transport',
+  'linked_controller_audit_reference'
+]
 
 const criterionMetadata: Record<
   SecondTargetPolicyCriterionId,
@@ -1203,6 +1218,43 @@ function resolvedCapturedReviewArtifactIds(snapshot: SecondTargetPolicySnapshot)
   return uniqueItems(snapshot.capturedReviewArtifactIds ?? [])
 }
 
+function resolvedLiveTransportCapturedArtifactIds(snapshot: SecondTargetPolicySnapshot) {
+  return uniqueItems(snapshot.liveTransportCapturedArtifactIds ?? [])
+}
+
+function resolvedLiveTransportCaptureArtifactRoot(snapshot: SecondTargetPolicySnapshot) {
+  const root = snapshot.liveTransportCaptureArtifactRoot?.trim()
+
+  if (!root) {
+    return undefined
+  }
+
+  return root.replace(/\/+$/u, '')
+}
+
+function resolvedLiveTransportCapturedAddress(snapshot: SecondTargetPolicySnapshot) {
+  const address = snapshot.liveTransportCapturedAddress?.trim()
+
+  return address ? address : undefined
+}
+
+function hasCompleteLiveTransportFollowUp(snapshot: SecondTargetPolicySnapshot) {
+  const capturedPacketRoot = resolvedLiveTransportCaptureArtifactRoot(snapshot)
+  const capturedAddress = resolvedLiveTransportCapturedAddress(snapshot)
+  const capturedArtifactIds = resolvedLiveTransportCapturedArtifactIds(snapshot)
+
+  return (
+    capturedPacketRoot !== undefined &&
+    capturedPacketRoot.startsWith(liveTailscaleFollowUpArtifactRootPrefix) &&
+    !capturedPacketRoot.includes('<date>') &&
+    capturedAddress !== undefined &&
+    capturedAddress !== preservedDockerBridgeAddress &&
+    requiredLiveTransportFollowUpArtifactIds.every((artifactId) =>
+      capturedArtifactIds.includes(artifactId)
+    )
+  )
+}
+
 function buildReviewPacketGuideCoverage(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetReviewPacketGuideCoverage {
@@ -1428,6 +1480,9 @@ function buildReviewAdjudication(
   const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
   const decisionState = decisionStateFrom(snapshot)
   const readinessState = reviewPacketReadinessStateFrom(snapshot)
+  const liveTransportFollowUpComplete = hasCompleteLiveTransportFollowUp(snapshot)
+  const capturedPacketRoot = resolvedLiveTransportCaptureArtifactRoot(snapshot)
+  const capturedAddress = resolvedLiveTransportCapturedAddress(snapshot)
   const state: SecondTargetReviewAdjudicationState =
     decisionState === 'review_required' && readinessState === 'packet_ready'
       ? 'review_open'
@@ -1448,7 +1503,9 @@ function buildReviewAdjudication(
       contractPath: secondTargetReviewContractPath,
       packetRoot: bootstrapCaptureArtifactRoot,
       summary:
-        `Bounded second-target review is open for ${candidateTargetProfileId}; adjudicate packet integrity, drift acknowledgement, support lock, operator sign-off, and follow-up scope while the Docker-bridge-only packet delta stays explicit.`,
+        liveTransportFollowUpComplete && capturedPacketRoot && capturedAddress
+          ? `Bounded second-target review is open for ${candidateTargetProfileId}; live Tailscale follow-up is now preserved at ${capturedPacketRoot} on address ${capturedAddress}, so adjudicate packet integrity, drift acknowledgement, support lock, operator sign-off, and bounded follow-up closure against both packets.`
+          : `Bounded second-target review is open for ${candidateTargetProfileId}; adjudicate packet integrity, drift acknowledgement, support lock, operator sign-off, and follow-up scope while the Docker-bridge-only packet delta stays explicit.`,
       pendingVerdicts: [
         reviewVerdict('packet_integrity'),
         reviewVerdict('drift_acknowledged'),
@@ -1456,8 +1513,13 @@ function buildReviewAdjudication(
         reviewVerdict('operator_signoff'),
         reviewVerdict('follow_up_scope_bounded')
       ],
-      blockingDeltas: [reviewDelta('container_bridge_transport_substitution')],
-      sources
+      blockingDeltas: liveTransportFollowUpComplete
+        ? []
+        : [reviewDelta('container_bridge_transport_substitution')],
+      sources:
+        liveTransportFollowUpComplete && capturedPacketRoot
+          ? [...sources, capturedPacketRoot]
+          : sources
     }
   }
 
@@ -1480,22 +1542,18 @@ function buildLiveTransportFollowUp(
 ): SecondTargetLiveTransportFollowUp {
   const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
   const reviewAdjudication = buildReviewAdjudication(snapshot)
-  const hasBlockingTransportDelta = reviewAdjudication.blockingDeltas.some(
-    (delta) => delta.id === 'container_bridge_transport_substitution'
-  )
+  const capturedPacketRoot = resolvedLiveTransportCaptureArtifactRoot(snapshot)
+  const capturedAddress = resolvedLiveTransportCapturedAddress(snapshot)
+  const liveTransportFollowUpComplete = hasCompleteLiveTransportFollowUp(snapshot)
   const state: SecondTargetLiveTransportFollowUpState =
     reviewAdjudication.state !== 'review_open'
       ? 'deferred'
-      : hasBlockingTransportDelta
-        ? 'capture_required'
-        : 'capture_complete'
-  const requiredArtifacts = [
-    liveTransportFollowUpArtifact('candidate_host_with_tailscale_ip'),
-    liveTransportFollowUpArtifact('bootstrap_operation_with_tailscale_transport'),
-    liveTransportFollowUpArtifact('steady_state_health_with_tailscale_transport'),
-    liveTransportFollowUpArtifact('steady_state_runtime_state_with_tailscale_transport'),
-    liveTransportFollowUpArtifact('linked_controller_audit_reference')
-  ]
+      : liveTransportFollowUpComplete
+        ? 'capture_complete'
+        : 'capture_required'
+  const requiredArtifacts = requiredLiveTransportFollowUpArtifactIds.map((id) =>
+    liveTransportFollowUpArtifact(id)
+  )
   const sources = [
     liveTailscaleFollowUpGuidePath,
     packetReadmePath,
@@ -1528,12 +1586,14 @@ function buildLiveTransportFollowUp(
       guidePath: liveTailscaleFollowUpGuidePath,
       artifactRootPattern: liveTailscaleFollowUpArtifactRootPattern,
       currentRecordedAddress: preservedDockerBridgeAddress,
+      capturedPacketRoot,
+      capturedAddress,
       summary:
-        `Live Tailscale follow-up is already captured for ${candidateTargetProfileId}; keep the newer packet linked while the preserved Docker-bridge packet remains historical evidence.`,
+        `Live Tailscale follow-up is already captured for ${candidateTargetProfileId}; newer packet ${capturedPacketRoot} records live Tailscale address ${capturedAddress} while the preserved Docker-bridge packet remains historical evidence.`,
       requiredNextAction:
-        'Keep `/second-target-policy-pack`, docs, CLI, and Web aligned with the newer live-Tailscale packet before narrowing any support-lock wording.',
+        `Keep \`/second-target-policy-pack\`, docs, CLI, and Web aligned with captured packet ${capturedPacketRoot} before narrowing any support-lock wording.`,
       requiredArtifacts,
-      sources
+      sources: capturedPacketRoot ? [...sources, capturedPacketRoot] : sources
     }
   }
 

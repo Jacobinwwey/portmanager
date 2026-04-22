@@ -1718,6 +1718,10 @@ components:
           type: string
         currentRecordedAddress:
           type: string
+        capturedPacketRoot:
+          type: string
+        capturedAddress:
+          type: string
         summary:
           type: string
         requiredNextAction:

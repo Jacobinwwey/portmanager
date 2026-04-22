@@ -1815,6 +1815,160 @@ fn operations_second_target_policy_pack_text_surfaces_blocking_review_delta() {
 }
 
 #[test]
+fn operations_second_target_policy_pack_text_surfaces_completed_live_transport_capture() {
+    let server = MockHttpServer::start(vec![(
+        "/second-target-policy-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "lockedTargetProfileId": "ubuntu-24.04-systemd-tailscale",
+                "reviewOwner": "controller",
+                "supportedTargetProfiles": [
+                    {
+                        "id": "ubuntu-24.04-systemd-tailscale",
+                        "label": "Ubuntu 24.04 + systemd + Tailscale",
+                        "status": "supported"
+                    }
+                ],
+                "candidateTargetProfiles": [
+                    {
+                        "id": "debian-12-systemd-tailscale",
+                        "label": "Debian 12 + systemd + Tailscale",
+                        "status": "candidate"
+                    }
+                ],
+                "candidateTargetProfileIds": ["debian-12-systemd-tailscale"],
+                "decisionState": "review_required",
+                "expansionReviewRequired": true,
+                "summary": "bounded second-target review is open now",
+                "nextActions": ["work through bounded review delta"],
+                "reviewPacketReadiness": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "state": "packet_ready",
+                    "summary": "packet ready",
+                    "requiredNextAction": "adjudicate review",
+                    "guideCoverage": {
+                        "available": 6,
+                        "expected": 6,
+                        "missingPaths": []
+                    },
+                    "artifactCoverage": {
+                        "available": 20,
+                        "expected": 20,
+                        "missingArtifactIds": []
+                    },
+                    "nextExecutionUnits": []
+                },
+                "reviewAdjudication": {
+                    "state": "review_open",
+                    "reviewOwner": "controller",
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "contractPath": "docs/operations/portmanager-second-target-review-contract.md",
+                    "packetRoot": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21",
+                    "summary": "live follow-up preserved",
+                    "pendingVerdicts": [
+                        {
+                            "id": "follow_up_scope_bounded",
+                            "label": "Follow-up scope bounded",
+                            "summary": "keep both packets linked",
+                            "sources": ["docs/operations/portmanager-second-target-review-contract.md"]
+                        }
+                    ],
+                    "blockingDeltas": [],
+                    "sources": [
+                        "docs/operations/portmanager-second-target-review-contract.md",
+                        "docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22"
+                    ]
+                },
+                "liveTransportFollowUp": {
+                    "state": "capture_complete",
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md",
+                    "artifactRootPattern": "docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/",
+                    "currentRecordedAddress": "172.17.0.2",
+                    "capturedPacketRoot": "docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22",
+                    "capturedAddress": "100.91.22.14",
+                    "summary": "live packet recorded",
+                    "requiredNextAction": "keep captured packet aligned",
+                    "requiredArtifacts": [
+                        {
+                            "id": "candidate_host_with_tailscale_ip",
+                            "label": "Candidate host with Tailscale IP",
+                            "summary": "host detail captured"
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md",
+                        "docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22"
+                    ]
+                },
+                "reviewPacketTemplate": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "templatePath": "docs/operations/portmanager-debian-12-review-packet-template.md",
+                    "summary": "review packet template exists",
+                    "requiredEvidence": []
+                },
+                "bootstrapProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md",
+                    "summary": "bootstrap proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-bootstrap-proof-capture.md"]
+                },
+                "steadyStateProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+                    "summary": "steady-state proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-steady-state-proof-capture.md"]
+                },
+                "backupRestoreProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-backup-restore-proof-capture.md",
+                    "summary": "backup and restore proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-backup-restore-proof-capture.md"]
+                },
+                "diagnosticsProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-diagnostics-proof-capture.md",
+                    "summary": "diagnostics proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-diagnostics-proof-capture.md"]
+                },
+                "rollbackProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+                    "summary": "rollback proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-rollback-proof-capture.md"]
+                },
+                "evidenceItems": [],
+                "satisfiedCriteria": [],
+                "blockingCriteria": []
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["operations", "second-target-policy-pack"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("Live Transport Follow-Up:"));
+    assert!(stdout.contains("State: capture_complete"));
+    assert!(stdout.contains(
+        "Captured Packet Root: docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22"
+    ));
+    assert!(stdout.contains("Captured Address: 100.91.22.14"));
+    assert!(stdout.contains("Blocking Review Deltas:\n- none"));
+}
+
+#[test]
 fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_prefix() {
     let server = MockHttpServer::start(vec![(
         "/api/controller/second-target-policy-pack",

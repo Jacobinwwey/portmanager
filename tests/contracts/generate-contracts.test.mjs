@@ -96,6 +96,8 @@ test('contracts generator emits openapi and json schema types into target tree',
     assert.match(openapiOutput, /reviewPacketReadiness/u)
     assert.match(openapiOutput, /reviewAdjudication/u)
     assert.match(openapiOutput, /liveTransportFollowUp/u)
+    assert.match(openapiOutput, /capturedPacketRoot/u)
+    assert.match(openapiOutput, /capturedAddress/u)
     assert.match(openapiOutput, /blockingDeltas/u)
     assert.match(openapiOutput, /bootstrapProofCapture/u)
     assert.match(openapiOutput, /steadyStateProofCapture/u)

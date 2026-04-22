@@ -3921,7 +3921,13 @@ function SecondTargetPolicyCard(props: {
           kvRow('Candidate Target', props.pack.liveTransportFollowUp.candidateTargetProfileId),
           kvRow('Guide Path', props.pack.liveTransportFollowUp.guidePath),
           kvRow('Artifact Root Pattern', props.pack.liveTransportFollowUp.artifactRootPattern),
-          kvRow('Current Recorded Address', props.pack.liveTransportFollowUp.currentRecordedAddress)
+          kvRow('Current Recorded Address', props.pack.liveTransportFollowUp.currentRecordedAddress),
+          props.pack.liveTransportFollowUp.capturedPacketRoot
+            ? kvRow('Captured Packet Root', props.pack.liveTransportFollowUp.capturedPacketRoot)
+            : null,
+          props.pack.liveTransportFollowUp.capturedAddress
+            ? kvRow('Captured Address', props.pack.liveTransportFollowUp.capturedAddress)
+            : null
         ]),
         h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.liveTransportFollowUp.summary),
         h(

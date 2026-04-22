@@ -1542,6 +1542,8 @@ export interface components {
         SecondTargetLiveTransportFollowUp: {
             artifactRootPattern: string;
             candidateTargetProfileId: string;
+            capturedAddress?: string;
+            capturedPacketRoot?: string;
             currentRecordedAddress: string;
             guidePath: string;
             requiredArtifacts: components["schemas"]["SecondTargetLiveTransportFollowUpArtifact"][];

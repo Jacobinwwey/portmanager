@@ -168,6 +168,8 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(roadmapData, /Docker bridge/i)
   assert.match(roadmapData, /172\.17\.0\.2/)
   assert.match(roadmapData, /live tailscale follow-up/i)
+  assert.match(roadmapData, /capture_complete/)
+  assert.match(roadmapData, /all five live follow-up artifacts/i)
   assert.match(roadmapData, /debian-12-systemd-tailscale/)
   assert.match(roadmapData, /review-packet readiness/i)
   assert.match(roadmapData, /guide coverage/i)

@@ -183,6 +183,8 @@ test('default second target policy pack preserves a complete review packet and o
     ),
     true
   )
+  assert.equal(pack.liveTransportFollowUp.capturedPacketRoot, undefined)
+  assert.equal(pack.liveTransportFollowUp.capturedAddress, undefined)
   assert.equal(pack.reviewPacketTemplate.candidateTargetProfileId, 'debian-12-systemd-tailscale')
   assert.match(
     pack.reviewPacketTemplate.templatePath,
@@ -381,6 +383,46 @@ test('default second target policy pack preserves a complete review packet and o
   assert.match(pack.nextActions[0] ?? '', /Work through bounded second-target review/i)
 })
 
+test('second target policy pack clears transport blocking delta when live tailscale follow-up packet is complete', () => {
+  const pack = buildSecondTargetPolicyPack({
+    ...createDefaultSecondTargetPolicySnapshot(),
+    liveTransportCaptureArtifactRoot:
+      'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22',
+    liveTransportCapturedAddress: '100.91.22.14',
+    liveTransportCapturedArtifactIds: [
+      'candidate_host_with_tailscale_ip',
+      'bootstrap_operation_with_tailscale_transport',
+      'steady_state_health_with_tailscale_transport',
+      'steady_state_runtime_state_with_tailscale_transport',
+      'linked_controller_audit_reference'
+    ]
+  })
+
+  assert.equal(pack.reviewAdjudication.state, 'review_open')
+  assert.equal(pack.reviewAdjudication.blockingDeltas.length, 0)
+  assert.match(pack.reviewAdjudication.summary, /live Tailscale follow-up is now preserved/i)
+  assert.equal(
+    pack.reviewAdjudication.sources.includes(
+      'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22'
+    ),
+    true
+  )
+  assert.equal(pack.liveTransportFollowUp.state, 'capture_complete')
+  assert.equal(
+    pack.liveTransportFollowUp.capturedPacketRoot,
+    'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22'
+  )
+  assert.equal(pack.liveTransportFollowUp.capturedAddress, '100.91.22.14')
+  assert.match(pack.liveTransportFollowUp.summary, /100\.91\.22\.14/)
+  assert.match(pack.liveTransportFollowUp.requiredNextAction, /captured packet/u)
+  assert.equal(
+    pack.liveTransportFollowUp.sources.includes(
+      'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22'
+    ),
+    true
+  )
+})
+
 test('second target review packet readiness stays in progress until diagnostics and rollback packet sections land', () => {
   const pack = buildSecondTargetPolicyPack({
     ...createDefaultSecondTargetPolicySnapshot(),
@@ -486,6 +528,23 @@ test('controller server exposes second target policy pack as explicit controller
             summary: string
             requiredFollowUp: string
             sources: string[]
+          }>
+          sources: string[]
+        }
+        liveTransportFollowUp: {
+          state: string
+          candidateTargetProfileId: string
+          guidePath: string
+          artifactRootPattern: string
+          currentRecordedAddress: string
+          capturedPacketRoot?: string
+          capturedAddress?: string
+          summary: string
+          requiredNextAction: string
+          requiredArtifacts: Array<{
+            id: string
+            label: string
+            summary: string
           }>
           sources: string[]
         }
@@ -805,6 +864,8 @@ test('controller server exposes second target policy pack as explicit controller
         'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md'
       )
       assert.equal(payload.liveTransportFollowUp.currentRecordedAddress, '172.17.0.2')
+      assert.equal(payload.liveTransportFollowUp.capturedPacketRoot, undefined)
+      assert.equal(payload.liveTransportFollowUp.capturedAddress, undefined)
       assert.match(payload.liveTransportFollowUp.summary, /live tailscale-backed bounded packet/i)
       assert.equal(payload.liveTransportFollowUp.requiredArtifacts.length >= 4, true)
       assert.equal(

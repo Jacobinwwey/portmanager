@@ -145,6 +145,72 @@ test('overview shell renders blocking review delta when bounded review is open',
   assert.match(html, /Candidate host with Tailscale IP/i)
 })
 
+test('overview shell renders captured packet evidence when live transport follow-up is complete', () => {
+  const state = createMockOverviewState()
+  state.secondTargetPolicyPack.decisionState = 'review_required'
+  state.secondTargetPolicyPack.expansionReviewRequired = true
+  state.secondTargetPolicyPack.reviewPacketReadiness.state = 'packet_ready'
+  state.secondTargetPolicyPack.reviewPacketReadiness.artifactCoverage.available = 20
+  state.secondTargetPolicyPack.reviewPacketReadiness.artifactCoverage.expected = 20
+  state.secondTargetPolicyPack.reviewPacketReadiness.artifactCoverage.missingArtifactIds = []
+  state.secondTargetPolicyPack.reviewPacketReadiness.nextExecutionUnits = []
+  state.secondTargetPolicyPack.reviewAdjudication = {
+    state: 'review_open',
+    reviewOwner: 'controller',
+    candidateTargetProfileId: 'debian-12-systemd-tailscale',
+    contractPath: 'docs/operations/portmanager-second-target-review-contract.md',
+    packetRoot: 'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21',
+    summary:
+      'Bounded second-target review is open for debian-12-systemd-tailscale; live Tailscale follow-up is now preserved at docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22 on address 100.91.22.14.',
+    pendingVerdicts: [
+      {
+        id: 'follow_up_scope_bounded',
+        label: 'Follow-up scope bounded',
+        summary: 'keep both packets linked during review closeout',
+        sources: ['docs/operations/portmanager-second-target-review-contract.md']
+      }
+    ],
+    blockingDeltas: [],
+    sources: [
+      'docs/operations/portmanager-second-target-review-contract.md',
+      'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22'
+    ]
+  }
+  state.secondTargetPolicyPack.liveTransportFollowUp = {
+    state: 'capture_complete',
+    candidateTargetProfileId: 'debian-12-systemd-tailscale',
+    guidePath: 'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md',
+    artifactRootPattern: 'docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/',
+    currentRecordedAddress: '172.17.0.2',
+    capturedPacketRoot: 'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22',
+    capturedAddress: '100.91.22.14',
+    summary:
+      'Live Tailscale follow-up is already captured for debian-12-systemd-tailscale; newer packet docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22 records live Tailscale address 100.91.22.14 while the preserved Docker-bridge packet remains historical evidence.',
+    requiredNextAction:
+      'Keep /second-target-policy-pack, docs, CLI, and Web aligned with captured packet docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22 before narrowing support-lock wording.',
+    requiredArtifacts: [
+      {
+        id: 'candidate_host_with_tailscale_ip',
+        label: 'Candidate host with Tailscale IP',
+        summary: 'host detail snapshot captured on live Tailscale address'
+      }
+    ],
+    sources: [
+      'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md',
+      'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-22'
+    ]
+  }
+
+  const html = renderToStaticMarkup(h(OverviewPage, { state }))
+
+  assert.match(html, /capture_complete/i)
+  assert.match(html, /Captured Packet Root/i)
+  assert.match(html, /debian-12-live-tailscale-packet-2026-04-22/i)
+  assert.match(html, /Captured Address/i)
+  assert.match(html, /100\.91\.22\.14/)
+  assert.match(html, /No blocking review deltas recorded yet/i)
+})
+
 test('host detail shell renders required milestone sections', () => {
   const html = renderToStaticMarkup(h(HostDetailPage, { state: createMockHostDetailState() }))
 

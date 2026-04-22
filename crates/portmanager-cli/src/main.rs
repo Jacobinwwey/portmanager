@@ -2382,8 +2382,18 @@ fn format_second_target_live_transport_follow_up_block(live_transport_follow_up:
         format!("Sources:\n{}", source_lines.join("\n"))
     };
 
+    let captured_packet_root_line = live_transport_follow_up["capturedPacketRoot"]
+        .as_str()
+        .map(|value| format!("\nCaptured Packet Root: {}", value))
+        .unwrap_or_default();
+
+    let captured_address_line = live_transport_follow_up["capturedAddress"]
+        .as_str()
+        .map(|value| format!("\nCaptured Address: {}", value))
+        .unwrap_or_default();
+
     format!(
-        "Live Transport Follow-Up:\nState: {}\nCandidate Target: {}\nGuide Path: {}\nArtifact Root Pattern: {}\nCurrent Recorded Address: {}\nSummary: {}\nRequired Next Action: {}\n{}\n{}",
+        "Live Transport Follow-Up:\nState: {}\nCandidate Target: {}\nGuide Path: {}\nArtifact Root Pattern: {}\nCurrent Recorded Address: {}{}{}\nSummary: {}\nRequired Next Action: {}\n{}\n{}",
         live_transport_follow_up["state"].as_str().unwrap_or("unknown"),
         live_transport_follow_up["candidateTargetProfileId"]
             .as_str()
@@ -2397,6 +2407,8 @@ fn format_second_target_live_transport_follow_up_block(live_transport_follow_up:
         live_transport_follow_up["currentRecordedAddress"]
             .as_str()
             .unwrap_or("unknown"),
+        captured_packet_root_line,
+        captured_address_line,
         live_transport_follow_up["summary"]
             .as_str()
             .unwrap_or("no summary"),
