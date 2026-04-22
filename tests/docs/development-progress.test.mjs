@@ -142,12 +142,18 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-live-packet-capture-automation-requirements\.md/
+    /2026-04-21-portmanager-m3-live-packet-source-auto-resolution-requirements\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-live-packet-capture-automation-plan\.md/
+    /2026-04-21-portmanager-m3-live-packet-source-auto-resolution-plan\.md/
   )
+  assert.match(
+    milestoneConfidenceComponent,
+    /pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>/
+  )
+  assert.match(milestoneConfidenceComponent, /--candidate-target-profile-id/)
+  assert.match(milestoneConfidenceComponent, /--bootstrap-operation-id/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:scaffold:live-packet/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:validate:live-packet/)
   assert.match(milestoneConfidenceComponent, /Phase 0 enablement/)
@@ -283,7 +289,10 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /live-transport-follow-up-summary\.json/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
-  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-live-packet-capture-automation-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-live-packet-source-auto-resolution-plan\.md/)
+  assert.match(roadmapData, /pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>/)
+  assert.match(roadmapData, /--candidate-target-profile-id/)
+  assert.match(roadmapData, /--bootstrap-operation-id/)
   assert.match(roadmapComponent, /lane\.items\.length > 0/)
   assert.match(roadmapComponent, /milestone-confidence-bundle-\*/)
   assert.match(roadmapComponent, /Required next action/)

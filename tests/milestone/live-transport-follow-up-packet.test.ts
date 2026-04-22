@@ -43,12 +43,21 @@ test('parseArgs accepts scaffold, assemble, capture, and validate modes', () => 
     '2026-04-26',
     '--controller-base-url',
     'http://127.0.0.1:8100/api/controller',
+    '--candidate-target-profile-id',
+    'debian-12-systemd-tailscale',
     '--host-id',
     'host_debian_review_001',
     '--bootstrap-operation-id',
     'op_bootstrap_001',
     '--audit-limit',
     '7'
+  ])
+  const captureAuto = parseArgs([
+    'capture',
+    '--packet-date',
+    '2026-04-26',
+    '--controller-base-url',
+    'http://127.0.0.1:8100/api/controller'
   ])
   const validate = parseArgs(['validate', '--packet-root', 'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-26'])
 
@@ -67,9 +76,15 @@ test('parseArgs accepts scaffold, assemble, capture, and validate modes', () => 
   )
   assert.equal(capture.action, 'capture')
   assert.equal(capture.controllerBaseUrl, 'http://127.0.0.1:8100/api/controller')
+  assert.equal(capture.candidateTargetProfileId, 'debian-12-systemd-tailscale')
   assert.equal(capture.hostId, 'host_debian_review_001')
   assert.equal(capture.bootstrapOperationId, 'op_bootstrap_001')
   assert.equal(capture.auditLimit, 7)
+  assert.equal(captureAuto.action, 'capture')
+  assert.equal(captureAuto.controllerBaseUrl, 'http://127.0.0.1:8100/api/controller')
+  assert.equal(captureAuto.hostId, undefined)
+  assert.equal(captureAuto.bootstrapOperationId, undefined)
+  assert.equal(captureAuto.auditLimit, 20)
   assert.equal(validate.action, 'validate')
   assert.equal(
     validate.packetRoot,
@@ -336,6 +351,9 @@ test('captureLiveTransportFollowUpPacket fetches controller plus agent evidence 
       return {
         body: {
           id: 'op_bootstrap_001',
+          type: 'bootstrap_host',
+          state: 'succeeded',
+          hostId: 'host_debian_review_001',
           finishedAt: '2026-04-29T12:02:00.000Z',
           resultSummary: `host host_debian_review_001 bootstrapped via ${agentServer.baseUrl}`
         }
@@ -417,6 +435,197 @@ test('captureLiveTransportFollowUpPacket fetches controller plus agent evidence 
   } finally {
     await controllerServer.close()
     await agentServer.close()
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('captureLiveTransportFollowUpPacket auto-resolves latest candidate bootstrap ids when omitted', async () => {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), 'portmanager-live-packet-helper-'))
+  const packetDate = '2026-04-30'
+
+  const agentServer = await startJsonServer(({ pathname }) => {
+    if (pathname === '/health') {
+      return {
+        body: {
+          schemaVersion: '0.1.0',
+          status: 'ok'
+        }
+      }
+    }
+
+    if (pathname === '/runtime-state') {
+      return {
+        body: {
+          schemaVersion: '0.1.0',
+          updatedAt: '2026-04-30T12:05:00.000Z',
+          agentState: 'ready'
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  const controllerServer = await startJsonServer(({ pathname, searchParams }) => {
+    if (pathname === '/api/controller/hosts') {
+      return {
+        body: {
+          items: [
+            {
+              id: 'host_supported_001',
+              targetProfileId: 'ubuntu-24.04-systemd-tailscale',
+              updatedAt: '2026-04-30T11:59:00.000Z'
+            },
+            {
+              id: 'host_debian_review_002',
+              targetProfileId: candidateTargetProfileId,
+              updatedAt: '2026-04-30T12:00:00.000Z'
+            }
+          ]
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/operations') {
+      assert.equal(searchParams.get('type'), 'bootstrap_host')
+      assert.equal(searchParams.get('state'), 'succeeded')
+
+      return {
+        body: {
+          items: [
+            {
+              id: 'op_bootstrap_supported_001',
+              type: 'bootstrap_host',
+              state: 'succeeded',
+              hostId: 'host_supported_001',
+              finishedAt: '2026-04-30T12:03:00.000Z'
+            },
+            {
+              id: 'op_bootstrap_candidate_002',
+              type: 'bootstrap_host',
+              state: 'succeeded',
+              hostId: 'host_debian_review_002',
+              finishedAt: '2026-04-30T12:04:00.000Z'
+            }
+          ]
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/hosts/host_debian_review_002') {
+      return {
+        body: {
+          id: 'host_debian_review_002',
+          targetProfileId: candidateTargetProfileId,
+          tailscaleAddress: '127.0.0.1',
+          updatedAt: '2026-04-30T12:01:00.000Z'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/operations/op_bootstrap_candidate_002') {
+      return {
+        body: {
+          id: 'op_bootstrap_candidate_002',
+          type: 'bootstrap_host',
+          state: 'succeeded',
+          hostId: 'host_debian_review_002',
+          finishedAt: '2026-04-30T12:04:00.000Z',
+          resultSummary: `host host_debian_review_002 bootstrapped via ${agentServer.baseUrl}`
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/event-audit-index') {
+      assert.equal(searchParams.get('hostId'), 'host_debian_review_002')
+
+      return {
+        body: {
+          items: [
+            {
+              lastEventAt: '2026-04-30T12:05:00.000Z',
+              operation: {
+                id: 'op_create_rule_002',
+                finishedAt: '2026-04-30T12:05:00.000Z'
+              }
+            },
+            {
+              lastEventAt: '2026-04-30T12:04:00.000Z',
+              operation: {
+                id: 'op_bootstrap_candidate_002',
+                finishedAt: '2026-04-30T12:04:00.000Z'
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  try {
+    const captured = await captureLiveTransportFollowUpPacket({
+      repoRoot,
+      packetDate,
+      controllerBaseUrl: `${controllerServer.baseUrl}/api/controller`
+    })
+
+    assert.equal(captured.candidateTargetProfileId, candidateTargetProfileId)
+    assert.equal(captured.hostId, 'host_debian_review_002')
+    assert.equal(captured.bootstrapOperationId, 'op_bootstrap_candidate_002')
+    assert.equal(captured.agentBaseUrl, agentServer.baseUrl)
+    assert.equal(captured.validation.ok, true)
+  } finally {
+    await controllerServer.close()
+    await agentServer.close()
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('captureLiveTransportFollowUpPacket fails when explicit host and bootstrap ids drift', async () => {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), 'portmanager-live-packet-helper-'))
+
+  const controllerServer = await startJsonServer(({ pathname }) => {
+    if (pathname === '/api/controller/operations/op_bootstrap_mismatch_001') {
+      return {
+        body: {
+          id: 'op_bootstrap_mismatch_001',
+          type: 'bootstrap_host',
+          state: 'succeeded',
+          hostId: 'host_other_001',
+          finishedAt: '2026-04-30T13:00:00.000Z',
+          resultSummary: 'host host_other_001 bootstrapped via http://127.0.0.1:8711'
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  try {
+    await assert.rejects(
+      () =>
+        captureLiveTransportFollowUpPacket({
+          repoRoot,
+          packetDate: '2026-04-30',
+          controllerBaseUrl: `${controllerServer.baseUrl}/api/controller`,
+          hostId: 'host_expected_001',
+          bootstrapOperationId: 'op_bootstrap_mismatch_001'
+        }),
+      /belongs to host host_other_001, not host_expected_001/u
+    )
+  } finally {
+    await controllerServer.close()
     rmSync(repoRoot, { recursive: true, force: true })
   }
 })

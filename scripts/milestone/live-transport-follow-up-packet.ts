@@ -44,6 +44,7 @@ export interface LiveTransportFollowUpPacketCliOptions {
   capturedAt?: string
   artifactSourcePaths?: Partial<Record<LiveTransportFollowUpArtifactId, string>>
   controllerBaseUrl?: string
+  candidateTargetProfileId?: string
   hostId?: string
   bootstrapOperationId?: string
   agentBaseUrl?: string
@@ -72,6 +73,7 @@ export interface AssembleLiveTransportFollowUpPacketResult {
 export interface CaptureLiveTransportFollowUpPacketResult
   extends AssembleLiveTransportFollowUpPacketResult {
   controllerBaseUrl: string
+  candidateTargetProfileId: string
   hostId: string
   bootstrapOperationId: string
   agentBaseUrl: string
@@ -83,7 +85,7 @@ function usage() {
     'Usage:',
     '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts scaffold --packet-date YYYY-MM-DD [--captured-at ISO] [--force] [--json]',
     '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts assemble --packet-date YYYY-MM-DD --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path> [--captured-at ISO] [--json]',
-    '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts capture --packet-date YYYY-MM-DD --controller-base-url <url> --host-id <host-id> --bootstrap-operation-id <operation-id> [--agent-base-url <url>] [--audit-limit <count>] [--captured-at ISO] [--force] [--json]',
+    '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts capture --packet-date YYYY-MM-DD --controller-base-url <url> [--candidate-target-profile-id <id>] [--host-id <host-id>] [--bootstrap-operation-id <operation-id>] [--agent-base-url <url>] [--audit-limit <count>] [--captured-at ISO] [--force] [--json]',
     '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts validate [--packet-root <repo-relative-root> | --latest] [--json]'
   ].join('\n')
 }
@@ -138,6 +140,11 @@ export function parseArgs(argv: string[]): LiveTransportFollowUpPacketCliOptions
 
     if (current === '--controller-base-url') {
       options.controllerBaseUrl = tokens[++index]
+      continue
+    }
+
+    if (current === '--candidate-target-profile-id') {
+      options.candidateTargetProfileId = tokens[++index]
       continue
     }
 
@@ -199,12 +206,12 @@ export function parseArgs(argv: string[]): LiveTransportFollowUpPacketCliOptions
       throw new Error(`--controller-base-url is required for capture\n${usage()}`)
     }
 
-    if (!options.hostId) {
-      throw new Error(`--host-id is required for capture\n${usage()}`)
-    }
-
-    if (!options.bootstrapOperationId) {
-      throw new Error(`--bootstrap-operation-id is required for capture\n${usage()}`)
+    if (
+      options.candidateTargetProfileId !== undefined &&
+      typeof options.candidateTargetProfileId === 'string' &&
+      !options.candidateTargetProfileId.trim()
+    ) {
+      throw new Error(`--candidate-target-profile-id must not be empty\n${usage()}`)
     }
 
     if (!Number.isInteger(options.auditLimit) || options.auditLimit < 1) {
@@ -291,7 +298,8 @@ function createReadme(packetRoot: string) {
     `- pnpm milestone:assemble:live-packet -- --packet-date ${packetRoot.slice(livePacketRootPrefix.length)} --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`,
     '',
     'Capture command:',
-    `- pnpm milestone:capture:live-packet -- --packet-date ${packetRoot.slice(livePacketRootPrefix.length)} --controller-base-url <url> --host-id <host-id> --bootstrap-operation-id <operation-id>`,
+    `- pnpm milestone:capture:live-packet -- --packet-date ${packetRoot.slice(livePacketRootPrefix.length)} --controller-base-url <url>`,
+    '- Optional capture overrides: --candidate-target-profile-id <id> --host-id <host-id> --bootstrap-operation-id <operation-id> --agent-base-url <url> --audit-limit <count>',
     '',
     'Validation command:',
     `- pnpm milestone:validate:live-packet -- --packet-root ${packetRoot}`
@@ -324,6 +332,51 @@ function parseJsonIfExists(filePath: string) {
 
 function isScaffoldMarkedJson(value: unknown) {
   return isRecord(value) && value[liveTransportFollowUpScaffoldMarkerField] === true
+}
+
+function extractNonEmptyStringField(value: unknown, fieldName: string) {
+  if (!isRecord(value) || typeof value[fieldName] !== 'string') {
+    return undefined
+  }
+
+  const normalized = value[fieldName].trim()
+  return normalized ? normalized : undefined
+}
+
+function extractCollectionItems(value: unknown, label: string) {
+  if (!isRecord(value) || !Array.isArray(value.items)) {
+    throw new Error(`${label} must return an object with an items array`)
+  }
+
+  return value.items
+}
+
+function newestTimestampForRecord(value: unknown, fieldNames: string[]) {
+  if (!isRecord(value)) {
+    return 0
+  }
+
+  for (const fieldName of fieldNames) {
+    const timestamp = extractTimestamp(value[fieldName])
+    if (timestamp) {
+      return Date.parse(timestamp)
+    }
+  }
+
+  return 0
+}
+
+function sortNewestFirst(records: unknown[], fieldNames: string[]) {
+  return [...records].sort((left, right) => {
+    const timestampDiff = newestTimestampForRecord(right, fieldNames) - newestTimestampForRecord(left, fieldNames)
+    if (timestampDiff !== 0) {
+      return timestampDiff
+    }
+
+    const rightId = extractNonEmptyStringField(right, 'id') ?? ''
+    const leftId = extractNonEmptyStringField(left, 'id') ?? ''
+    return rightId.localeCompare(leftId)
+  })
 }
 
 function packetRootContainsOnlyScaffoldContent(absolutePacketRoot: string) {
@@ -374,6 +427,32 @@ function extractBootstrapCapturedAddress(bootstrapOperation: unknown) {
 
   const match = bootstrapOperation.resultSummary.match(/via https?:\/\/([^:/\s]+)/u)
   return match?.[1]?.trim() || undefined
+}
+
+function extractHostIdFromOperation(operation: unknown) {
+  return extractNonEmptyStringField(operation, 'hostId')
+}
+
+function extractOperationId(operation: unknown, label: string) {
+  const operationId = extractNonEmptyStringField(operation, 'id')
+  if (!operationId) {
+    throw new Error(`${label} is missing id`)
+  }
+
+  return operationId
+}
+
+function extractTargetProfileIdFromHostSummary(hostSummary: unknown) {
+  const targetProfileId = extractNonEmptyStringField(hostSummary, 'targetProfileId')
+  if (targetProfileId) {
+    return targetProfileId
+  }
+
+  if (isRecord(hostSummary) && isRecord(hostSummary.targetProfile)) {
+    return extractNonEmptyStringField(hostSummary.targetProfile, 'id')
+  }
+
+  return undefined
 }
 
 function extractCandidateTargetProfileId(candidateHostDetail: unknown) {
@@ -527,6 +606,19 @@ async function requestJson(options: {
   return (await response.json()) as unknown
 }
 
+function validateResolvedTargetProfile(candidateHostDetail: unknown, requestedTargetProfileId: string, hostId: string) {
+  const resolvedTargetProfileId = extractCandidateTargetProfileId(candidateHostDetail)
+  if (!resolvedTargetProfileId) {
+    throw new Error(`candidate host detail for ${hostId} is missing targetProfileId`)
+  }
+
+  if (resolvedTargetProfileId !== requestedTargetProfileId) {
+    throw new Error(
+      `candidate host ${hostId} target profile ${resolvedTargetProfileId} does not match requested ${requestedTargetProfileId}`
+    )
+  }
+}
+
 function extractBootstrapAgentBaseUrl(bootstrapOperation: unknown) {
   if (!isRecord(bootstrapOperation) || typeof bootstrapOperation.resultSummary !== 'string') {
     return undefined
@@ -538,6 +630,153 @@ function extractBootstrapAgentBaseUrl(bootstrapOperation: unknown) {
   }
 
   return match[1].replace(/[),.]+$/u, '')
+}
+
+async function resolveLatestBootstrapOperationIdForHost(options: {
+  controllerBaseUrl: string
+  hostId: string
+}) {
+  const operationsPayload = await requestJson({
+    baseUrl: options.controllerBaseUrl,
+    pathname: 'operations',
+    label: 'bootstrap operation list',
+    searchParams: {
+      hostId: options.hostId,
+      type: 'bootstrap_host',
+      state: 'succeeded'
+    }
+  })
+
+  const bootstrapOperations = sortNewestFirst(extractCollectionItems(operationsPayload, 'bootstrap operation list'), [
+    'finishedAt',
+    'startedAt'
+  ]).filter((operation) => extractHostIdFromOperation(operation) === options.hostId)
+
+  const latestBootstrapOperation = bootstrapOperations[0]
+  if (!latestBootstrapOperation) {
+    throw new Error(`no successful bootstrap operation found for host ${options.hostId}`)
+  }
+
+  return extractOperationId(latestBootstrapOperation, 'bootstrap operation')
+}
+
+async function resolveLatestCandidateCaptureSelection(options: {
+  controllerBaseUrl: string
+  candidateTargetProfileId: string
+}) {
+  const hostsPayload = await requestJson({
+    baseUrl: options.controllerBaseUrl,
+    pathname: 'hosts',
+    label: 'candidate host list'
+  })
+  const candidateHosts = extractCollectionItems(hostsPayload, 'candidate host list').filter(
+    (hostSummary) => extractTargetProfileIdFromHostSummary(hostSummary) === options.candidateTargetProfileId
+  )
+
+  if (candidateHosts.length === 0) {
+    throw new Error(
+      `no candidate hosts found for target profile ${options.candidateTargetProfileId}`
+    )
+  }
+
+  const candidateHostIds = new Set(
+    candidateHosts
+      .map((hostSummary) => extractNonEmptyStringField(hostSummary, 'id'))
+      .filter((hostId): hostId is string => Boolean(hostId))
+  )
+
+  const operationsPayload = await requestJson({
+    baseUrl: options.controllerBaseUrl,
+    pathname: 'operations',
+    label: 'bootstrap operation list',
+    searchParams: {
+      type: 'bootstrap_host',
+      state: 'succeeded'
+    }
+  })
+  const latestBootstrapOperation = sortNewestFirst(
+    extractCollectionItems(operationsPayload, 'bootstrap operation list'),
+    ['finishedAt', 'startedAt']
+  ).find((operation) => {
+    const hostId = extractHostIdFromOperation(operation)
+    return hostId ? candidateHostIds.has(hostId) : false
+  })
+
+  if (!latestBootstrapOperation) {
+    throw new Error(
+      `no successful bootstrap operation found for target profile ${options.candidateTargetProfileId}`
+    )
+  }
+
+  const hostId = extractHostIdFromOperation(latestBootstrapOperation)
+  if (!hostId) {
+    throw new Error('resolved bootstrap operation is missing hostId')
+  }
+
+  return {
+    hostId,
+    bootstrapOperationId: extractOperationId(latestBootstrapOperation, 'bootstrap operation')
+  }
+}
+
+async function resolveCaptureSelection(options: {
+  controllerBaseUrl: string
+  candidateTargetProfileId?: string
+  hostId?: string
+  bootstrapOperationId?: string
+}) {
+  const resolvedCandidateTargetProfileId = options.candidateTargetProfileId ?? candidateTargetProfileId
+  let hostId = options.hostId
+  let bootstrapOperationId = options.bootstrapOperationId
+  let bootstrapOperationDetail: unknown | undefined
+
+  if (bootstrapOperationId) {
+    bootstrapOperationDetail = await requestJson({
+      baseUrl: options.controllerBaseUrl,
+      pathname: `operations/${encodeURIComponent(bootstrapOperationId)}`,
+      label: 'bootstrap operation'
+    })
+
+    const bootstrapHostId = extractHostIdFromOperation(bootstrapOperationDetail)
+    if (!bootstrapHostId) {
+      throw new Error(`bootstrap operation ${bootstrapOperationId} is missing hostId`)
+    }
+
+    if (hostId && hostId !== bootstrapHostId) {
+      throw new Error(
+        `bootstrap operation ${bootstrapOperationId} belongs to host ${bootstrapHostId}, not ${hostId}`
+      )
+    }
+
+    hostId = bootstrapHostId
+  }
+
+  if (!hostId && !bootstrapOperationId) {
+    const resolved = await resolveLatestCandidateCaptureSelection({
+      controllerBaseUrl: options.controllerBaseUrl,
+      candidateTargetProfileId: resolvedCandidateTargetProfileId
+    })
+    hostId = resolved.hostId
+    bootstrapOperationId = resolved.bootstrapOperationId
+  }
+
+  if (!hostId) {
+    throw new Error(`could not resolve candidate host for target profile ${resolvedCandidateTargetProfileId}`)
+  }
+
+  if (!bootstrapOperationId) {
+    bootstrapOperationId = await resolveLatestBootstrapOperationIdForHost({
+      controllerBaseUrl: options.controllerBaseUrl,
+      hostId
+    })
+  }
+
+  return {
+    candidateTargetProfileId: resolvedCandidateTargetProfileId,
+    hostId,
+    bootstrapOperationId,
+    bootstrapOperationDetail
+  }
 }
 
 function extractAuditOperationIds(auditIndex: unknown) {
@@ -713,8 +952,9 @@ export async function captureLiveTransportFollowUpPacket(options: {
   repoRoot?: string
   packetDate: string
   controllerBaseUrl: string
-  hostId: string
-  bootstrapOperationId: string
+  candidateTargetProfileId?: string
+  hostId?: string
+  bootstrapOperationId?: string
   agentBaseUrl?: string
   auditLimit?: number
   capturedAt?: string
@@ -722,17 +962,30 @@ export async function captureLiveTransportFollowUpPacket(options: {
 }): Promise<CaptureLiveTransportFollowUpPacketResult> {
   const repoRoot = options.repoRoot ?? defaultRepoRoot
   const controllerBaseUrl = normalizeBaseUrl(options.controllerBaseUrl, 'controller base URL')
+  const resolvedSelection = await resolveCaptureSelection({
+    controllerBaseUrl,
+    candidateTargetProfileId: options.candidateTargetProfileId,
+    hostId: options.hostId,
+    bootstrapOperationId: options.bootstrapOperationId
+  })
 
   const candidateHostDetail = await requestJson({
     baseUrl: controllerBaseUrl,
-    pathname: `hosts/${encodeURIComponent(options.hostId)}`,
+    pathname: `hosts/${encodeURIComponent(resolvedSelection.hostId)}`,
     label: 'candidate host detail'
   })
-  const bootstrapOperation = await requestJson({
-    baseUrl: controllerBaseUrl,
-    pathname: `operations/${encodeURIComponent(options.bootstrapOperationId)}`,
-    label: 'bootstrap operation'
-  })
+  validateResolvedTargetProfile(
+    candidateHostDetail,
+    resolvedSelection.candidateTargetProfileId,
+    resolvedSelection.hostId
+  )
+  const bootstrapOperation =
+    resolvedSelection.bootstrapOperationDetail ??
+    (await requestJson({
+      baseUrl: controllerBaseUrl,
+      pathname: `operations/${encodeURIComponent(resolvedSelection.bootstrapOperationId)}`,
+      label: 'bootstrap operation'
+    }))
 
   const agentBaseUrl = normalizeBaseUrl(
     options.agentBaseUrl ?? extractBootstrapAgentBaseUrl(bootstrapOperation) ?? '',
@@ -755,13 +1008,13 @@ export async function captureLiveTransportFollowUpPacket(options: {
     pathname: 'event-audit-index',
     label: 'controller audit index',
     searchParams: {
-      hostId: options.hostId,
+      hostId: resolvedSelection.hostId,
       limit: auditLimit
     }
   })
   ensureAuditIndexLinksBootstrap(
     linkedControllerAuditReference,
-    options.bootstrapOperationId,
+    resolvedSelection.bootstrapOperationId,
     auditLimit
   )
 
@@ -782,8 +1035,9 @@ export async function captureLiveTransportFollowUpPacket(options: {
   return {
     ...assembled,
     controllerBaseUrl,
-    hostId: options.hostId,
-    bootstrapOperationId: options.bootstrapOperationId,
+    candidateTargetProfileId: resolvedSelection.candidateTargetProfileId,
+    hostId: resolvedSelection.hostId,
+    bootstrapOperationId: resolvedSelection.bootstrapOperationId,
     agentBaseUrl,
     auditLimit
   }
@@ -831,6 +1085,7 @@ function printCaptureResult(result: CaptureLiveTransportFollowUpPacketResult) {
   return [
     printAssembleResult(result),
     `Controller base URL: ${result.controllerBaseUrl}`,
+    `Candidate target profile: ${result.candidateTargetProfileId}`,
     `Host ID: ${result.hostId}`,
     `Bootstrap operation ID: ${result.bootstrapOperationId}`,
     `Agent base URL: ${result.agentBaseUrl}`,
@@ -894,8 +1149,9 @@ async function main() {
       repoRoot: options.repoRoot,
       packetDate: options.packetDate ?? '',
       controllerBaseUrl: options.controllerBaseUrl ?? '',
-      hostId: options.hostId ?? '',
-      bootstrapOperationId: options.bootstrapOperationId ?? '',
+      candidateTargetProfileId: options.candidateTargetProfileId,
+      hostId: options.hostId,
+      bootstrapOperationId: options.bootstrapOperationId,
       agentBaseUrl: options.agentBaseUrl,
       auditLimit: options.auditLimit,
       capturedAt: options.capturedAt,

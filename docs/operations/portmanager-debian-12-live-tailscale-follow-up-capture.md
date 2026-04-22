@@ -16,7 +16,7 @@ It does not widen supported-target claims by itself.
 - The current recorded address is still `172.17.0.2`.
 - `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` stays preserved and untouched.
 - `pnpm milestone:review:promotion-ready -- --limit 20` already passed wording review on the current mainline slice.
-- `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url> --host-id <host-id> --bootstrap-operation-id <operation-id>` is now the preferred repo-native capture path, while `pnpm milestone:scaffold:live-packet -- --packet-date <date>`, `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`, and `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>` remain available as lower-level fallback helpers.
+- `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>` is now the preferred repo-native capture path because it can auto-resolve the latest candidate host plus latest successful bootstrap pair for `debian-12-systemd-tailscale`; `--candidate-target-profile-id <target-profile-id>`, `--host-id <host-id>`, and `--bootstrap-operation-id <operation-id>` remain bounded override flags, while `pnpm milestone:scaffold:live-packet -- --packet-date <date>`, `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`, and `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>` remain available as lower-level fallback helpers.
 - One Debian 12 candidate host is reachable on a real Tailscale tailnet.
 
 ### Capture flow
@@ -26,9 +26,9 @@ It does not widen supported-target claims by itself.
    - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 3. Run one bounded steady-state mutation on the same host so the live follow-up packet has fresh transport evidence:
    - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
-4. Preferred path: let one repo-native capture command fetch host detail, bootstrap detail, steady-state `/health`, steady-state `/runtime-state`, and one host-scoped audit index, then write the canonical packet-local JSON files plus `live-transport-follow-up-summary.json` in one step:
-   - `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url> --host-id <host-id> --bootstrap-operation-id <operation-id>`
-5. Add `--agent-base-url <url>` only when the bootstrap result summary does not expose a usable live agent base URL. Add `--audit-limit <count>` when the host-scoped audit window must widen so the bootstrap operation still appears in the captured audit index. Existing scaffold roots may be upgraded without `--force`, but existing non-scaffold packet roots stay protected unless `--force` is explicit.
+4. Preferred path: let one repo-native capture command auto-resolve the latest candidate host plus latest successful bootstrap pair, fetch host detail, bootstrap detail, steady-state `/health`, steady-state `/runtime-state`, and one host-scoped audit index, then write the canonical packet-local JSON files plus `live-transport-follow-up-summary.json` in one step:
+   - `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>`
+5. Add `--candidate-target-profile-id <target-profile-id>` when operator review needs a bounded candidate lane other than the default `debian-12-systemd-tailscale`. Add explicit `--host-id <host-id>` and `--bootstrap-operation-id <operation-id>` only when operator review needs a hand-selected override or mismatch debugging path. Add `--agent-base-url <url>` only when the bootstrap result summary does not expose a usable live agent base URL. Add `--audit-limit <count>` when the host-scoped audit window must widen so the bootstrap operation still appears in the captured audit index. Existing scaffold roots may be upgraded without `--force`, but existing non-scaffold packet roots stay protected unless `--force` is explicit.
 6. Fallback path: if direct capture cannot reach controller or agent HTTP surfaces, create one fresh scaffold root and feed the five bounded source files into the assembly helper manually:
    - `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
    - `portmanager hosts get <host-id> --json`
@@ -83,7 +83,7 @@ Do not overwrite the preserved Docker-bridge packet; keep it as historical evide
 - 当前记录地址仍然是 `172.17.0.2`。
 - `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` 继续作为已保留历史 packet，不被改写。
 - `pnpm milestone:review:promotion-ready -- --limit 20` 已经在当前主线切片上完成文案复核。
-- 本地现在已经把 `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url> --host-id <host-id> --bootstrap-operation-id <operation-id>` 作为首选 repo-native 采集路径，同时仍保留 `pnpm milestone:scaffold:live-packet -- --packet-date <date>`、`pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>` 与 `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>` 作为底层回退 helper。
+- 本地现在已经把 `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>` 作为首选 repo-native 采集路径，因为它已经能为 `debian-12-systemd-tailscale` 自动解析最新候选主机与最新成功 bootstrap 配对；`--candidate-target-profile-id <target-profile-id>`、`--host-id <host-id>` 与 `--bootstrap-operation-id <operation-id>` 继续保留为有边界 override 参数，同时仍保留 `pnpm milestone:scaffold:live-packet -- --packet-date <date>`、`pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>` 与 `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>` 作为底层回退 helper。
 - 已有一台 Debian 12 候选主机真实接入同一条 Tailscale tailnet。
 
 ### 采集流程
@@ -93,9 +93,9 @@ Do not overwrite the preserved Docker-bridge packet; keep it as historical evide
    - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 3. 在同一台主机上执行一次有边界 steady-state mutation，让 live follow-up packet 拥有新的 transport 证据：
    - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
-4. 首选路径：直接用一条 repo-native capture helper 去抓取 host detail、bootstrap detail、steady-state `/health`、steady-state `/runtime-state` 与一份 host-scoped audit index，然后一次写入规范 packet 本地 JSON 文件与 `live-transport-follow-up-summary.json`：
-   - `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url> --host-id <host-id> --bootstrap-operation-id <operation-id>`
-5. 只有在 bootstrap result summary 无法给出可用 live agent base URL 时，才额外传 `--agent-base-url <url>`。只有在 host-scoped audit window 太窄、还抓不到 bootstrap operation 时，才额外放大 `--audit-limit <count>`。已经存在但仍是 scaffold-only 的 packet 根目录可以直接升级；而已经存在的非 scaffold packet 根目录仍然必须显式传 `--force` 才允许覆盖。
+4. 首选路径：直接用一条 repo-native capture helper 自动解析最新候选主机与最新成功 bootstrap 配对，再抓取 host detail、bootstrap detail、steady-state `/health`、steady-state `/runtime-state` 与一份 host-scoped audit index，然后一次写入规范 packet 本地 JSON 文件与 `live-transport-follow-up-summary.json`：
+   - `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>`
+5. 只有在 operator review 需要切换有边界候选 lane 时，才额外传 `--candidate-target-profile-id <target-profile-id>`；只有在需要 hand-picked override 或 mismatch 调试时，才额外传 `--host-id <host-id>` 与 `--bootstrap-operation-id <operation-id>`。只有在 bootstrap result summary 无法给出可用 live agent base URL 时，才额外传 `--agent-base-url <url>`。只有在 host-scoped audit window 太窄、还抓不到 bootstrap operation 时，才额外放大 `--audit-limit <count>`。已经存在但仍是 scaffold-only 的 packet 根目录可以直接升级；而已经存在的非 scaffold packet 根目录仍然必须显式传 `--force` 才允许覆盖。
 6. 回退路径：如果 capture helper 暂时无法直接访问 controller 或 agent HTTP surface，就先创建 scaffold 根目录，再手工收集五份源产物交给 assembly helper：
    - `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
    - `portmanager hosts get <host-id> --json`
