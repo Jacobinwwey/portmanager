@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/operations/portmanager-debian-12-review-packet-template.md`
 > Audience: `shared` | Section: `operations` | Status: `active`
-> Updated: 2026-04-21 | Version: v0.2.0
+> Updated: 2026-04-22 | Version: v0.3.0
 ### Purpose
 Freeze one explicit review-packet template for `debian-12-systemd-tailscale`.
 This document does not claim that parity already passed.
@@ -60,11 +60,13 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### Filesystem-backed live packet extension
 - fresh packet root pattern: `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
 - canonical summary filename: `live-transport-follow-up-summary.json`
+- preferred preview helper: `pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>`
 - preferred capture helper: `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>`
 - scaffold helper: `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
 - assembly helper fallback: `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
 - validator helper: `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
-- the preferred capture helper now auto-resolves the latest candidate host plus latest successful bootstrap pair for `debian-12-systemd-tailscale`, fetches host detail, bootstrap detail, steady-state `/health`, steady-state `/runtime-state`, and one host-scoped audit index directly from bounded controller plus agent HTTP surfaces, then writes the canonical packet-local files and summary in one step
+- the preferred preview helper now auto-resolves the latest candidate host plus latest successful bootstrap pair for `debian-12-systemd-tailscale`, fetches controller host detail, bootstrap detail, and one host-scoped audit index directly from bounded controller surfaces, then reports packet root, resolved ids, captured address, derived agent base URL, audit operation ids, and `captureReady` without writing packet files
+- the preferred capture helper now runs immediately after preview reports `captureReady: true`, reuses the same resolved host/bootstrap pair, fetches steady-state `/health`, steady-state `/runtime-state`, and the same host-scoped audit index, then writes the canonical packet-local files and summary in one step
 - `--candidate-target-profile-id <target-profile-id>`, `--host-id <host-id>`, and `--bootstrap-operation-id <operation-id>` remain bounded override flags when operator review needs a different candidate lane, a hand-picked bootstrap pair, or mismatch debugging
 - the assembly helper copies real source artifacts into the canonical packet-local filenames, derives `candidateTargetProfileId`, `capturedAt`, and `capturedAddress`, and fails on cross-source address drift so operators do not hand-write `live-transport-follow-up-summary.json`
 - scaffold-only packet roots may be replaced by capture or assembly without `--force`, but existing non-scaffold packet roots stay protected unless `--force` is explicit

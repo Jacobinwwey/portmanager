@@ -37,7 +37,7 @@ const artifactSourceOptionToId = Object.fromEntries(
 ) as Record<string, LiveTransportFollowUpArtifactId>
 
 export interface LiveTransportFollowUpPacketCliOptions {
-  action: 'scaffold' | 'assemble' | 'capture' | 'validate'
+  action: 'scaffold' | 'assemble' | 'preview' | 'capture' | 'validate'
   repoRoot: string
   packetDate?: string
   packetRoot?: string
@@ -80,11 +80,27 @@ export interface CaptureLiveTransportFollowUpPacketResult
   auditLimit: number
 }
 
+export interface PreviewLiveTransportFollowUpCaptureResult {
+  packetRoot: string
+  controllerBaseUrl: string
+  candidateTargetProfileId: string
+  hostId: string
+  bootstrapOperationId: string
+  capturedAddress?: string
+  agentBaseUrl?: string
+  auditLimit: number
+  bootstrapOperationPresentInAuditWindow: boolean
+  auditOperationIds: string[]
+  captureReady: boolean
+  warnings: string[]
+}
+
 function usage() {
   return [
     'Usage:',
     '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts scaffold --packet-date YYYY-MM-DD [--captured-at ISO] [--force] [--json]',
     '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts assemble --packet-date YYYY-MM-DD --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path> [--captured-at ISO] [--json]',
+    '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts preview --packet-date YYYY-MM-DD --controller-base-url <url> [--candidate-target-profile-id <id>] [--host-id <host-id>] [--bootstrap-operation-id <operation-id>] [--agent-base-url <url>] [--audit-limit <count>] [--json]',
     '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts capture --packet-date YYYY-MM-DD --controller-base-url <url> [--candidate-target-profile-id <id>] [--host-id <host-id>] [--bootstrap-operation-id <operation-id>] [--agent-base-url <url>] [--audit-limit <count>] [--captured-at ISO] [--force] [--json]',
     '  node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts validate [--packet-root <repo-relative-root> | --latest] [--json]'
   ].join('\n')
@@ -100,6 +116,7 @@ export function parseArgs(argv: string[]): LiveTransportFollowUpPacketCliOptions
   if (
     actionToken !== 'scaffold' &&
     actionToken !== 'assemble' &&
+    actionToken !== 'preview' &&
     actionToken !== 'capture' &&
     actionToken !== 'validate'
   ) {
@@ -193,7 +210,7 @@ export function parseArgs(argv: string[]): LiveTransportFollowUpPacketCliOptions
     throw new Error(`unknown argument: ${current}\n${usage()}`)
   }
 
-  if (['scaffold', 'assemble', 'capture'].includes(options.action) && !options.packetDate) {
+  if (['scaffold', 'assemble', 'preview', 'capture'].includes(options.action) && !options.packetDate) {
     throw new Error(`--packet-date is required for ${options.action}\n${usage()}`)
   }
 
@@ -201,9 +218,9 @@ export function parseArgs(argv: string[]): LiveTransportFollowUpPacketCliOptions
     throw new Error(`choose --packet-root or --latest, not both\n${usage()}`)
   }
 
-  if (options.action === 'capture') {
+  if (options.action === 'preview' || options.action === 'capture') {
     if (!options.controllerBaseUrl) {
-      throw new Error(`--controller-base-url is required for capture\n${usage()}`)
+      throw new Error(`--controller-base-url is required for ${options.action}\n${usage()}`)
     }
 
     if (
@@ -961,6 +978,71 @@ export async function captureLiveTransportFollowUpPacket(options: {
   force?: boolean
 }): Promise<CaptureLiveTransportFollowUpPacketResult> {
   const repoRoot = options.repoRoot ?? defaultRepoRoot
+  const preflight = await loadCapturePreflight({
+    packetDate: options.packetDate,
+    controllerBaseUrl: options.controllerBaseUrl,
+    candidateTargetProfileId: options.candidateTargetProfileId,
+    hostId: options.hostId,
+    bootstrapOperationId: options.bootstrapOperationId,
+    agentBaseUrl: options.agentBaseUrl,
+    auditLimit: options.auditLimit
+  })
+
+  if (!preflight.agentBaseUrl) {
+    throw new Error('agent base URL could not be resolved; pass --agent-base-url <url>')
+  }
+
+  ensureAuditIndexLinksBootstrap(
+    preflight.linkedControllerAuditReference,
+    preflight.bootstrapOperationId,
+    preflight.auditLimit
+  )
+
+  const steadyStateHealth = await requestJson({
+    baseUrl: preflight.agentBaseUrl,
+    pathname: 'health',
+    label: 'steady-state health'
+  })
+  const steadyStateRuntimeState = await requestJson({
+    baseUrl: preflight.agentBaseUrl,
+    pathname: 'runtime-state',
+    label: 'steady-state runtime-state'
+  })
+
+  const assembled = writePacketFromSourceArtifacts({
+    repoRoot,
+    packetDate: options.packetDate,
+    capturedAt: options.capturedAt,
+    force: options.force,
+    sourceArtifacts: {
+      candidate_host_with_tailscale_ip: preflight.candidateHostDetail,
+      bootstrap_operation_with_tailscale_transport: preflight.bootstrapOperation,
+      steady_state_health_with_tailscale_transport: steadyStateHealth,
+      steady_state_runtime_state_with_tailscale_transport: steadyStateRuntimeState,
+      linked_controller_audit_reference: preflight.linkedControllerAuditReference
+    }
+  })
+
+  return {
+    ...assembled,
+    controllerBaseUrl: preflight.controllerBaseUrl,
+    candidateTargetProfileId: preflight.candidateTargetProfileId,
+    hostId: preflight.hostId,
+    bootstrapOperationId: preflight.bootstrapOperationId,
+    agentBaseUrl: preflight.agentBaseUrl,
+    auditLimit: preflight.auditLimit
+  }
+}
+
+async function loadCapturePreflight(options: {
+  packetDate: string
+  controllerBaseUrl: string
+  candidateTargetProfileId?: string
+  hostId?: string
+  bootstrapOperationId?: string
+  agentBaseUrl?: string
+  auditLimit?: number
+}) {
   const controllerBaseUrl = normalizeBaseUrl(options.controllerBaseUrl, 'controller base URL')
   const resolvedSelection = await resolveCaptureSelection({
     controllerBaseUrl,
@@ -979,6 +1061,7 @@ export async function captureLiveTransportFollowUpPacket(options: {
     resolvedSelection.candidateTargetProfileId,
     resolvedSelection.hostId
   )
+
   const bootstrapOperation =
     resolvedSelection.bootstrapOperationDetail ??
     (await requestJson({
@@ -986,21 +1069,6 @@ export async function captureLiveTransportFollowUpPacket(options: {
       pathname: `operations/${encodeURIComponent(resolvedSelection.bootstrapOperationId)}`,
       label: 'bootstrap operation'
     }))
-
-  const agentBaseUrl = normalizeBaseUrl(
-    options.agentBaseUrl ?? extractBootstrapAgentBaseUrl(bootstrapOperation) ?? '',
-    'agent base URL'
-  )
-  const steadyStateHealth = await requestJson({
-    baseUrl: agentBaseUrl,
-    pathname: 'health',
-    label: 'steady-state health'
-  })
-  const steadyStateRuntimeState = await requestJson({
-    baseUrl: agentBaseUrl,
-    pathname: 'runtime-state',
-    label: 'steady-state runtime-state'
-  })
 
   const auditLimit = options.auditLimit ?? 20
   const linkedControllerAuditReference = await requestJson({
@@ -1012,34 +1080,65 @@ export async function captureLiveTransportFollowUpPacket(options: {
       limit: auditLimit
     }
   })
-  ensureAuditIndexLinksBootstrap(
-    linkedControllerAuditReference,
-    resolvedSelection.bootstrapOperationId,
-    auditLimit
-  )
 
-  const assembled = writePacketFromSourceArtifacts({
-    repoRoot,
-    packetDate: options.packetDate,
-    capturedAt: options.capturedAt,
-    force: options.force,
-    sourceArtifacts: {
-      candidate_host_with_tailscale_ip: candidateHostDetail,
-      bootstrap_operation_with_tailscale_transport: bootstrapOperation,
-      steady_state_health_with_tailscale_transport: steadyStateHealth,
-      steady_state_runtime_state_with_tailscale_transport: steadyStateRuntimeState,
-      linked_controller_audit_reference: linkedControllerAuditReference
-    }
-  })
+  const rawAgentBaseUrl = options.agentBaseUrl ?? extractBootstrapAgentBaseUrl(bootstrapOperation)
+  const agentBaseUrl = rawAgentBaseUrl
+    ? normalizeBaseUrl(rawAgentBaseUrl, 'agent base URL')
+    : undefined
 
   return {
-    ...assembled,
+    packetRoot: packetRootFromDate(options.packetDate),
     controllerBaseUrl,
     candidateTargetProfileId: resolvedSelection.candidateTargetProfileId,
     hostId: resolvedSelection.hostId,
     bootstrapOperationId: resolvedSelection.bootstrapOperationId,
+    candidateHostDetail,
+    bootstrapOperation,
+    linkedControllerAuditReference,
+    capturedAddress: extractCapturedAddress(candidateHostDetail, bootstrapOperation),
     agentBaseUrl,
     auditLimit
+  }
+}
+
+export async function previewLiveTransportFollowUpCapture(options: {
+  repoRoot?: string
+  packetDate: string
+  controllerBaseUrl: string
+  candidateTargetProfileId?: string
+  hostId?: string
+  bootstrapOperationId?: string
+  agentBaseUrl?: string
+  auditLimit?: number
+}): Promise<PreviewLiveTransportFollowUpCaptureResult> {
+  const preflight = await loadCapturePreflight(options)
+  const auditOperationIds = extractAuditOperationIds(preflight.linkedControllerAuditReference)
+  const bootstrapOperationPresentInAuditWindow = auditOperationIds.includes(preflight.bootstrapOperationId)
+  const warnings: string[] = []
+
+  if (!preflight.agentBaseUrl) {
+    warnings.push('agent base URL is unresolved; pass --agent-base-url <url> before capture')
+  }
+
+  if (!bootstrapOperationPresentInAuditWindow) {
+    warnings.push(
+      `controller audit index does not include bootstrap operation ${preflight.bootstrapOperationId}; increase --audit-limit above ${preflight.auditLimit} or capture closer to the bounded run`
+    )
+  }
+
+  return {
+    packetRoot: preflight.packetRoot,
+    controllerBaseUrl: preflight.controllerBaseUrl,
+    candidateTargetProfileId: preflight.candidateTargetProfileId,
+    hostId: preflight.hostId,
+    bootstrapOperationId: preflight.bootstrapOperationId,
+    capturedAddress: preflight.capturedAddress,
+    agentBaseUrl: preflight.agentBaseUrl,
+    auditLimit: preflight.auditLimit,
+    bootstrapOperationPresentInAuditWindow,
+    auditOperationIds,
+    captureReady: warnings.length === 0,
+    warnings
   }
 }
 
@@ -1093,6 +1192,22 @@ function printCaptureResult(result: CaptureLiveTransportFollowUpPacketResult) {
   ].join('\n')
 }
 
+function printPreviewResult(result: PreviewLiveTransportFollowUpCaptureResult) {
+  return [
+    `Packet root: ${result.packetRoot}`,
+    `Controller base URL: ${result.controllerBaseUrl}`,
+    `Candidate target profile: ${result.candidateTargetProfileId}`,
+    `Host ID: ${result.hostId}`,
+    `Bootstrap operation ID: ${result.bootstrapOperationId}`,
+    result.capturedAddress ? `Captured address: ${result.capturedAddress}` : 'Captured address: missing',
+    result.agentBaseUrl ? `Agent base URL: ${result.agentBaseUrl}` : 'Agent base URL: unresolved',
+    `Audit limit: ${result.auditLimit}`,
+    `Bootstrap operation in audit window: ${result.bootstrapOperationPresentInAuditWindow ? 'yes' : 'no'}`,
+    `Capture readiness: ${result.captureReady ? 'ready' : 'blocked'}`,
+    ...(result.warnings.length === 0 ? [] : result.warnings.map((warning) => `- ${warning}`))
+  ].join('\n')
+}
+
 function printValidationResult(validation: ReturnType<typeof validateLiveTransportFollowUpPacket>) {
   return [
     `Packet root: ${validation.packetRoot}`,
@@ -1142,6 +1257,27 @@ async function main() {
     }
 
     process.exit(result.validation.ok ? 0 : 1)
+  }
+
+  if (options.action === 'preview') {
+    const result = await previewLiveTransportFollowUpCapture({
+      repoRoot: options.repoRoot,
+      packetDate: options.packetDate ?? '',
+      controllerBaseUrl: options.controllerBaseUrl ?? '',
+      candidateTargetProfileId: options.candidateTargetProfileId,
+      hostId: options.hostId,
+      bootstrapOperationId: options.bootstrapOperationId,
+      agentBaseUrl: options.agentBaseUrl,
+      auditLimit: options.auditLimit
+    })
+
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2))
+    } else {
+      console.log(printPreviewResult(result))
+    }
+
+    process.exit(result.captureReady ? 0 : 1)
   }
 
   if (options.action === 'capture') {

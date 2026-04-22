@@ -1,7 +1,7 @@
 # PortManager Debian 12 Review Packet Template
 
-Updated: 2026-04-21
-Version: v0.2.0
+Updated: 2026-04-22
+Version: v0.3.0
 
 ## English
 
@@ -52,11 +52,13 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### Filesystem-backed live packet extension
 - fresh packet root pattern: `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
 - canonical summary filename: `live-transport-follow-up-summary.json`
+- preferred preview helper: `pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>`
 - preferred capture helper: `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>`
 - scaffold helper: `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
 - assembly helper fallback: `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
 - validator helper: `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
-- the preferred capture helper now auto-resolves the latest candidate host plus latest successful bootstrap pair for `debian-12-systemd-tailscale`, fetches host detail, bootstrap detail, steady-state `/health`, steady-state `/runtime-state`, and one host-scoped audit index directly from bounded controller plus agent HTTP surfaces, then writes the canonical packet-local files and summary in one step
+- the preferred preview helper now auto-resolves the latest candidate host plus latest successful bootstrap pair for `debian-12-systemd-tailscale`, fetches controller host detail, bootstrap detail, and one host-scoped audit index directly from bounded controller surfaces, then reports packet root, resolved ids, captured address, derived agent base URL, audit operation ids, and `captureReady` without writing packet files
+- the preferred capture helper now runs immediately after preview reports `captureReady: true`, reuses the same resolved host/bootstrap pair, fetches steady-state `/health`, steady-state `/runtime-state`, and the same host-scoped audit index, then writes the canonical packet-local files and summary in one step
 - `--candidate-target-profile-id <target-profile-id>`, `--host-id <host-id>`, and `--bootstrap-operation-id <operation-id>` remain bounded override flags when operator review needs a different candidate lane, a hand-picked bootstrap pair, or mismatch debugging
 - the assembly helper copies real source artifacts into the canonical packet-local filenames, derives `candidateTargetProfileId`, `capturedAt`, and `capturedAddress`, and fails on cross-source address drift so operators do not hand-write `live-transport-follow-up-summary.json`
 - scaffold-only packet roots may be replaced by capture or assembly without `--force`, but existing non-scaffold packet roots stay protected unless `--force` is explicit
@@ -159,11 +161,13 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### filesystem-backed live packet 扩展
 - 新 packet 根目录模式：`docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
 - 规范 summary 文件名：`live-transport-follow-up-summary.json`
+- 首选 preview helper：`pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>`
 - 首选 capture helper：`pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>`
 - scaffold helper：`pnpm milestone:scaffold:live-packet -- --packet-date <date>`
 - assembly helper 回退路径：`pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
 - validator helper：`pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
-- 首选 capture helper 现在会先为 `debian-12-systemd-tailscale` 自动解析最新候选主机与最新成功 bootstrap 配对，再直接从有边界的 controller 与 agent HTTP surface 抓取 host detail、bootstrap detail、steady-state `/health`、steady-state `/runtime-state` 与一份 host-scoped audit index，然后一次写入规范 packet 本地文件与 summary
+- 首选 preview helper 现在会先为 `debian-12-systemd-tailscale` 自动解析最新候选主机与最新成功 bootstrap 配对，再直接从有边界的 controller surface 抓取 host detail、bootstrap detail 与一份 host-scoped audit index，并在不写 packet 文件前提下返回 packet root、resolved id、captured address、derived agent base URL、audit operation id 与 `captureReady`
+- 首选 capture helper 现在会在 preview 已经报告 `captureReady: true` 之后复用同一套 resolved host/bootstrap 配对，再抓取 steady-state `/health`、steady-state `/runtime-state` 与同一份 host-scoped audit index，然后一次写入规范 packet 本地文件与 summary
 - `--candidate-target-profile-id <target-profile-id>`、`--host-id <host-id>` 与 `--bootstrap-operation-id <operation-id>` 继续保留为有边界 override 参数，用于切换候选 lane、手工指定 bootstrap 配对或排查 mismatch
 - assembly helper 会把真实源产物复制到规范 packet 本地文件名中，自动推导 `candidateTargetProfileId`、`capturedAt` 与 `capturedAddress`，并在跨源地址漂移时直接失败，因此 operator 不再默认手写 `live-transport-follow-up-summary.json`
 - scaffold-only 的 packet 根目录可以被 capture 或 assembly 直接升级；而已经存在的非 scaffold packet 根目录只有显式传 `--force` 才允许覆盖

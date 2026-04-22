@@ -15,12 +15,13 @@ import {
   assembleLiveTransportFollowUpPacket,
   captureLiveTransportFollowUpPacket,
   parseArgs,
+  previewLiveTransportFollowUpCapture,
   resolveLatestLiveTransportFollowUpPacketRoot,
   scaffoldLiveTransportFollowUpPacket,
   validateLiveTransportFollowUpPacketCommand
 } from '../../scripts/milestone/live-transport-follow-up-packet.ts'
 
-test('parseArgs accepts scaffold, assemble, capture, and validate modes', () => {
+test('parseArgs accepts scaffold, assemble, preview, capture, and validate modes', () => {
   const scaffold = parseArgs(['--', 'scaffold', '--packet-date', '2026-04-26', '--json'])
   const assemble = parseArgs([
     'assemble',
@@ -59,6 +60,17 @@ test('parseArgs accepts scaffold, assemble, capture, and validate modes', () => 
     '--controller-base-url',
     'http://127.0.0.1:8100/api/controller'
   ])
+  const preview = parseArgs([
+    'preview',
+    '--packet-date',
+    '2026-04-26',
+    '--controller-base-url',
+    'http://127.0.0.1:8100/api/controller',
+    '--candidate-target-profile-id',
+    'debian-12-systemd-tailscale',
+    '--audit-limit',
+    '6'
+  ])
   const validate = parseArgs(['validate', '--packet-root', 'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-26'])
 
   assert.equal(scaffold.action, 'scaffold')
@@ -85,6 +97,10 @@ test('parseArgs accepts scaffold, assemble, capture, and validate modes', () => 
   assert.equal(captureAuto.hostId, undefined)
   assert.equal(captureAuto.bootstrapOperationId, undefined)
   assert.equal(captureAuto.auditLimit, 20)
+  assert.equal(preview.action, 'preview')
+  assert.equal(preview.controllerBaseUrl, 'http://127.0.0.1:8100/api/controller')
+  assert.equal(preview.candidateTargetProfileId, 'debian-12-systemd-tailscale')
+  assert.equal(preview.auditLimit, 6)
   assert.equal(validate.action, 'validate')
   assert.equal(
     validate.packetRoot,
@@ -435,6 +451,206 @@ test('captureLiveTransportFollowUpPacket fetches controller plus agent evidence 
   } finally {
     await controllerServer.close()
     await agentServer.close()
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('previewLiveTransportFollowUpCapture resolves current controller-side capture plan without writing packet files', async () => {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), 'portmanager-live-packet-helper-'))
+
+  const controllerServer = await startJsonServer(({ pathname, searchParams }) => {
+    if (pathname === '/api/controller/hosts') {
+      return {
+        body: {
+          items: [
+            {
+              id: 'host_debian_review_009',
+              targetProfileId: candidateTargetProfileId,
+              tailscaleAddress: '100.91.22.99',
+              updatedAt: '2026-05-01T12:02:00.000Z'
+            }
+          ]
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/hosts/host_debian_review_009') {
+      return {
+        body: {
+          id: 'host_debian_review_009',
+          targetProfileId: candidateTargetProfileId,
+          tailscaleAddress: '100.91.22.99',
+          updatedAt: '2026-05-01T12:02:00.000Z'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/operations') {
+      if (searchParams.get('type') === 'bootstrap_host') {
+        return {
+          body: {
+            items: [
+              {
+                id: 'op_bootstrap_009',
+                type: 'bootstrap_host',
+                state: 'succeeded',
+                hostId: 'host_debian_review_009',
+                finishedAt: '2026-05-01T12:03:00.000Z'
+              }
+            ]
+          }
+        }
+      }
+
+      return {
+        body: {
+          items: []
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/operations/op_bootstrap_009') {
+      return {
+        body: {
+          id: 'op_bootstrap_009',
+          type: 'bootstrap_host',
+          state: 'succeeded',
+          hostId: 'host_debian_review_009',
+          finishedAt: '2026-05-01T12:03:00.000Z',
+          resultSummary: 'host host_debian_review_009 bootstrapped via http://100.91.22.99:8711'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/event-audit-index') {
+      assert.equal(searchParams.get('hostId'), 'host_debian_review_009')
+      assert.equal(searchParams.get('limit'), '6')
+
+      return {
+        body: {
+          items: [
+            {
+              lastEventAt: '2026-05-01T12:05:00.000Z',
+              operation: {
+                id: 'op_create_rule_009',
+                finishedAt: '2026-05-01T12:05:00.000Z'
+              }
+            },
+            {
+              lastEventAt: '2026-05-01T12:03:00.000Z',
+              operation: {
+                id: 'op_bootstrap_009',
+                finishedAt: '2026-05-01T12:03:00.000Z'
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  try {
+    const preview = await previewLiveTransportFollowUpCapture({
+      repoRoot,
+      packetDate: '2026-05-01',
+      controllerBaseUrl: `${controllerServer.baseUrl}/api/controller`,
+      auditLimit: 6
+    })
+
+    assert.equal(
+      preview.packetRoot,
+      'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-05-01'
+    )
+    assert.equal(preview.candidateTargetProfileId, candidateTargetProfileId)
+    assert.equal(preview.hostId, 'host_debian_review_009')
+    assert.equal(preview.bootstrapOperationId, 'op_bootstrap_009')
+    assert.equal(preview.agentBaseUrl, 'http://100.91.22.99:8711')
+    assert.equal(preview.bootstrapOperationPresentInAuditWindow, true)
+    assert.equal(preview.captureReady, true)
+    assert.deepEqual(preview.warnings, [])
+    assert.equal(existsSync(path.join(repoRoot, preview.packetRoot)), false)
+  } finally {
+    await controllerServer.close()
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('previewLiveTransportFollowUpCapture reports unresolved capture blockers without writing packet files', async () => {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), 'portmanager-live-packet-helper-'))
+
+  const controllerServer = await startJsonServer(({ pathname, searchParams }) => {
+    if (pathname === '/api/controller/hosts/host_debian_review_010') {
+      return {
+        body: {
+          id: 'host_debian_review_010',
+          targetProfileId: candidateTargetProfileId,
+          tailscaleAddress: '100.91.22.100',
+          updatedAt: '2026-05-02T12:02:00.000Z'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/operations/op_bootstrap_010') {
+      return {
+        body: {
+          id: 'op_bootstrap_010',
+          type: 'bootstrap_host',
+          state: 'succeeded',
+          hostId: 'host_debian_review_010',
+          finishedAt: '2026-05-02T12:03:00.000Z',
+          resultSummary: 'host host_debian_review_010 bootstrapped'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/event-audit-index') {
+      assert.equal(searchParams.get('hostId'), 'host_debian_review_010')
+      assert.equal(searchParams.get('limit'), '3')
+
+      return {
+        body: {
+          items: [
+            {
+              lastEventAt: '2026-05-02T12:05:00.000Z',
+              operation: {
+                id: 'op_create_rule_010',
+                finishedAt: '2026-05-02T12:05:00.000Z'
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  try {
+    const preview = await previewLiveTransportFollowUpCapture({
+      repoRoot,
+      packetDate: '2026-05-02',
+      controllerBaseUrl: `${controllerServer.baseUrl}/api/controller`,
+      hostId: 'host_debian_review_010',
+      bootstrapOperationId: 'op_bootstrap_010',
+      auditLimit: 3
+    })
+
+    assert.equal(preview.captureReady, false)
+    assert.equal(preview.agentBaseUrl, undefined)
+    assert.equal(preview.bootstrapOperationPresentInAuditWindow, false)
+    assert.match(preview.warnings.join('\n'), /agent base URL/i)
+    assert.match(preview.warnings.join('\n'), /audit index does not include bootstrap operation/i)
+    assert.equal(existsSync(path.join(repoRoot, preview.packetRoot)), false)
+  } finally {
+    await controllerServer.close()
     rmSync(repoRoot, { recursive: true, force: true })
   }
 })

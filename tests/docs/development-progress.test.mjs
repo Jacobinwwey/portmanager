@@ -130,6 +130,10 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:confidence/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:fetch:review-pack/)
+  assert.match(
+    milestoneConfidenceComponent,
+    /pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>/
+  )
   assert.match(milestoneConfidenceComponent, /pnpm milestone:capture:live-packet/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:assemble:live-packet/)
   assert.match(
@@ -142,11 +146,11 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-live-packet-source-auto-resolution-requirements\.md/
+    /2026-04-22-portmanager-m3-live-packet-capture-preflight-requirements\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-live-packet-source-auto-resolution-plan\.md/
+    /2026-04-22-portmanager-m3-live-packet-capture-preflight-plan\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
@@ -177,6 +181,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(roadmapData, /Units 51 through 62/)
   assert.match(roadmapData, /Units 63 through 79/)
+  assert.match(roadmapData, /pnpm milestone:preview:live-packet/)
   assert.match(roadmapData, /pnpm milestone:capture:live-packet/)
   assert.match(roadmapData, /review_open/)
   assert.match(roadmapData, /blockingDeltas/)
@@ -289,7 +294,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /live-transport-follow-up-summary\.json/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
-  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-live-packet-source-auto-resolution-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-22-portmanager-m3-live-packet-capture-preflight-plan\.md/)
   assert.match(roadmapData, /pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>/)
   assert.match(roadmapData, /--candidate-target-profile-id/)
   assert.match(roadmapData, /--bootstrap-operation-id/)
