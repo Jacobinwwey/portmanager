@@ -14,14 +14,14 @@ Version: v0.1.0
 ## Status Note
 Late `2026-04-21` progress now puts live-packet discovery into landed history.
 The next Milestone 3 slice is narrower.
-Public `main` still stays `capture_required` because no real live packet is committed, and current repo workflow still lacks a safe way to scaffold or validate the next bounded packet.
-This plan adds that execution tooling without pretending the live packet already exists.
+Public `main` still stays `capture_required` because no real live packet is committed, even though the repo now ships a safe way to scaffold, assemble, and validate the next bounded packet.
+This plan keeps that execution tooling, the operator docs, and public progress wording aligned without pretending the live packet already exists.
 
 ## Overview
 This plan covers the post-discovery Milestone 3 slice.
 It keeps filesystem-backed discovery, repaired live-loader parity, blocker visibility, and the preserved Docker-bridge packet as landed history.
 It does not fabricate live packet evidence or broaden supported-target claims.
-It adds scaffold-marker safety, repo-native packet scaffold plus validation helpers, and retargeted developer progress docs.
+It adds scaffold-marker safety, repo-native packet scaffold plus assembly plus validation helpers, and retargeted developer progress docs.
 
 ## Problem Frame
 The repo no longer lacks:
@@ -31,24 +31,25 @@ The repo no longer lacks:
 - fallback behavior when newer roots are malformed or incomplete
 - CLI/Web/contracts/docs parity for `capturedPacketRoot` and `capturedAddress`
 
-It now lacks one safe operator-to-commit workflow that says:
+It now lacks one safe operator-to-commit workflow that stays documented everywhere and says:
 
 - how to create the canonical live packet root without hand-building files
+- how to assemble real source artifacts into the canonical packet root without hand-writing the summary
 - how scaffold output stays invalid by design
 - how developers can validate the latest packet root before commit
 - how progress docs describe the new execution-tooling queue honestly
 
 ## Requirements Trace
-- R1-R3. Add invalid-by-design live packet scaffolds and keep controller truth conservative.
-- R4-R6. Add repo-native packet validation that reuses controller discovery rules.
-- R7-R12. Retarget docs, roadmap, and verification around the new active queue.
+- R1-R4. Keep invalid-by-design live packet preparation and controller truth conservative.
+- R5-R7. Add repo-native packet validation that reuses controller discovery rules.
+- R8-R13. Retarget docs, roadmap, and verification around the new active queue.
 
 ## Current Architecture Deep Compare
 
 | Concern | Current verified base | Next move |
 | --- | --- | --- |
 | Discovery truth | `apps/controller/src/second-target-policy-pack.ts` already discovers newest valid live packet roots | Reuse that truth for validator output and reject scaffold markers there too |
-| Packet execution workflow | Operators still handcraft packet roots from prose docs | Add one repo-native scaffold command and one validator command |
+| Packet execution workflow | Repo-native scaffold, assemble, and validator helpers now exist | Keep docs, roadmap, and operator guidance aligned to one official workflow |
 | Progress docs | Root docs and roadmap surfaces still sound like discovery is the unfinished queue | Shift active-map wording to execution tooling plus real packet capture |
 | Support-lock posture | `/second-target-policy-pack` still publishes `review_open`, `capture_required`, and the Docker-bridge blocker honestly | Keep that posture until a validator-passing real packet is committed |
 
@@ -60,11 +61,11 @@ It now lacks one safe operator-to-commit workflow that says:
 
 ## Implementation Units
 
-- [ ] **Unit 77: Scaffold Marker Safety In Controller Truth**
+- [x] **Unit 77: Scaffold Marker Safety In Controller Truth**
 
 **Goal:** Make scaffold marker files invalid everywhere controller discovery reads live packet roots.
 
-**Requirements:** R2, R5, R10
+**Requirements:** R3, R6, R11
 
 **Dependencies:** Landed Units 74-76
 
@@ -86,11 +87,11 @@ It now lacks one safe operator-to-commit workflow that says:
 **Verification:**
 - `node --experimental-strip-types --test tests/controller/second-target-policy-pack.test.ts`
 
-- [ ] **Unit 78: Repo-Native Live Packet Scaffold And Validation Helpers**
+- [x] **Unit 78: Repo-Native Live Packet Scaffold, Assembly, And Validation Helpers**
 
-**Goal:** Give developers one safe repo-native path to prepare and audit the next bounded live packet.
+**Goal:** Give developers one safe repo-native path to scaffold, assemble, and audit the next bounded live packet.
 
-**Requirements:** R1-R6, R11
+**Requirements:** R1-R7, R12
 
 **Dependencies:** Unit 77
 
@@ -101,22 +102,24 @@ It now lacks one safe operator-to-commit workflow that says:
 
 **Approach:**
 - Add `pnpm milestone:scaffold:live-packet` to create the canonical packet root, README, placeholder JSON files, and invalid summary scaffold.
+- Add `pnpm milestone:assemble:live-packet` to copy real source artifacts into the canonical packet filenames, derive `candidateTargetProfileId`, `capturedAt`, and `capturedAddress`, and fail on cross-source address drift.
 - Add `pnpm milestone:validate:live-packet` to audit a specific packet root or the latest candidate root against the shared controller validator.
 - Keep scaffold output invalid by design until real packet files replace the scaffold markers.
 
 **Test scenarios:**
 - Scaffold command creates the canonical file layout and fails validation by design.
+- Assemble command writes canonical packet-local files plus a derived summary from real source artifacts.
 - Validator reports scaffold-marker, captured-address, and required-artifact blockers.
 - Replacing scaffold files with real packet files makes validation pass.
 
 **Verification:**
 - `node --experimental-strip-types --test tests/milestone/live-transport-follow-up-packet.test.ts`
 
-- [ ] **Unit 79: Progress Retarget And Docs Closure**
+- [x] **Unit 79: Progress Retarget And Docs Closure**
 
 **Goal:** Mark discovery as landed history, publish the new helper commands, and keep roadmap/progress truth aligned with the still-missing real packet.
 
-**Requirements:** R7-R12
+**Requirements:** R8-R13
 
 **Dependencies:** Units 77-78
 
@@ -140,12 +143,12 @@ It now lacks one safe operator-to-commit workflow that says:
 **Approach:**
 - Mark Units 74 through 76 as landed history.
 - Shift the active Milestone 3 map from discovery to execution tooling.
-- Teach the new scaffold and validation commands in the operator guide and review packet template.
+- Teach the new scaffold, assembly, and validation commands in the operator guide and review packet template.
 - Keep current-state wording explicit: discovery is landed, helpers exist, `capture_required` remains truthful until a real live packet is committed.
 
 **Test scenarios:**
 - Development-progress docs mention the new active requirements/plan pair.
-- Milestone component copy mentions scaffold and validation commands.
+- Milestone component copy mentions scaffold, assembly, and validation commands.
 - Follow-up guide and review template both name the helper commands and scaffold-invalid posture.
 - Docs generation and build still succeed.
 

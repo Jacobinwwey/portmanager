@@ -130,6 +130,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:confidence/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:fetch:review-pack/)
+  assert.match(milestoneConfidenceComponent, /pnpm milestone:assemble:live-packet/)
   assert.match(
     milestoneConfidenceComponent,
     /2026-04-21-portmanager-m3-toward-c-enablement-requirements\.md/
@@ -173,6 +174,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(roadmapData, /capture_complete/)
   assert.match(roadmapData, /live-transport-follow-up-summary\.json/)
   assert.match(roadmapData, /pnpm milestone:scaffold:live-packet/)
+  assert.match(roadmapData, /pnpm milestone:assemble:live-packet/)
   assert.match(roadmapData, /pnpm milestone:validate:live-packet/)
   assert.match(roadmapData, /debian-12-systemd-tailscale/)
   assert.match(roadmapData, /review-packet readiness/i)

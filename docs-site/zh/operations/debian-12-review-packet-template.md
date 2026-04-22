@@ -61,7 +61,9 @@ status: active
 - 新 packet 根目录模式：`docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
 - 规范 summary 文件名：`live-transport-follow-up-summary.json`
 - scaffold helper：`pnpm milestone:scaffold:live-packet -- --packet-date <date>`
+- assembly helper：`pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
 - validator helper：`pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
+- assembly helper 会把真实源产物复制到规范 packet 本地文件名中，自动推导 `candidateTargetProfileId`、`capturedAt` 与 `capturedAddress`，并在跨源地址漂移时直接失败，因此 operator 不再默认手写 `live-transport-follow-up-summary.json`
 - controller 默认真相现在只会读取“最新有效 packet”根目录，而这份 summary 文件至少要同时保留：
   - `candidateTargetProfileId`
   - `capturedAt`

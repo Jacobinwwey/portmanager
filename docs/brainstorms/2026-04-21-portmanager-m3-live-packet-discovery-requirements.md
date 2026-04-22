@@ -5,7 +5,7 @@ topic: portmanager-m3-live-packet-discovery
 
 # PortManager Milestone 3 Live Packet Discovery Requirements
 
-Status note on `2026-04-21`: this slice is now landed. `/second-target-policy-pack` auto-discovers the newest valid `docs/operations/artifacts/debian-12-live-tailscale-packet-*` root, ignores incomplete or scaffold-marked newer roots, clears the blocking delta only from real live evidence, and remote `main` CI parity stays repaired after the stale live-loader expectation was corrected. The next gap now shifts from discovery to safe execution: public `main` still stays `capture_required` because no real live packet is committed yet, and developers still need repo-native scaffold plus validation helpers before bounded live capture can move honestly.
+Status note on `2026-04-21`: this slice is now landed. `/second-target-policy-pack` auto-discovers the newest valid `docs/operations/artifacts/debian-12-live-tailscale-packet-*` root, ignores incomplete or scaffold-marked newer roots, clears the blocking delta only from real live evidence, and remote `main` CI parity stays repaired after the stale live-loader expectation was corrected. The next gap now shifts from discovery to safe execution: public `main` still stays `capture_required` because no real live packet is committed yet, and developers now rely on repo-native scaffold -> assemble -> validate helpers before bounded live capture can move honestly.
 
 ## Problem Frame
 Current repo truth has already moved past “make live follow-up visible”:

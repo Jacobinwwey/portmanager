@@ -181,4 +181,4 @@ It now lacks one fully wired public truth path that says:
 - Do not weaken support-lock wording while the discovered packet still has not replaced the blocker on `main`.
 
 ## Next Steps
-- Move to `docs/brainstorms/2026-04-21-portmanager-m3-live-packet-execution-tooling-requirements.md` plus `docs/plans/2026-04-21-portmanager-m3-live-packet-execution-tooling-plan.md` for the follow-on slice that adds repo-native scaffold plus validation helpers and shifts the active Milestone 3 map from landed discovery work to real packet execution.
+- Move to `docs/brainstorms/2026-04-21-portmanager-m3-live-packet-execution-tooling-requirements.md` plus `docs/plans/2026-04-21-portmanager-m3-live-packet-execution-tooling-plan.md` for the follow-on slice that adds the repo-native scaffold -> assemble -> validate workflow and shifts the active Milestone 3 map from landed discovery work to real packet execution.

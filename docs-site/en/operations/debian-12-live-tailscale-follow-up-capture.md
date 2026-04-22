@@ -24,7 +24,7 @@ It does not widen supported-target claims by itself.
 - The current recorded address is still `172.17.0.2`.
 - `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` stays preserved and untouched.
 - `pnpm milestone:review:promotion-ready -- --limit 20` already passed wording review on the current mainline slice.
-- `pnpm milestone:scaffold:live-packet -- --packet-date <date>` and `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>` are available locally.
+- `pnpm milestone:scaffold:live-packet -- --packet-date <date>`, `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`, and `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>` are available locally.
 - One Debian 12 candidate host is reachable on a real Tailscale tailnet.
 
 ### Capture flow
@@ -43,25 +43,19 @@ It does not widen supported-target claims by itself.
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
 6. Record one controller audit or replay reference that links the new bootstrap plus steady-state captures into one bounded packet:
    - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
-7. Replace the scaffold-marked packet-local JSON files with the resulting real artifacts under the new root without mutating the preserved Docker-bridge packet.
-8. Write one canonical packet summary file at:
-   - `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/live-transport-follow-up-summary.json`
-9. The summary file must keep these minimum fields together:
-   - `candidateTargetProfileId`
-   - `capturedAt`
-   - `capturedAddress`
-   - `requiredArtifactIds`
-   - `artifactFiles`
-10. `artifactFiles` must point at packet-local files for all five required artifact ids. Use this minimum layout unless a successor template explicitly replaces it:
+7. Feed those five real source artifacts into the repo-native assembly helper so the packet-local JSON files, canonical summary, and packet README stay synchronized without mutating the preserved Docker-bridge packet:
+   - `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
+8. Only pass `--captured-at <iso>` when operator review must override the newest valid source timestamp. Otherwise let the helper derive `candidateTargetProfileId`, `capturedAt`, and `capturedAddress`, and fail if host-detail versus bootstrap transport addresses drift.
+9. `artifactFiles` must still point at packet-local files for all five required artifact ids. Use this minimum layout unless a successor template explicitly replaces it:
    - `candidate-host-detail.json`
    - `bootstrap-operation.json`
    - `steady-state-health.json`
    - `steady-state-runtime-state.json`
    - `controller-audit-index.json`
    - `live-transport-follow-up-summary.json`
-11. Run the repo-native validator before commit:
+10. Run the repo-native validator before commit:
    - `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
-12. Update `docs/operations/portmanager-debian-12-review-packet-template.md` or a successor live packet README so every new artifact links back to `/second-target-policy-pack`.
+11. Update `docs/operations/portmanager-debian-12-review-packet-template.md` or a successor live packet README so every new artifact links back to `/second-target-policy-pack`.
 
 ### Required artifacts
 - `candidate_host_with_tailscale_ip`: one host detail snapshot with a live Tailscale-backed address

@@ -17,6 +17,7 @@
     "contracts:check": "node scripts/contracts/generate-contracts.mjs --check",
     "milestone:verify:reliability-remote-backup-replay": "node --experimental-strip-types scripts/milestone/verify-reliability-remote-backup-replay.ts",
     "milestone:scaffold:live-packet": "node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts scaffold",
+    "milestone:assemble:live-packet": "node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts assemble",
     "milestone:validate:live-packet": "node --experimental-strip-types scripts/milestone/live-transport-follow-up-packet.ts validate",
     "test": "node --experimental-strip-types --test tests/contracts/*.test.mjs tests/docs/*.test.mjs tests/controller/*.test.ts tests/web/*.test.ts tests/milestone/*.test.ts",
     "typecheck": "pnpm exec tsc -p packages/typescript-contracts/tsconfig.json --noEmit && pnpm exec tsc -p apps/controller/tsconfig.json --noEmit && pnpm exec tsc -p apps/web/tsconfig.json --noEmit",
