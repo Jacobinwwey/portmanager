@@ -338,9 +338,10 @@ const bootstrapCaptureArtifactRoot =
   'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21'
 const liveTailscaleFollowUpArtifactRootPrefix =
   'docs/operations/artifacts/debian-12-live-tailscale-packet-'
-const liveTailscaleFollowUpArtifactRootPattern =
+export const liveTransportFollowUpArtifactRootPattern =
   'docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/'
-const liveTailscaleFollowUpSummaryFileName = 'live-transport-follow-up-summary.json'
+export const liveTransportFollowUpSummaryFileName = 'live-transport-follow-up-summary.json'
+export const liveTransportFollowUpScaffoldMarkerField = 'portmanagerLivePacketScaffold'
 const preservedDockerBridgeAddress = '172.17.0.2'
 const defaultSecondTargetPolicyRepoRoot = fileURLToPath(new URL('../../../', import.meta.url))
 const bootstrapCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/bootstrap-capture-summary.json`
@@ -711,7 +712,18 @@ const liveTransportFollowUpArtifactMetadata: Record<
   }
 }
 
-const requiredLiveTransportFollowUpArtifactIds: SecondTargetLiveTransportFollowUpArtifactId[] = [
+export const liveTransportFollowUpArtifactFiles: Record<
+  SecondTargetLiveTransportFollowUpArtifactId,
+  string
+> = {
+  candidate_host_with_tailscale_ip: 'candidate-host-detail.json',
+  bootstrap_operation_with_tailscale_transport: 'bootstrap-operation.json',
+  steady_state_health_with_tailscale_transport: 'steady-state-health.json',
+  steady_state_runtime_state_with_tailscale_transport: 'steady-state-runtime-state.json',
+  linked_controller_audit_reference: 'controller-audit-index.json'
+}
+
+export const requiredLiveTransportFollowUpArtifactIds: SecondTargetLiveTransportFollowUpArtifactId[] = [
   'candidate_host_with_tailscale_ip',
   'bootstrap_operation_with_tailscale_transport',
   'steady_state_health_with_tailscale_transport',
@@ -732,6 +744,16 @@ interface LiveTransportFollowUpSummaryFile {
   requiredArtifactIds: SecondTargetLiveTransportFollowUpArtifactId[]
   artifactFiles: Partial<Record<SecondTargetLiveTransportFollowUpArtifactId, string>>
   capturedAtMs: number
+}
+
+export interface LiveTransportFollowUpPacketValidation {
+  ok: boolean
+  packetRoot: string
+  summaryPath: string
+  candidateTargetProfileId?: string
+  capturedAddress?: string
+  capturedAtMs: number
+  errors: string[]
 }
 
 export interface DefaultSecondTargetPolicySnapshotOptions {
@@ -1321,7 +1343,16 @@ function parseLiveTransportFollowUpArtifactFiles(
   return parsed
 }
 
-function parseLiveTransportFollowUpSummaryFile(raw: string): LiveTransportFollowUpSummaryFile | undefined {
+interface LiveTransportFollowUpSummaryDraft {
+  candidateTargetProfileId?: string
+  capturedAddress?: string
+  requiredArtifactIds?: SecondTargetLiveTransportFollowUpArtifactId[]
+  artifactFiles?: Partial<Record<SecondTargetLiveTransportFollowUpArtifactId, string>>
+  capturedAtMs: number
+  hasScaffoldMarker: boolean
+}
+
+function parseLiveTransportFollowUpSummaryDraft(raw: string): LiveTransportFollowUpSummaryDraft | undefined {
   let parsedJson: unknown
 
   try {
@@ -1336,25 +1367,45 @@ function parseLiveTransportFollowUpSummaryFile(raw: string): LiveTransportFollow
 
   const candidateId = typeof parsedJson.candidateTargetProfileId === 'string'
     ? parsedJson.candidateTargetProfileId.trim()
-    : ''
+    : undefined
   const capturedAddress = typeof parsedJson.capturedAddress === 'string'
     ? parsedJson.capturedAddress.trim()
-    : ''
+    : undefined
   const requiredArtifactIds = parseLiveTransportFollowUpArtifactIds(parsedJson.requiredArtifactIds)
   const artifactFiles = parseLiveTransportFollowUpArtifactFiles(parsedJson.artifactFiles)
   const capturedAt = typeof parsedJson.capturedAt === 'string' ? parsedJson.capturedAt.trim() : ''
   const capturedAtMs = Number.parseInt(String(Date.parse(capturedAt)), 10)
-
-  if (!candidateId || !capturedAddress || !requiredArtifactIds || !artifactFiles) {
-    return undefined
-  }
 
   return {
     candidateTargetProfileId: candidateId,
     capturedAddress,
     requiredArtifactIds,
     artifactFiles,
-    capturedAtMs: Number.isFinite(capturedAtMs) ? capturedAtMs : Number.NEGATIVE_INFINITY
+    capturedAtMs: Number.isFinite(capturedAtMs) ? capturedAtMs : Number.NEGATIVE_INFINITY,
+    hasScaffoldMarker: parsedJson[liveTransportFollowUpScaffoldMarkerField] === true
+  }
+}
+
+function parseLiveTransportFollowUpSummaryFile(raw: string): LiveTransportFollowUpSummaryFile | undefined {
+  const summary = parseLiveTransportFollowUpSummaryDraft(raw)
+
+  if (
+    !summary ||
+    summary.hasScaffoldMarker ||
+    !summary.candidateTargetProfileId ||
+    !summary.capturedAddress ||
+    !summary.requiredArtifactIds ||
+    !summary.artifactFiles
+  ) {
+    return undefined
+  }
+
+  return {
+    candidateTargetProfileId: summary.candidateTargetProfileId,
+    capturedAddress: summary.capturedAddress,
+    requiredArtifactIds: summary.requiredArtifactIds,
+    artifactFiles: summary.artifactFiles,
+    capturedAtMs: summary.capturedAtMs
   }
 }
 
@@ -1374,6 +1425,133 @@ function resolvePacketArtifactPath(rootAbsolutePath: string, artifactPath: strin
   return resolvedPath
 }
 
+function hasLiveTransportFollowUpScaffoldMarker(filePath: string) {
+  try {
+    const raw = readFileSync(filePath, 'utf8')
+    const parsed = JSON.parse(raw) as unknown
+    return isRecord(parsed) && parsed[liveTransportFollowUpScaffoldMarkerField] === true
+  } catch {
+    return false
+  }
+}
+
+export function validateLiveTransportFollowUpPacket(options: {
+  repoRoot?: string
+  packetRoot: string
+  expectedCandidateTargetProfileId?: string
+}): LiveTransportFollowUpPacketValidation {
+  const repoRoot = options.repoRoot ?? defaultSecondTargetPolicyRepoRoot
+  const summaryPath = path.posix.join(options.packetRoot, liveTransportFollowUpSummaryFileName)
+  const rootAbsolutePath = path.resolve(repoRoot, options.packetRoot)
+  const errors: string[] = []
+  const expectedCandidateTargetProfileId =
+    options.expectedCandidateTargetProfileId ?? candidateTargetProfileId
+
+  if (
+    !options.packetRoot.startsWith(liveTailscaleFollowUpArtifactRootPrefix) ||
+    options.packetRoot.includes('<date>')
+  ) {
+    errors.push(
+      `packet root must stay under ${liveTransportFollowUpArtifactRootPattern}`
+    )
+  }
+
+  if (!existsSync(rootAbsolutePath) || !statSync(rootAbsolutePath).isDirectory()) {
+    errors.push('packet root does not exist')
+  }
+
+  const summaryAbsolutePath = path.join(rootAbsolutePath, liveTransportFollowUpSummaryFileName)
+  if (!existsSync(summaryAbsolutePath) || !statSync(summaryAbsolutePath).isFile()) {
+    errors.push(`missing ${liveTransportFollowUpSummaryFileName}`)
+    return {
+      ok: false,
+      packetRoot: options.packetRoot,
+      summaryPath,
+      capturedAtMs: Number.NEGATIVE_INFINITY,
+      errors
+    }
+  }
+
+  const draft = parseLiveTransportFollowUpSummaryDraft(readFileSync(summaryAbsolutePath, 'utf8'))
+  if (!draft) {
+    errors.push(
+      'summary file must be valid JSON with candidateTargetProfileId, capturedAt, capturedAddress, requiredArtifactIds, and artifactFiles'
+    )
+    return {
+      ok: false,
+      packetRoot: options.packetRoot,
+      summaryPath,
+      capturedAtMs: Number.NEGATIVE_INFINITY,
+      errors
+    }
+  }
+
+  if (draft.hasScaffoldMarker) {
+    errors.push('summary file still carries scaffold marker')
+  }
+
+  if (!draft.candidateTargetProfileId) {
+    errors.push('summary file is missing candidateTargetProfileId')
+  } else if (draft.candidateTargetProfileId !== expectedCandidateTargetProfileId) {
+    errors.push(
+      `summary file candidateTargetProfileId must stay ${expectedCandidateTargetProfileId}`
+    )
+  }
+
+  if (!draft.capturedAddress) {
+    errors.push('summary file is missing capturedAddress')
+  } else if (draft.capturedAddress === preservedDockerBridgeAddress) {
+    errors.push(`capturedAddress must not stay ${preservedDockerBridgeAddress}`)
+  }
+
+  if (!draft.requiredArtifactIds) {
+    errors.push('summary file is missing requiredArtifactIds')
+  } else {
+    const missingRequiredArtifactIds = requiredLiveTransportFollowUpArtifactIds.filter(
+      (artifactId) => !draft.requiredArtifactIds?.includes(artifactId)
+    )
+
+    if (missingRequiredArtifactIds.length > 0) {
+      errors.push(
+        `requiredArtifactIds is missing ${missingRequiredArtifactIds.join(', ')}`
+      )
+    }
+  }
+
+  if (!draft.artifactFiles) {
+    errors.push('summary file is missing artifactFiles')
+  } else {
+    for (const artifactId of requiredLiveTransportFollowUpArtifactIds) {
+      const artifactPath = draft.artifactFiles[artifactId]
+
+      if (typeof artifactPath !== 'string') {
+        errors.push(`artifactFiles is missing ${artifactId}`)
+        continue
+      }
+
+      const resolvedArtifactPath = resolvePacketArtifactPath(rootAbsolutePath, artifactPath)
+      if (!resolvedArtifactPath) {
+        errors.push(`artifact file for ${artifactId} is missing or escapes packet root`)
+        continue
+      }
+
+      if (hasLiveTransportFollowUpScaffoldMarker(resolvedArtifactPath)) {
+        errors.push(`artifact file for ${artifactId} still carries scaffold marker`)
+      }
+    }
+  }
+
+  return {
+    ok: errors.length === 0,
+    packetRoot: options.packetRoot,
+    summaryPath,
+    candidateTargetProfileId: draft.candidateTargetProfileId,
+    capturedAddress: draft.capturedAddress,
+    capturedAtMs: draft.capturedAtMs,
+    errors
+  }
+}
+
 function discoverLatestLiveTransportFollowUpCapture(
   repoRoot: string,
   expectedCandidateTargetProfileId: string
@@ -1388,43 +1566,22 @@ function discoverLatestLiveTransportFollowUpCapture(
   const candidates = readdirSync(artifactsRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && entry.name.startsWith(packetDirectoryPrefix))
     .map((entry) => {
-      const rootAbsolutePath = path.join(artifactsRoot, entry.name)
-      const summaryAbsolutePath = path.join(rootAbsolutePath, liveTailscaleFollowUpSummaryFileName)
-
-      if (!existsSync(summaryAbsolutePath) || !statSync(summaryAbsolutePath).isFile()) {
-        return undefined
-      }
-
-      const summary = parseLiveTransportFollowUpSummaryFile(readFileSync(summaryAbsolutePath, 'utf8'))
-      if (!summary || summary.candidateTargetProfileId !== expectedCandidateTargetProfileId) {
-        return undefined
-      }
-
-      if (
-        summary.capturedAddress === preservedDockerBridgeAddress ||
-        !requiredLiveTransportFollowUpArtifactIds.every((artifactId) =>
-          summary.requiredArtifactIds.includes(artifactId)
-        )
-      ) {
-        return undefined
-      }
-
-      const hasAllArtifactFiles = requiredLiveTransportFollowUpArtifactIds.every((artifactId) => {
-        const artifactPath = summary.artifactFiles[artifactId]
-        return typeof artifactPath === 'string'
-          ? resolvePacketArtifactPath(rootAbsolutePath, artifactPath) !== undefined
-          : false
+      const packetRoot = path.posix.join('docs', 'operations', 'artifacts', entry.name)
+      const validation = validateLiveTransportFollowUpPacket({
+        repoRoot,
+        packetRoot,
+        expectedCandidateTargetProfileId
       })
 
-      if (!hasAllArtifactFiles) {
+      if (!validation.ok || !validation.capturedAddress) {
         return undefined
       }
 
       return {
-        artifactRoot: path.posix.join('docs', 'operations', 'artifacts', entry.name),
-        capturedAddress: summary.capturedAddress,
+        artifactRoot: packetRoot,
+        capturedAddress: validation.capturedAddress,
         capturedArtifactIds: [...requiredLiveTransportFollowUpArtifactIds],
-        capturedAtMs: summary.capturedAtMs
+        capturedAtMs: validation.capturedAtMs
       } satisfies DiscoveredLiveTransportFollowUpCapture
     })
     .filter((entry): entry is DiscoveredLiveTransportFollowUpCapture => entry !== undefined)
@@ -1770,7 +1927,7 @@ function buildLiveTransportFollowUp(
       state,
       candidateTargetProfileId,
       guidePath: liveTailscaleFollowUpGuidePath,
-      artifactRootPattern: liveTailscaleFollowUpArtifactRootPattern,
+      artifactRootPattern: liveTransportFollowUpArtifactRootPattern,
       currentRecordedAddress: preservedDockerBridgeAddress,
       summary:
         `Live Tailscale follow-up stays deferred for ${candidateTargetProfileId} until bounded review is open with one complete preserved packet.`,
@@ -1786,7 +1943,7 @@ function buildLiveTransportFollowUp(
       state,
       candidateTargetProfileId,
       guidePath: liveTailscaleFollowUpGuidePath,
-      artifactRootPattern: liveTailscaleFollowUpArtifactRootPattern,
+      artifactRootPattern: liveTransportFollowUpArtifactRootPattern,
       currentRecordedAddress: preservedDockerBridgeAddress,
       capturedPacketRoot,
       capturedAddress,
@@ -1803,7 +1960,7 @@ function buildLiveTransportFollowUp(
     state,
     candidateTargetProfileId,
     guidePath: liveTailscaleFollowUpGuidePath,
-    artifactRootPattern: liveTailscaleFollowUpArtifactRootPattern,
+    artifactRootPattern: liveTransportFollowUpArtifactRootPattern,
     currentRecordedAddress: preservedDockerBridgeAddress,
     summary:
       `Capture one live Tailscale-backed bounded packet for ${candidateTargetProfileId} because the preserved packet still resolves to Docker bridge address ${preservedDockerBridgeAddress}.`,

@@ -12,16 +12,16 @@ Updated: 2026-04-21
 Version: v0.1.0
 
 ## Status Note
-Late `2026-04-21` progress now moves Milestone 3 past “make `capture_complete` reachable.”
-That reachability is already landed.
-The next slice makes one real live packet root discoverable from repo artifacts so public controller truth can move without manual snapshot injection.
-This same slice also hardens the live-loader acceptance path that failed remote `main` on `2026-04-22` when a stale `hold` expectation survived after the second-target policy pack moved to `review_required`.
+Late `2026-04-21` progress now marks this slice as landed history.
+Milestone 3 already moved past “make `capture_complete` reachable” and “discover one valid live packet root from repo artifacts.”
+Controller default truth now discovers the newest valid packet, ignores incomplete or scaffold-marked newer roots, and the repaired live-loader acceptance path stays green after the stale `hold` expectation moved to `review_required`.
+The next slice is no longer discovery itself; it is safe live-packet execution tooling plus progress-doc retargeting around the still-missing committed live packet.
 
 ## Overview
-This plan covers the post-follow-up Milestone 3 slice.
-It keeps blocker visibility, follow-up guide publication, data-driven completion semantics, CLI/Web parity, and repaired `main` CI as landed history.
-It does not reopen the earlier review-delta or live-follow-up surface work.
-It adds filesystem-backed live packet discovery, standardizes the live packet summary contract, and retargets developer progress docs to the new active queue.
+This plan covered the post-follow-up Milestone 3 slice.
+It kept blocker visibility, follow-up guide publication, data-driven completion semantics, CLI/Web parity, and repaired `main` CI as landed history.
+It did not reopen the earlier review-delta or live-follow-up surface work.
+It added filesystem-backed live packet discovery, standardized the live packet summary contract, and retargeted developer progress docs to the new active queue.
 
 ## Problem Frame
 The repo no longer lacks:
@@ -61,7 +61,7 @@ It now lacks one fully wired public truth path that says:
 
 ## Implementation Units
 
-- [ ] **Unit 74: Live Packet Summary Contract And Discovery Helper**
+- [x] **Unit 74: Live Packet Summary Contract And Discovery Helper**
 
 **Goal:** Teach controller default second-target truth to discover one newest valid live packet root from `docs/operations/artifacts/debian-12-live-tailscale-packet-*`.
 
@@ -97,7 +97,7 @@ It now lacks one fully wired public truth path that says:
 - `node --experimental-strip-types --test tests/controller/second-target-policy-pack.test.ts`
 - `node --experimental-strip-types --test tests/web/live-controller-shell.test.ts`
 
-- [ ] **Unit 75: Live Packet Docs Contract And Progress Sync**
+- [x] **Unit 75: Live Packet Docs Contract And Progress Sync**
 
 **Goal:** Standardize live packet file layout, retarget active-map docs, and keep public roadmap/progress truth aligned with discovery-backed completion.
 
@@ -140,7 +140,7 @@ It now lacks one fully wired public truth path that says:
 - `corepack pnpm --dir docs-site --ignore-workspace run docs:generate`
 - `corepack pnpm --dir docs-site --ignore-workspace run docs:build`
 
-- [ ] **Unit 76: Mainline Acceptance Verification Closure**
+- [x] **Unit 76: Mainline Acceptance Verification Closure**
 
 **Goal:** Re-run the same mainline acceptance chain that failed on remote `main` and leave branch plus docs tree clean.
 
@@ -179,3 +179,6 @@ It now lacks one fully wired public truth path that says:
 - Do not move discovery logic into CLI/Web-only code paths that diverge from controller truth.
 - Do not let the old live-follow-up pair remain marked active after this discovery pair lands.
 - Do not weaken support-lock wording while the discovered packet still has not replaced the blocker on `main`.
+
+## Next Steps
+- Move to `docs/brainstorms/2026-04-21-portmanager-m3-live-packet-execution-tooling-requirements.md` plus `docs/plans/2026-04-21-portmanager-m3-live-packet-execution-tooling-plan.md` for the follow-on slice that adds repo-native scaffold plus validation helpers and shifts the active Milestone 3 map from landed discovery work to real packet execution.

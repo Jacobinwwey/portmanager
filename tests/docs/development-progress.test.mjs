@@ -140,14 +140,16 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-live-packet-discovery-requirements\.md/
+    /2026-04-21-portmanager-m3-live-packet-execution-tooling-requirements\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-live-packet-discovery-plan\.md/
+    /2026-04-21-portmanager-m3-live-packet-execution-tooling-plan\.md/
   )
+  assert.match(milestoneConfidenceComponent, /pnpm milestone:scaffold:live-packet/)
+  assert.match(milestoneConfidenceComponent, /pnpm milestone:validate:live-packet/)
   assert.match(milestoneConfidenceComponent, /Phase 0 enablement/)
-  assert.match(milestoneConfidenceComponent, /Units 63 through 73/)
+  assert.match(milestoneConfidenceComponent, /Units 63 through 76/)
   assert.match(milestoneConfidenceComponent, /Unit 57 audit\/event boundary/)
   assert.match(milestoneConfidenceComponent, /Unit 58 target-profile abstraction/)
   assert.match(milestoneConfidenceComponent, /Unit 60 consumer-boundary split criteria/)
@@ -163,13 +165,15 @@ test('roadmap publishes a development-progress page backed by live milestone con
     /\.portmanager\/reports\/milestone-wording-review\.md/
   )
   assert.match(roadmapData, /Units 51 through 62/)
-  assert.match(roadmapData, /Units 63 through 73/)
+  assert.match(roadmapData, /Units 63 through 76/)
   assert.match(roadmapData, /review_open/)
   assert.match(roadmapData, /Docker bridge/i)
   assert.match(roadmapData, /172\.17\.0\.2/)
-  assert.match(roadmapData, /live packet discovery/i)
+  assert.match(roadmapData, /live packet execution tooling/i)
   assert.match(roadmapData, /capture_complete/)
   assert.match(roadmapData, /live-transport-follow-up-summary\.json/)
+  assert.match(roadmapData, /pnpm milestone:scaffold:live-packet/)
+  assert.match(roadmapData, /pnpm milestone:validate:live-packet/)
   assert.match(roadmapData, /debian-12-systemd-tailscale/)
   assert.match(roadmapData, /review-packet readiness/i)
   assert.match(roadmapData, /guide coverage/i)
@@ -271,7 +275,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /live-transport-follow-up-summary\.json/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
-  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-live-packet-discovery-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-live-packet-execution-tooling-plan\.md/)
   assert.match(roadmapComponent, /lane\.items\.length > 0/)
   assert.match(roadmapComponent, /milestone-confidence-bundle-\*/)
   assert.match(roadmapComponent, /Required next action/)

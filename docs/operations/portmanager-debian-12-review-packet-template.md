@@ -52,6 +52,8 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### Filesystem-backed live packet extension
 - fresh packet root pattern: `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
 - canonical summary filename: `live-transport-follow-up-summary.json`
+- scaffold helper: `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
+- validator helper: `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
 - controller default truth now reads only the newest valid packet root whose summary file keeps:
   - `candidateTargetProfileId`
   - `capturedAt`
@@ -67,6 +69,7 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
   - `live-transport-follow-up-summary.json`
 - `requiredArtifactIds` must include all five live follow-up artifact ids, and `artifactFiles` must map each id to one existing packet-local file.
 - `capturedAddress` must be non-empty and must not remain `172.17.0.2`.
+- scaffold-marked summary or artifact files are invalid by design and do not count as packet evidence.
 - incomplete or malformed newer packet roots do not clear the blocking delta; controller falls back to the newest valid root or keeps `capture_required`.
 
 ### Required evidence sections
@@ -150,6 +153,8 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### filesystem-backed live packet 扩展
 - 新 packet 根目录模式：`docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
 - 规范 summary 文件名：`live-transport-follow-up-summary.json`
+- scaffold helper：`pnpm milestone:scaffold:live-packet -- --packet-date <date>`
+- validator helper：`pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
 - controller 默认真相现在只会读取“最新有效 packet”根目录，而这份 summary 文件至少要同时保留：
   - `candidateTargetProfileId`
   - `capturedAt`
@@ -165,6 +170,7 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
   - `live-transport-follow-up-summary.json`
 - `requiredArtifactIds` 必须包含全部五个 live follow-up artifact id，而 `artifactFiles` 必须把每个 id 映射到同一 packet 根目录下一个已经存在的文件。
 - `capturedAddress` 必须非空，而且不能继续保持 `172.17.0.2`。
+- 任何还带 scaffold marker 的 summary 或 artifact 文件都属于“故意无效”的准备态，不算真实 packet 证据。
 - 更新但无效的新 packet 根目录不会清除 blocking delta；controller 会回退到最新有效根目录，或继续保持 `capture_required`。
 
 ### 必需证据分区

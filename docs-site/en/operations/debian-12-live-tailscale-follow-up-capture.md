@@ -24,12 +24,13 @@ It does not widen supported-target claims by itself.
 - The current recorded address is still `172.17.0.2`.
 - `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` stays preserved and untouched.
 - `pnpm milestone:review:promotion-ready -- --limit 20` already passed wording review on the current mainline slice.
+- `pnpm milestone:scaffold:live-packet -- --packet-date <date>` and `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>` are available locally.
 - One Debian 12 candidate host is reachable on a real Tailscale tailnet.
 
 ### Capture flow
 1. Read `portmanager operations second-target-policy-pack` and confirm the follow-up guide path, artifact root pattern, current recorded address, and required artifact ids.
-2. Create one fresh artifact root for the new bounded packet:
-   - `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
+2. Create one fresh artifact root for the new bounded packet with the repo-native scaffold helper:
+   - `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
 3. Record one host detail snapshot that proves the candidate host is now on a live Tailscale-backed address:
    - `portmanager hosts get <host-id> --json`
 4. Rehearse bounded bootstrap on that same candidate host and capture the linked controller operation:
@@ -42,7 +43,7 @@ It does not widen supported-target claims by itself.
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
 6. Record one controller audit or replay reference that links the new bootstrap plus steady-state captures into one bounded packet:
    - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
-7. Store the resulting artifacts under the new root without mutating the preserved Docker-bridge packet.
+7. Replace the scaffold-marked packet-local JSON files with the resulting real artifacts under the new root without mutating the preserved Docker-bridge packet.
 8. Write one canonical packet summary file at:
    - `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/live-transport-follow-up-summary.json`
 9. The summary file must keep these minimum fields together:
@@ -58,7 +59,9 @@ It does not widen supported-target claims by itself.
    - `steady-state-runtime-state.json`
    - `controller-audit-index.json`
    - `live-transport-follow-up-summary.json`
-11. Update `docs/operations/portmanager-debian-12-review-packet-template.md` or a successor live packet README so every new artifact links back to `/second-target-policy-pack`.
+11. Run the repo-native validator before commit:
+   - `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
+12. Update `docs/operations/portmanager-debian-12-review-packet-template.md` or a successor live packet README so every new artifact links back to `/second-target-policy-pack`.
 
 ### Required artifacts
 - `candidate_host_with_tailscale_ip`: one host detail snapshot with a live Tailscale-backed address
@@ -78,4 +81,5 @@ It does not widen supported-target claims by itself.
 ### Exit rule
 Keep `/second-target-policy-pack.liveTransportFollowUp.state` at `capture_required` until all five artifacts plus `live-transport-follow-up-summary.json` are preserved under one fresh live-Tailscale packet root.
 Controller default truth now ignores newer invalid roots and only selects the newest valid packet root deterministically.
+Scaffold-marked summary or artifact files are explicitly invalid and must be replaced before the validator can pass.
 Do not overwrite the preserved Docker-bridge packet; keep it as historical evidence that still explains why broader support remained locked.

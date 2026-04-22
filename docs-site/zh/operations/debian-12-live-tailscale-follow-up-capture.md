@@ -24,12 +24,13 @@ status: active
 - 当前记录地址仍然是 `172.17.0.2`。
 - `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` 继续作为已保留历史 packet，不被改写。
 - `pnpm milestone:review:promotion-ready -- --limit 20` 已经在当前主线切片上完成文案复核。
+- 本地已经提供 `pnpm milestone:scaffold:live-packet -- --packet-date <date>` 与 `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`。
 - 已有一台 Debian 12 候选主机真实接入同一条 Tailscale tailnet。
 
 ### 采集流程
 1. 先读取 `portmanager operations second-target-policy-pack`，确认 follow-up guide path、artifact root pattern、当前记录地址与 required artifact id。
-2. 为新的有边界 packet 创建一份新根目录：
-   - `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
+2. 先通过 repo-native scaffold helper 为新的有边界 packet 创建根目录：
+   - `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
 3. 记录一份 host detail 快照，证明候选主机已经切到 live Tailscale-backed 地址：
    - `portmanager hosts get <host-id> --json`
 4. 在同一台候选主机上重放一次有边界 bootstrap，并记录对应 controller operation：
@@ -42,7 +43,7 @@ status: active
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
 6. 记录一条 controller audit 或 replay 引用，把新的 bootstrap 与 steady-state 采集串成同一份 bounded packet：
    - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
-7. 把这些产物全部写入新的 packet 根目录，不要去修改已保留的 Docker-bridge packet。
+7. 用真实采集结果替换 scaffold 标记过的 packet 本地 JSON 文件，再把这些产物全部写入新的 packet 根目录，不要去修改已保留的 Docker-bridge packet。
 8. 在新根目录下写出一份规范化 packet summary 文件：
    - `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/live-transport-follow-up-summary.json`
 9. 这份 summary 文件至少要同时保留以下字段：
@@ -58,7 +59,9 @@ status: active
    - `steady-state-runtime-state.json`
    - `controller-audit-index.json`
    - `live-transport-follow-up-summary.json`
-11. 把新产物回填到 `docs/operations/portmanager-debian-12-review-packet-template.md` 或后续 live packet README，并确保每个链接都能回到 `/second-target-policy-pack`。
+11. 在提交前执行 repo-native validator：
+   - `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
+12. 把新产物回填到 `docs/operations/portmanager-debian-12-review-packet-template.md` 或后续 live packet README，并确保每个链接都能回到 `/second-target-policy-pack`。
 
 ### 必需产物
 - `candidate_host_with_tailscale_ip`：一份带 live Tailscale-backed 地址的 host detail 快照
@@ -78,4 +81,5 @@ status: active
 ### 退出规则
 只要这五类产物与 `live-transport-follow-up-summary.json` 还没有在同一份新的 live-Tailscale packet 根目录下完整保留，就继续把 `/second-target-policy-pack.liveTransportFollowUp.state` 保持为 `capture_required`。
 controller 默认真相现在会忽略更新但无效的 packet 根目录，只会稳定选择“最新有效 packet”。
+任何还带 scaffold marker 的 summary 或 artifact 文件都属于显式无效状态，必须先被真实产物替换，validator 才会通过。
 不要覆盖已保留的 Docker-bridge packet；它必须继续作为历史证据存在，说明为什么更广支持声明一直保持锁定。

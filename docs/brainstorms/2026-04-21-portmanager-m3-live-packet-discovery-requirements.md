@@ -5,7 +5,7 @@ topic: portmanager-m3-live-packet-discovery
 
 # PortManager Milestone 3 Live Packet Discovery Requirements
 
-Status note on `2026-04-21`: deep comparison now shows the earlier live-follow-up slice is landed. `/second-target-policy-pack` already exposes top-level `liveTransportFollowUp`, `capture_complete` is now structurally reachable, CLI/Web/contracts/docs all expose captured packet fields, and remote `main` CI parity is back after the stale live-loader expectation was corrected. The remaining gap is narrower: controller default truth still does not discover any fresh live packet from `docs/operations/artifacts/debian-12-live-tailscale-packet-*`, so public state stays `capture_required` until snapshot fields are injected manually.
+Status note on `2026-04-21`: this slice is now landed. `/second-target-policy-pack` auto-discovers the newest valid `docs/operations/artifacts/debian-12-live-tailscale-packet-*` root, ignores incomplete or scaffold-marked newer roots, clears the blocking delta only from real live evidence, and remote `main` CI parity stays repaired after the stale live-loader expectation was corrected. The next gap now shifts from discovery to safe execution: public `main` still stays `capture_required` because no real live packet is committed yet, and developers still need repo-native scaffold plus validation helpers before bounded live capture can move honestly.
 
 ## Problem Frame
 Current repo truth has already moved past “make live follow-up visible”:
@@ -76,4 +76,4 @@ As long as discovery stays manual-only, public `main` cannot become honestly `ca
 - `liveTransportCaptureArtifactRoot`, `liveTransportCapturedAddress`, and `liveTransportCapturedArtifactIds` already exist in `apps/controller/src/second-target-policy-pack.ts`, but today they are only exercised through direct snapshot construction in tests.
 
 ## Next Steps
-- Move to `docs/plans/2026-04-21-portmanager-m3-live-packet-discovery-plan.md` for the implementation units that add live packet discovery, repair live-loader parity coverage, and retarget progress docs to the new active Milestone 3 map.
+- Move to `docs/brainstorms/2026-04-21-portmanager-m3-live-packet-execution-tooling-requirements.md` plus `docs/plans/2026-04-21-portmanager-m3-live-packet-execution-tooling-plan.md` for the follow-on slice that adds invalid-by-design packet scaffolds, repo-native validation commands, and the next truthful progress-doc retarget.

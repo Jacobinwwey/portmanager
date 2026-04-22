@@ -9,7 +9,9 @@ import {
   createControllerEventBus,
   createDefaultSecondTargetPolicySnapshot,
   createControllerServer,
-  createOperationStore
+  createOperationStore,
+  liveTransportFollowUpArtifactFiles,
+  liveTransportFollowUpScaffoldMarkerField
 } from '../../apps/controller/src/index.ts'
 
 function tempDbPath() {
@@ -66,6 +68,57 @@ function writeLiveTransportFollowUpPacket(
         capturedAt: options.capturedAt ?? '2026-04-21T18:00:00.000Z',
         capturedAddress: options.capturedAddress,
         requiredArtifactIds: options.requiredArtifactIds ?? artifactIds,
+        artifactFiles
+      },
+      null,
+      2
+    )
+  )
+
+  return path.posix.join('docs', 'operations', 'artifacts', packetDirectoryName)
+}
+
+function writeScaffoldLiveTransportFollowUpPacket(
+  repoRoot: string,
+  packetDirectoryName: string,
+  options: {
+    capturedAt?: string
+    capturedAddress?: string
+    requiredArtifactIds?: string[]
+  } = {}
+) {
+  const packetRoot = path.join(repoRoot, 'docs', 'operations', 'artifacts', packetDirectoryName)
+  mkdirSync(packetRoot, { recursive: true })
+
+  const artifactFiles = Object.fromEntries(
+    Object.entries(liveTransportFollowUpArtifactFiles).map(([artifactId, filename]) => {
+      writeFileSync(
+        path.join(packetRoot, filename),
+        JSON.stringify(
+          {
+            [liveTransportFollowUpScaffoldMarkerField]: true,
+            artifactId,
+            packetDirectoryName,
+            status: 'replace_with_real_capture'
+          },
+          null,
+          2
+        )
+      )
+      return [artifactId, filename]
+    })
+  )
+
+  writeFileSync(
+    path.join(packetRoot, 'live-transport-follow-up-summary.json'),
+    JSON.stringify(
+      {
+        [liveTransportFollowUpScaffoldMarkerField]: true,
+        candidateTargetProfileId: 'debian-12-systemd-tailscale',
+        capturedAt: options.capturedAt ?? '2026-04-24T08:00:00.000Z',
+        capturedAddress: options.capturedAddress ?? '100.91.22.18',
+        requiredArtifactIds:
+          options.requiredArtifactIds ?? Object.keys(liveTransportFollowUpArtifactFiles),
         artifactFiles
       },
       null,
@@ -561,6 +614,36 @@ test('default second target policy snapshot keeps capture required when discover
     assert.equal(pack.liveTransportFollowUp.state, 'capture_required')
     assert.equal(pack.liveTransportFollowUp.capturedPacketRoot, undefined)
     assert.equal(pack.reviewAdjudication.blockingDeltas.length, 1)
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('default second target policy snapshot ignores scaffold-marked live packet roots', () => {
+  const repoRoot = tempRepoRoot()
+
+  try {
+    const validPacketRoot = writeLiveTransportFollowUpPacket(
+      repoRoot,
+      'debian-12-live-tailscale-packet-2026-04-23',
+      {
+        capturedAt: '2026-04-23T08:00:00.000Z',
+        capturedAddress: '100.91.22.17'
+      }
+    )
+    writeScaffoldLiveTransportFollowUpPacket(
+      repoRoot,
+      'debian-12-live-tailscale-packet-2026-04-24'
+    )
+
+    const pack = buildSecondTargetPolicyPack(
+      createDefaultSecondTargetPolicySnapshot({ repoRoot })
+    )
+
+    assert.equal(pack.liveTransportFollowUp.state, 'capture_complete')
+    assert.equal(pack.liveTransportFollowUp.capturedPacketRoot, validPacketRoot)
+    assert.equal(pack.liveTransportFollowUp.capturedAddress, '100.91.22.17')
+    assert.equal(pack.reviewAdjudication.blockingDeltas.length, 0)
   } finally {
     rmSync(repoRoot, { recursive: true, force: true })
   }

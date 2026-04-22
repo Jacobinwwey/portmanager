@@ -25,7 +25,13 @@ export { createPersistenceAdapter } from './persistence-adapter.ts'
 export { buildPersistenceDecisionPack } from './persistence-decision-pack.ts'
 export {
   buildSecondTargetPolicyPack,
-  createDefaultSecondTargetPolicySnapshot
+  createDefaultSecondTargetPolicySnapshot,
+  liveTransportFollowUpArtifactFiles,
+  liveTransportFollowUpArtifactRootPattern,
+  liveTransportFollowUpScaffoldMarkerField,
+  liveTransportFollowUpSummaryFileName,
+  requiredLiveTransportFollowUpArtifactIds,
+  validateLiveTransportFollowUpPacket
 } from './second-target-policy-pack.ts'
 export { createControllerServer } from './controller-server.ts'
 export { closeHttpServer } from './http-server-lifecycle.ts'

@@ -60,6 +60,8 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 ### Filesystem-backed live packet extension
 - fresh packet root pattern: `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
 - canonical summary filename: `live-transport-follow-up-summary.json`
+- scaffold helper: `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
+- validator helper: `pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
 - controller default truth now reads only the newest valid packet root whose summary file keeps:
   - `candidateTargetProfileId`
   - `capturedAt`
@@ -75,6 +77,7 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
   - `live-transport-follow-up-summary.json`
 - `requiredArtifactIds` must include all five live follow-up artifact ids, and `artifactFiles` must map each id to one existing packet-local file.
 - `capturedAddress` must be non-empty and must not remain `172.17.0.2`.
+- scaffold-marked summary or artifact files are invalid by design and do not count as packet evidence.
 - incomplete or malformed newer packet roots do not clear the blocking delta; controller falls back to the newest valid root or keeps `capture_required`.
 
 ### Required evidence sections
