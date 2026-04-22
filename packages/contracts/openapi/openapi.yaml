@@ -1603,6 +1603,30 @@ components:
           type: array
           items:
             type: string
+    SecondTargetReviewDeltaState:
+      type: string
+      enum: [blocking]
+    SecondTargetReviewDeltaId:
+      type: string
+      enum: [container_bridge_transport_substitution]
+    SecondTargetReviewDelta:
+      type: object
+      required: [id, label, state, summary, requiredFollowUp, sources]
+      properties:
+        id:
+          $ref: '#/components/schemas/SecondTargetReviewDeltaId'
+        label:
+          type: string
+        state:
+          $ref: '#/components/schemas/SecondTargetReviewDeltaState'
+        summary:
+          type: string
+        requiredFollowUp:
+          type: string
+        sources:
+          type: array
+          items:
+            type: string
     SecondTargetReviewAdjudication:
       type: object
       required:
@@ -1614,6 +1638,7 @@ components:
           packetRoot,
           summary,
           pendingVerdicts,
+          blockingDeltas,
           sources
         ]
       properties:
@@ -1634,6 +1659,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetReviewVerdict'
+        blockingDeltas:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetReviewDelta'
         sources:
           type: array
           items:

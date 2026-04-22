@@ -210,6 +210,19 @@ export interface SecondTargetReviewVerdict {
   sources: string[]
 }
 
+export type SecondTargetReviewDeltaState = 'blocking'
+
+export type SecondTargetReviewDeltaId = 'container_bridge_transport_substitution'
+
+export interface SecondTargetReviewDelta {
+  id: SecondTargetReviewDeltaId
+  label: string
+  state: SecondTargetReviewDeltaState
+  summary: string
+  requiredFollowUp: string
+  sources: string[]
+}
+
 export interface SecondTargetReviewAdjudication {
   state: SecondTargetReviewAdjudicationState
   reviewOwner: SecondTargetPolicySnapshot['reviewOwner']
@@ -218,6 +231,7 @@ export interface SecondTargetReviewAdjudication {
   packetRoot: string
   summary: string
   pendingVerdicts: SecondTargetReviewVerdict[]
+  blockingDeltas: SecondTargetReviewDelta[]
   sources: string[]
 }
 
@@ -584,6 +598,36 @@ const reviewVerdictMetadata: Record<
     summary:
       'Bound any review-found delta to explicit follow-up work instead of widening target support or platform claims by implication.',
     sources: [secondTargetReviewContractPath, packetReadyPolicyPackPath, 'docs/architecture/portmanager-v1-architecture.md']
+  }
+}
+
+const reviewDeltaMetadata: Record<
+  SecondTargetReviewDeltaId,
+  {
+    label: string
+    state: SecondTargetReviewDeltaState
+    summary: string
+    requiredFollowUp: string
+    sources: string[]
+  }
+> = {
+  container_bridge_transport_substitution: {
+    label: 'Container bridge transport substitution',
+    state: 'blocking',
+    summary:
+      'Preserved Debian 12 packet still uses Docker bridge address 172.17.0.2 instead of live Tailscale transport, so bounded review stays open and broader support claims remain locked.',
+    requiredFollowUp:
+      'Capture one live Tailscale-backed bounded packet for debian-12-systemd-tailscale before review close, or keep the candidate blocked and support locked to Ubuntu.',
+    sources: [
+      packetReadmePath,
+      bootstrapCaptureSummaryPath,
+      steadyStateCaptureSummaryPath,
+      diagnosticsCaptureSummaryPath,
+      rollbackCaptureSummaryPath,
+      steadyStateCaptureHostDetailPath,
+      diagnosticsCaptureHostDetailPath,
+      rollbackCaptureHostDetailPath
+    ]
   }
 }
 
@@ -1042,8 +1086,8 @@ function buildNextActions(
   if (decisionState === 'review_required') {
     return [
       `Work through bounded second-target review for ${candidateTargets} before widening supported-target claims beyond ${lockedTarget}.`,
-      'Keep controller, CLI, Web, and docs contract wording aligned while review adjudication validates the preserved parity packet.',
-      'Record packet verdicts, operator sign-off, and any follow-up delta before any broader support claim moves.'
+      'Keep controller, CLI, Web, and docs contract wording aligned while review adjudication validates the preserved parity packet and keeps the Docker-bridge transport delta explicit.',
+      'Record packet verdicts, operator sign-off, and the live-Tailscale follow-up delta before any broader support claim moves.'
     ]
   }
 
@@ -1286,6 +1330,19 @@ function reviewVerdict(id: SecondTargetReviewVerdictId): SecondTargetReviewVerdi
   }
 }
 
+function reviewDelta(id: SecondTargetReviewDeltaId): SecondTargetReviewDelta {
+  const metadata = reviewDeltaMetadata[id]
+
+  return {
+    id,
+    label: metadata.label,
+    state: metadata.state,
+    summary: metadata.summary,
+    requiredFollowUp: metadata.requiredFollowUp,
+    sources: [...metadata.sources]
+  }
+}
+
 function buildReviewAdjudication(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetReviewAdjudication {
@@ -1312,7 +1369,7 @@ function buildReviewAdjudication(
       contractPath: secondTargetReviewContractPath,
       packetRoot: bootstrapCaptureArtifactRoot,
       summary:
-        `Bounded second-target review is open for ${candidateTargetProfileId}; adjudicate packet integrity, drift acknowledgement, support lock, operator sign-off, and follow-up scope before any broader support claim moves.`,
+        `Bounded second-target review is open for ${candidateTargetProfileId}; adjudicate packet integrity, drift acknowledgement, support lock, operator sign-off, and follow-up scope while the Docker-bridge-only packet delta stays explicit.`,
       pendingVerdicts: [
         reviewVerdict('packet_integrity'),
         reviewVerdict('drift_acknowledged'),
@@ -1320,6 +1377,7 @@ function buildReviewAdjudication(
         reviewVerdict('operator_signoff'),
         reviewVerdict('follow_up_scope_bounded')
       ],
+      blockingDeltas: [reviewDelta('container_bridge_transport_substitution')],
       sources
     }
   }
@@ -1333,6 +1391,7 @@ function buildReviewAdjudication(
     summary:
       `Bounded second-target review is not open for ${candidateTargetProfileId}; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.`,
     pendingVerdicts: [],
+    blockingDeltas: [],
     sources
   }
 }

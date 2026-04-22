@@ -1587,6 +1587,7 @@ export interface components {
             supportedTargetProfiles: components["schemas"]["TargetProfileSummary"][];
         };
         SecondTargetReviewAdjudication: {
+            blockingDeltas: components["schemas"]["SecondTargetReviewDelta"][];
             candidateTargetProfileId: string;
             contractPath: string;
             packetRoot: string;
@@ -1601,6 +1602,18 @@ export interface components {
         SecondTargetReviewAdjudicationState: "not_open" | "review_open";
         /** @enum {string} */
         SecondTargetReviewArtifactId: "bootstrap_operation_id" | "bootstrap_result_summary" | "audit_reference" | "target_profile_confirmation" | "post_mutation_operation_id" | "health_capture" | "runtime_state_capture" | "controller_audit_reference" | "backup_bearing_mutation_id" | "backup_manifest_path" | "remote_backup_result" | "restore_readiness_reference" | "diagnostics_operation_id" | "diagnostics_artifact_paths" | "controller_event_reference" | "drift_operator_note" | "rollback_point_id" | "rollback_operation_id" | "rollback_result_summary" | "post_rollback_diagnostics_linkage";
+        SecondTargetReviewDelta: {
+            id: components["schemas"]["SecondTargetReviewDeltaId"];
+            label: string;
+            requiredFollowUp: string;
+            sources: string[];
+            state: components["schemas"]["SecondTargetReviewDeltaState"];
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetReviewDeltaId: "container_bridge_transport_substitution";
+        /** @enum {string} */
+        SecondTargetReviewDeltaState: "blocking";
         SecondTargetReviewPacketArtifactCoverage: components["schemas"]["SecondTargetReviewPacketCoverage"] & {
             missingArtifactIds: components["schemas"]["SecondTargetReviewArtifactId"][];
         };
@@ -1780,6 +1793,9 @@ export type SecondTargetPolicyPack = components['schemas']['SecondTargetPolicyPa
 export type SecondTargetReviewAdjudication = components['schemas']['SecondTargetReviewAdjudication'];
 export type SecondTargetReviewAdjudicationState = components['schemas']['SecondTargetReviewAdjudicationState'];
 export type SecondTargetReviewArtifactId = components['schemas']['SecondTargetReviewArtifactId'];
+export type SecondTargetReviewDelta = components['schemas']['SecondTargetReviewDelta'];
+export type SecondTargetReviewDeltaId = components['schemas']['SecondTargetReviewDeltaId'];
+export type SecondTargetReviewDeltaState = components['schemas']['SecondTargetReviewDeltaState'];
 export type SecondTargetReviewPacketArtifactCoverage = components['schemas']['SecondTargetReviewPacketArtifactCoverage'];
 export type SecondTargetReviewPacketCoverage = components['schemas']['SecondTargetReviewPacketCoverage'];
 export type SecondTargetReviewPacketGuideCoverage = components['schemas']['SecondTargetReviewPacketGuideCoverage'];

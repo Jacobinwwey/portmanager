@@ -2228,6 +2228,39 @@ fn format_second_target_review_adjudication_block(review_adjudication: &Value) -
     } else {
         format!("Pending Verdicts:\n{}", verdict_lines.join("\n"))
     };
+    let delta_lines = review_adjudication["blockingDeltas"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|item| {
+            let sources = item["sources"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|source| source.as_str())
+                .collect::<Vec<_>>();
+            let sources_suffix = if sources.is_empty() {
+                String::new()
+            } else {
+                format!(" :: sources {}", sources.join(", "))
+            };
+
+            format!(
+                "- {} :: {} :: {} :: {} :: {}{}",
+                item["id"].as_str().unwrap_or("unknown"),
+                item["label"].as_str().unwrap_or("unknown"),
+                item["state"].as_str().unwrap_or("unknown"),
+                item["summary"].as_str().unwrap_or("no summary"),
+                item["requiredFollowUp"].as_str().unwrap_or("no follow-up"),
+                sources_suffix
+            )
+        })
+        .collect::<Vec<_>>();
+    let delta_block = if delta_lines.is_empty() {
+        "Blocking Review Deltas:\n- none".to_string()
+    } else {
+        format!("Blocking Review Deltas:\n{}", delta_lines.join("\n"))
+    };
     let source_lines = review_adjudication["sources"]
         .as_array()
         .into_iter()
@@ -2242,7 +2275,7 @@ fn format_second_target_review_adjudication_block(review_adjudication: &Value) -
     };
 
     format!(
-        "Review Adjudication:\nState: {}\nReview Owner: {}\nCandidate Target: {}\nContract Path: {}\nPacket Root: {}\nSummary: {}\n{}\n{}",
+        "Review Adjudication:\nState: {}\nReview Owner: {}\nCandidate Target: {}\nContract Path: {}\nPacket Root: {}\nSummary: {}\n{}\n{}\n{}",
         review_adjudication["state"].as_str().unwrap_or("unknown"),
         review_adjudication["reviewOwner"].as_str().unwrap_or("unknown"),
         review_adjudication["candidateTargetProfileId"]
@@ -2258,6 +2291,7 @@ fn format_second_target_review_adjudication_block(review_adjudication: &Value) -
             .as_str()
             .unwrap_or("no summary"),
         verdict_block,
+        delta_block,
         source_block
     )
 }

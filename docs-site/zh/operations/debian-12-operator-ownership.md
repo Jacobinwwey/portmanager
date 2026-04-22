@@ -28,6 +28,7 @@ status: active
 - 通过 `/second-target-policy-pack` 记录 adjudication verdict。
 - 证据变化或 review 找到真实 delta 时，同步更新 `/second-target-policy-pack` 与 docs 表面。
 - 一旦 parity proof 回退或 packet integrity 漂移，立即停止候选复核推进。
+- 在 live Tailscale-backed bounded packet 出现之前，持续把 `container_bridge_transport_substitution` 作为显式阻塞 delta 保留。
 
 ### 必需签字条件
 - review packet 包含完整 acceptance recipe 证据包。
@@ -35,6 +36,8 @@ status: active
 - `/second-target-policy-pack` 与 docs、CLI、Web 一样公开 `review_required` 加 `review_open` 真相。
 - 待裁定 verdict 必须显式存在：packet integrity、drift acknowledgement、support lock confirmation、operator sign-off、follow-up scope bounding。
 - `/second-target-policy-pack` 与 docs、CLI、Web 保持同一份真相。
+- 当前阻塞 delta 必须显式存在：保留 packet 里的 Docker bridge 地址 `172.17.0.2` 仍然替代 live Tailscale transport。
+- 当前必需 follow-up 必须显式存在：在 bounded review 关闭前捕获一份 live Tailscale-backed bounded packet。
 - rollback ownership 已经明确且完成演练。
 - 任何未解决的 parity gap 或 review-found delta 都必须列为 blocking，而不是被愿景文案掩盖。
 

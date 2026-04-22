@@ -1448,6 +1448,7 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
                     "packetRoot": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21",
                     "summary": "Bounded second-target review is not open for debian-12-systemd-tailscale; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.",
                     "pendingVerdicts": [],
+                    "blockingDeltas": [],
                     "sources": [
                         "docs/operations/portmanager-second-target-review-contract.md",
                         "docs/operations/portmanager-debian-12-operator-ownership.md"
@@ -1617,6 +1618,8 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("unit_63"));
     assert!(stdout.contains("Review Adjudication"));
     assert!(stdout.contains("Pending Verdicts:"));
+    assert!(stdout.contains("Blocking Review Deltas:"));
+    assert!(stdout.contains("- none"));
     assert!(stdout.contains("Review Packet Template"));
     assert!(stdout.contains("Bootstrap Proof Capture"));
     assert!(stdout.contains("Steady-State Proof Capture"));
@@ -1636,6 +1639,155 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
     assert!(stdout.contains("backup_manifest_path"));
     assert!(stdout.contains("diagnostics_artifact_paths"));
     assert!(stdout.contains("rollback_operation_id"));
+}
+
+#[test]
+fn operations_second_target_policy_pack_text_surfaces_blocking_review_delta() {
+    let server = MockHttpServer::start(vec![(
+        "/second-target-policy-pack",
+        vec![MockOutcome::Json {
+            status: 200,
+            body: json!({
+                "lockedTargetProfileId": "ubuntu-24.04-systemd-tailscale",
+                "reviewOwner": "controller",
+                "supportedTargetProfiles": [
+                    {
+                        "id": "ubuntu-24.04-systemd-tailscale",
+                        "label": "Ubuntu 24.04 + systemd + Tailscale",
+                        "status": "supported"
+                    }
+                ],
+                "candidateTargetProfiles": [
+                    {
+                        "id": "debian-12-systemd-tailscale",
+                        "label": "Debian 12 + systemd + Tailscale",
+                        "status": "candidate"
+                    }
+                ],
+                "candidateTargetProfileIds": ["debian-12-systemd-tailscale"],
+                "decisionState": "review_required",
+                "expansionReviewRequired": true,
+                "summary": "bounded second-target review is open now",
+                "nextActions": ["work through bounded review delta"],
+                "reviewPacketReadiness": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "state": "packet_ready",
+                    "summary": "packet ready",
+                    "requiredNextAction": "adjudicate review",
+                    "guideCoverage": {
+                        "available": 6,
+                        "expected": 6,
+                        "missingPaths": []
+                    },
+                    "artifactCoverage": {
+                        "available": 20,
+                        "expected": 20,
+                        "missingArtifactIds": []
+                    },
+                    "nextExecutionUnits": []
+                },
+                "reviewAdjudication": {
+                    "state": "review_open",
+                    "reviewOwner": "controller",
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "contractPath": "docs/operations/portmanager-second-target-review-contract.md",
+                    "packetRoot": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21",
+                    "summary": "bounded second-target review is open",
+                    "pendingVerdicts": [
+                        {
+                            "id": "operator_signoff",
+                            "label": "Operator sign-off",
+                            "summary": "record controller owner sign-off",
+                            "sources": ["docs/operations/portmanager-debian-12-operator-ownership.md"]
+                        }
+                    ],
+                    "blockingDeltas": [
+                        {
+                            "id": "container_bridge_transport_substitution",
+                            "label": "Container bridge transport substitution",
+                            "state": "blocking",
+                            "summary": "Preserved packet still uses Docker bridge address 172.17.0.2 instead of live Tailscale transport.",
+                            "requiredFollowUp": "Capture one live Tailscale-backed bounded packet before review close or keep support locked.",
+                            "sources": [
+                                "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/README.md",
+                                "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-capture-summary.json"
+                            ]
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-second-target-review-contract.md",
+                        "docs/operations/portmanager-debian-12-operator-ownership.md"
+                    ]
+                },
+                "reviewPacketTemplate": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "templatePath": "docs/operations/portmanager-debian-12-review-packet-template.md",
+                    "summary": "review packet template exists",
+                    "requiredEvidence": []
+                },
+                "bootstrapProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-bootstrap-proof-capture.md",
+                    "summary": "bootstrap proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-bootstrap-proof-capture.md"]
+                },
+                "steadyStateProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-steady-state-proof-capture.md",
+                    "summary": "steady-state proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-steady-state-proof-capture.md"]
+                },
+                "backupRestoreProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-backup-restore-proof-capture.md",
+                    "summary": "backup and restore proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-backup-restore-proof-capture.md"]
+                },
+                "diagnosticsProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-diagnostics-proof-capture.md",
+                    "summary": "diagnostics proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-diagnostics-proof-capture.md"]
+                },
+                "rollbackProofCapture": {
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-rollback-proof-capture.md",
+                    "summary": "rollback proof capture guide exists",
+                    "requiredArtifacts": [],
+                    "sources": ["docs/operations/portmanager-debian-12-rollback-proof-capture.md"]
+                },
+                "evidenceItems": [],
+                "satisfiedCriteria": [
+                    {
+                        "id": "bootstrap_transport_parity",
+                        "label": "Bootstrap transport parity",
+                        "reason": "Bootstrap transport behavior is proven for the candidate target."
+                    }
+                ],
+                "blockingCriteria": []
+            }),
+        }],
+    )]);
+
+    let output = run_portmanager(
+        &["operations", "second-target-policy-pack"],
+        &server.base_url(),
+    );
+
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+
+    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
+    assert!(stdout.contains("Decision State: review_required"));
+    assert!(stdout.contains("Blocking Review Deltas:"));
+    assert!(stdout.contains("Container bridge transport substitution"));
+    assert!(stdout.contains("container_bridge_transport_substitution"));
+    assert!(stdout.contains("Preserved packet still uses Docker bridge address 172.17.0.2"));
+    assert!(stdout.contains("Capture one live Tailscale-backed bounded packet before review close"));
 }
 
 #[test]
@@ -1697,6 +1849,7 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
                     "packetRoot": "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21",
                     "summary": "Bounded second-target review is not open for debian-12-systemd-tailscale; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.",
                     "pendingVerdicts": [],
+                    "blockingDeltas": [],
                     "sources": [
                         "docs/operations/portmanager-second-target-review-contract.md"
                     ]

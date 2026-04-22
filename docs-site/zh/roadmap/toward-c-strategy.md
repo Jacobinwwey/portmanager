@@ -95,7 +95,7 @@ Milestone 3 现在不是重新做一遍已落地 seam，而是在其上继续推
 - Unit 61：已完成。deployment-boundary decision pack 现在已经通过 `/deployment-boundary-decision-pack` 公开，并明确只有在 deployable artifact、edge runtime controls、replay parity、observability ownership 与 external pressure 同时成立时，`/api/controller` 才需要进入独立部署复核
 - Unit 62：已完成。second-target policy pack 现在已经通过 `/second-target-policy-pack` 公开，并明确只有在候选第二目标声明、等价证据、文档契约、验收 recipe 与 operator ownership 同时成立时，支持声明才能超出 Ubuntu 锁定画像
 - 治理切片：已完成。Debian review-prep 文档现在已经冻结第二目标文案契约、验收 recipe 与 operator ownership，同时没有扩大支持声明
-- 下一队列：先把 candidate host 注册、probe、bootstrap review-prep lane 保持诚实，再遵循 `docs/brainstorms/2026-04-21-portmanager-m3-review-adjudication-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-review-adjudication-plan.md`：Units 63 到 69 现在都已成为已落地历史，第一份完整有边界 Debian 12 review packet 继续保留到 `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`，artifact coverage 维持 `20/20`，而当前实时队列已经收敛为 bounded second-target review adjudication，而不是 PostgreSQL 默认状态库承诺或伪造的独立部署推进
+- 下一队列：先把 candidate host 注册、probe、bootstrap review-prep lane 保持诚实，再遵循 `docs/brainstorms/2026-04-21-portmanager-m3-review-delta-surface-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-review-delta-surface-plan.md`：Units 63 到 71 现在都已成为已落地历史，第一份完整有边界 Debian 12 review packet 继续保留到 `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`，artifact coverage 维持 `20/20`，`/second-target-policy-pack` 现在已经把阻塞 delta `container_bridge_transport_substitution` 显式公开，而当前实时队列已经收敛为围绕 Docker bridge 地址 `172.17.0.2` 的 live Tailscale follow-up，而不是 PostgreSQL 默认状态库承诺或伪造的独立部署推进
 - 下一批队列：继续定义更后置的独立部署边界证据与候选第二目标等价证据，而不是宣称 PostgreSQL 默认状态库已经可用
 - 继续让 bounded batch work 留在同一套 evidence model 上，而不是再发明第二条 orchestration 路径
 

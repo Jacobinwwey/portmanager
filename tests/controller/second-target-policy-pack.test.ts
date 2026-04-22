@@ -138,12 +138,41 @@ test('default second target policy pack preserves a complete review packet and o
   )
   assert.match(pack.reviewAdjudication.summary, /bounded second-target review is open/i)
   assert.equal(pack.reviewAdjudication.pendingVerdicts.length, 5)
+  assert.equal(pack.reviewAdjudication.blockingDeltas.length, 1)
+  assert.equal(
+    pack.reviewAdjudication.blockingDeltas[0]?.id,
+    'container_bridge_transport_substitution'
+  )
+  assert.equal(
+    pack.reviewAdjudication.blockingDeltas[0]?.state,
+    'blocking'
+  )
+  assert.match(
+    pack.reviewAdjudication.blockingDeltas[0]?.summary ?? '',
+    /172\.17\.0\.2/
+  )
+  assert.match(
+    pack.reviewAdjudication.blockingDeltas[0]?.requiredFollowUp ?? '',
+    /live Tailscale-backed bounded packet/i
+  )
   assert.equal(
     pack.reviewAdjudication.pendingVerdicts.some(
       (item) =>
         item.id === 'operator_signoff' &&
         item.sources.some((source) =>
           source.endsWith('docs/operations/portmanager-debian-12-operator-ownership.md')
+        )
+    ),
+    true
+  )
+  assert.equal(
+    pack.reviewAdjudication.blockingDeltas.some(
+      (item) =>
+        item.id === 'container_bridge_transport_substitution' &&
+        item.sources.some((source) =>
+          source.endsWith(
+            'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-capture-summary.json'
+          )
         )
     ),
     true
@@ -391,6 +420,7 @@ test('second target review packet readiness stays in progress until diagnostics 
   assert.match(pack.reviewPacketReadiness.requiredNextAction, /Execute Units 67 through 69/i)
   assert.equal(pack.reviewAdjudication.state, 'not_open')
   assert.deepEqual(pack.reviewAdjudication.pendingVerdicts, [])
+  assert.deepEqual(pack.reviewAdjudication.blockingDeltas, [])
 })
 
 test('controller server exposes second target policy pack as explicit controller contract', async () => {
@@ -447,6 +477,14 @@ test('controller server exposes second target policy pack as explicit controller
             id: string
             label: string
             summary: string
+            sources: string[]
+          }>
+          blockingDeltas: Array<{
+            id: string
+            label: string
+            state: string
+            summary: string
+            requiredFollowUp: string
             sources: string[]
           }>
           sources: string[]
@@ -549,6 +587,19 @@ test('controller server exposes second target policy pack as explicit controller
       assert.equal(payload.reviewAdjudication.state, 'review_open')
       assert.equal(payload.reviewAdjudication.reviewOwner, 'controller')
       assert.equal(payload.reviewAdjudication.pendingVerdicts.length, 5)
+      assert.equal(payload.reviewAdjudication.blockingDeltas.length, 1)
+      assert.equal(
+        payload.reviewAdjudication.blockingDeltas[0]?.id,
+        'container_bridge_transport_substitution'
+      )
+      assert.equal(
+        payload.reviewAdjudication.blockingDeltas[0]?.state,
+        'blocking'
+      )
+      assert.match(
+        payload.reviewAdjudication.blockingDeltas[0]?.requiredFollowUp ?? '',
+        /live Tailscale-backed bounded packet/i
+      )
       assert.match(
         payload.reviewAdjudication.contractPath,
         /docs\/operations\/portmanager-second-target-review-contract\.md/u

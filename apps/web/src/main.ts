@@ -1564,6 +1564,7 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
       summary:
         'Bounded second-target review is not open for debian-12-systemd-tailscale; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.',
       pendingVerdicts: [],
+      blockingDeltas: [],
       sources: [
         'docs/operations/portmanager-second-target-review-contract.md',
         'docs/operations/portmanager-debian-12-operator-ownership.md',
@@ -3832,6 +3833,25 @@ function SecondTargetPolicyCard(props: {
             )
           )
         : emptyState('No review verdicts pending until packet-ready review opens.', 'empty'),
+      props.pack.reviewAdjudication.blockingDeltas.length
+        ? h(
+            'ul',
+            { className: 'pm-list', key: 'deltas' },
+            props.pack.reviewAdjudication.blockingDeltas.map((item) =>
+              h('li', { className: 'pm-list-item', key: item.id }, [
+                h('div', { key: 'line1' }, `${item.label} · ${item.id}`),
+                h('div', { className: 'pm-microcopy', key: 'line2' }, [
+                  `${item.state.toUpperCase()} · ${item.summary} Required follow-up: ${item.requiredFollowUp}`,
+                  h(
+                    'span',
+                    { key: 'sources' },
+                    item.sources.length > 0 ? ` Sources: ${item.sources.join(', ')}` : ''
+                  )
+                ])
+              ])
+            )
+          )
+        : emptyState('No blocking review deltas recorded yet.', 'empty'),
       h(
         'p',
         { className: 'pm-microcopy', key: 'sources' },

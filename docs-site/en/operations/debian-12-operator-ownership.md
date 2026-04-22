@@ -28,6 +28,7 @@ Define who owns bounded-review work for `debian-12-systemd-tailscale`.
 - Record adjudication verdicts through `/second-target-policy-pack`.
 - Update `/second-target-policy-pack` and docs surfaces when evidence changes or review finds a real delta.
 - Stop the candidate review immediately if parity proof regresses or packet integrity drifts.
+- Keep `container_bridge_transport_substitution` explicit until one live Tailscale-backed bounded packet replaces the current Docker-bridge-only evidence.
 
 ### Required sign-off conditions
 - Review packet contains the full acceptance recipe evidence bundle.
@@ -35,6 +36,8 @@ Define who owns bounded-review work for `debian-12-systemd-tailscale`.
 - `/second-target-policy-pack` exposes the same `review_required` plus `review_open` truth as docs, CLI, and Web.
 - Pending verdicts are explicit: packet integrity, drift acknowledgement, support lock confirmation, operator sign-off, and follow-up scope bounding.
 - `/second-target-policy-pack` reflects the same truth as docs, CLI, and Web.
+- The current blocking delta is explicit: Docker bridge address `172.17.0.2` still replaces live Tailscale transport in the preserved packet.
+- Required follow-up is explicit: capture one live Tailscale-backed bounded packet before bounded review can close.
 - Rollback ownership is explicit and rehearsed.
 - Any unresolved parity gap or review-found delta is listed as blocking, not hidden behind aspirational prose.
 

@@ -41,6 +41,7 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /unit_63/i)
   assert.match(html, /Review adjudication/i)
   assert.match(html, /No review verdicts pending until packet-ready review opens/i)
+  assert.match(html, /No blocking review deltas recorded yet/i)
   assert.match(html, /Review packet template/i)
   assert.match(html, /portmanager-debian-12-review-packet-template\.md/i)
   assert.match(html, /Bootstrap proof capture/i)
@@ -61,6 +62,60 @@ test('overview shell renders locked control-plane zones and managed hosts table'
   assert.match(html, /Bridge Rules/)
   assert.match(html, /host_alpha/)
   assert.match(html, /ready/)
+})
+
+test('overview shell renders blocking review delta when bounded review is open', () => {
+  const state = createMockOverviewState()
+  state.secondTargetPolicyPack.decisionState = 'review_required'
+  state.secondTargetPolicyPack.expansionReviewRequired = true
+  state.secondTargetPolicyPack.reviewPacketReadiness.state = 'packet_ready'
+  state.secondTargetPolicyPack.reviewPacketReadiness.summary = 'packet ready'
+  state.secondTargetPolicyPack.reviewPacketReadiness.requiredNextAction = 'adjudicate review'
+  state.secondTargetPolicyPack.reviewPacketReadiness.artifactCoverage.available = 20
+  state.secondTargetPolicyPack.reviewPacketReadiness.artifactCoverage.expected = 20
+  state.secondTargetPolicyPack.reviewPacketReadiness.artifactCoverage.missingArtifactIds = []
+  state.secondTargetPolicyPack.reviewPacketReadiness.nextExecutionUnits = []
+  state.secondTargetPolicyPack.reviewAdjudication = {
+    state: 'review_open',
+    reviewOwner: 'controller',
+    candidateTargetProfileId: 'debian-12-systemd-tailscale',
+    contractPath: 'docs/operations/portmanager-second-target-review-contract.md',
+    packetRoot: 'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21',
+    summary: 'bounded second-target review is open',
+    pendingVerdicts: [
+      {
+        id: 'operator_signoff',
+        label: 'Operator sign-off',
+        summary: 'record controller owner sign-off',
+        sources: ['docs/operations/portmanager-debian-12-operator-ownership.md']
+      }
+    ],
+    blockingDeltas: [
+      {
+        id: 'container_bridge_transport_substitution',
+        label: 'Container bridge transport substitution',
+        state: 'blocking',
+        summary:
+          'Preserved packet still uses Docker bridge address 172.17.0.2 instead of live Tailscale transport.',
+        requiredFollowUp:
+          'Capture one live Tailscale-backed bounded packet before review close or keep support locked.',
+        sources: [
+          'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/README.md',
+          'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-capture-summary.json'
+        ]
+      }
+    ],
+    sources: [
+      'docs/operations/portmanager-second-target-review-contract.md',
+      'docs/operations/portmanager-debian-12-operator-ownership.md'
+    ]
+  }
+
+  const html = renderToStaticMarkup(h(OverviewPage, { state }))
+
+  assert.match(html, /Container bridge transport substitution/i)
+  assert.match(html, /172\.17\.0\.2/)
+  assert.match(html, /Capture one live Tailscale-backed bounded packet before review close/i)
 })
 
 test('host detail shell renders required milestone sections', () => {
@@ -513,6 +568,7 @@ test('overview loader keeps consumer boundary base path when building controller
             summary:
               'Bounded second-target review is not open for debian-12-systemd-tailscale; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.',
             pendingVerdicts: [],
+            blockingDeltas: [],
             sources: [
               'docs/operations/portmanager-second-target-review-contract.md',
               'docs/operations/portmanager-debian-12-operator-ownership.md'
@@ -841,6 +897,7 @@ test('console loader keeps consumer boundary decision pack on prefixed controlle
             summary:
               'Bounded second-target review is not open for debian-12-systemd-tailscale; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.',
             pendingVerdicts: [],
+            blockingDeltas: [],
             sources: ['docs/operations/portmanager-second-target-review-contract.md']
           },
           reviewPacketTemplate: {
