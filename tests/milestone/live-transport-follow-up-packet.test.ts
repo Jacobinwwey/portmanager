@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { createServer } from 'node:http'
 import path from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -12,13 +13,14 @@ import {
 } from '../../apps/controller/src/index.ts'
 import {
   assembleLiveTransportFollowUpPacket,
+  captureLiveTransportFollowUpPacket,
   parseArgs,
   resolveLatestLiveTransportFollowUpPacketRoot,
   scaffoldLiveTransportFollowUpPacket,
   validateLiveTransportFollowUpPacketCommand
 } from '../../scripts/milestone/live-transport-follow-up-packet.ts'
 
-test('parseArgs accepts scaffold, assemble, and validate modes', () => {
+test('parseArgs accepts scaffold, assemble, capture, and validate modes', () => {
   const scaffold = parseArgs(['--', 'scaffold', '--packet-date', '2026-04-26', '--json'])
   const assemble = parseArgs([
     'assemble',
@@ -35,6 +37,19 @@ test('parseArgs accepts scaffold, assemble, and validate modes', () => {
     '--controller-audit-index',
     '/tmp/controller-audit-index.json'
   ])
+  const capture = parseArgs([
+    'capture',
+    '--packet-date',
+    '2026-04-26',
+    '--controller-base-url',
+    'http://127.0.0.1:8100/api/controller',
+    '--host-id',
+    'host_debian_review_001',
+    '--bootstrap-operation-id',
+    'op_bootstrap_001',
+    '--audit-limit',
+    '7'
+  ])
   const validate = parseArgs(['validate', '--packet-root', 'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-26'])
 
   assert.equal(scaffold.action, 'scaffold')
@@ -50,6 +65,11 @@ test('parseArgs accepts scaffold, assemble, and validate modes', () => {
     assemble.artifactSourcePaths?.bootstrap_operation_with_tailscale_transport,
     '/tmp/bootstrap-operation.json'
   )
+  assert.equal(capture.action, 'capture')
+  assert.equal(capture.controllerBaseUrl, 'http://127.0.0.1:8100/api/controller')
+  assert.equal(capture.hostId, 'host_debian_review_001')
+  assert.equal(capture.bootstrapOperationId, 'op_bootstrap_001')
+  assert.equal(capture.auditLimit, 7)
   assert.equal(validate.action, 'validate')
   assert.equal(
     validate.packetRoot,
@@ -62,6 +82,53 @@ function writeSourceJson(sourceRoot: string, fileName: string, payload: unknown)
   const filePath = path.join(sourceRoot, fileName)
   writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8')
   return filePath
+}
+
+async function startJsonServer(
+  handler: (request: { method: string; pathname: string; searchParams: URLSearchParams }) => {
+    status?: number
+    body: unknown
+  }
+) {
+  const server = createServer((request, response) => {
+    const url = new URL(request.url ?? '/', 'http://127.0.0.1')
+    const result = handler({
+      method: request.method ?? 'GET',
+      pathname: url.pathname,
+      searchParams: url.searchParams
+    })
+
+    response.writeHead(result.status ?? 200, { 'content-type': 'application/json' })
+    response.end(JSON.stringify(result.body))
+  })
+
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', reject)
+      resolve()
+    })
+  })
+
+  const address = server.address()
+  if (!address || typeof address === 'string') {
+    throw new Error('failed to read server address')
+  }
+
+  return {
+    baseUrl: `http://127.0.0.1:${address.port}`,
+    async close() {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => {
+          if (error) {
+            reject(error)
+            return
+          }
+          resolve()
+        })
+      })
+    }
+  }
 }
 
 test('scaffoldLiveTransportFollowUpPacket creates invalid-by-design packet scaffold', () => {
@@ -219,6 +286,137 @@ test('assembleLiveTransportFollowUpPacket writes canonical packet files from rea
       assert.ok(existsSync(path.join(packetRoot, filename)))
     }
   } finally {
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('captureLiveTransportFollowUpPacket fetches controller plus agent evidence and upgrades scaffold root', async () => {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), 'portmanager-live-packet-helper-'))
+  const packetDate = '2026-04-29'
+
+  const agentServer = await startJsonServer(({ pathname }) => {
+    if (pathname === '/health') {
+      return {
+        body: {
+          schemaVersion: '0.1.0',
+          status: 'ok'
+        }
+      }
+    }
+
+    if (pathname === '/runtime-state') {
+      return {
+        body: {
+          schemaVersion: '0.1.0',
+          updatedAt: '2026-04-29T12:03:00.000Z',
+          agentState: 'ready'
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  const controllerServer = await startJsonServer(({ pathname, searchParams }) => {
+    if (pathname === '/api/controller/hosts/host_debian_review_001') {
+      return {
+        body: {
+          id: 'host_debian_review_001',
+          targetProfileId: candidateTargetProfileId,
+          tailscaleAddress: '127.0.0.1',
+          updatedAt: '2026-04-29T12:01:00.000Z'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/operations/op_bootstrap_001') {
+      return {
+        body: {
+          id: 'op_bootstrap_001',
+          finishedAt: '2026-04-29T12:02:00.000Z',
+          resultSummary: `host host_debian_review_001 bootstrapped via ${agentServer.baseUrl}`
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/event-audit-index') {
+      assert.equal(searchParams.get('hostId'), 'host_debian_review_001')
+      assert.equal(searchParams.get('limit'), '9')
+
+      return {
+        body: {
+          items: [
+            {
+              lastEventAt: '2026-04-29T12:04:00.000Z',
+              operation: {
+                id: 'op_create_rule_001',
+                finishedAt: '2026-04-29T12:04:00.000Z'
+              }
+            },
+            {
+              lastEventAt: '2026-04-29T12:02:00.000Z',
+              operation: {
+                id: 'op_bootstrap_001',
+                finishedAt: '2026-04-29T12:02:00.000Z'
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  try {
+    scaffoldLiveTransportFollowUpPacket({
+      repoRoot,
+      packetDate,
+      capturedAt: '2026-04-29T12:00:00.000Z'
+    })
+
+    const captured = await captureLiveTransportFollowUpPacket({
+      repoRoot,
+      packetDate,
+      controllerBaseUrl: `${controllerServer.baseUrl}/api/controller`,
+      hostId: 'host_debian_review_001',
+      bootstrapOperationId: 'op_bootstrap_001',
+      auditLimit: 9
+    })
+
+    assert.equal(
+      captured.packetRoot,
+      'docs/operations/artifacts/debian-12-live-tailscale-packet-2026-04-29'
+    )
+    assert.equal(captured.agentBaseUrl, agentServer.baseUrl)
+    assert.equal(captured.auditLimit, 9)
+    assert.equal(captured.validation.ok, true)
+    assert.equal(captured.validation.capturedAddress, '127.0.0.1')
+
+    const packetRoot = path.join(repoRoot, captured.packetRoot)
+    const summary = JSON.parse(
+      readFileSync(path.join(packetRoot, liveTransportFollowUpSummaryFileName), 'utf8')
+    )
+    assert.equal(summary.candidateTargetProfileId, candidateTargetProfileId)
+    assert.equal(summary.capturedAt, '2026-04-29T12:04:00.000Z')
+    assert.equal(summary.capturedAddress, '127.0.0.1')
+
+    const auditIndex = JSON.parse(
+      readFileSync(path.join(packetRoot, liveTransportFollowUpArtifactFiles.linked_controller_audit_reference), 'utf8')
+    )
+    assert.deepEqual(
+      auditIndex.items.map((entry: { operation: { id: string } }) => entry.operation.id),
+      ['op_create_rule_001', 'op_bootstrap_001']
+    )
+  } finally {
+    await controllerServer.close()
+    await agentServer.close()
     rmSync(repoRoot, { recursive: true, force: true })
   }
 })
