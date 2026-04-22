@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -18,6 +18,62 @@ function tempDbPath() {
     directory,
     databasePath: path.join(directory, 'controller.sqlite')
   }
+}
+
+function tempRepoRoot() {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), 'portmanager-live-packet-discovery-'))
+  mkdirSync(path.join(repoRoot, 'docs', 'operations', 'artifacts'), { recursive: true })
+  return repoRoot
+}
+
+function writeLiveTransportFollowUpPacket(
+  repoRoot: string,
+  packetDirectoryName: string,
+  options: {
+    capturedAt?: string
+    capturedAddress: string
+    requiredArtifactIds?: string[]
+    artifactFileIds?: string[]
+    candidateTargetProfileId?: string
+  }
+) {
+  const packetRoot = path.join(repoRoot, 'docs', 'operations', 'artifacts', packetDirectoryName)
+  mkdirSync(packetRoot, { recursive: true })
+
+  const artifactIds = options.artifactFileIds ?? [
+    'candidate_host_with_tailscale_ip',
+    'bootstrap_operation_with_tailscale_transport',
+    'steady_state_health_with_tailscale_transport',
+    'steady_state_runtime_state_with_tailscale_transport',
+    'linked_controller_audit_reference'
+  ]
+  const artifactFiles = Object.fromEntries(
+    artifactIds.map((artifactId) => {
+      const filename = `${artifactId}.json`
+      writeFileSync(
+        path.join(packetRoot, filename),
+        JSON.stringify({ artifactId, packetDirectoryName }, null, 2)
+      )
+      return [artifactId, filename]
+    })
+  )
+
+  writeFileSync(
+    path.join(packetRoot, 'live-transport-follow-up-summary.json'),
+    JSON.stringify(
+      {
+        candidateTargetProfileId: options.candidateTargetProfileId ?? 'debian-12-systemd-tailscale',
+        capturedAt: options.capturedAt ?? '2026-04-21T18:00:00.000Z',
+        capturedAddress: options.capturedAddress,
+        requiredArtifactIds: options.requiredArtifactIds ?? artifactIds,
+        artifactFiles
+      },
+      null,
+      2
+    )
+  )
+
+  return path.posix.join('docs', 'operations', 'artifacts', packetDirectoryName)
 }
 
 test('second target policy pack keeps expansion review on hold while only locked Ubuntu target is supported', () => {
@@ -421,6 +477,93 @@ test('second target policy pack clears transport blocking delta when live tailsc
     ),
     true
   )
+})
+
+test('default second target policy snapshot discovers newest valid live tailscale packet from repo artifacts', () => {
+  const repoRoot = tempRepoRoot()
+
+  try {
+    writeLiveTransportFollowUpPacket(repoRoot, 'debian-12-live-tailscale-packet-2026-04-22', {
+      capturedAt: '2026-04-22T08:00:00.000Z',
+      capturedAddress: '100.91.22.14'
+    })
+    const newestPacketRoot = writeLiveTransportFollowUpPacket(
+      repoRoot,
+      'debian-12-live-tailscale-packet-2026-04-23',
+      {
+        capturedAt: '2026-04-23T08:00:00.000Z',
+        capturedAddress: '100.91.22.15'
+      }
+    )
+
+    const pack = buildSecondTargetPolicyPack(
+      createDefaultSecondTargetPolicySnapshot({ repoRoot })
+    )
+
+    assert.equal(pack.liveTransportFollowUp.state, 'capture_complete')
+    assert.equal(pack.liveTransportFollowUp.capturedPacketRoot, newestPacketRoot)
+    assert.equal(pack.liveTransportFollowUp.capturedAddress, '100.91.22.15')
+    assert.equal(pack.reviewAdjudication.blockingDeltas.length, 0)
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('default second target policy snapshot falls back to newest valid live tailscale packet when latest root is incomplete', () => {
+  const repoRoot = tempRepoRoot()
+
+  try {
+    const validPacketRoot = writeLiveTransportFollowUpPacket(
+      repoRoot,
+      'debian-12-live-tailscale-packet-2026-04-22',
+      {
+        capturedAt: '2026-04-22T08:00:00.000Z',
+        capturedAddress: '100.91.22.14'
+      }
+    )
+    writeLiveTransportFollowUpPacket(repoRoot, 'debian-12-live-tailscale-packet-2026-04-24', {
+      capturedAt: '2026-04-24T08:00:00.000Z',
+      capturedAddress: '100.91.22.16',
+      requiredArtifactIds: [
+        'candidate_host_with_tailscale_ip',
+        'bootstrap_operation_with_tailscale_transport',
+        'steady_state_health_with_tailscale_transport',
+        'steady_state_runtime_state_with_tailscale_transport'
+      ]
+    })
+
+    const pack = buildSecondTargetPolicyPack(
+      createDefaultSecondTargetPolicySnapshot({ repoRoot })
+    )
+
+    assert.equal(pack.liveTransportFollowUp.state, 'capture_complete')
+    assert.equal(pack.liveTransportFollowUp.capturedPacketRoot, validPacketRoot)
+    assert.equal(pack.liveTransportFollowUp.capturedAddress, '100.91.22.14')
+    assert.equal(pack.reviewAdjudication.blockingDeltas.length, 0)
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('default second target policy snapshot keeps capture required when discovered live packet still resolves to Docker bridge transport', () => {
+  const repoRoot = tempRepoRoot()
+
+  try {
+    writeLiveTransportFollowUpPacket(repoRoot, 'debian-12-live-tailscale-packet-2026-04-24', {
+      capturedAt: '2026-04-24T08:00:00.000Z',
+      capturedAddress: '172.17.0.2'
+    })
+
+    const pack = buildSecondTargetPolicyPack(
+      createDefaultSecondTargetPolicySnapshot({ repoRoot })
+    )
+
+    assert.equal(pack.liveTransportFollowUp.state, 'capture_required')
+    assert.equal(pack.liveTransportFollowUp.capturedPacketRoot, undefined)
+    assert.equal(pack.reviewAdjudication.blockingDeltas.length, 1)
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
 })
 
 test('second target review packet readiness stays in progress until diagnostics and rollback packet sections land', () => {
@@ -885,6 +1028,53 @@ test('controller server exposes second target policy pack as explicit controller
       store.close()
     }
   } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('controller server discovers filesystem-backed live tailscale packet when repo root is overridden', async () => {
+  const { directory, databasePath } = tempDbPath()
+  const repoRoot = tempRepoRoot()
+
+  try {
+    const discoveredPacketRoot = writeLiveTransportFollowUpPacket(
+      repoRoot,
+      'debian-12-live-tailscale-packet-2026-04-25',
+      {
+        capturedAt: '2026-04-25T08:00:00.000Z',
+        capturedAddress: '100.91.22.25'
+      }
+    )
+    const store = createOperationStore({ databasePath })
+    const eventBus = createControllerEventBus()
+    const server = createControllerServer({ store, eventBus, repoRoot })
+    const listening = await server.listen(0)
+
+    try {
+      const response = await fetch(`${listening.baseUrl}/second-target-policy-pack`)
+      assert.equal(response.status, 200)
+
+      const payload = (await response.json()) as {
+        liveTransportFollowUp: {
+          state: string
+          capturedPacketRoot?: string
+          capturedAddress?: string
+        }
+        reviewAdjudication: {
+          blockingDeltas: unknown[]
+        }
+      }
+
+      assert.equal(payload.liveTransportFollowUp.state, 'capture_complete')
+      assert.equal(payload.liveTransportFollowUp.capturedPacketRoot, discoveredPacketRoot)
+      assert.equal(payload.liveTransportFollowUp.capturedAddress, '100.91.22.25')
+      assert.equal(payload.reviewAdjudication.blockingDeltas.length, 0)
+    } finally {
+      await server.close()
+      store.close()
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true })
     rmSync(directory, { recursive: true, force: true })
   }
 })

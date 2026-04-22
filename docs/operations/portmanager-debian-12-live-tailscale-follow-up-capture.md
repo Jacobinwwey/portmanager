@@ -1,7 +1,7 @@
 # PortManager Debian 12 Live Tailscale Follow-Up Capture
 
 Updated: 2026-04-21
-Version: v0.1.0
+Version: v0.2.0
 
 ## English
 
@@ -35,7 +35,22 @@ It does not widen supported-target claims by itself.
 6. Record one controller audit or replay reference that links the new bootstrap plus steady-state captures into one bounded packet:
    - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
 7. Store the resulting artifacts under the new root without mutating the preserved Docker-bridge packet.
-8. Update `docs/operations/portmanager-debian-12-review-packet-template.md` or a successor live packet README so every new artifact links back to `/second-target-policy-pack`.
+8. Write one canonical packet summary file at:
+   - `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/live-transport-follow-up-summary.json`
+9. The summary file must keep these minimum fields together:
+   - `candidateTargetProfileId`
+   - `capturedAt`
+   - `capturedAddress`
+   - `requiredArtifactIds`
+   - `artifactFiles`
+10. `artifactFiles` must point at packet-local files for all five required artifact ids. Use this minimum layout unless a successor template explicitly replaces it:
+   - `candidate-host-detail.json`
+   - `bootstrap-operation.json`
+   - `steady-state-health.json`
+   - `steady-state-runtime-state.json`
+   - `controller-audit-index.json`
+   - `live-transport-follow-up-summary.json`
+11. Update `docs/operations/portmanager-debian-12-review-packet-template.md` or a successor live packet README so every new artifact links back to `/second-target-policy-pack`.
 
 ### Required artifacts
 - `candidate_host_with_tailscale_ip`: one host detail snapshot with a live Tailscale-backed address
@@ -44,8 +59,17 @@ It does not widen supported-target claims by itself.
 - `steady_state_runtime_state_with_tailscale_transport`: one `/runtime-state` capture from the same live packet
 - `linked_controller_audit_reference`: one audit-index or replay reference that links the live bootstrap and steady-state captures
 
+### Canonical packet summary contract
+- Filename: `live-transport-follow-up-summary.json`
+- `candidateTargetProfileId` must stay `debian-12-systemd-tailscale`.
+- `capturedAt` must be an ISO timestamp so controller can choose the newest valid packet deterministically.
+- `capturedAddress` must be non-empty and must not stay `172.17.0.2`.
+- `requiredArtifactIds` must include all five live follow-up artifact ids.
+- `artifactFiles` must map each required artifact id to one packet-local file path that already exists under the same packet root.
+
 ### Exit rule
-Keep `/second-target-policy-pack.liveTransportFollowUp.state` at `capture_required` until all five artifacts are preserved under one fresh live-Tailscale packet root.
+Keep `/second-target-policy-pack.liveTransportFollowUp.state` at `capture_required` until all five artifacts plus `live-transport-follow-up-summary.json` are preserved under one fresh live-Tailscale packet root.
+Controller default truth now ignores newer invalid roots and only selects the newest valid packet root deterministically.
 Do not overwrite the preserved Docker-bridge packet; keep it as historical evidence that still explains why broader support remained locked.
 
 ## 中文
@@ -80,7 +104,22 @@ Do not overwrite the preserved Docker-bridge packet; keep it as historical evide
 6. 记录一条 controller audit 或 replay 引用，把新的 bootstrap 与 steady-state 采集串成同一份 bounded packet：
    - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
 7. 把这些产物全部写入新的 packet 根目录，不要去修改已保留的 Docker-bridge packet。
-8. 把新产物回填到 `docs/operations/portmanager-debian-12-review-packet-template.md` 或后续 live packet README，并确保每个链接都能回到 `/second-target-policy-pack`。
+8. 在新根目录下写出一份规范化 packet summary 文件：
+   - `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/live-transport-follow-up-summary.json`
+9. 这份 summary 文件至少要同时保留以下字段：
+   - `candidateTargetProfileId`
+   - `capturedAt`
+   - `capturedAddress`
+   - `requiredArtifactIds`
+   - `artifactFiles`
+10. `artifactFiles` 必须给五个必需产物 id 都指向同一 packet 根目录下的文件。除非后续模板明确替换，否则最小布局固定为：
+   - `candidate-host-detail.json`
+   - `bootstrap-operation.json`
+   - `steady-state-health.json`
+   - `steady-state-runtime-state.json`
+   - `controller-audit-index.json`
+   - `live-transport-follow-up-summary.json`
+11. 把新产物回填到 `docs/operations/portmanager-debian-12-review-packet-template.md` 或后续 live packet README，并确保每个链接都能回到 `/second-target-policy-pack`。
 
 ### 必需产物
 - `candidate_host_with_tailscale_ip`：一份带 live Tailscale-backed 地址的 host detail 快照
@@ -89,6 +128,15 @@ Do not overwrite the preserved Docker-bridge packet; keep it as historical evide
 - `steady_state_runtime_state_with_tailscale_transport`：同一份 live packet 下的 `/runtime-state` 采集
 - `linked_controller_audit_reference`：把 live bootstrap 与 steady-state 采集串起来的一条 audit-index 或 replay 引用
 
+### 规范 packet summary 契约
+- 文件名固定：`live-transport-follow-up-summary.json`
+- `candidateTargetProfileId` 必须继续保持为 `debian-12-systemd-tailscale`
+- `capturedAt` 必须是 ISO 时间戳，方便 controller 确定“最新有效 packet”
+- `capturedAddress` 必须非空，而且不能继续是 `172.17.0.2`
+- `requiredArtifactIds` 必须包含全部五个 live follow-up artifact id
+- `artifactFiles` 必须把每个必需 artifact id 映射到同一 packet 根目录下已经存在的文件路径
+
 ### 退出规则
-只要这五类产物还没有在同一份新的 live-Tailscale packet 根目录下完整保留，就继续把 `/second-target-policy-pack.liveTransportFollowUp.state` 保持为 `capture_required`。
+只要这五类产物与 `live-transport-follow-up-summary.json` 还没有在同一份新的 live-Tailscale packet 根目录下完整保留，就继续把 `/second-target-policy-pack.liveTransportFollowUp.state` 保持为 `capture_required`。
+controller 默认真相现在会忽略更新但无效的 packet 根目录，只会稳定选择“最新有效 packet”。
 不要覆盖已保留的 Docker-bridge packet；它必须继续作为历史证据存在，说明为什么更广支持声明一直保持锁定。

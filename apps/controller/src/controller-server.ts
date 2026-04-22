@@ -140,6 +140,7 @@ export function createControllerServer(options: {
   store: OperationStore
   eventBus: ControllerEventBus
   artifactRoot?: string
+  repoRoot?: string
   githubBackup?: {
     apiBaseUrl?: string
     env?: NodeJS.ProcessEnv
@@ -713,7 +714,9 @@ export function createControllerServer(options: {
       sendJson(
         response,
         200,
-        buildSecondTargetPolicyPack(createDefaultSecondTargetPolicySnapshot())
+        buildSecondTargetPolicyPack(
+          createDefaultSecondTargetPolicySnapshot({ repoRoot: options.repoRoot })
+        )
       )
       return
     }

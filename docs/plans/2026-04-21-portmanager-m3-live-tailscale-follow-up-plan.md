@@ -1,7 +1,7 @@
 ---
 title: PortManager Milestone 3 Live Tailscale Follow-Up Plan
 type: architecture
-status: active
+status: completed
 date: 2026-04-21
 origin: docs/brainstorms/2026-04-21-portmanager-m3-live-tailscale-follow-up-requirements.md
 ---
@@ -9,13 +9,12 @@ origin: docs/brainstorms/2026-04-21-portmanager-m3-live-tailscale-follow-up-requ
 # PortManager Milestone 3 Live Tailscale Follow-Up Plan
 
 Updated: 2026-04-21
-Version: v0.1.0
+Version: v0.2.0
 
 ## Status Note
-Late `2026-04-21` progress now moves Milestone 3 past “make the blocker visible.”
-That blocker is already visible.
-`/second-target-policy-pack` already reports `review_open`, pending verdicts, blocking delta `container_bridge_transport_substitution`, and preserved Docker bridge address `172.17.0.2`.
-This slice finishes the next-lane surface that tells developers exactly how to capture one fresh live-Tailscale packet without mutating the preserved historical packet.
+Late `2026-04-21` progress now marks this slice landed.
+`/second-target-policy-pack` already reports top-level `liveTransportFollowUp`, `capture_complete` is structurally reachable, CLI/Web/contracts/docs expose captured packet fields, and remote `main` CI parity is repaired after the stale live-loader expectation was updated.
+The active next queue now moves to `docs/brainstorms/2026-04-21-portmanager-m3-live-packet-discovery-requirements.md` plus `docs/plans/2026-04-21-portmanager-m3-live-packet-discovery-plan.md`.
 
 ## Overview
 This plan covers the post-delta Milestone 3 slice.

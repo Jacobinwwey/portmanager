@@ -1,3 +1,7 @@
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import type { TargetProfileSummary } from './target-profile-registry.ts'
 import {
   candidateTargetProfileId,
@@ -336,7 +340,9 @@ const liveTailscaleFollowUpArtifactRootPrefix =
   'docs/operations/artifacts/debian-12-live-tailscale-packet-'
 const liveTailscaleFollowUpArtifactRootPattern =
   'docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/'
+const liveTailscaleFollowUpSummaryFileName = 'live-transport-follow-up-summary.json'
 const preservedDockerBridgeAddress = '172.17.0.2'
+const defaultSecondTargetPolicyRepoRoot = fileURLToPath(new URL('../../../', import.meta.url))
 const bootstrapCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/bootstrap-capture-summary.json`
 const bootstrapCaptureOperationPath = `${bootstrapCaptureArtifactRoot}/bootstrap-operation.json`
 const bootstrapCaptureAuditIndexPath = `${bootstrapCaptureArtifactRoot}/bootstrap-audit-index.json`
@@ -712,6 +718,25 @@ const requiredLiveTransportFollowUpArtifactIds: SecondTargetLiveTransportFollowU
   'steady_state_runtime_state_with_tailscale_transport',
   'linked_controller_audit_reference'
 ]
+
+interface DiscoveredLiveTransportFollowUpCapture {
+  artifactRoot: string
+  capturedAddress: string
+  capturedArtifactIds: SecondTargetLiveTransportFollowUpArtifactId[]
+  capturedAtMs: number
+}
+
+interface LiveTransportFollowUpSummaryFile {
+  candidateTargetProfileId: string
+  capturedAddress: string
+  requiredArtifactIds: SecondTargetLiveTransportFollowUpArtifactId[]
+  artifactFiles: Partial<Record<SecondTargetLiveTransportFollowUpArtifactId, string>>
+  capturedAtMs: number
+}
+
+export interface DefaultSecondTargetPolicySnapshotOptions {
+  repoRoot?: string
+}
 
 const criterionMetadata: Record<
   SecondTargetPolicyCriterionId,
@@ -1236,6 +1261,183 @@ function resolvedLiveTransportCapturedAddress(snapshot: SecondTargetPolicySnapsh
   const address = snapshot.liveTransportCapturedAddress?.trim()
 
   return address ? address : undefined
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function isLiveTransportFollowUpArtifactId(
+  value: string
+): value is SecondTargetLiveTransportFollowUpArtifactId {
+  return requiredLiveTransportFollowUpArtifactIds.includes(
+    value as SecondTargetLiveTransportFollowUpArtifactId
+  )
+}
+
+function parseLiveTransportFollowUpArtifactIds(
+  value: unknown
+): SecondTargetLiveTransportFollowUpArtifactId[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined
+  }
+
+  const parsed: SecondTargetLiveTransportFollowUpArtifactId[] = []
+
+  for (const entry of value) {
+    if (typeof entry !== 'string' || !isLiveTransportFollowUpArtifactId(entry)) {
+      return undefined
+    }
+
+    parsed.push(entry)
+  }
+
+  return uniqueItems(parsed)
+}
+
+function parseLiveTransportFollowUpArtifactFiles(
+  value: unknown
+): Partial<Record<SecondTargetLiveTransportFollowUpArtifactId, string>> | undefined {
+  if (!isRecord(value)) {
+    return undefined
+  }
+
+  const parsed: Partial<Record<SecondTargetLiveTransportFollowUpArtifactId, string>> = {}
+
+  for (const [key, entry] of Object.entries(value)) {
+    if (!isLiveTransportFollowUpArtifactId(key) || typeof entry !== 'string') {
+      return undefined
+    }
+
+    const normalized = entry.trim()
+
+    if (!normalized) {
+      return undefined
+    }
+
+    parsed[key] = normalized
+  }
+
+  return parsed
+}
+
+function parseLiveTransportFollowUpSummaryFile(raw: string): LiveTransportFollowUpSummaryFile | undefined {
+  let parsedJson: unknown
+
+  try {
+    parsedJson = JSON.parse(raw)
+  } catch {
+    return undefined
+  }
+
+  if (!isRecord(parsedJson)) {
+    return undefined
+  }
+
+  const candidateId = typeof parsedJson.candidateTargetProfileId === 'string'
+    ? parsedJson.candidateTargetProfileId.trim()
+    : ''
+  const capturedAddress = typeof parsedJson.capturedAddress === 'string'
+    ? parsedJson.capturedAddress.trim()
+    : ''
+  const requiredArtifactIds = parseLiveTransportFollowUpArtifactIds(parsedJson.requiredArtifactIds)
+  const artifactFiles = parseLiveTransportFollowUpArtifactFiles(parsedJson.artifactFiles)
+  const capturedAt = typeof parsedJson.capturedAt === 'string' ? parsedJson.capturedAt.trim() : ''
+  const capturedAtMs = Number.parseInt(String(Date.parse(capturedAt)), 10)
+
+  if (!candidateId || !capturedAddress || !requiredArtifactIds || !artifactFiles) {
+    return undefined
+  }
+
+  return {
+    candidateTargetProfileId: candidateId,
+    capturedAddress,
+    requiredArtifactIds,
+    artifactFiles,
+    capturedAtMs: Number.isFinite(capturedAtMs) ? capturedAtMs : Number.NEGATIVE_INFINITY
+  }
+}
+
+function resolvePacketArtifactPath(rootAbsolutePath: string, artifactPath: string) {
+  const resolvedPath = path.resolve(rootAbsolutePath, artifactPath)
+  const relativePath = path.relative(rootAbsolutePath, resolvedPath)
+
+  if (
+    relativePath.startsWith('..') ||
+    path.isAbsolute(relativePath) ||
+    !existsSync(resolvedPath) ||
+    !statSync(resolvedPath).isFile()
+  ) {
+    return undefined
+  }
+
+  return resolvedPath
+}
+
+function discoverLatestLiveTransportFollowUpCapture(
+  repoRoot: string,
+  expectedCandidateTargetProfileId: string
+): DiscoveredLiveTransportFollowUpCapture | undefined {
+  const artifactsRoot = path.join(repoRoot, 'docs', 'operations', 'artifacts')
+  const packetDirectoryPrefix = path.basename(liveTailscaleFollowUpArtifactRootPrefix)
+
+  if (!existsSync(artifactsRoot) || !statSync(artifactsRoot).isDirectory()) {
+    return undefined
+  }
+
+  const candidates = readdirSync(artifactsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith(packetDirectoryPrefix))
+    .map((entry) => {
+      const rootAbsolutePath = path.join(artifactsRoot, entry.name)
+      const summaryAbsolutePath = path.join(rootAbsolutePath, liveTailscaleFollowUpSummaryFileName)
+
+      if (!existsSync(summaryAbsolutePath) || !statSync(summaryAbsolutePath).isFile()) {
+        return undefined
+      }
+
+      const summary = parseLiveTransportFollowUpSummaryFile(readFileSync(summaryAbsolutePath, 'utf8'))
+      if (!summary || summary.candidateTargetProfileId !== expectedCandidateTargetProfileId) {
+        return undefined
+      }
+
+      if (
+        summary.capturedAddress === preservedDockerBridgeAddress ||
+        !requiredLiveTransportFollowUpArtifactIds.every((artifactId) =>
+          summary.requiredArtifactIds.includes(artifactId)
+        )
+      ) {
+        return undefined
+      }
+
+      const hasAllArtifactFiles = requiredLiveTransportFollowUpArtifactIds.every((artifactId) => {
+        const artifactPath = summary.artifactFiles[artifactId]
+        return typeof artifactPath === 'string'
+          ? resolvePacketArtifactPath(rootAbsolutePath, artifactPath) !== undefined
+          : false
+      })
+
+      if (!hasAllArtifactFiles) {
+        return undefined
+      }
+
+      return {
+        artifactRoot: path.posix.join('docs', 'operations', 'artifacts', entry.name),
+        capturedAddress: summary.capturedAddress,
+        capturedArtifactIds: [...requiredLiveTransportFollowUpArtifactIds],
+        capturedAtMs: summary.capturedAtMs
+      } satisfies DiscoveredLiveTransportFollowUpCapture
+    })
+    .filter((entry): entry is DiscoveredLiveTransportFollowUpCapture => entry !== undefined)
+
+  candidates.sort((left, right) => {
+    if (left.capturedAtMs !== right.capturedAtMs) {
+      return right.capturedAtMs - left.capturedAtMs
+    }
+
+    return right.artifactRoot.localeCompare(left.artifactRoot)
+  })
+
+  return candidates[0]
 }
 
 function hasCompleteLiveTransportFollowUp(snapshot: SecondTargetPolicySnapshot) {
@@ -1849,11 +2051,18 @@ function buildRollbackProofCapture(
   }
 }
 
-export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySnapshot {
+export function createDefaultSecondTargetPolicySnapshot(
+  options: DefaultSecondTargetPolicySnapshotOptions = {}
+): SecondTargetPolicySnapshot {
+  const repoRoot = options.repoRoot ?? defaultSecondTargetPolicyRepoRoot
   const candidateTargetProfiles = listCandidateTargetProfiles().map((profile) =>
     summarizeTargetProfile(profile.id)
   )
   const evidenceItems = createDefaultSecondTargetEvidenceItems()
+  const discoveredLiveTransportFollowUp = discoverLatestLiveTransportFollowUpCapture(
+    repoRoot,
+    candidateTargetProfiles[0]?.id ?? candidateTargetProfileId
+  )
 
   return {
     lockedTargetProfileId: defaultTargetProfileId,
@@ -1880,6 +2089,9 @@ export function createDefaultSecondTargetPolicySnapshot(): SecondTargetPolicySna
       ...diagnosticsCapturedArtifactIds,
       ...rollbackCapturedArtifactIds
     ],
+    liveTransportCaptureArtifactRoot: discoveredLiveTransportFollowUp?.artifactRoot,
+    liveTransportCapturedAddress: discoveredLiveTransportFollowUp?.capturedAddress,
+    liveTransportCapturedArtifactIds: discoveredLiveTransportFollowUp?.capturedArtifactIds,
     evidenceItems
   }
 }

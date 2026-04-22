@@ -5,7 +5,7 @@ topic: portmanager-m3-live-tailscale-follow-up
 
 # PortManager Milestone 3 Live Tailscale Follow-Up Requirements
 
-Status note on `2026-04-21`: deep comparison now shows the review-delta slice is already landed. `/second-target-policy-pack` already exposes `review_open`, pending adjudication verdicts, blocking delta `container_bridge_transport_substitution`, and the preserved Docker bridge address `172.17.0.2`. The remaining gap is narrower and more actionable: developers still need one first-class public lane that says exactly how to replace that preserved Docker-bridge evidence with one fresh live-Tailscale bounded packet.
+Status note on `2026-04-21`: this slice is now landed. `/second-target-policy-pack` already exposes top-level `liveTransportFollowUp`, `capture_complete` is structurally reachable, CLI/Web/contracts/docs expose captured packet fields, and the stale live-loader expectation that broke remote `main` CI has been repaired. The active next gap now shifts from “publish the follow-up lane” to “discover one real live packet root from repo artifacts.”
 
 ## Problem Frame
 Current repo truth has already moved past broad “review delta” language:
@@ -78,4 +78,4 @@ Developers can see the blocker, but they still do not get one explicit public ne
 - Milestone 2 review helpers remain the wording-truth guardrail while this Milestone 3 slice lands.
 
 ## Next Steps
-- Move to `docs/plans/2026-04-21-portmanager-m3-live-tailscale-follow-up-plan.md` for the implementation units that finish docs, roadmap, generated pages, and verification around `liveTransportFollowUp`.
+- Move to `docs/brainstorms/2026-04-21-portmanager-m3-live-packet-discovery-requirements.md` plus `docs/plans/2026-04-21-portmanager-m3-live-packet-discovery-plan.md` for the implementation units that make live packet discovery automatic from repo artifacts.

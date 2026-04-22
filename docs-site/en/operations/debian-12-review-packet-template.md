@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/operations/portmanager-debian-12-review-packet-template.md`
 > Audience: `shared` | Section: `operations` | Status: `active`
-> Updated: 2026-04-21 | Version: v0.1.0
+> Updated: 2026-04-21 | Version: v0.2.0
 ### Purpose
 Freeze one explicit review-packet template for `debian-12-systemd-tailscale`.
 This document does not claim that parity already passed.
@@ -56,6 +56,26 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 - rollback result artifact: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback/rp_op_backup_1776807481139_825-result.json`
 - post-rollback diagnostics linkage: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-post-diagnostics.json`
 - drift summary: local Debian 12 Docker bridge replaced live Tailscale for this preserved review packet, so broader support claims remain locked until bounded second-target review closes.
+
+### Filesystem-backed live packet extension
+- fresh packet root pattern: `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
+- canonical summary filename: `live-transport-follow-up-summary.json`
+- controller default truth now reads only the newest valid packet root whose summary file keeps:
+  - `candidateTargetProfileId`
+  - `capturedAt`
+  - `capturedAddress`
+  - `requiredArtifactIds`
+  - `artifactFiles`
+- minimum packet-local file layout for discovery:
+  - `candidate-host-detail.json`
+  - `bootstrap-operation.json`
+  - `steady-state-health.json`
+  - `steady-state-runtime-state.json`
+  - `controller-audit-index.json`
+  - `live-transport-follow-up-summary.json`
+- `requiredArtifactIds` must include all five live follow-up artifact ids, and `artifactFiles` must map each id to one existing packet-local file.
+- `capturedAddress` must be non-empty and must not remain `172.17.0.2`.
+- incomplete or malformed newer packet roots do not clear the blocking delta; controller falls back to the newest valid root or keeps `capture_required`.
 
 ### Required evidence sections
 1. Bootstrap transport parity

@@ -1,7 +1,7 @@
 # PortManager Debian 12 Review Packet Template
 
 Updated: 2026-04-21
-Version: v0.1.0
+Version: v0.2.0
 
 ## English
 
@@ -48,6 +48,26 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 - rollback result artifact: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback/rp_op_backup_1776807481139_825-result.json`
 - post-rollback diagnostics linkage: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-post-diagnostics.json`
 - drift summary: local Debian 12 Docker bridge replaced live Tailscale for this preserved review packet, so broader support claims remain locked until bounded second-target review closes.
+
+### Filesystem-backed live packet extension
+- fresh packet root pattern: `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
+- canonical summary filename: `live-transport-follow-up-summary.json`
+- controller default truth now reads only the newest valid packet root whose summary file keeps:
+  - `candidateTargetProfileId`
+  - `capturedAt`
+  - `capturedAddress`
+  - `requiredArtifactIds`
+  - `artifactFiles`
+- minimum packet-local file layout for discovery:
+  - `candidate-host-detail.json`
+  - `bootstrap-operation.json`
+  - `steady-state-health.json`
+  - `steady-state-runtime-state.json`
+  - `controller-audit-index.json`
+  - `live-transport-follow-up-summary.json`
+- `requiredArtifactIds` must include all five live follow-up artifact ids, and `artifactFiles` must map each id to one existing packet-local file.
+- `capturedAddress` must be non-empty and must not remain `172.17.0.2`.
+- incomplete or malformed newer packet roots do not clear the blocking delta; controller falls back to the newest valid root or keeps `capture_required`.
 
 ### Required evidence sections
 1. Bootstrap transport parity
@@ -126,6 +146,26 @@ It names the artifact slots that must be filled before `/second-target-policy-pa
 - rollback 结果产物：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback/rp_op_backup_1776807481139_825-result.json`
 - rollback 后 diagnostics 链接：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-post-diagnostics.json`
 - drift 摘要：这次保留的 review packet 使用本地 Debian 12 Docker bridge 替代 live Tailscale，因此更广支持声明继续保持锁定，直到 bounded second-target review 关闭。
+
+### filesystem-backed live packet 扩展
+- 新 packet 根目录模式：`docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
+- 规范 summary 文件名：`live-transport-follow-up-summary.json`
+- controller 默认真相现在只会读取“最新有效 packet”根目录，而这份 summary 文件至少要同时保留：
+  - `candidateTargetProfileId`
+  - `capturedAt`
+  - `capturedAddress`
+  - `requiredArtifactIds`
+  - `artifactFiles`
+- discovery 的最小 packet 本地文件布局固定为：
+  - `candidate-host-detail.json`
+  - `bootstrap-operation.json`
+  - `steady-state-health.json`
+  - `steady-state-runtime-state.json`
+  - `controller-audit-index.json`
+  - `live-transport-follow-up-summary.json`
+- `requiredArtifactIds` 必须包含全部五个 live follow-up artifact id，而 `artifactFiles` 必须把每个 id 映射到同一 packet 根目录下一个已经存在的文件。
+- `capturedAddress` 必须非空，而且不能继续保持 `172.17.0.2`。
+- 更新但无效的新 packet 根目录不会清除 blocking delta；controller 会回退到最新有效根目录，或继续保持 `capture_required`。
 
 ### 必需证据分区
 1. Bootstrap transport parity

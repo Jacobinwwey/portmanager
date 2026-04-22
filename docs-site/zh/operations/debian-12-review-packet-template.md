@@ -12,7 +12,7 @@ status: active
 ---
 > 真源文档：`docs/operations/portmanager-debian-12-review-packet-template.md`
 > Audience：`shared` | Section：`operations` | Status：`active`
-> Updated：2026-04-21 | Version：v0.1.0
+> Updated：2026-04-21 | Version：v0.2.0
 ### 目的
 冻结一份 `debian-12-systemd-tailscale` 的显式 review packet 模板。
 本文档不宣称等价已经通过。
@@ -56,6 +56,26 @@ status: active
 - rollback 结果产物：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback/rp_op_backup_1776807481139_825-result.json`
 - rollback 后 diagnostics 链接：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/rollback-post-diagnostics.json`
 - drift 摘要：这次保留的 review packet 使用本地 Debian 12 Docker bridge 替代 live Tailscale，因此更广支持声明继续保持锁定，直到 bounded second-target review 关闭。
+
+### filesystem-backed live packet 扩展
+- 新 packet 根目录模式：`docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
+- 规范 summary 文件名：`live-transport-follow-up-summary.json`
+- controller 默认真相现在只会读取“最新有效 packet”根目录，而这份 summary 文件至少要同时保留：
+  - `candidateTargetProfileId`
+  - `capturedAt`
+  - `capturedAddress`
+  - `requiredArtifactIds`
+  - `artifactFiles`
+- discovery 的最小 packet 本地文件布局固定为：
+  - `candidate-host-detail.json`
+  - `bootstrap-operation.json`
+  - `steady-state-health.json`
+  - `steady-state-runtime-state.json`
+  - `controller-audit-index.json`
+  - `live-transport-follow-up-summary.json`
+- `requiredArtifactIds` 必须包含全部五个 live follow-up artifact id，而 `artifactFiles` 必须把每个 id 映射到同一 packet 根目录下一个已经存在的文件。
+- `capturedAddress` 必须非空，而且不能继续保持 `172.17.0.2`。
+- 更新但无效的新 packet 根目录不会清除 blocking delta；controller 会回退到最新有效根目录，或继续保持 `capture_required`。
 
 ### 必需证据分区
 1. Bootstrap transport parity
