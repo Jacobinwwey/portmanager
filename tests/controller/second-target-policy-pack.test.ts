@@ -799,6 +799,26 @@ test('controller server exposes second target policy pack as explicit controller
         ),
         true
       )
+      assert.equal(payload.liveTransportFollowUp.state, 'capture_required')
+      assert.equal(
+        payload.liveTransportFollowUp.guidePath,
+        'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md'
+      )
+      assert.equal(payload.liveTransportFollowUp.currentRecordedAddress, '172.17.0.2')
+      assert.match(payload.liveTransportFollowUp.summary, /live tailscale-backed bounded packet/i)
+      assert.equal(payload.liveTransportFollowUp.requiredArtifacts.length >= 4, true)
+      assert.equal(
+        payload.liveTransportFollowUp.requiredArtifacts.some(
+          (item) => item.id === 'candidate_host_with_tailscale_ip'
+        ),
+        true
+      )
+      assert.equal(
+        payload.liveTransportFollowUp.sources.some((source) =>
+          source.endsWith('docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md')
+        ),
+        true
+      )
     } finally {
       await server.close()
       store.close()

@@ -130,6 +130,8 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Land Milestone 3 review adjudication implementation plan: `docs/plans/2026-04-21-portmanager-m3-review-adjudication-plan.md`
 - [x] Land Milestone 3 review delta surface requirements doc: `docs/brainstorms/2026-04-21-portmanager-m3-review-delta-surface-requirements.md`
 - [x] Land Milestone 3 review delta surface implementation plan: `docs/plans/2026-04-21-portmanager-m3-review-delta-surface-plan.md`
+- [x] Land Milestone 3 live-Tailscale follow-up requirements doc: `docs/brainstorms/2026-04-21-portmanager-m3-live-tailscale-follow-up-requirements.md`
+- [x] Land Milestone 3 live-Tailscale follow-up implementation plan: `docs/plans/2026-04-21-portmanager-m3-live-tailscale-follow-up-plan.md`
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
@@ -259,4 +261,6 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] 落盘 Milestone 3 review adjudication 实现计划：`docs/plans/2026-04-21-portmanager-m3-review-adjudication-plan.md`
 - [x] 落盘 Milestone 3 review delta surface 需求文档：`docs/brainstorms/2026-04-21-portmanager-m3-review-delta-surface-requirements.md`
 - [x] 落盘 Milestone 3 review delta surface 实现计划：`docs/plans/2026-04-21-portmanager-m3-review-delta-surface-plan.md`
+- [x] 落盘 Milestone 3 live-Tailscale follow-up 需求文档：`docs/brainstorms/2026-04-21-portmanager-m3-live-tailscale-follow-up-requirements.md`
+- [x] 落盘 Milestone 3 live-Tailscale follow-up 实现计划：`docs/plans/2026-04-21-portmanager-m3-live-tailscale-follow-up-plan.md`
 - [x] 在合并进 `main` 前，同步 root docs 与 roadmap docs 的进度表述。

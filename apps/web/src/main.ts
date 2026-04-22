@@ -1573,6 +1573,57 @@ export function createMockSecondTargetPolicyPack(): SecondTargetPolicyPackContra
         'docs/operations/portmanager-debian-12-review-packet-template.md'
       ]
     },
+    liveTransportFollowUp: {
+      state: 'deferred',
+      candidateTargetProfileId: 'debian-12-systemd-tailscale',
+      guidePath: 'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md',
+      artifactRootPattern: 'docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/',
+      currentRecordedAddress: '172.17.0.2',
+      summary:
+        'Live Tailscale follow-up stays deferred until bounded review is open with one complete preserved packet.',
+      requiredNextAction:
+        'Keep the preserved Debian 12 packet intact, then reopen live-Tailscale capture only after bounded review is ready for blocking-delta follow-up.',
+      requiredArtifacts: [
+        {
+          id: 'candidate_host_with_tailscale_ip',
+          label: 'Candidate host with Tailscale IP',
+          summary:
+            'Record one host detail snapshot that shows the Debian 12 candidate on a live Tailscale-backed address instead of the preserved Docker bridge address.'
+        },
+        {
+          id: 'bootstrap_operation_with_tailscale_transport',
+          label: 'Bootstrap operation with Tailscale transport',
+          summary:
+            'Capture one bootstrap operation result whose transport summary resolves to a live Tailscale-backed address for the same bounded packet.'
+        },
+        {
+          id: 'steady_state_health_with_tailscale_transport',
+          label: 'Steady-state health on Tailscale transport',
+          summary:
+            'Capture /health from the same bounded packet after the candidate host is reachable over live Tailscale transport.'
+        },
+        {
+          id: 'steady_state_runtime_state_with_tailscale_transport',
+          label: 'Steady-state runtime state on Tailscale transport',
+          summary:
+            'Capture /runtime-state from the same bounded packet after the candidate host is reachable over live Tailscale transport.'
+        },
+        {
+          id: 'linked_controller_audit_reference',
+          label: 'Linked controller audit reference',
+          summary:
+            'Capture one controller audit-index or replay reference that links the live-Tailscale bootstrap and steady-state captures into one bounded packet.'
+        }
+      ],
+      sources: [
+        'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md',
+        'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/README.md',
+        'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/bootstrap-capture-summary.json',
+        'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/steady-state-capture-summary.json',
+        'docs/operations/portmanager-second-target-review-contract.md',
+        'docs/operations/portmanager-debian-12-operator-ownership.md'
+      ]
+    },
     reviewPacketTemplate: {
       candidateTargetProfileId: 'debian-12-systemd-tailscale',
       templatePath: 'docs/operations/portmanager-debian-12-review-packet-template.md',
@@ -3859,6 +3910,44 @@ function SecondTargetPolicyCard(props: {
           ? `Sources: ${props.pack.reviewAdjudication.sources.join(', ')}`
           : 'Sources: none'
       )
+    ]),
+    h('section', { className: 'pm-card', key: 'live-transport-follow-up' }, [
+        h(SectionHeading, {
+          key: 'heading',
+          title: 'Live transport follow-up',
+          detail: props.pack.liveTransportFollowUp.state
+        }),
+        h('div', { className: 'pm-kv', key: 'kv' }, [
+          kvRow('Candidate Target', props.pack.liveTransportFollowUp.candidateTargetProfileId),
+          kvRow('Guide Path', props.pack.liveTransportFollowUp.guidePath),
+          kvRow('Artifact Root Pattern', props.pack.liveTransportFollowUp.artifactRootPattern),
+          kvRow('Current Recorded Address', props.pack.liveTransportFollowUp.currentRecordedAddress)
+        ]),
+        h('p', { className: 'pm-microcopy', key: 'summary' }, props.pack.liveTransportFollowUp.summary),
+        h(
+          'p',
+          { className: 'pm-microcopy', key: 'next-action' },
+          `Required next action: ${props.pack.liveTransportFollowUp.requiredNextAction}`
+        ),
+        props.pack.liveTransportFollowUp.requiredArtifacts.length
+          ? h(
+              'ul',
+              { className: 'pm-list', key: 'artifacts' },
+              props.pack.liveTransportFollowUp.requiredArtifacts.map((item) =>
+                h('li', { className: 'pm-list-item', key: item.id }, [
+                  h('div', { key: 'line1' }, `${item.label} · ${item.id}`),
+                  h('div', { className: 'pm-microcopy', key: 'line2' }, item.summary)
+                ])
+              )
+            )
+          : emptyState('No live-transport follow-up artifacts recorded yet.', 'empty'),
+        h(
+          'p',
+          { className: 'pm-microcopy', key: 'sources' },
+          props.pack.liveTransportFollowUp.sources.length > 0
+            ? `Sources: ${props.pack.liveTransportFollowUp.sources.join(', ')}`
+            : 'Sources: none'
+        )
     ]),
     h('section', { className: 'pm-card', key: 'review-packet-template' }, [
       h(SectionHeading, {

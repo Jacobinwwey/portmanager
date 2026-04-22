@@ -110,12 +110,39 @@ test('overview shell renders blocking review delta when bounded review is open',
       'docs/operations/portmanager-debian-12-operator-ownership.md'
     ]
   }
+  state.secondTargetPolicyPack.liveTransportFollowUp = {
+    state: 'capture_required',
+    candidateTargetProfileId: 'debian-12-systemd-tailscale',
+    guidePath: 'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md',
+    artifactRootPattern: 'docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/',
+    currentRecordedAddress: '172.17.0.2',
+    summary:
+      'Capture one live Tailscale-backed bounded packet because the preserved packet still uses Docker bridge address 172.17.0.2.',
+    requiredNextAction:
+      'Capture one new Debian 12 packet on a real tailnet-backed address and keep the preserved Docker-bridge packet as historical evidence.',
+    requiredArtifacts: [
+      {
+        id: 'candidate_host_with_tailscale_ip',
+        label: 'Candidate host with Tailscale IP',
+        summary:
+          'Record one host detail snapshot that shows a live Tailscale-backed address for the declared Debian 12 candidate.'
+      }
+    ],
+    sources: [
+      'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md',
+      'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/README.md'
+    ]
+  }
 
   const html = renderToStaticMarkup(h(OverviewPage, { state }))
 
   assert.match(html, /Container bridge transport substitution/i)
   assert.match(html, /172\.17\.0\.2/)
   assert.match(html, /Capture one live Tailscale-backed bounded packet before review close/i)
+  assert.match(html, /Live transport follow-up/i)
+  assert.match(html, /portmanager-debian-12-live-tailscale-follow-up-capture\.md/i)
+  assert.match(html, /debian-12-live-tailscale-packet-&lt;date&gt;/i)
+  assert.match(html, /Candidate host with Tailscale IP/i)
 })
 
 test('host detail shell renders required milestone sections', () => {

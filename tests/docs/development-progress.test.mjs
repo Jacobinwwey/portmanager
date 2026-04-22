@@ -69,6 +69,12 @@ test('roadmap publishes a development-progress page backed by live milestone con
     'operations',
     'debian-12-rollback-proof-capture.md'
   )
+  const enLiveTailscaleFollowUpPagePath = path.join(
+    docsSiteRoot,
+    'en',
+    'operations',
+    'debian-12-live-tailscale-follow-up-capture.md'
+  )
   const zhBackupRestoreProofPagePath = path.join(
     docsSiteRoot,
     'zh',
@@ -87,6 +93,12 @@ test('roadmap publishes a development-progress page backed by live milestone con
     'operations',
     'debian-12-rollback-proof-capture.md'
   )
+  const zhLiveTailscaleFollowUpPagePath = path.join(
+    docsSiteRoot,
+    'zh',
+    'operations',
+    'debian-12-live-tailscale-follow-up-capture.md'
+  )
 
   assert.ok(existsSync(enPagePath), 'missing English development-progress roadmap page')
   assert.ok(existsSync(zhPagePath), 'missing Chinese development-progress roadmap page')
@@ -100,6 +112,8 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.ok(existsSync(zhDiagnosticsProofPagePath), 'missing Chinese diagnostics operations page')
   assert.ok(existsSync(enRollbackProofPagePath), 'missing English rollback operations page')
   assert.ok(existsSync(zhRollbackProofPagePath), 'missing Chinese rollback operations page')
+  assert.ok(existsSync(enLiveTailscaleFollowUpPagePath), 'missing English live-Tailscale follow-up operations page')
+  assert.ok(existsSync(zhLiveTailscaleFollowUpPagePath), 'missing Chinese live-Tailscale follow-up operations page')
   assert.ok(existsSync(generatedProgressDataPath), 'missing generated milestone confidence progress data file')
   assert.ok(existsSync(roadmapDataPath), 'missing roadmap data file')
 
@@ -126,11 +140,11 @@ test('roadmap publishes a development-progress page backed by live milestone con
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-review-delta-surface-requirements\.md/
+    /2026-04-21-portmanager-m3-live-tailscale-follow-up-requirements\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
-    /2026-04-21-portmanager-m3-review-delta-surface-plan\.md/
+    /2026-04-21-portmanager-m3-live-tailscale-follow-up-plan\.md/
   )
   assert.match(milestoneConfidenceComponent, /Phase 0 enablement/)
   assert.match(milestoneConfidenceComponent, /Units 63 through 71/)
@@ -153,6 +167,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(roadmapData, /review_open/)
   assert.match(roadmapData, /Docker bridge/i)
   assert.match(roadmapData, /172\.17\.0\.2/)
+  assert.match(roadmapData, /live tailscale follow-up/i)
   assert.match(roadmapData, /debian-12-systemd-tailscale/)
   assert.match(roadmapData, /review-packet readiness/i)
   assert.match(roadmapData, /guide coverage/i)
@@ -167,6 +182,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(roadmapData, /portmanager-debian-12-backup-restore-proof-capture\.md/)
   assert.match(roadmapData, /portmanager-debian-12-diagnostics-proof-capture\.md/)
   assert.match(roadmapData, /portmanager-debian-12-rollback-proof-capture\.md/)
+  assert.match(roadmapData, /portmanager-debian-12-live-tailscale-follow-up-capture\.md/)
   assert.match(milestoneConfidenceComponent, /--skip-sync/)
   assert.match(milestoneConfidenceComponent, /Public claim class/)
   assert.match(milestoneConfidenceComponent, /Source surface status/)
@@ -252,7 +268,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /promotion-ready-refresh-required/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
-  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-review-delta-surface-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-21-portmanager-m3-live-tailscale-follow-up-plan\.md/)
   assert.match(roadmapComponent, /lane\.items\.length > 0/)
   assert.match(roadmapComponent, /milestone-confidence-bundle-\*/)
   assert.match(roadmapComponent, /Required next action/)

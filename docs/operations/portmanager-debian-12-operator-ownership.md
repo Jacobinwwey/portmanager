@@ -18,6 +18,7 @@ Define who owns bounded-review work for `debian-12-systemd-tailscale`.
 - Stage Debian 12 environment, Tailscale reachability, and target-profile enrollment.
 - Preserve bootstrap, steady-state, backup, diagnostics, and rollback evidence.
 - Record the packet through `docs/operations/portmanager-debian-12-review-packet-template.md`.
+- Record live-Tailscale follow-up through `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` when `/second-target-policy-pack.liveTransportFollowUp.state` is `capture_required`.
 - Record adjudication verdicts through `/second-target-policy-pack`.
 - Update `/second-target-policy-pack` and docs surfaces when evidence changes or review finds a real delta.
 - Stop the candidate review immediately if parity proof regresses or packet integrity drifts.
@@ -26,11 +27,12 @@ Define who owns bounded-review work for `debian-12-systemd-tailscale`.
 ### Required sign-off conditions
 - Review packet contains the full acceptance recipe evidence bundle.
 - Review packet follows `docs/operations/portmanager-debian-12-review-packet-template.md`.
-- `/second-target-policy-pack` exposes the same `review_required` plus `review_open` truth as docs, CLI, and Web.
+- `/second-target-policy-pack` exposes the same `review_required`, `review_open`, and `liveTransportFollowUp` truth as docs, CLI, and Web.
 - Pending verdicts are explicit: packet integrity, drift acknowledgement, support lock confirmation, operator sign-off, and follow-up scope bounding.
 - `/second-target-policy-pack` reflects the same truth as docs, CLI, and Web.
 - The current blocking delta is explicit: Docker bridge address `172.17.0.2` still replaces live Tailscale transport in the preserved packet.
-- Required follow-up is explicit: capture one live Tailscale-backed bounded packet before bounded review can close.
+- Required follow-up is explicit: capture one live Tailscale-backed bounded packet under `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/` before bounded review can close.
+- The follow-up guide path is explicit: `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md`.
 - Rollback ownership is explicit and rehearsed.
 - Any unresolved parity gap or review-found delta is listed as blocking, not hidden behind aspirational prose.
 
@@ -52,6 +54,7 @@ If owner duty or evidence retention cannot be maintained, keep `debian-12-system
 - 负责 Debian 12 环境、Tailscale 可达性与 target-profile 注册。
 - 保留 bootstrap、steady-state、backup、diagnostics、rollback 证据。
 - 按 `docs/operations/portmanager-debian-12-review-packet-template.md` 记录 packet。
+- 当 `/second-target-policy-pack.liveTransportFollowUp.state` 为 `capture_required` 时，按 `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` 记录 live Tailscale follow-up。
 - 通过 `/second-target-policy-pack` 记录 adjudication verdict。
 - 证据变化或 review 找到真实 delta 时，同步更新 `/second-target-policy-pack` 与 docs 表面。
 - 一旦 parity proof 回退或 packet integrity 漂移，立即停止候选复核推进。
@@ -60,11 +63,12 @@ If owner duty or evidence retention cannot be maintained, keep `debian-12-system
 ### 必需签字条件
 - review packet 包含完整 acceptance recipe 证据包。
 - review packet 遵循 `docs/operations/portmanager-debian-12-review-packet-template.md`。
-- `/second-target-policy-pack` 与 docs、CLI、Web 一样公开 `review_required` 加 `review_open` 真相。
+- `/second-target-policy-pack` 与 docs、CLI、Web 一样公开 `review_required`、`review_open` 与 `liveTransportFollowUp` 真相。
 - 待裁定 verdict 必须显式存在：packet integrity、drift acknowledgement、support lock confirmation、operator sign-off、follow-up scope bounding。
 - `/second-target-policy-pack` 与 docs、CLI、Web 保持同一份真相。
 - 当前阻塞 delta 必须显式存在：保留 packet 里的 Docker bridge 地址 `172.17.0.2` 仍然替代 live Tailscale transport。
-- 当前必需 follow-up 必须显式存在：在 bounded review 关闭前捕获一份 live Tailscale-backed bounded packet。
+- 当前必需 follow-up 必须显式存在：在 bounded review 关闭前，把一份 live Tailscale-backed bounded packet 落到 `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`。
+- follow-up guide path 也必须显式存在：`docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md`。
 - rollback ownership 已经明确且完成演练。
 - 任何未解决的 parity gap 或 review-found delta 都必须列为 blocking，而不是被愿景文案掩盖。
 

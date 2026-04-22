@@ -1,0 +1,57 @@
+---
+title: "Debian 12 Live Tailscale Follow-Up Capture"
+audience: shared
+persona:
+  - operator
+  - admin
+  - contributor
+  - automation
+section: operations
+sourcePath: "docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md"
+status: active
+---
+> Source of truth: `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md`
+> Audience: `shared` | Section: `operations` | Status: `active`
+> Updated: 2026-04-21 | Version: v0.1.0
+### Purpose
+Freeze one explicit live-Tailscale follow-up capture guide for `debian-12-systemd-tailscale`.
+This guide starts only after `/second-target-policy-pack` opens bounded review and keeps the preserved Docker-bridge packet immutable as historical evidence.
+It does not widen supported-target claims by itself.
+
+### Inputs
+- `portmanager operations second-target-policy-pack --json` shows `reviewAdjudication.state: review_open`.
+- The same pack shows `liveTransportFollowUp.state: capture_required`.
+- The current recorded address is still `172.17.0.2`.
+- `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` stays preserved and untouched.
+- `pnpm milestone:review:promotion-ready -- --limit 20` already passed wording review on the current mainline slice.
+- One Debian 12 candidate host is reachable on a real Tailscale tailnet.
+
+### Capture flow
+1. Read `portmanager operations second-target-policy-pack` and confirm the follow-up guide path, artifact root pattern, current recorded address, and required artifact ids.
+2. Create one fresh artifact root for the new bounded packet:
+   - `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/`
+3. Record one host detail snapshot that proves the candidate host is now on a live Tailscale-backed address:
+   - `portmanager hosts get <host-id> --json`
+4. Rehearse bounded bootstrap on that same candidate host and capture the linked controller operation:
+   - `portmanager hosts probe <host-id> --wait`
+   - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
+   - `portmanager operation get <bootstrap-operation-id> --json`
+5. Run one bounded steady-state mutation on the same host, then capture live transport evidence:
+   - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
+   - `curl -fsSL http://<tailscale-ip>:<agent-port>/health`
+   - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
+6. Record one controller audit or replay reference that links the new bootstrap plus steady-state captures into one bounded packet:
+   - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
+7. Store the resulting artifacts under the new root without mutating the preserved Docker-bridge packet.
+8. Update `docs/operations/portmanager-debian-12-review-packet-template.md` or a successor live packet README so every new artifact links back to `/second-target-policy-pack`.
+
+### Required artifacts
+- `candidate_host_with_tailscale_ip`: one host detail snapshot with a live Tailscale-backed address
+- `bootstrap_operation_with_tailscale_transport`: one bootstrap operation result that resolves to the live Tailscale-backed address
+- `steady_state_health_with_tailscale_transport`: one `/health` capture from the same live packet
+- `steady_state_runtime_state_with_tailscale_transport`: one `/runtime-state` capture from the same live packet
+- `linked_controller_audit_reference`: one audit-index or replay reference that links the live bootstrap and steady-state captures
+
+### Exit rule
+Keep `/second-target-policy-pack.liveTransportFollowUp.state` at `capture_required` until all five artifacts are preserved under one fresh live-Tailscale packet root.
+Do not overwrite the preserved Docker-bridge packet; keep it as historical evidence that still explains why broader support remained locked.

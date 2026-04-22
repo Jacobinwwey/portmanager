@@ -1379,6 +1379,7 @@ components:
           nextActions,
           reviewPacketReadiness,
           reviewAdjudication,
+          liveTransportFollowUp,
           reviewPacketTemplate,
           bootstrapProofCapture,
           steadyStateProofCapture,
@@ -1422,6 +1423,8 @@ components:
           $ref: '#/components/schemas/SecondTargetReviewPacketReadiness'
         reviewAdjudication:
           $ref: '#/components/schemas/SecondTargetReviewAdjudication'
+        liveTransportFollowUp:
+          $ref: '#/components/schemas/SecondTargetLiveTransportFollowUp'
         reviewPacketTemplate:
           $ref: '#/components/schemas/SecondTargetReviewPacketTemplate'
         bootstrapProofCapture:
@@ -1663,6 +1666,66 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondTargetReviewDelta'
+        sources:
+          type: array
+          items:
+            type: string
+    SecondTargetLiveTransportFollowUpState:
+      type: string
+      enum: [deferred, capture_required, capture_complete]
+    SecondTargetLiveTransportFollowUpArtifactId:
+      type: string
+      enum:
+        [
+          candidate_host_with_tailscale_ip,
+          bootstrap_operation_with_tailscale_transport,
+          steady_state_health_with_tailscale_transport,
+          steady_state_runtime_state_with_tailscale_transport,
+          linked_controller_audit_reference
+        ]
+    SecondTargetLiveTransportFollowUpArtifact:
+      type: object
+      required: [id, label, summary]
+      properties:
+        id:
+          $ref: '#/components/schemas/SecondTargetLiveTransportFollowUpArtifactId'
+        label:
+          type: string
+        summary:
+          type: string
+    SecondTargetLiveTransportFollowUp:
+      type: object
+      required:
+        [
+          state,
+          candidateTargetProfileId,
+          guidePath,
+          artifactRootPattern,
+          currentRecordedAddress,
+          summary,
+          requiredNextAction,
+          requiredArtifacts,
+          sources
+        ]
+      properties:
+        state:
+          $ref: '#/components/schemas/SecondTargetLiveTransportFollowUpState'
+        candidateTargetProfileId:
+          type: string
+        guidePath:
+          type: string
+        artifactRootPattern:
+          type: string
+        currentRecordedAddress:
+          type: string
+        summary:
+          type: string
+        requiredNextAction:
+          type: string
+        requiredArtifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondTargetLiveTransportFollowUpArtifact'
         sources:
           type: array
           items:

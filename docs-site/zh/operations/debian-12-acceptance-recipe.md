@@ -18,7 +18,7 @@ status: active
 本文档不宣称等价证明已经通过。
 它只冻结在第二目标 review 能开启前必须完成的证明顺序与产物包。
 配套的 `docs/operations/portmanager-debian-12-review-packet-template.md` 会冻结这些产物该如何落盘记录。
-配套的 `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`、`docs/operations/portmanager-debian-12-steady-state-proof-capture.md`、`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`、`docs/operations/portmanager-debian-12-diagnostics-proof-capture.md` 与 `docs/operations/portmanager-debian-12-rollback-proof-capture.md` 会冻结 bootstrap、steady-state、backup、diagnostics 与 rollback 证据该如何采集。
+配套的 `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`、`docs/operations/portmanager-debian-12-steady-state-proof-capture.md`、`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`、`docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`、`docs/operations/portmanager-debian-12-rollback-proof-capture.md` 与 `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` 会冻结 bootstrap、steady-state、backup、diagnostics、rollback 与 blocker-resolution follow-up 证据该如何采集。
 当前仓库基线现在已经支持 candidate host 的注册、probe，以及一份已保留、同时带有 bootstrap、steady-state、backup、diagnostics 与 rollback 证据的完整 Debian 12 review packet。
 它仍然不会自动扩大更广支持声明，也继续把更广支持声明锁在 Ubuntu 上，直到 bounded review 关闭。
 
@@ -61,6 +61,7 @@ status: active
 - backup-restore proof 指南路径：`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`
 - diagnostics proof 指南路径：`docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`
 - rollback proof 指南路径：`docs/operations/portmanager-debian-12-rollback-proof-capture.md`
+- live-Tailscale follow-up 指南路径：`docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md`
 
 ### 退出规则
-只有在完整证据包真实存在且已经链接进 review packet 之后，才能把等价 criteria 标为 true。当前已保留 packet 现在已经满足这条要求，因此下一步是 bounded second-target review，而不是继续发明新的采集步骤。
+只有在完整证据包真实存在且已经链接进 review packet 之后，才能把等价 criteria 标为 true。当前已保留 packet 现在已经让 bounded review 打开，但下一步已经不再是模糊的“继续 review”，而是按 `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` 在 `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/` 下保留一份新的 live packet，而不是原地改写历史 Docker-bridge packet。

@@ -286,6 +286,7 @@ const copy = computed(() => props.locale === 'zh'
       currentDirectionEvidence: '有边界 review',
       currentDirectionRequirementsLink: '当前方向需求文档',
       currentDirectionPlanLink: '当前方向实现计划',
+      currentDirectionGuideLink: '当前方向 follow-up 指南',
       currentDirectionVerificationLink: '真机验证报告',
       sourceFilesKicker: 'Source Files',
       sourceFilesTitle: '当前公开页面数据来源',
@@ -392,6 +393,7 @@ const copy = computed(() => props.locale === 'zh'
       currentDirectionEvidence: 'Bounded Review',
       currentDirectionRequirementsLink: 'Current-direction requirements',
       currentDirectionPlanLink: 'Current-direction plan',
+      currentDirectionGuideLink: 'Current-direction follow-up guide',
       currentDirectionVerificationLink: 'Verification report',
       sourceFilesKicker: 'Source Files',
       sourceFilesTitle: 'Current public page inputs',
@@ -569,7 +571,7 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
         `qualified consecutive passes 已达到 ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}；promotion 门槛已经满足。`,
         'Milestone 2 现在继续承担 guardrail 角色：当前 CI-first 复核先执行 `pnpm milestone:fetch:review-pack`，completed-mainline 复核仍然经过 `pnpm milestone:review:promotion-ready -- --limit 20`。',
         'Milestone 3 已经作为有边界的 `Phase 0 enablement` 打开；此前 `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` 与 `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` 记录的 Unit 51 到 Unit 62 enablement 基线继续成立，其中包含已落地的 Unit 57 audit/event boundary、Unit 58 target-profile abstraction rule、Unit 60 consumer-boundary split criteria、Unit 61 deployment-boundary decision pack、Unit 62 second-target policy pack，以及 `/consumer-boundary-decision-pack`、`/deployment-boundary-decision-pack`、`/persistence-decision-pack` 与 `/second-target-policy-pack` 四类 review surface。',
-        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前实现地图已经切到 \`docs/brainstorms/2026-04-21-portmanager-m3-review-delta-surface-requirements.md\` 与 \`docs/plans/2026-04-21-portmanager-m3-review-delta-surface-plan.md\`：Unit 63 到 Unit 71 现已全部落地，\`debian-12-systemd-tailscale\` 在 \`/second-target-policy-pack\` 下已经公开 guide coverage \`6/6\`、artifact coverage \`20/20\`、\`packet_ready\`、\`review_required\`、\`review_open\` 与阻塞 delta \`container_bridge_transport_substitution\`，其中当前保留的 Docker bridge 地址仍是 \`172.17.0.2\`；下一步已经收窄为 live Tailscale follow-up，同时继续保持 PostgreSQL backend 路径缺失与更广第二目标支持声明未成立的真相。`
+        `当前最新 qualified 主线 run 为 ${latestQualifiedRunLabel.value}；当前实现地图已经切到 \`docs/brainstorms/2026-04-21-portmanager-m3-live-tailscale-follow-up-requirements.md\` 与 \`docs/plans/2026-04-21-portmanager-m3-live-tailscale-follow-up-plan.md\`：Unit 63 到 Unit 71 现已全部落地，\`debian-12-systemd-tailscale\` 在 \`/second-target-policy-pack\` 下已经公开 guide coverage \`6/6\`、artifact coverage \`20/20\`、\`packet_ready\`、\`review_required\`、\`review_open\` 与顶层 \`liveTransportFollowUp.state: capture_required\`，follow-up guide path 固定到 \`docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md\`，而当前保留的 Docker bridge 地址仍是 \`172.17.0.2\`；下一步已经收窄为 live Tailscale follow-up，同时继续保持 PostgreSQL backend 路径缺失与更广第二目标支持声明未成立的真相。`
       ]
     : [
         `当前公开状态仍为 \`${progress.readiness.status}\`，qualified 进度为 ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}。`,
@@ -583,7 +585,7 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
         `Qualified consecutive passes are already at ${progress.readiness.qualifiedConsecutivePasses}/${progress.readiness.minimumConsecutivePasses}; the promotion threshold is met.`,
         'Milestone 2 now stays in guardrail mode: current CI-first review starts with `pnpm milestone:fetch:review-pack`, and completed-mainline review still runs through `pnpm milestone:review:promotion-ready -- --limit 20`.',
         'Milestone 3 is now open as bounded `Phase 0 enablement`; the earlier `docs/brainstorms/2026-04-21-portmanager-m3-toward-c-enablement-requirements.md` and `docs/plans/2026-04-21-portmanager-m3-toward-c-enablement-plan.md` still define the landed Units 51 through 62 enablement baseline, including Unit 57 audit/event boundary decisions, Unit 58 target-profile abstraction rules, Unit 60 consumer-boundary split criteria, Unit 61 deployment-boundary decision pack, Unit 62 second-target policy pack, and the `/consumer-boundary-decision-pack`, `/deployment-boundary-decision-pack`, `/persistence-decision-pack`, plus `/second-target-policy-pack` review surfaces.',
-        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active implementation map now shifts to \`docs/brainstorms/2026-04-21-portmanager-m3-review-delta-surface-requirements.md\` and \`docs/plans/2026-04-21-portmanager-m3-review-delta-surface-plan.md\`: Units 63 through 71 are now landed, \`debian-12-systemd-tailscale\` now publishes guide coverage \`6/6\`, artifact coverage \`20/20\`, \`packet_ready\`, \`review_required\`, \`review_open\`, and blocking delta \`container_bridge_transport_substitution\` through \`/second-target-policy-pack\`, the preserved Docker bridge address is still \`172.17.0.2\`, and the next queue has collapsed into live Tailscale follow-up while current code still lacks a PostgreSQL backend path and any broader second-target support claim.`
+        `The latest qualified mainline run is ${latestQualifiedRunLabel.value}; the active implementation map now shifts to \`docs/brainstorms/2026-04-21-portmanager-m3-live-tailscale-follow-up-requirements.md\` and \`docs/plans/2026-04-21-portmanager-m3-live-tailscale-follow-up-plan.md\`: Units 63 through 71 are now landed, \`debian-12-systemd-tailscale\` now publishes guide coverage \`6/6\`, artifact coverage \`20/20\`, \`packet_ready\`, \`review_required\`, \`review_open\`, and top-level \`liveTransportFollowUp.state: capture_required\` through \`/second-target-policy-pack\`, guide path \`docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md\` now names the next bounded packet root, the preserved Docker bridge address is still \`172.17.0.2\`, and the next queue has collapsed into live Tailscale follow-up while current code still lacks a PostgreSQL backend path and any broader second-target support claim.`
       ]
     : [
         `Current public status remains \`${progress.readiness.status}\` with qualified progress at ${progress.readiness.qualifiedRuns}/${progress.readiness.minimumQualifiedRuns}.`,
@@ -595,12 +597,16 @@ const currentDirectionSummary = computed(() => props.locale === 'zh'
 
 const currentDirectionDocs = computed(() => [
   {
-    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m3-review-delta-surface-requirements.md'),
+    href: githubSourceLink('docs/brainstorms/2026-04-21-portmanager-m3-live-tailscale-follow-up-requirements.md'),
     label: copy.value.currentDirectionRequirementsLink
   },
   {
-    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m3-review-delta-surface-plan.md'),
+    href: githubSourceLink('docs/plans/2026-04-21-portmanager-m3-live-tailscale-follow-up-plan.md'),
     label: copy.value.currentDirectionPlanLink
+  },
+  {
+    href: docMeta(props.locale, 'debian-12-live-tailscale-follow-up-capture').link,
+    label: copy.value.currentDirectionGuideLink
   },
   {
     href: docMeta(props.locale, 'real-machine-verification-report').link,

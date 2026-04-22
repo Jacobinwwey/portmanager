@@ -10,7 +10,7 @@ Define the bounded review-prep recipe for `debian-12-systemd-tailscale`.
 This document does not claim that parity proof already passed.
 It freezes the exact proof sequence and artifact bundle required before second-target review can open.
 The companion review-packet template at `docs/operations/portmanager-debian-12-review-packet-template.md` freezes how those artifacts are recorded.
-The companion capture guides at `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`, `docs/operations/portmanager-debian-12-steady-state-proof-capture.md`, `docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`, `docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`, and `docs/operations/portmanager-debian-12-rollback-proof-capture.md` freeze how bootstrap, steady-state, backup, diagnostics, and rollback evidence are gathered.
+The companion capture guides at `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`, `docs/operations/portmanager-debian-12-steady-state-proof-capture.md`, `docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`, `docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`, `docs/operations/portmanager-debian-12-rollback-proof-capture.md`, and `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` freeze how bootstrap, steady-state, backup, diagnostics, rollback, and blocker-resolution follow-up evidence are gathered.
 Current repo baseline now supports candidate-host enrollment, probe, and one preserved complete Debian 12 review packet with bounded bootstrap, steady-state, backup, diagnostics, and rollback evidence.
 It still does not widen broader support claims automatically, and it still keeps broader support claims locked to Ubuntu until bounded review closes.
 
@@ -53,9 +53,10 @@ It still does not widen broader support claims automatically, and it still keeps
 - backup-restore-proof guide path: `docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`
 - diagnostics-proof guide path: `docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`
 - rollback-proof guide path: `docs/operations/portmanager-debian-12-rollback-proof-capture.md`
+- live-Tailscale follow-up guide path: `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md`
 
 ### Exit rule
-Only mark parity criteria true after the exact evidence bundle exists and is linked in the review packet. The current preserved packet now satisfies that bundle, so the next action is bounded second-target review instead of inventing more capture work.
+Only mark parity criteria true after the exact evidence bundle exists and is linked in the review packet. The current preserved packet now keeps bounded review open, but the next required action is no longer vague “more review”: follow `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` and preserve one fresh packet under `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/` instead of mutating the historical Docker-bridge packet in place.
 
 ## 中文
 
@@ -64,7 +65,7 @@ Only mark parity criteria true after the exact evidence bundle exists and is lin
 本文档不宣称等价证明已经通过。
 它只冻结在第二目标 review 能开启前必须完成的证明顺序与产物包。
 配套的 `docs/operations/portmanager-debian-12-review-packet-template.md` 会冻结这些产物该如何落盘记录。
-配套的 `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`、`docs/operations/portmanager-debian-12-steady-state-proof-capture.md`、`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`、`docs/operations/portmanager-debian-12-diagnostics-proof-capture.md` 与 `docs/operations/portmanager-debian-12-rollback-proof-capture.md` 会冻结 bootstrap、steady-state、backup、diagnostics 与 rollback 证据该如何采集。
+配套的 `docs/operations/portmanager-debian-12-bootstrap-proof-capture.md`、`docs/operations/portmanager-debian-12-steady-state-proof-capture.md`、`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`、`docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`、`docs/operations/portmanager-debian-12-rollback-proof-capture.md` 与 `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` 会冻结 bootstrap、steady-state、backup、diagnostics、rollback 与 blocker-resolution follow-up 证据该如何采集。
 当前仓库基线现在已经支持 candidate host 的注册、probe，以及一份已保留、同时带有 bootstrap、steady-state、backup、diagnostics 与 rollback 证据的完整 Debian 12 review packet。
 它仍然不会自动扩大更广支持声明，也继续把更广支持声明锁在 Ubuntu 上，直到 bounded review 关闭。
 
@@ -107,6 +108,7 @@ Only mark parity criteria true after the exact evidence bundle exists and is lin
 - backup-restore proof 指南路径：`docs/operations/portmanager-debian-12-backup-restore-proof-capture.md`
 - diagnostics proof 指南路径：`docs/operations/portmanager-debian-12-diagnostics-proof-capture.md`
 - rollback proof 指南路径：`docs/operations/portmanager-debian-12-rollback-proof-capture.md`
+- live-Tailscale follow-up 指南路径：`docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md`
 
 ### 退出规则
-只有在完整证据包真实存在且已经链接进 review packet 之后，才能把等价 criteria 标为 true。当前已保留 packet 现在已经满足这条要求，因此下一步是 bounded second-target review，而不是继续发明新的采集步骤。
+只有在完整证据包真实存在且已经链接进 review packet 之后，才能把等价 criteria 标为 true。当前已保留 packet 现在已经让 bounded review 打开，但下一步已经不再是模糊的“继续 review”，而是按 `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` 在 `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/` 下保留一份新的 live packet，而不是原地改写历史 Docker-bridge packet。

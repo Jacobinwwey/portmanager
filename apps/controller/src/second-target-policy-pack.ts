@@ -235,6 +235,36 @@ export interface SecondTargetReviewAdjudication {
   sources: string[]
 }
 
+export type SecondTargetLiveTransportFollowUpState =
+  | 'deferred'
+  | 'capture_required'
+  | 'capture_complete'
+
+export type SecondTargetLiveTransportFollowUpArtifactId =
+  | 'candidate_host_with_tailscale_ip'
+  | 'bootstrap_operation_with_tailscale_transport'
+  | 'steady_state_health_with_tailscale_transport'
+  | 'steady_state_runtime_state_with_tailscale_transport'
+  | 'linked_controller_audit_reference'
+
+export interface SecondTargetLiveTransportFollowUpArtifact {
+  id: SecondTargetLiveTransportFollowUpArtifactId
+  label: string
+  summary: string
+}
+
+export interface SecondTargetLiveTransportFollowUp {
+  state: SecondTargetLiveTransportFollowUpState
+  candidateTargetProfileId: string
+  guidePath: string
+  artifactRootPattern: string
+  currentRecordedAddress: string
+  summary: string
+  requiredNextAction: string
+  requiredArtifacts: SecondTargetLiveTransportFollowUpArtifact[]
+  sources: string[]
+}
+
 export interface SecondTargetPolicySnapshot {
   lockedTargetProfileId: string
   reviewOwner: 'controller'
@@ -267,6 +297,7 @@ export interface SecondTargetPolicyPack {
   nextActions: string[]
   reviewPacketReadiness: SecondTargetReviewPacketReadiness
   reviewAdjudication: SecondTargetReviewAdjudication
+  liveTransportFollowUp: SecondTargetLiveTransportFollowUp
   reviewPacketTemplate: SecondTargetReviewPacketTemplate
   bootstrapProofCapture: SecondTargetBootstrapProofCapture
   steadyStateProofCapture: SecondTargetSteadyStateProofCapture
@@ -292,8 +323,13 @@ const diagnosticsProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-diagnostics-proof-capture.md'
 const rollbackProofCaptureGuidePath =
   'docs/operations/portmanager-debian-12-rollback-proof-capture.md'
+const liveTailscaleFollowUpGuidePath =
+  'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md'
 const bootstrapCaptureArtifactRoot =
   'docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21'
+const liveTailscaleFollowUpArtifactRootPattern =
+  'docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/'
+const preservedDockerBridgeAddress = '172.17.0.2'
 const bootstrapCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/bootstrap-capture-summary.json`
 const bootstrapCaptureOperationPath = `${bootstrapCaptureArtifactRoot}/bootstrap-operation.json`
 const bootstrapCaptureAuditIndexPath = `${bootstrapCaptureArtifactRoot}/bootstrap-audit-index.json`
@@ -615,7 +651,7 @@ const reviewDeltaMetadata: Record<
     label: 'Container bridge transport substitution',
     state: 'blocking',
     summary:
-      'Preserved Debian 12 packet still uses Docker bridge address 172.17.0.2 instead of live Tailscale transport, so bounded review stays open and broader support claims remain locked.',
+      `Preserved Debian 12 packet still uses Docker bridge address ${preservedDockerBridgeAddress} instead of live Tailscale transport, so bounded review stays open and broader support claims remain locked.`,
     requiredFollowUp:
       'Capture one live Tailscale-backed bounded packet for debian-12-systemd-tailscale before review close, or keep the candidate blocked and support locked to Ubuntu.',
     sources: [
@@ -628,6 +664,37 @@ const reviewDeltaMetadata: Record<
       diagnosticsCaptureHostDetailPath,
       rollbackCaptureHostDetailPath
     ]
+  }
+}
+
+const liveTransportFollowUpArtifactMetadata: Record<
+  SecondTargetLiveTransportFollowUpArtifactId,
+  { label: string; summary: string }
+> = {
+  candidate_host_with_tailscale_ip: {
+    label: 'Candidate host with Tailscale IP',
+    summary:
+      'Record one host detail snapshot that shows the Debian 12 candidate on a live Tailscale-backed address instead of the preserved Docker bridge address.'
+  },
+  bootstrap_operation_with_tailscale_transport: {
+    label: 'Bootstrap operation with Tailscale transport',
+    summary:
+      'Capture one bootstrap operation result whose transport summary resolves to a live Tailscale-backed address for the same bounded packet.'
+  },
+  steady_state_health_with_tailscale_transport: {
+    label: 'Steady-state health on Tailscale transport',
+    summary:
+      'Capture `/health` from the same bounded packet after the candidate host is reachable over live Tailscale transport.'
+  },
+  steady_state_runtime_state_with_tailscale_transport: {
+    label: 'Steady-state runtime state on Tailscale transport',
+    summary:
+      'Capture `/runtime-state` from the same bounded packet after the candidate host is reachable over live Tailscale transport.'
+  },
+  linked_controller_audit_reference: {
+    label: 'Linked controller audit reference',
+    summary:
+      'Capture one controller audit-index or replay reference that links the live-Tailscale bootstrap and steady-state captures into one bounded packet.'
   }
 }
 
@@ -1343,6 +1410,18 @@ function reviewDelta(id: SecondTargetReviewDeltaId): SecondTargetReviewDelta {
   }
 }
 
+function liveTransportFollowUpArtifact(
+  id: SecondTargetLiveTransportFollowUpArtifactId
+): SecondTargetLiveTransportFollowUpArtifact {
+  const metadata = liveTransportFollowUpArtifactMetadata[id]
+
+  return {
+    id,
+    label: metadata.label,
+    summary: metadata.summary
+  }
+}
+
 function buildReviewAdjudication(
   snapshot: SecondTargetPolicySnapshot
 ): SecondTargetReviewAdjudication {
@@ -1392,6 +1471,83 @@ function buildReviewAdjudication(
       `Bounded second-target review is not open for ${candidateTargetProfileId}; keep packet capture and public wording aligned until decision state is review_required and readiness is packet_ready.`,
     pendingVerdicts: [],
     blockingDeltas: [],
+    sources
+  }
+}
+
+function buildLiveTransportFollowUp(
+  snapshot: SecondTargetPolicySnapshot
+): SecondTargetLiveTransportFollowUp {
+  const candidateTargetProfileId = primaryCandidateTargetProfileId(snapshot)
+  const reviewAdjudication = buildReviewAdjudication(snapshot)
+  const hasBlockingTransportDelta = reviewAdjudication.blockingDeltas.some(
+    (delta) => delta.id === 'container_bridge_transport_substitution'
+  )
+  const state: SecondTargetLiveTransportFollowUpState =
+    reviewAdjudication.state !== 'review_open'
+      ? 'deferred'
+      : hasBlockingTransportDelta
+        ? 'capture_required'
+        : 'capture_complete'
+  const requiredArtifacts = [
+    liveTransportFollowUpArtifact('candidate_host_with_tailscale_ip'),
+    liveTransportFollowUpArtifact('bootstrap_operation_with_tailscale_transport'),
+    liveTransportFollowUpArtifact('steady_state_health_with_tailscale_transport'),
+    liveTransportFollowUpArtifact('steady_state_runtime_state_with_tailscale_transport'),
+    liveTransportFollowUpArtifact('linked_controller_audit_reference')
+  ]
+  const sources = [
+    liveTailscaleFollowUpGuidePath,
+    packetReadmePath,
+    bootstrapCaptureSummaryPath,
+    steadyStateCaptureSummaryPath,
+    secondTargetReviewContractPath,
+    secondTargetOperatorOwnershipPath
+  ]
+
+  if (state === 'deferred') {
+    return {
+      state,
+      candidateTargetProfileId,
+      guidePath: liveTailscaleFollowUpGuidePath,
+      artifactRootPattern: liveTailscaleFollowUpArtifactRootPattern,
+      currentRecordedAddress: preservedDockerBridgeAddress,
+      summary:
+        `Live Tailscale follow-up stays deferred for ${candidateTargetProfileId} until bounded review is open with one complete preserved packet.`,
+      requiredNextAction:
+        'Keep the preserved Debian 12 packet intact, then reopen live-Tailscale capture only after bounded review is ready for blocking-delta follow-up.',
+      requiredArtifacts,
+      sources
+    }
+  }
+
+  if (state === 'capture_complete') {
+    return {
+      state,
+      candidateTargetProfileId,
+      guidePath: liveTailscaleFollowUpGuidePath,
+      artifactRootPattern: liveTailscaleFollowUpArtifactRootPattern,
+      currentRecordedAddress: preservedDockerBridgeAddress,
+      summary:
+        `Live Tailscale follow-up is already captured for ${candidateTargetProfileId}; keep the newer packet linked while the preserved Docker-bridge packet remains historical evidence.`,
+      requiredNextAction:
+        'Keep `/second-target-policy-pack`, docs, CLI, and Web aligned with the newer live-Tailscale packet before narrowing any support-lock wording.',
+      requiredArtifacts,
+      sources
+    }
+  }
+
+  return {
+    state,
+    candidateTargetProfileId,
+    guidePath: liveTailscaleFollowUpGuidePath,
+    artifactRootPattern: liveTailscaleFollowUpArtifactRootPattern,
+    currentRecordedAddress: preservedDockerBridgeAddress,
+    summary:
+      `Capture one live Tailscale-backed bounded packet for ${candidateTargetProfileId} because the preserved packet still resolves to Docker bridge address ${preservedDockerBridgeAddress}.`,
+    requiredNextAction:
+      'Capture one new Debian 12 packet on a real tailnet-backed address and keep the preserved Docker-bridge packet as historical evidence instead of mutating it in place.',
+    requiredArtifacts,
     sources
   }
 }
@@ -1678,6 +1834,8 @@ export function buildSecondTargetPolicyPack(
     .filter(([, isSatisfied]) => !isSatisfied(snapshot))
     .map(([id]) => criterionFrom(id, false))
   const decisionState = decisionStateFrom(snapshot)
+  const reviewAdjudication = buildReviewAdjudication(snapshot)
+  const liveTransportFollowUp = buildLiveTransportFollowUp(snapshot)
 
   return {
     lockedTargetProfileId: snapshot.lockedTargetProfileId,
@@ -1690,7 +1848,8 @@ export function buildSecondTargetPolicyPack(
     summary: buildSummary(decisionState, blockingCriteria),
     nextActions: buildNextActions(snapshot, decisionState),
     reviewPacketReadiness: buildReviewPacketReadiness(snapshot),
-    reviewAdjudication: buildReviewAdjudication(snapshot),
+    reviewAdjudication,
+    liveTransportFollowUp,
     reviewPacketTemplate: buildReviewPacketTemplate(snapshot),
     bootstrapProofCapture: buildBootstrapProofCapture(snapshot),
     steadyStateProofCapture: buildSteadyStateProofCapture(snapshot),

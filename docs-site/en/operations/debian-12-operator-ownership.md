@@ -25,6 +25,7 @@ Define who owns bounded-review work for `debian-12-systemd-tailscale`.
 - Stage Debian 12 environment, Tailscale reachability, and target-profile enrollment.
 - Preserve bootstrap, steady-state, backup, diagnostics, and rollback evidence.
 - Record the packet through `docs/operations/portmanager-debian-12-review-packet-template.md`.
+- Record live-Tailscale follow-up through `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md` when `/second-target-policy-pack.liveTransportFollowUp.state` is `capture_required`.
 - Record adjudication verdicts through `/second-target-policy-pack`.
 - Update `/second-target-policy-pack` and docs surfaces when evidence changes or review finds a real delta.
 - Stop the candidate review immediately if parity proof regresses or packet integrity drifts.
@@ -33,11 +34,12 @@ Define who owns bounded-review work for `debian-12-systemd-tailscale`.
 ### Required sign-off conditions
 - Review packet contains the full acceptance recipe evidence bundle.
 - Review packet follows `docs/operations/portmanager-debian-12-review-packet-template.md`.
-- `/second-target-policy-pack` exposes the same `review_required` plus `review_open` truth as docs, CLI, and Web.
+- `/second-target-policy-pack` exposes the same `review_required`, `review_open`, and `liveTransportFollowUp` truth as docs, CLI, and Web.
 - Pending verdicts are explicit: packet integrity, drift acknowledgement, support lock confirmation, operator sign-off, and follow-up scope bounding.
 - `/second-target-policy-pack` reflects the same truth as docs, CLI, and Web.
 - The current blocking delta is explicit: Docker bridge address `172.17.0.2` still replaces live Tailscale transport in the preserved packet.
-- Required follow-up is explicit: capture one live Tailscale-backed bounded packet before bounded review can close.
+- Required follow-up is explicit: capture one live Tailscale-backed bounded packet under `docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/` before bounded review can close.
+- The follow-up guide path is explicit: `docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md`.
 - Rollback ownership is explicit and rehearsed.
 - Any unresolved parity gap or review-found delta is listed as blocking, not hidden behind aspirational prose.
 

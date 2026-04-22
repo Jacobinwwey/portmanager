@@ -1719,6 +1719,26 @@ fn operations_second_target_policy_pack_text_surfaces_blocking_review_delta() {
                         "docs/operations/portmanager-debian-12-operator-ownership.md"
                     ]
                 },
+                "liveTransportFollowUp": {
+                    "state": "capture_required",
+                    "candidateTargetProfileId": "debian-12-systemd-tailscale",
+                    "guidePath": "docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md",
+                    "artifactRootPattern": "docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/",
+                    "currentRecordedAddress": "172.17.0.2",
+                    "summary": "Capture one live Tailscale-backed bounded packet because the preserved packet still uses Docker bridge address 172.17.0.2.",
+                    "requiredNextAction": "Capture one new Debian 12 packet on a real tailnet-backed address and keep the preserved Docker-bridge packet as historical evidence.",
+                    "requiredArtifacts": [
+                        {
+                            "id": "candidate_host_with_tailscale_ip",
+                            "label": "Candidate host with Tailscale IP",
+                            "summary": "Record one host detail snapshot that shows a live Tailscale-backed address for the declared Debian 12 candidate."
+                        }
+                    ],
+                    "sources": [
+                        "docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md",
+                        "docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/README.md"
+                    ]
+                },
                 "reviewPacketTemplate": {
                     "candidateTargetProfileId": "debian-12-systemd-tailscale",
                     "templatePath": "docs/operations/portmanager-debian-12-review-packet-template.md",
@@ -1788,6 +1808,10 @@ fn operations_second_target_policy_pack_text_surfaces_blocking_review_delta() {
     assert!(stdout.contains("container_bridge_transport_substitution"));
     assert!(stdout.contains("Preserved packet still uses Docker bridge address 172.17.0.2"));
     assert!(stdout.contains("Capture one live Tailscale-backed bounded packet before review close"));
+    assert!(stdout.contains("Live Transport Follow-Up:"));
+    assert!(stdout.contains("docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md"));
+    assert!(stdout.contains("docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/"));
+    assert!(stdout.contains("candidate_host_with_tailscale_ip"));
 }
 
 #[test]

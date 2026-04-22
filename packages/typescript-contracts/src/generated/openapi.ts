@@ -1539,6 +1539,26 @@ export interface components {
             sources: string[];
             summary: string;
         };
+        SecondTargetLiveTransportFollowUp: {
+            artifactRootPattern: string;
+            candidateTargetProfileId: string;
+            currentRecordedAddress: string;
+            guidePath: string;
+            requiredArtifacts: components["schemas"]["SecondTargetLiveTransportFollowUpArtifact"][];
+            requiredNextAction: string;
+            sources: string[];
+            state: components["schemas"]["SecondTargetLiveTransportFollowUpState"];
+            summary: string;
+        };
+        SecondTargetLiveTransportFollowUpArtifact: {
+            id: components["schemas"]["SecondTargetLiveTransportFollowUpArtifactId"];
+            label: string;
+            summary: string;
+        };
+        /** @enum {string} */
+        SecondTargetLiveTransportFollowUpArtifactId: "candidate_host_with_tailscale_ip" | "bootstrap_operation_with_tailscale_transport" | "steady_state_health_with_tailscale_transport" | "steady_state_runtime_state_with_tailscale_transport" | "linked_controller_audit_reference";
+        /** @enum {string} */
+        SecondTargetLiveTransportFollowUpState: "deferred" | "capture_required" | "capture_complete";
         SecondTargetNextExecutionUnit: {
             id: string;
             summary: string;
@@ -1572,6 +1592,7 @@ export interface components {
             diagnosticsProofCapture: components["schemas"]["SecondTargetDiagnosticsProofCapture"];
             evidenceItems: components["schemas"]["SecondTargetPolicyEvidenceItem"][];
             expansionReviewRequired: boolean;
+            liveTransportFollowUp: components["schemas"]["SecondTargetLiveTransportFollowUp"];
             /** @enum {string} */
             lockedTargetProfileId: "ubuntu-24.04-systemd-tailscale";
             nextActions: string[];
@@ -1783,6 +1804,10 @@ export type SecondTargetBootstrapProofCapture = components['schemas']['SecondTar
 export type SecondTargetDiagnosticsProofArtifact = components['schemas']['SecondTargetDiagnosticsProofArtifact'];
 export type SecondTargetDiagnosticsProofArtifactId = components['schemas']['SecondTargetDiagnosticsProofArtifactId'];
 export type SecondTargetDiagnosticsProofCapture = components['schemas']['SecondTargetDiagnosticsProofCapture'];
+export type SecondTargetLiveTransportFollowUp = components['schemas']['SecondTargetLiveTransportFollowUp'];
+export type SecondTargetLiveTransportFollowUpArtifact = components['schemas']['SecondTargetLiveTransportFollowUpArtifact'];
+export type SecondTargetLiveTransportFollowUpArtifactId = components['schemas']['SecondTargetLiveTransportFollowUpArtifactId'];
+export type SecondTargetLiveTransportFollowUpState = components['schemas']['SecondTargetLiveTransportFollowUpState'];
 export type SecondTargetNextExecutionUnit = components['schemas']['SecondTargetNextExecutionUnit'];
 export type SecondTargetPolicyCriterion = components['schemas']['SecondTargetPolicyCriterion'];
 export type SecondTargetPolicyCriterionId = components['schemas']['SecondTargetPolicyCriterionId'];

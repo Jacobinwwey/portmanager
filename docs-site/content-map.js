@@ -325,6 +325,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'debian-12-live-tailscale-follow-up-capture',
+    sourcePath: 'docs/operations/portmanager-debian-12-live-tailscale-follow-up-capture.md',
+    route: 'operations/debian-12-live-tailscale-follow-up-capture',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'contributor', 'automation'],
+    section: 'operations',
+    status: 'active',
+    titles: {
+      en: 'Debian 12 Live Tailscale Follow-Up Capture',
+      zh: 'Debian 12 Live Tailscale Follow-Up 采集'
+    }
+  },
+  {
     id: 'overview-design-baseline',
     sourcePath: 'docs/design/portmanager-overview-design-baseline.md',
     route: 'architecture/overview-design-baseline',
