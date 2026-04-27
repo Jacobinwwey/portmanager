@@ -132,6 +132,10 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /pnpm milestone:fetch:review-pack/)
   assert.match(
     milestoneConfidenceComponent,
+    /pnpm milestone:rehearse:debian12-incus -- --name portmanager-debian12-review/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
     /pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>/
   )
   assert.match(milestoneConfidenceComponent, /pnpm milestone:capture:live-packet/)
@@ -151,6 +155,14 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(
     milestoneConfidenceComponent,
     /2026-04-22-portmanager-m3-live-packet-capture-preflight-plan\.md/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /2026-04-27-portmanager-m2-closeout-incus-runway-requirements\.md/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /2026-04-27-portmanager-m2-closeout-incus-runway-plan\.md/
   )
   assert.match(
     milestoneConfidenceComponent,
@@ -183,6 +195,18 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(roadmapData, /Units 63 through 79/)
   assert.match(roadmapData, /pnpm milestone:preview:live-packet/)
   assert.match(roadmapData, /pnpm milestone:capture:live-packet/)
+  assert.match(
+    roadmapData,
+    /pnpm milestone:rehearse:debian12-incus -- --name portmanager-debian12-review/
+  )
+  assert.match(
+    roadmapData,
+    /2026-04-27-portmanager-m2-closeout-incus-runway-requirements\.md/
+  )
+  assert.match(
+    roadmapData,
+    /2026-04-27-portmanager-m2-closeout-incus-runway-plan\.md/
+  )
   assert.match(roadmapData, /review_open/)
   assert.match(roadmapData, /blockingDeltas/)
   assert.match(roadmapData, /container_bridge_transport_substitution/)
@@ -294,7 +318,7 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /live-transport-follow-up-summary\.json/)
   assert.match(roadmapComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(roadmapComponent, /pnpm milestone:fetch:review-pack/)
-  assert.match(roadmapComponent, /2026-04-22-portmanager-m3-live-packet-capture-preflight-plan\.md/)
+  assert.match(roadmapComponent, /2026-04-27-portmanager-m2-closeout-incus-runway-plan\.md/)
   assert.match(roadmapData, /pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>/)
   assert.match(roadmapData, /--candidate-target-profile-id/)
   assert.match(roadmapData, /--bootstrap-operation-id/)

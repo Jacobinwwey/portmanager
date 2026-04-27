@@ -23,9 +23,10 @@ It still does not widen broader support claims automatically, and it still keeps
 
 ### Suggested staging options
 - Preferred: one disposable Debian 12 VM or physical host on the same Tailscale tailnet as controller.
-- Optional local rehearsal: `incus launch images:debian/12 portmanager-debian12-review`
-  - If `incus` is unavailable, use any equivalent Debian 12 environment.
-  - This command is a staging suggestion, not proof by itself.
+- Optional repo-native local rehearsal: `pnpm milestone:rehearse:debian12-incus -- --name portmanager-debian12-review`
+  - The helper wraps `incus launch`, mounts the repo, installs minimal inspection packages, and prints the same Milestone 2 review plus live-packet preview commands developers already use elsewhere.
+  - If `incus` is unavailable, fall back to raw `incus launch images:debian/12 portmanager-debian12-review` or any equivalent Debian 12 environment.
+  - This helper is staging only, not proof by itself.
 - Preserved Units 64-69 example: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
   - This bounded example used a local Debian 12 Docker container, preserved bootstrap, steady-state, backup, diagnostics, and rollback evidence, and recorded the drift note instead of pretending live Tailscale parity already exists.
 
@@ -78,9 +79,10 @@ Only mark parity criteria true after the exact evidence bundle exists and is lin
 
 ### 推荐布置方式
 - 优先：与 controller 位于同一 Tailscale tailnet 的一次性 Debian 12 VM 或物理机。
-- 可选本地预演：`incus launch images:debian/12 portmanager-debian12-review`
-  - 如果没有 `incus`，可以改用任何等价 Debian 12 环境。
-  - 这条命令只是布置建议，不构成证明本身。
+- 可选 repo-native 本地预演：`pnpm milestone:rehearse:debian12-incus -- --name portmanager-debian12-review`
+  - 这个 helper 会包装 `incus launch`、挂载仓库、安装最小检查包，并打印同一套 Milestone 2 复核与 live-packet preview 命令。
+  - 如果没有 `incus`，可以退回原始 `incus launch images:debian/12 portmanager-debian12-review`，或改用任何等价 Debian 12 环境。
+  - 这个 helper 只负责布置，不构成证明本身。
 - 已保留的 Unit 64-69 示例：`docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
   - 这份有边界示例使用本地 Debian 12 Docker 容器，已经保留 bootstrap、steady-state、backup、diagnostics 与 rollback 证据，并显式记录 drift 备注，而不是假装 live Tailscale 等价已经成立。
 

@@ -30,6 +30,11 @@ test('overview shell renders locked control-plane zones and managed hosts table'
 
   assert.match(html, /Control Plane/)
   assert.match(html, /Managed Hosts/)
+  assert.match(html, /Milestone 2 closeout discipline/)
+  assert.match(html, /promotion-ready guardrail/)
+  assert.match(html, /Toward C bounded runway/)
+  assert.match(html, /pnpm milestone:rehearse:debian12-incus/)
+  assert.match(html, /pnpm milestone:preview:live-packet/)
   assert.match(html, /Selected Host/)
   assert.match(html, /Effective Policy/)
   assert.match(html, /Persistence readiness/i)

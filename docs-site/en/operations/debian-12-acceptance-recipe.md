@@ -31,9 +31,10 @@ It still does not widen broader support claims automatically, and it still keeps
 
 ### Suggested staging options
 - Preferred: one disposable Debian 12 VM or physical host on the same Tailscale tailnet as controller.
-- Optional local rehearsal: `incus launch images:debian/12 portmanager-debian12-review`
-  - If `incus` is unavailable, use any equivalent Debian 12 environment.
-  - This command is a staging suggestion, not proof by itself.
+- Optional repo-native local rehearsal: `pnpm milestone:rehearse:debian12-incus -- --name portmanager-debian12-review`
+  - The helper wraps `incus launch`, mounts the repo, installs minimal inspection packages, and prints the same Milestone 2 review plus live-packet preview commands developers already use elsewhere.
+  - If `incus` is unavailable, fall back to raw `incus launch images:debian/12 portmanager-debian12-review` or any equivalent Debian 12 environment.
+  - This helper is staging only, not proof by itself.
 - Preserved Units 64-69 example: `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/`
   - This bounded example used a local Debian 12 Docker container, preserved bootstrap, steady-state, backup, diagnostics, and rollback evidence, and recorded the drift note instead of pretending live Tailscale parity already exists.
 

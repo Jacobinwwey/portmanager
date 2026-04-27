@@ -829,11 +829,14 @@ body {
 .pm-status-ready,
 .pm-status-live,
 .pm-status-healthy,
+.pm-status-packet_ready,
+.pm-status-capture_complete,
 .pm-tone-success { color: var(--pm-ok); background: rgba(15, 109, 88, 0.12); }
 .pm-status-bootstrapping,
 .pm-status-running,
 .pm-status-monitor,
 .pm-status-prepare_review,
+.pm-status-review_open,
 .pm-tone-info { color: var(--pm-accent); background: rgba(180, 93, 29, 0.12); }
 .pm-status-degraded,
 .pm-status-applying,
@@ -841,6 +844,7 @@ body {
 .pm-status-stale,
 .pm-status-migration_ready,
 .pm-status-review_required,
+.pm-status-capture_required,
 .pm-tone-warn { color: var(--pm-warn); background: rgba(157, 93, 19, 0.14); }
 .pm-status-failed,
 .pm-status-unreachable,
@@ -3484,6 +3488,110 @@ function OverviewMain(props: { state: OverviewState }) {
           )
         ]
       )
+    ]),
+    h('div', { className: 'pm-detail-grid', key: 'runway' }, [
+      h(MilestoneGuardrailCard, { key: 'milestone-guardrail' }),
+      h(TowardCRunwayCard, { key: 'toward-c-runway', state: props.state })
+    ])
+  ])
+}
+
+function runwayCommandItem(key: string, label: string, command: string, summary: string) {
+  return h('li', { className: 'pm-list-item', key }, [
+    h('div', { key: 'line1' }, label),
+    h('div', { className: 'pm-microcopy', key: 'line2' }, summary),
+    h('code', { key: 'line3' }, command)
+  ])
+}
+
+function MilestoneGuardrailCard() {
+  return h('section', { className: 'pm-card' }, [
+    h(SectionHeading, {
+      key: 'heading',
+      title: 'Milestone 2 closeout discipline',
+      detail: 'promotion-ready guardrail'
+    }),
+    h(
+      'p',
+      { className: 'pm-microcopy', key: 'summary' },
+      'Milestone 2 is already threshold-met. Keep branch proof, CI review-pack truth, and published development-progress aligned while Toward C stays bounded.'
+    ),
+    h('div', { className: 'pm-kv', key: 'kv' }, [
+      kvRow('Closeout state', h('span', { className: 'pm-tone pm-tone-success' }, 'promotion-ready')),
+      kvRow('Current CI first', h('code', null, 'pnpm milestone:fetch:review-pack')),
+      kvRow('Completed mainline review', h('code', null, 'pnpm milestone:review:promotion-ready -- --limit 20'))
+    ]),
+    h('ul', { className: 'pm-list', key: 'actions' }, [
+      runwayCommandItem(
+        'acceptance-verify',
+        'Keep accepted slice green',
+        'pnpm acceptance:verify',
+        'Run the standing Unit 0 gate before treating any closeout copy as current.'
+      ),
+      runwayCommandItem(
+        'fetch-review-pack',
+        'Read current CI review pack first',
+        'pnpm milestone:fetch:review-pack',
+        'Pull the uploaded milestone-confidence bundle into `.portmanager/reports/current-ci-review-pack/` when the first question is current CI.'
+      ),
+      runwayCommandItem(
+        'promotion-review',
+        'Review completed mainline evidence',
+        'pnpm milestone:review:promotion-ready -- --limit 20',
+        'Freeze wording truth, source-surface status, and refresh posture from the same repo-native helper.'
+      )
+    ])
+  ])
+}
+
+function TowardCRunwayCard(props: { state: OverviewState }) {
+  const reviewPacketReadiness = props.state.secondTargetPolicyPack.reviewPacketReadiness
+  const reviewAdjudication = props.state.secondTargetPolicyPack.reviewAdjudication
+  const liveTransportFollowUp = props.state.secondTargetPolicyPack.liveTransportFollowUp
+
+  return h('section', { className: 'pm-card' }, [
+    h(SectionHeading, {
+      key: 'heading',
+      title: 'Toward C bounded runway',
+      detail: reviewPacketReadiness.state
+    }),
+    h('div', { className: 'pm-kv', key: 'kv' }, [
+      kvRow('Candidate Target', liveTransportFollowUp.candidateTargetProfileId),
+      kvRow('Review state', h(StatusBadge, { state: reviewAdjudication.state })),
+      kvRow('Packet readiness', h(StatusBadge, { state: reviewPacketReadiness.state })),
+      kvRow('Live follow-up', h(StatusBadge, { state: liveTransportFollowUp.state })),
+      kvRow(
+        'Artifact coverage',
+        `${reviewPacketReadiness.artifactCoverage.available}/${reviewPacketReadiness.artifactCoverage.expected}`
+      ),
+      kvRow('Blocking deltas', String(reviewAdjudication.blockingDeltas.length))
+    ]),
+    h('p', { className: 'pm-microcopy', key: 'summary' }, reviewPacketReadiness.summary),
+    h('ul', { className: 'pm-list', key: 'actions' }, [
+      runwayCommandItem(
+        'incus-rehearsal',
+        'Stage disposable Debian 12 rehearsal',
+        'pnpm milestone:rehearse:debian12-incus -- --name portmanager-debian12-review',
+        'Launch one bounded incus lane, mount the repo, install minimal inspection packages, and print the same guardrail commands before live follow-up work.'
+      ),
+      runwayCommandItem(
+        'preview-live-packet',
+        'Run read-only packet preflight',
+        'pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>',
+        'Resolve candidate host, bootstrap operation, audit window, and derived agent URL before any packet files are written.'
+      ),
+      runwayCommandItem(
+        'capture-live-packet',
+        'Write bounded live packet after preview',
+        'pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>',
+        'Keep `--candidate-target-profile-id`, `--host-id`, and `--bootstrap-operation-id` as bounded overrides only when preflight already says ready.'
+      ),
+      runwayCommandItem(
+        'validate-live-packet',
+        'Freeze validator truth before wording narrows',
+        'pnpm milestone:validate:live-packet',
+        'Keep `container_bridge_transport_substitution` and Docker bridge truth visible until one validator-passing live packet closes the bounded follow-up honestly.'
+      )
     ])
   ])
 }
@@ -5310,6 +5418,9 @@ function toneFromState(state: string): Tone {
     state === 'unknown' ||
     state === 'monitor' ||
     state === 'prepare_review' ||
+    state === 'review_open' ||
+    state === 'packet_ready' ||
+    state === 'capture_complete' ||
     state === 'hold'
   ) {
     return state === 'live' ? 'success' : 'info'
@@ -5322,7 +5433,8 @@ function toneFromState(state: string): Tone {
     state === 'bootstrapping' ||
     state === 'applied_unverified' ||
     state === 'migration_ready' ||
-    state === 'review_required'
+    state === 'review_required' ||
+    state === 'capture_required'
   ) {
     return 'warn'
   }
