@@ -9,6 +9,7 @@ import {
   candidateTargetProfileId,
   liveTransportFollowUpArtifactFiles,
   liveTransportFollowUpSummaryFileName,
+  preservedDockerBridgeAddress,
   requiredLiveTransportFollowUpArtifactIds
 } from '../../apps/controller/src/index.ts'
 import {
@@ -648,6 +649,169 @@ test('previewLiveTransportFollowUpCapture reports unresolved capture blockers wi
     assert.equal(preview.bootstrapOperationPresentInAuditWindow, false)
     assert.match(preview.warnings.join('\n'), /agent base URL/i)
     assert.match(preview.warnings.join('\n'), /audit index does not include bootstrap operation/i)
+    assert.equal(existsSync(path.join(repoRoot, preview.packetRoot)), false)
+  } finally {
+    await controllerServer.close()
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('previewLiveTransportFollowUpCapture blocks when captured address is unresolved even if agent url is supplied', async () => {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), 'portmanager-live-packet-helper-'))
+
+  const controllerServer = await startJsonServer(({ pathname, searchParams }) => {
+    if (pathname === '/api/controller/hosts/host_debian_review_011') {
+      return {
+        body: {
+          id: 'host_debian_review_011',
+          targetProfileId: candidateTargetProfileId,
+          updatedAt: '2026-05-03T12:02:00.000Z'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/operations/op_bootstrap_011') {
+      return {
+        body: {
+          id: 'op_bootstrap_011',
+          type: 'bootstrap_host',
+          state: 'succeeded',
+          hostId: 'host_debian_review_011',
+          finishedAt: '2026-05-03T12:03:00.000Z',
+          resultSummary: 'host host_debian_review_011 bootstrapped'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/event-audit-index') {
+      assert.equal(searchParams.get('hostId'), 'host_debian_review_011')
+      assert.equal(searchParams.get('limit'), '4')
+
+      return {
+        body: {
+          items: [
+            {
+              lastEventAt: '2026-05-03T12:05:00.000Z',
+              operation: {
+                id: 'op_create_rule_011',
+                finishedAt: '2026-05-03T12:05:00.000Z'
+              }
+            },
+            {
+              lastEventAt: '2026-05-03T12:03:00.000Z',
+              operation: {
+                id: 'op_bootstrap_011',
+                finishedAt: '2026-05-03T12:03:00.000Z'
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  try {
+    const preview = await previewLiveTransportFollowUpCapture({
+      repoRoot,
+      packetDate: '2026-05-03',
+      controllerBaseUrl: `${controllerServer.baseUrl}/api/controller`,
+      hostId: 'host_debian_review_011',
+      bootstrapOperationId: 'op_bootstrap_011',
+      agentBaseUrl: 'http://100.91.22.101:8711',
+      auditLimit: 4
+    })
+
+    assert.equal(preview.captureReady, false)
+    assert.equal(preview.capturedAddress, undefined)
+    assert.equal(preview.bootstrapOperationPresentInAuditWindow, true)
+    assert.match(preview.warnings.join('\n'), /captured address is unresolved/i)
+    assert.equal(existsSync(path.join(repoRoot, preview.packetRoot)), false)
+  } finally {
+    await controllerServer.close()
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
+})
+
+test('previewLiveTransportFollowUpCapture blocks when captured address still resolves to preserved docker bridge', async () => {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), 'portmanager-live-packet-helper-'))
+
+  const controllerServer = await startJsonServer(({ pathname, searchParams }) => {
+    if (pathname === '/api/controller/hosts/host_debian_review_012') {
+      return {
+        body: {
+          id: 'host_debian_review_012',
+          targetProfileId: candidateTargetProfileId,
+          tailscaleAddress: preservedDockerBridgeAddress,
+          updatedAt: '2026-05-04T12:02:00.000Z'
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/operations/op_bootstrap_012') {
+      return {
+        body: {
+          id: 'op_bootstrap_012',
+          type: 'bootstrap_host',
+          state: 'succeeded',
+          hostId: 'host_debian_review_012',
+          finishedAt: '2026-05-04T12:03:00.000Z',
+          resultSummary: `host host_debian_review_012 bootstrapped via http://${preservedDockerBridgeAddress}:8711`
+        }
+      }
+    }
+
+    if (pathname === '/api/controller/event-audit-index') {
+      assert.equal(searchParams.get('hostId'), 'host_debian_review_012')
+      assert.equal(searchParams.get('limit'), '5')
+
+      return {
+        body: {
+          items: [
+            {
+              lastEventAt: '2026-05-04T12:05:00.000Z',
+              operation: {
+                id: 'op_create_rule_012',
+                finishedAt: '2026-05-04T12:05:00.000Z'
+              }
+            },
+            {
+              lastEventAt: '2026-05-04T12:03:00.000Z',
+              operation: {
+                id: 'op_bootstrap_012',
+                finishedAt: '2026-05-04T12:03:00.000Z'
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      body: { error: 'not_found' }
+    }
+  })
+
+  try {
+    const preview = await previewLiveTransportFollowUpCapture({
+      repoRoot,
+      packetDate: '2026-05-04',
+      controllerBaseUrl: `${controllerServer.baseUrl}/api/controller`,
+      hostId: 'host_debian_review_012',
+      bootstrapOperationId: 'op_bootstrap_012',
+      auditLimit: 5
+    })
+
+    assert.equal(preview.captureReady, false)
+    assert.equal(preview.capturedAddress, preservedDockerBridgeAddress)
+    assert.equal(preview.agentBaseUrl, `http://${preservedDockerBridgeAddress}:8711`)
+    assert.equal(preview.bootstrapOperationPresentInAuditWindow, true)
+    assert.match(preview.warnings.join('\n'), /preserved Docker bridge 172\.17\.0\.2/i)
     assert.equal(existsSync(path.join(repoRoot, preview.packetRoot)), false)
   } finally {
     await controllerServer.close()

@@ -15,6 +15,7 @@ import {
   liveTransportFollowUpArtifactRootPattern,
   liveTransportFollowUpScaffoldMarkerField,
   liveTransportFollowUpSummaryFileName,
+  preservedDockerBridgeAddress,
   requiredLiveTransportFollowUpArtifactIds,
   validateLiveTransportFollowUpPacket
 } from '../../apps/controller/src/index.ts'
@@ -1118,6 +1119,16 @@ export async function previewLiveTransportFollowUpCapture(options: {
 
   if (!preflight.agentBaseUrl) {
     warnings.push('agent base URL is unresolved; pass --agent-base-url <url> before capture')
+  }
+
+  if (!preflight.capturedAddress) {
+    warnings.push(
+      'captured address is unresolved; keep review open until host detail or bootstrap evidence exposes one live Tailscale-backed address'
+    )
+  } else if (preflight.capturedAddress === preservedDockerBridgeAddress) {
+    warnings.push(
+      `captured address still resolves to preserved Docker bridge ${preservedDockerBridgeAddress}; rerun bounded review on live Tailscale transport before capture`
+    )
   }
 
   if (!bootstrapOperationPresentInAuditWindow) {

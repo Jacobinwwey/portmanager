@@ -65,7 +65,7 @@ status: active
 - scaffold helper：`pnpm milestone:scaffold:live-packet -- --packet-date <date>`
 - assembly helper 回退路径：`pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
 - validator helper：`pnpm milestone:validate:live-packet -- --packet-root docs/operations/artifacts/debian-12-live-tailscale-packet-<date>`
-- 首选 preview helper 现在会先为 `debian-12-systemd-tailscale` 自动解析最新候选主机与最新成功 bootstrap 配对，再直接从有边界的 controller surface 抓取 host detail、bootstrap detail 与一份 host-scoped audit index，并在不写 packet 文件前提下返回 packet root、resolved id、captured address、derived agent base URL、audit operation id 与 `captureReady`
+- 首选 preview helper 现在会先为 `debian-12-systemd-tailscale` 自动解析最新候选主机与最新成功 bootstrap 配对，再直接从有边界的 controller surface 抓取 host detail、bootstrap detail 与一份 host-scoped audit index，并在不写 packet 文件前提下返回 packet root、resolved id、captured address、derived agent base URL、audit operation id 与 `captureReady`；只要 captured address 仍未解析出来，或仍然等于保留的 Docker bridge `172.17.0.2`，preview 就会保持 blocked
 - 首选 capture helper 现在会在 preview 已经报告 `captureReady: true` 之后复用同一套 resolved host/bootstrap 配对，再抓取 steady-state `/health`、steady-state `/runtime-state` 与同一份 host-scoped audit index，然后一次写入规范 packet 本地文件与 summary
 - `--candidate-target-profile-id <target-profile-id>`、`--host-id <host-id>` 与 `--bootstrap-operation-id <operation-id>` 继续保留为有边界 override 参数，用于切换候选 lane、手工指定 bootstrap 配对或排查 mismatch
 - assembly helper 会把真实源产物复制到规范 packet 本地文件名中，自动推导 `candidateTargetProfileId`、`capturedAt` 与 `capturedAddress`，并在跨源地址漂移时直接失败，因此 operator 不再默认手写 `live-transport-follow-up-summary.json`

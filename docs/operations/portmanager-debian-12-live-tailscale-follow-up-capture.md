@@ -27,7 +27,7 @@ It does not widen supported-target claims by itself.
    - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 3. Run one bounded steady-state mutation on the same host so the live follow-up packet has fresh transport evidence:
    - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
-4. Preferred read-only preflight: let one repo-native preview command auto-resolve the latest candidate host plus latest successful bootstrap pair, fetch controller host detail, bootstrap detail, and one host-scoped audit index, then report packet root, resolved ids, captured address, derived agent URL, audit operation ids, and `captureReady` before any packet files are written:
+4. Preferred read-only preflight: let one repo-native preview command auto-resolve the latest candidate host plus latest successful bootstrap pair, fetch controller host detail, bootstrap detail, and one host-scoped audit index, then report packet root, resolved ids, captured address, derived agent URL, audit operation ids, and `captureReady` before any packet files are written. Preview stays blocked if captured address is still unresolved or still equals preserved Docker bridge `172.17.0.2`, so operators do not mistake an invalid packet candidate for a ready live capture lane:
    - `pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>`
 5. Preferred packet-writing path: after preview reports `captureReady: true`, run the matching capture command to fetch host detail, bootstrap detail, steady-state `/health`, steady-state `/runtime-state`, and one host-scoped audit index, then write the canonical packet-local JSON files plus `live-transport-follow-up-summary.json` in one step:
    - `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>`
@@ -97,7 +97,7 @@ Do not overwrite the preserved Docker-bridge packet; keep it as historical evide
    - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 3. 在同一台主机上执行一次有边界 steady-state mutation，让 live follow-up packet 拥有新的 transport 证据：
    - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
-4. 首选只读预检：先用一条 repo-native preview helper 自动解析最新候选主机与最新成功 bootstrap 配对，再抓取 controller host detail、bootstrap detail 与一份 host-scoped audit index，并在不写 packet 文件前提下返回 packet root、resolved id、captured address、derived agent URL、audit operation id 与 `captureReady`：
+4. 首选只读预检：先用一条 repo-native preview helper 自动解析最新候选主机与最新成功 bootstrap 配对，再抓取 controller host detail、bootstrap detail 与一份 host-scoped audit index，并在不写 packet 文件前提下返回 packet root、resolved id、captured address、derived agent URL、audit operation id 与 `captureReady`。只要 captured address 仍未解析出来，或仍然等于保留的 Docker bridge `172.17.0.2`，preview 就会继续保持 blocked，避免把无效 packet 候选误判成 ready：
    - `pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>`
 5. 首选写入路径：只有在 preview 已经报告 `captureReady: true` 之后，才执行匹配的 capture helper，再抓取 host detail、bootstrap detail、steady-state `/health`、steady-state `/runtime-state` 与一份 host-scoped audit index，并一次写入规范 packet 本地 JSON 文件与 `live-transport-follow-up-summary.json`：
    - `pnpm milestone:capture:live-packet -- --packet-date <date> --controller-base-url <url>`

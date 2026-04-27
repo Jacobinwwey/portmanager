@@ -342,7 +342,7 @@ export const liveTransportFollowUpArtifactRootPattern =
   'docs/operations/artifacts/debian-12-live-tailscale-packet-<date>/'
 export const liveTransportFollowUpSummaryFileName = 'live-transport-follow-up-summary.json'
 export const liveTransportFollowUpScaffoldMarkerField = 'portmanagerLivePacketScaffold'
-const preservedDockerBridgeAddress = '172.17.0.2'
+export const preservedDockerBridgeAddress = '172.17.0.2'
 const defaultSecondTargetPolicyRepoRoot = fileURLToPath(new URL('../../../', import.meta.url))
 const bootstrapCaptureSummaryPath = `${bootstrapCaptureArtifactRoot}/bootstrap-capture-summary.json`
 const bootstrapCaptureOperationPath = `${bootstrapCaptureArtifactRoot}/bootstrap-operation.json`

@@ -30,6 +30,7 @@ export {
   liveTransportFollowUpArtifactRootPattern,
   liveTransportFollowUpScaffoldMarkerField,
   liveTransportFollowUpSummaryFileName,
+  preservedDockerBridgeAddress,
   requiredLiveTransportFollowUpArtifactIds,
   validateLiveTransportFollowUpPacket
 } from './second-target-policy-pack.ts'
