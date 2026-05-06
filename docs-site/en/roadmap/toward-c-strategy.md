@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-toward-c-strategy.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-21 | Version: v0.2.0-m3-phase0-enablement
+> Updated: 2026-05-06 | Version: v0.2.1-product-positioning-realignment
 ### Purpose
 This document keeps `Toward C` specific.
 Milestone 3 is not “more scale later.”
@@ -44,6 +44,13 @@ In that scheme:
 - not hosted SaaS or multi-tenant scope by default
 - not permission to bypass contract governance
 - not proof that the repo already contains a standalone gateway app, standalone audit service, broad fleet orchestration, or a PostgreSQL backend
+- not a license to let review/evidence surfaces outrun the operator golden path
+
+### Additional entry gate
+Before any new C-oriented abstraction lands, it should satisfy at least one of the following:
+- it unlocks a blocked operator path
+- it removes a proven runtime bottleneck
+- it prevents a demonstrated contract divergence
 
 ### Relationship to A and B
 - `A` freezes the docs-first baseline, contracts, and design boundaries.

@@ -1,12 +1,17 @@
 # Interface Document
 
-Updated: 2026-04-21
-Version: v0.4.0-m3-phase0-enablement
+Updated: 2026-05-06
+Version: v0.4.1-product-positioning-realignment
 
 ## English
 
 This document summarizes the V1 public interface boundary for PortManager.
 It is a compact companion to `packages/contracts/README.md`, not a replacement for the contracts themselves.
+
+### Product framing guardrail
+- These interfaces belong to a remote localhost exposure control plane.
+- They should not drift toward local process inspection or local service-launcher semantics.
+- The current positioning correction is frozen in `docs/specs/portmanager-product-positioning-and-upgrade-plan.md`.
 
 ### Controller API resources
 - `hosts`
@@ -103,6 +108,11 @@ It is a compact companion to `packages/contracts/README.md`, not a replacement f
 
 本文档汇总 PortManager V1 的公共接口边界。
 它是 `packages/contracts/README.md` 的紧凑配套说明，而不是契约本体的替代品。
+
+### 产品 framing 护栏
+- 这些接口属于一个远端 localhost 暴露控制平面。
+- 它们不应继续漂移到本地进程检查语义或本地服务启动器语义。
+- 当前定位纠偏已冻结在 `docs/specs/portmanager-product-positioning-and-upgrade-plan.md`。
 
 ### Controller API 资源
 - `hosts`

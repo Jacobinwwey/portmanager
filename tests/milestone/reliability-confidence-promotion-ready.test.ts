@@ -24,7 +24,7 @@ test('parseArgs accepts wording-review flags, refresh flag, print flag, and limi
   assert.equal(options.limit, 12)
   assert.equal(options.refreshPublishedArtifact, true)
   assert.equal(options.printDigest, true)
-  assert.match(options.wordingReviewPath, /tmp\/wording\.md$/)
+  assert.match(options.wordingReviewPath.replaceAll('\\', '/'), /tmp\/wording\.md$/)
   assert.equal(options.skipSync, true)
   assert.equal(options.skipWordingReview, true)
 })

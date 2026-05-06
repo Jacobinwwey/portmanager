@@ -11,7 +11,7 @@ status: active
 ---
 > 真源文档：`docs/architecture/portmanager-v1-architecture.md`
 > Audience：`shared` | Section：`architecture` | Status：`active`
-> Updated：2026-04-21 | Version：v0.2.0-m3-phase0-enablement
+> Updated：2026-05-06 | Version：v0.2.1-product-positioning-realignment
 ### 当前已实现的拆分
 - `web`：面向操作员工作流与长期运行可见性的 TypeScript React SPA
 - `controller`：TypeScript 的 `REST + SSE` API 服务
@@ -34,6 +34,12 @@ status: active
 - Controller 仍然在一个 TypeScript 服务里同时承担 desired state、orchestration、persistence、artifact indexing 与大部分 event/audit wiring。
 - Agent 已经是 live 的 bounded execution plane，但还不是更强的 event / orchestration participant。
 - Web 与 CLI 已经是同一份契约上的 truthful peer，而且这份契约现在已经包含 gateway-ready 的 `/api/controller` consumer boundary，只是还没有独立 gateway app。
+- 只有当架构工作继续服务于远端暴露控制平面本身，而不是把 runtime core 逐步变成 review-system plumbing 时，这条方向才成立。
+
+### Runtime-core 边界规则
+- Review、evidence 与 decision-pack surface 只有在保护或解锁 operator path 时才允许继续增长。
+- 它们不能成为 runtime complexity 的主中心。
+- Controller-agent 的稳态语义必须容忍真实远端延迟；远端控制平面不能因为工作站级别的超时假设而自我降级。
 
 ### 对照 Scheme C 的深度比较
 

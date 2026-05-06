@@ -89,7 +89,9 @@ async function startGitHubMockServer() {
 }
 
 async function waitForTerminalOperation(baseUrl: string, operationId: string) {
-  for (let attempt = 0; attempt < 60; attempt += 1) {
+  const deadline = Date.now() + 10_000
+
+  while (Date.now() < deadline) {
     const response = await fetch(`${baseUrl}/operations/${operationId}`)
     assert.equal(response.status, 200)
 
@@ -102,7 +104,7 @@ async function waitForTerminalOperation(baseUrl: string, operationId: string) {
       return payload
     }
 
-    await delay(20)
+    await delay(25)
   }
 
   throw new Error(`operation did not settle: ${operationId}`)

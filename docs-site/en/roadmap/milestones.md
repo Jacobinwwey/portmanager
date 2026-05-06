@@ -11,12 +11,13 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-milestones.md`
 > Audience: `shared` | Section: `roadmap` | Status: `active`
-> Updated: 2026-04-21 | Version: v0.6.0-m3-phase0-enablement
+> Updated: 2026-05-06 | Version: v0.6.1-product-positioning-realignment
 ### Roadmap sequencing rules
 - Freeze contracts, design baselines, and publishing rules before implementation breadth.
 - Prove one trusted operational slice before expanding reliability or platform reach.
 - Reliability work comes before platform breadth, because unstable multi-host expansion only amplifies ambiguity.
 - `Toward C` is an earned phase, not a placeholder slogan. It begins only after the `B` validation state is credible.
+- Operator golden-path work stays ahead of new review/meta-surface work unless the latter removes a demonstrated failure mode.
 
 ### A / B / C progression model
 - `A`: docs-first baseline. Contracts, design baselines, route contracts, install contract, and publishing rules are frozen and reviewable.

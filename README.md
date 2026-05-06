@@ -1,11 +1,28 @@
 # PortManager
 
-Updated: 2026-04-21
-Version: v0.6.0-m3-phase0-enablement
+Updated: 2026-05-06
+Version: v0.6.1-product-positioning-realignment
 
 ## English
 
 PortManager is a docs-first control plane for managing remote localhost exposure over Tailscale with explicit safety rails around backup, rollback, diagnostics, and operations visibility.
+
+### Product boundary clarification
+- PortManager is not a local port/process inspector.
+- PortManager is not a local dev-service launcher.
+- PortManager is a remote localhost exposure control plane with bounded mutation, recoverability, diagnostics evidence, and shared truth across Web, CLI, API, and agent.
+- The current strategy correction is frozen in `docs/specs/portmanager-product-positioning-and-upgrade-plan.md`.
+
+### Why this still matters
+- The strongest product differentiator is not generic "port management."
+- The strongest product differentiator is safe remote exposure governance built around desired state, backup-before-mutation, rollback points, explicit `degraded`, diagnostics evidence, and one truth model across surfaces.
+
+### Immediate strategic priorities
+- keep the operator golden path shorter and clearer than review-prep flows
+- absorb CLI density and scope clarity from `PortsWhisper-Rust` without copying its local-tool scope
+- absorb operator-first actionability from `PortMaster` without copying its workstation-launcher scope
+- stop adding C-shaped complexity unless it unlocks a blocked operator path, removes a proven bottleneck, or prevents contract drift
+- harden controller-agent network semantics so remote jitter is not mislabeled as product instability
 
 This repository started as a baseline repository, not as an implementation repository.
 The first upload froze decisions, contracts, design language, and deployment boundaries before any milestone code was written.
@@ -185,6 +202,23 @@ The current branch now also includes Milestone 1 foundation code for workspace s
 ## 中文
 
 PortManager 是一个以 docs-first 为原则的控制平面项目，用于通过 Tailscale 管理远端 localhost 暴露能力，并显式提供备份、回滚、诊断与操作可见性等安全护栏。
+
+### 产品边界澄清
+- PortManager 不是本地端口/进程检查工具。
+- PortManager 不是本地开发服务启动器。
+- PortManager 是一个远端 localhost 暴露控制平面，核心是有边界的 mutation、可恢复性、诊断证据，以及 Web、CLI、API、agent 之间共享真相。
+- 当前这次方向纠偏已冻结在 `docs/specs/portmanager-product-positioning-and-upgrade-plan.md`。
+
+### 为什么这仍然重要
+- 当前最强的产品差异化，不是泛化的“端口管理”。
+- 当前最强的产品差异化，是围绕 desired state、backup-before-mutation、rollback point、显式 `degraded`、diagnostics 证据与跨表面真相模型建立起来的安全远端暴露治理。
+
+### 当前立即优先级
+- 保证 operator golden path 比 review-prep flow 更短、更清晰
+- 吸收 `PortsWhisper-Rust` 的 CLI 价值密度与范围清晰度，但不复制它的本地工具范围
+- 吸收 `PortMaster` 的 operator-first actionability，但不复制它的工作站启动器范围
+- 除非能解锁被阻塞的 operator path、移除真实瓶颈或防止 contract drift，否则不要继续增加 C 形态复杂度
+- 加固 controller-agent 的网络语义，避免把远端 jitter 误报成产品不稳定
 
 这个仓库最初刻意是“基线仓库”，而不是“实现仓库”。
 首次上传先冻结决策、契约、设计语言与部署边界，之后才进入里程碑代码实现。

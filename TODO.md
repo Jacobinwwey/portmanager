@@ -1,9 +1,16 @@
 # PortManager
 
-Updated: 2026-04-21
-Version: v0.6.0-m3-phase0-enablement
+Updated: 2026-05-06
+Version: v0.6.1-product-positioning-realignment
 
 ## English
+
+### Product direction guardrails
+- [x] Freeze the product-positioning correction in `docs/specs/portmanager-product-positioning-and-upgrade-plan.md`.
+- [x] Explicitly distinguish PortManager from local port tools such as `PortsWhisper-Rust` and workstation launchers such as `PortMaster`.
+- [ ] Keep operator golden-path work ahead of new review/meta-surface work.
+- [ ] Audit controller-agent remote-network semantics and remove false degraded triggers caused by over-aggressive timeouts.
+- [ ] Keep Toward C work behind explicit gates: blocked operator path, proven bottleneck, or demonstrated contract drift.
 
 ### Baseline work completed
 - [x] Freeze the V1 product boundary and architecture.
@@ -142,6 +149,13 @@ Version: v0.6.0-m3-phase0-enablement
 - [x] Sync progress language across root docs and roadmap docs before merging into `main`.
 
 ## 中文
+
+### 产品方向护栏
+- [x] 将产品定位纠偏冻结到 `docs/specs/portmanager-product-positioning-and-upgrade-plan.md`。
+- [x] 明确把 PortManager 与 `PortsWhisper-Rust` 这类本地端口工具、以及 `PortMaster` 这类工作站启动器区分开。
+- [ ] 持续保证 operator golden path 工作优先于新的 review/meta-surface 工作。
+- [ ] 审查 controller-agent 的远端网络语义，移除由于过激超时造成的伪 degraded 触发。
+- [ ] 把 Toward C 工作继续限制在显式 gate 之后：被阻塞的 operator path、已证明的瓶颈，或已经出现的 contract drift。
 
 ### 已完成的基线工作
 - [x] 冻结 V1 产品边界与架构决策。

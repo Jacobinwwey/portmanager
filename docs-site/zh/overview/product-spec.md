@@ -12,7 +12,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-v1-product-spec.md`
 > Audience：`shared` | Section：`overview` | Status：`active`
-> Updated：2026-04-21 | Version：v0.5.0-m3-phase0-enablement
+> Updated：2026-05-06 | Version：v0.5.1-product-positioning-realignment
 ### 摘要
 PortManager V1 是一个通过 Tailscale 暴露远端 localhost 服务的控制平面，它的目标不只是“能转发”，而是“安全地转发”：具备期望状态、操作历史、诊断可见性、变更前备份以及明确回滚点。
 
@@ -21,6 +21,12 @@ PortManager V1 是一个通过 Tailscale 暴露远端 localhost 服务的控制�
 - `One Host, One Rule, One Rollback` 是首个实现里程碑，也是验收重心。
 - Web、CLI 与未来 agent 驱动自动化都必须作为同一契约面的平级一等入口。
 - 即使高级 agent 工作流尚未实现，产品从第一天开始也必须保持 agent-friendly。
+- PortManager 必须持续保持为远端暴露控制平面，而不是漂移成通用本地端口工具或工作站启动器。
+
+### 非目标澄清
+- PortManager 不是通过提供比 `PortsWhisper-Rust` 更强的本地端口检查来竞争。
+- PortManager 不是通过变成 `PortMaster` 那类本地项目/服务启动器来竞争。
+- PortManager 的竞争方式，是把远端暴露做得更安全、更可恢复、更易验证。
 
 ### 主要要解决的操作者问题
 - 操作者需要一个比零散 SSH、临时系统修改、未文档化端口暴露脚本更安全的替代方案。

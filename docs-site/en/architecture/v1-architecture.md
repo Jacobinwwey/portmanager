@@ -11,7 +11,7 @@ status: active
 ---
 > Source of truth: `docs/architecture/portmanager-v1-architecture.md`
 > Audience: `shared` | Section: `architecture` | Status: `active`
-> Updated: 2026-04-21 | Version: v0.2.0-m3-phase0-enablement
+> Updated: 2026-05-06 | Version: v0.2.1-product-positioning-realignment
 ### Current implemented split
 - `web`: TypeScript React SPA for operator workflows and long-lived operational visibility
 - `controller`: TypeScript REST + SSE API service
@@ -34,6 +34,12 @@ status: active
 - The controller still owns desired state, orchestration, persistence, artifact indexing, and most event/audit wiring inside one TypeScript service.
 - The agent is already a live bounded execution plane, but not yet a richer event or orchestration participant.
 - Web and CLI are truthful peers over the same contract surface, and that surface now includes a gateway-ready `/api/controller` consumer boundary even though no separate gateway app exists yet.
+- Architecture work remains valid only while it keeps serving the remote exposure control-plane problem rather than turning runtime core into review-system plumbing.
+
+### Runtime-core boundary rule
+- Review, evidence, and decision-pack surfaces may grow only when they protect or unlock an operator path.
+- They must not become the dominant center of runtime complexity.
+- Controller-agent steady-state semantics must tolerate realistic remote latency; a remote control plane should not self-degrade because of workstation-grade timeout assumptions.
 
 ### Deep compare against Scheme C
 

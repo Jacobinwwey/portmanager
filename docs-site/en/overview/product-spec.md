@@ -12,7 +12,7 @@ status: active
 ---
 > Source of truth: `docs/specs/portmanager-v1-product-spec.md`
 > Audience: `shared` | Section: `overview` | Status: `active`
-> Updated: 2026-04-21 | Version: v0.5.0-m3-phase0-enablement
+> Updated: 2026-05-06 | Version: v0.5.1-product-positioning-realignment
 ### Summary
 PortManager V1 is a control plane for exposing selected remote localhost services over Tailscale without treating ad-hoc shell commands as the operating model.
 The product goal is not only exposure, but safe exposure: desired state, operations history, diagnostics visibility, backup-before-mutation, and explicit rollback points.
@@ -22,6 +22,12 @@ The product goal is not only exposure, but safe exposure: desired state, operati
 - `One Host, One Rule, One Rollback` is the first implementation milestone and the acceptance center of gravity.
 - Web, CLI, and future agent-driven automation are first-class peers over the same contract surface.
 - The product must remain agent-friendly from day one, even before advanced agent workflows are implemented.
+- PortManager must remain a remote exposure control plane, not drift into a generic local port utility or workstation launcher.
+
+### Non-goal clarification
+- PortManager does not compete by offering richer local port inspection than `PortsWhisper-Rust`.
+- PortManager does not compete by becoming a local project/service launcher like `PortMaster`.
+- PortManager competes by making remote exposure safer, more recoverable, and easier to verify.
 
 ### Primary operator problems being solved
 - Operators need a safer replacement for scattered SSH, ad-hoc system edits, and undocumented local port exposure scripts.

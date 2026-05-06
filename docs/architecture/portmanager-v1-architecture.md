@@ -1,7 +1,7 @@
 # PortManager V1 Architecture
 
-Updated: 2026-04-21
-Version: v0.2.0-m3-phase0-enablement
+Updated: 2026-05-06
+Version: v0.2.1-product-positioning-realignment
 
 ## English
 
@@ -27,6 +27,12 @@ Version: v0.2.0-m3-phase0-enablement
 - The controller still owns desired state, orchestration, persistence, artifact indexing, and most event/audit wiring inside one TypeScript service.
 - The agent is already a live bounded execution plane, but not yet a richer event or orchestration participant.
 - Web and CLI are truthful peers over the same contract surface, and that surface now includes a gateway-ready `/api/controller` consumer boundary even though no separate gateway app exists yet.
+- Architecture work remains valid only while it keeps serving the remote exposure control-plane problem rather than turning runtime core into review-system plumbing.
+
+### Runtime-core boundary rule
+- Review, evidence, and decision-pack surfaces may grow only when they protect or unlock an operator path.
+- They must not become the dominant center of runtime complexity.
+- Controller-agent steady-state semantics must tolerate realistic remote latency; a remote control plane should not self-degrade because of workstation-grade timeout assumptions.
 
 ### Deep compare against Scheme C
 
@@ -92,6 +98,12 @@ It now continues with bounded enablement:
 - Controller 仍然在一个 TypeScript 服务里同时承担 desired state、orchestration、persistence、artifact indexing 与大部分 event/audit wiring。
 - Agent 已经是 live 的 bounded execution plane，但还不是更强的 event / orchestration participant。
 - Web 与 CLI 已经是同一份契约上的 truthful peer，而且这份契约现在已经包含 gateway-ready 的 `/api/controller` consumer boundary，只是还没有独立 gateway app。
+- 只有当架构工作继续服务于远端暴露控制平面本身，而不是把 runtime core 逐步变成 review-system plumbing 时，这条方向才成立。
+
+### Runtime-core 边界规则
+- Review、evidence 与 decision-pack surface 只有在保护或解锁 operator path 时才允许继续增长。
+- 它们不能成为 runtime complexity 的主中心。
+- Controller-agent 的稳态语义必须容忍真实远端延迟；远端控制平面不能因为工作站级别的超时假设而自我降级。
 
 ### 对照 Scheme C 的深度比较
 

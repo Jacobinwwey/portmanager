@@ -12,7 +12,7 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-toward-c-strategy.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-21 | Version：v0.2.0-m3-phase0-enablement
+> Updated：2026-05-06 | Version：v0.2.1-product-positioning-realignment
 ### 用途
 这份文档继续把 `Toward C` 保持为一个具体方向。
 里程碑 3 不是“以后再扩点规模”。
@@ -44,6 +44,13 @@ PortManager 已经不再处于必须把 `Toward C` 纯粹停留在纸面上的�
 - 不是默认承诺托管 SaaS 或多租户
 - 不是绕开契约治理的许可
 - 也不是说当前仓库已经有 API gateway、拆开的 audit service、batch orchestration，或者 PostgreSQL readiness
+- 也不是让 review/evidence surface 跑在 operator golden path 前面的借口
+
+### 额外进入门槛
+任何新的 C-oriented abstraction 落地前，至少应满足以下条件之一：
+- 它解锁了被阻塞的 operator path
+- 它移除了已经被证明存在的 runtime bottleneck
+- 它防止了已经出现的 contract divergence
 
 ### 它与 A、B 的关系
 - `A` 冻结 docs-first 基线、契约与设计边界。

@@ -1,7 +1,7 @@
 # PortManager V1 Product Specification
 
-Updated: 2026-04-21
-Version: v0.5.0-m3-phase0-enablement
+Updated: 2026-05-06
+Version: v0.5.1-product-positioning-realignment
 
 ## English
 
@@ -14,6 +14,12 @@ The product goal is not only exposure, but safe exposure: desired state, operati
 - `One Host, One Rule, One Rollback` is the first implementation milestone and the acceptance center of gravity.
 - Web, CLI, and future agent-driven automation are first-class peers over the same contract surface.
 - The product must remain agent-friendly from day one, even before advanced agent workflows are implemented.
+- PortManager must remain a remote exposure control plane, not drift into a generic local port utility or workstation launcher.
+
+### Non-goal clarification
+- PortManager does not compete by offering richer local port inspection than `PortsWhisper-Rust`.
+- PortManager does not compete by becoming a local project/service launcher like `PortMaster`.
+- PortManager competes by making remote exposure safer, more recoverable, and easier to verify.
 
 ### Primary operator problems being solved
 - Operators need a safer replacement for scattered SSH, ad-hoc system edits, and undocumented local port exposure scripts.
@@ -101,6 +107,12 @@ PortManager V1 是一个通过 Tailscale 暴露远端 localhost 服务的控制�
 - `One Host, One Rule, One Rollback` 是首个实现里程碑，也是验收重心。
 - Web、CLI 与未来 agent 驱动自动化都必须作为同一契约面的平级一等入口。
 - 即使高级 agent 工作流尚未实现，产品从第一天开始也必须保持 agent-friendly。
+- PortManager 必须持续保持为远端暴露控制平面，而不是漂移成通用本地端口工具或工作站启动器。
+
+### 非目标澄清
+- PortManager 不是通过提供比 `PortsWhisper-Rust` 更强的本地端口检查来竞争。
+- PortManager 不是通过变成 `PortMaster` 那类本地项目/服务启动器来竞争。
+- PortManager 的竞争方式，是把远端暴露做得更安全、更可恢复、更易验证。
 
 ### 主要要解决的操作者问题
 - 操作者需要一个比零散 SSH、临时系统修改、未文档化端口暴露脚本更安全的替代方案。

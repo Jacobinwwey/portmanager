@@ -39,6 +39,19 @@ export const contentMap = [
     }
   },
   {
+    id: 'product-positioning-upgrade-plan',
+    sourcePath: 'docs/specs/portmanager-product-positioning-and-upgrade-plan.md',
+    route: 'roadmap/product-positioning-upgrade-plan',
+    audience: 'shared',
+    persona: ['operator', 'admin', 'integrator', 'contributor', 'automation'],
+    section: 'roadmap',
+    status: 'active',
+    titles: {
+      en: 'Product Positioning and Upgrade Plan',
+      zh: '产品定位与升级计划'
+    }
+  },
+  {
     id: 'milestones',
     sourcePath: 'docs/specs/portmanager-milestones.md',
     route: 'roadmap/milestones',

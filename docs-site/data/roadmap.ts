@@ -415,7 +415,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
       ]
     },
     dependencies: ['m1'],
-    docs: ['backup-rollback-policy', 'real-machine-verification-report', 'snapshot-diagnostics', 'sdk-docker', 'milestones']
+    docs: ['backup-rollback-policy', 'real-machine-verification-report', 'snapshot-diagnostics', 'sdk-docker', 'milestones', 'product-positioning-upgrade-plan']
   },
   {
     id: 'm3',
@@ -508,6 +508,7 @@ export const roadmapMilestones: RoadmapMilestone[] = [
     },
     dependencies: ['m2'],
     docs: [
+      'product-positioning-upgrade-plan',
       'milestones',
       'toward-c-strategy',
       'v1-architecture',
@@ -521,11 +522,11 @@ export const roadmapMilestones: RoadmapMilestone[] = [
 
 export const roadmapTracks = {
   product: {
-    en: ['Control Plane Baseline', 'Diagnostics Visibility', 'Backup & Rollback Confidence', 'Reliability Guardrail', 'Toward C Enablement'],
-    zh: ['控制平面基线', '诊断可见性', '备份与回滚信心', '可靠性护栏', 'Toward C 启动']
+    en: ['Remote Exposure Control Plane', 'Diagnostics Visibility', 'Backup & Rollback Confidence', 'Reliability Guardrail', 'Toward C Enablement'],
+    zh: ['远端暴露控制平面', '诊断可见性', '备份与回滚信心', '可靠性护栏', 'Toward C 启动']
   },
   engineering: {
-    en: ['Contracts', 'Controller Seams', 'Agent', 'CLI', 'Web', 'Event & Audit Index', 'Batch Operations', 'Persistence Readiness', 'Toward C'],
-    zh: ['契约', 'Controller 分层', 'Agent', 'CLI', 'Web', 'Event 与 Audit 索引', '批量操作', '持久化就绪度', 'Toward C']
+    en: ['Contracts', 'Operator Golden Path', 'Controller Seams', 'Agent', 'CLI', 'Web', 'Event & Audit Index', 'Persistence Readiness', 'Toward C'],
+    zh: ['契约', 'Operator Golden Path', 'Controller 分层', 'Agent', 'CLI', 'Web', 'Event 与 Audit 索引', '持久化就绪度', 'Toward C']
   }
 }

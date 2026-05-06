@@ -11,12 +11,13 @@ status: active
 ---
 > 真源文档：`docs/specs/portmanager-milestones.md`
 > Audience：`shared` | Section：`roadmap` | Status：`active`
-> Updated：2026-04-21 | Version：v0.6.0-m3-phase0-enablement
+> Updated：2026-05-06 | Version：v0.6.1-product-positioning-realignment
 ### 路线排序规则
 - 在扩展实现广度之前，先冻结契约、设计基线与发布规则。
 - 在扩展可靠性或平台范围之前，先证明一条可信的最小运行切片。
 - 可靠性工作优先于平台广度，因为不稳定的多主机扩展只会放大歧义。
 - `Toward C` 不是一个占位口号，而是一个需要通过 `B` 验证状态“挣出来”的阶段。
+- 除非新的 review/meta-surface 正在移除一个已证明故障模式，否则 operator golden path 工作优先。
 
 ### A / B / C 递进模型
 - `A`：docs-first 基线。契约、设计基线、路由契约、安装契约与发布规则都已经冻结且可评审。

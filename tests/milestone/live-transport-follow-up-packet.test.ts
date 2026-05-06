@@ -79,13 +79,13 @@ test('parseArgs accepts scaffold, assemble, preview, capture, and validate modes
   assert.equal(scaffold.json, true)
   assert.equal(assemble.action, 'assemble')
   assert.equal(assemble.packetDate, '2026-04-26')
-  assert.equal(
-    assemble.artifactSourcePaths?.candidate_host_with_tailscale_ip,
-    '/tmp/candidate-host-detail.json'
+  assert.match(
+    assemble.artifactSourcePaths?.candidate_host_with_tailscale_ip?.replaceAll('\\', '/') ?? '',
+    /\/tmp\/candidate-host-detail\.json$/
   )
-  assert.equal(
-    assemble.artifactSourcePaths?.bootstrap_operation_with_tailscale_transport,
-    '/tmp/bootstrap-operation.json'
+  assert.match(
+    assemble.artifactSourcePaths?.bootstrap_operation_with_tailscale_transport?.replaceAll('\\', '/') ?? '',
+    /\/tmp\/bootstrap-operation\.json$/
   )
   assert.equal(capture.action, 'capture')
   assert.equal(capture.controllerBaseUrl, 'http://127.0.0.1:8100/api/controller')

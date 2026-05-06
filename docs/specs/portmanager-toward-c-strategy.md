@@ -1,7 +1,7 @@
 # PortManager Toward C Strategy
 
-Updated: 2026-04-21
-Version: v0.2.0-m3-phase0-enablement
+Updated: 2026-05-06
+Version: v0.2.1-product-positioning-realignment
 
 ## English
 
@@ -36,6 +36,13 @@ In that scheme:
 - not hosted SaaS or multi-tenant scope by default
 - not permission to bypass contract governance
 - not proof that the repo already contains a standalone gateway app, standalone audit service, broad fleet orchestration, or a PostgreSQL backend
+- not a license to let review/evidence surfaces outrun the operator golden path
+
+### Additional entry gate
+Before any new C-oriented abstraction lands, it should satisfy at least one of the following:
+- it unlocks a blocked operator path
+- it removes a proven runtime bottleneck
+- it prevents a demonstrated contract divergence
 
 ### Relationship to A and B
 - `A` freezes the docs-first baseline, contracts, and design boundaries.
@@ -141,6 +148,13 @@ PortManager 已经不再处于必须把 `Toward C` 纯粹停留在纸面上的�
 - 不是默认承诺托管 SaaS 或多租户
 - 不是绕开契约治理的许可
 - 也不是说当前仓库已经有 API gateway、拆开的 audit service、batch orchestration，或者 PostgreSQL readiness
+- 也不是让 review/evidence surface 跑在 operator golden path 前面的借口
+
+### 额外进入门槛
+任何新的 C-oriented abstraction 落地前，至少应满足以下条件之一：
+- 它解锁了被阻塞的 operator path
+- 它移除了已经被证明存在的 runtime bottleneck
+- 它防止了已经出现的 contract divergence
 
 ### 它与 A、B 的关系
 - `A` 冻结 docs-first 基线、契约与设计边界。
