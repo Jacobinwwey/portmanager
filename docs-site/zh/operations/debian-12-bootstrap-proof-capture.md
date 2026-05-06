@@ -24,17 +24,17 @@ status: active
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md` 与 `docs/operations/portmanager-debian-12-review-packet-template.md` 继续作为配套真相面。
 
 ### 采集流程
-1. 先读取 `portmanager operations second-target-policy-pack`，确认已保留的 bootstrap 切片仍然链接在完整 bounded packet 里，而更广支持声明仍然在 bounded review 完成前保持锁定。
+1. 先读取 `pmg operations second-target-policy-pack`，确认已保留的 bootstrap 切片仍然链接在完整 bounded packet 里，而更广支持声明仍然在 bounded review 完成前保持锁定。
 2. 使用 `--target-profile-id debian-12-systemd-tailscale` 创建或确认一台候选主机。
 3. 通过正常 controller 路径执行一次有边界 bootstrap 预演：
-   - `portmanager hosts probe <host-id> --wait`
-   - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
+   - `pmg hosts probe <host-id> --wait`
+   - `pmg hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 4. 读取对应 operation 详情：
-   - `portmanager operation get <bootstrap-operation-id> --json`
+   - `pmg operation get <bootstrap-operation-id> --json`
 5. 记录同一条 bootstrap 对应的 audit 或 replay 引用：
-   - `portmanager operations audit-index --host-id <host-id> --type bootstrap_host --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --type bootstrap_host --limit 5 --json`
 6. 记录一份 host detail 快照，证明 target profile 仍然锁定：
-   - `portmanager hosts get <host-id> --json`
+   - `pmg hosts get <host-id> --json`
 7. 把采集结果逐项回填进 `docs/operations/portmanager-debian-12-review-packet-template.md`。
 
 ### 已保留的执行产物包

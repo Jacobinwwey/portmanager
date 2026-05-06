@@ -149,7 +149,7 @@ export async function verifyReliabilityOperationsFlow(): Promise<ReliabilityOper
     )
     const cliOperationDetail = await runJsonCommandAsync<OperationDetail>(
       'cargo',
-      ['run', '-q', '-p', 'portmanager-cli', '--', 'operation', 'get', 'op_backup_required_001', '--json'],
+      ['run', '-q', '-p', 'portmanager-cli', '--bin', 'pmg', '--', 'operation', 'get', 'op_backup_required_001', '--json'],
       {
         PORTMANAGER_CONTROLLER_BASE_URL: listening.baseUrl
       }

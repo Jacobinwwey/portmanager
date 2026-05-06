@@ -32,18 +32,18 @@ status: active
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md`、`docs/operations/portmanager-debian-12-review-packet-template.md` 与 `docs/operations/portmanager-backup-rollback-policy.md` 继续作为配套真相面。
 
 ### 采集流程
-1. 先读取 `portmanager operations second-target-policy-pack`，确认 rollback parity 已经由保留 packet 支撑，但更广支持声明仍然在 bounded review 完成前保持锁定。
+1. 先读取 `pmg operations second-target-policy-pack`，确认 rollback parity 已经由保留 packet 支撑，但更广支持声明仍然在 bounded review 完成前保持锁定。
 2. 列出候选主机的 rollback points，并选择一个属于同一份有边界 review packet 的 point：
-   - `portmanager rollback-points --host-id <host-id> --json`
+   - `pmg rollback-points list --host-id <host-id> --json`
 3. 预演一次有边界 rollback：
-   - `portmanager rollback-points apply <rollback-point-id> --wait --json`
+   - `pmg rollback-points apply <rollback-point-id> --wait --json`
 4. 记录 resulting controller operation 详情：
-   - `portmanager operation get <rollback-operation-id> --json`
+   - `pmg operation get <rollback-operation-id> --json`
 5. 保留同一份 packet 里的 rollback-point id 与终态 rollback 结果摘要：
    - 保留显式 `rollbackPointId`
    - 保留显式终态 `resultSummary`
 6. 为同一轮 rehearsal 记录一条 rollback 后 diagnostics 链接：
-   - `portmanager diagnostics list --host-id <host-id> --rule-id <rule-id> --json`
+   - `pmg diagnostics list --host-id <host-id> --rule-id <rule-id> --json`
    - 保留一条 linked diagnostics artifact 路径或 audit 引用，证明 rollback 后验证确实执行过
 7. 把采集结果逐项回填进 `docs/operations/portmanager-debian-12-review-packet-template.md`。
 

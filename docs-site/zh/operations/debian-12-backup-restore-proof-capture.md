@@ -33,19 +33,19 @@ status: active
 - restore-readiness 引用：`rp_op_backup_1776807481139_825`，保存在 `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backup-rollback-points.json`
 
 ### 采集流程
-1. 先读取 `portmanager operations second-target-policy-pack`，确认 backup-and-restore parity 已由保留 packet 支撑，而更广支持声明仍然在 bounded review 完成前保持锁定。
+1. 先读取 `pmg operations second-target-policy-pack`，确认 backup-and-restore parity 已由保留 packet 支撑，而更广支持声明仍然在 bounded review 完成前保持锁定。
 2. 在候选主机上触发一次有边界 controller backup operation：
    - 调用 `POST /backups/run`，并传入 `mode: "required"`
    - 只有在保持同一套 manifest、remote-backup 与 rollback-point 证据模型时，才可以改用等价路径。
 3. 记录对应 controller operation 详情：
-   - `portmanager operation get <backup-operation-id> --json`
+   - `pmg operation get <backup-operation-id> --json`
 4. 采集同一条 operation 对应的 backup 摘要：
-   - `portmanager backups list --operation-id <backup-operation-id> --json`
+   - `pmg backups list --operation-id <backup-operation-id> --json`
 5. 记录同一份 bundle 里的 remote-backup 结果：
    - 如果 GitHub backup 已启用，就保留显式 configured 结果
    - 如果 remote backup 仍未配置，就保留显式 `not_configured` 状态与 operator action
 6. 记录同一份 bundle 里的 restore-readiness 引用：
-   - `portmanager rollback-points list --host-id <host-id> --state ready --json`
+   - `pmg rollback-points list --host-id <host-id> --state ready --json`
 7. 把采集结果逐项回填进 `docs/operations/portmanager-debian-12-review-packet-template.md`。
 
 ### 必需产物

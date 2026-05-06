@@ -10,7 +10,7 @@ title: Non-Interactive Flows
 ## CLI 预期
 
 ```bash
-portmanager operation get op_123 --json --wait
+pmg operation get op_123 --json --wait
 ```
 
 - `--json` 只返回结构化输出

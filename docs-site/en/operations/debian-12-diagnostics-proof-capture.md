@@ -32,16 +32,16 @@ It now points at the preserved diagnostics artifact bundle that `/second-target-
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md`, `docs/operations/portmanager-debian-12-review-packet-template.md`, and `docs/operations/portmanager-backup-rollback-policy.md` stay the companion truth surfaces.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm diagnostics parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
+1. Read `pmg operations second-target-policy-pack` and confirm diagnostics parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
 2. Trigger one bounded controller-side diagnostics run for the candidate host and rule:
    - `curl -fsS -X POST http://<controller-host>:<controller-port>/snapshots/diagnostics -H 'content-type: application/json' -d '{"hostId":"<host-id>","ruleId":"<rule-id>","port":<listen-port>,"scheme":"http","captureSnapshot":true}'`
    - Use any equivalent bounded controller-driven diagnostics trigger only if it preserves the same controller artifact and event model.
 3. Record the resulting controller operation detail:
-   - `portmanager operation get <diagnostics-operation-id> --json`
+   - `pmg operation get <diagnostics-operation-id> --json`
 4. Capture the diagnostics artifact bundle from the same run:
-   - `portmanager diagnostics list --host-id <host-id> --rule-id <rule-id> --json`
+   - `pmg diagnostics list --host-id <host-id> --rule-id <rule-id> --json`
 5. Record one linked controller audit or replay reference:
-   - `portmanager operations audit-index --host-id <host-id> --rule-id <rule-id> --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --rule-id <rule-id> --limit 5 --json`
 6. Record one short operator drift note from the same packet:
    - preserve the explicit no-drift conclusion if verification stayed healthy
    - preserve the explicit degraded or rollback-required note if drift remained

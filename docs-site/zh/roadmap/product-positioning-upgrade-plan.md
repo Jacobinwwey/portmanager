@@ -132,6 +132,7 @@ controller 到 agent 的稳态客户端此前使用 `AbortSignal.timeout(500)`�
 #### 吸收自 PortsWhisper-Rust
 - CLI 价值密度：
   - PortManager 的 CLI 必须保持简短、可组合、面向证据。
+  - 主执行入口前缀标准化为 `pmg`，让操作者命令保持紧凑，并与产品/仓库命名分层。
 - 发布纪律：
   - 持续保持 acceptance 与 packaging discipline 可见。
 - 范围清晰：
@@ -161,6 +162,7 @@ controller 到 agent 的稳态客户端此前使用 `AbortSignal.timeout(500)`�
 
 #### 工作流 1：吸收自 PortsWhisper-Rust 的 CLI 密度
 - 保持动词短、确定性强
+- 保持主命令前缀短且稳定：`pmg`
 - 持续把 `--json` 输出作为一等且稳定的契约
 - 优先使用直接任务语言，而不是内部控制平面术语
 - 强化“一条命令通向下一步动作”的链路：
@@ -248,6 +250,7 @@ controller 到 agent 的稳态客户端此前使用 `AbortSignal.timeout(500)`�
 #### 优先级 3：把 review/evidence 与 runtime critical path 隔离
 - review artifact 仍是一等输出
 - 但 review 专属复杂度不应继续泄漏到普通 operator flow，除非它确实在防止真实故障
+- 普通实现切片不应再默认要求新增 review/evidence 表面，除非它会改变公开文案、触及高风险 mutation 路径，或闭环一个已证明失败模式
 
 #### 优先级 4：加固远端网络语义
 - 用可配置、基于真实证据的默认值替换不现实的 controller-agent timeout 假设
@@ -277,6 +280,7 @@ controller 到 agent 的稳态客户端此前使用 `AbortSignal.timeout(500)`�
 
 ### 后续最佳实践规则
 - operator path 优先于 meta-surface
+- `pmg` 保持为主 CLI 入口；产品名称继续保持为 `PortManager`
 - 少一些抽象名词，多一些可执行结果
 - evidence 服务于 runtime truth，但不能替代 runtime truth
 - 远端控制语义必须容忍真实世界延迟

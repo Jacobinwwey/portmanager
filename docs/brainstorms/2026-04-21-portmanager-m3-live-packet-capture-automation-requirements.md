@@ -16,7 +16,7 @@ Current repo truth no longer lacks packet structure or validator rules:
 - newer malformed or scaffold-marked packet roots no longer clear the blocking delta
 
 The remaining live queue is narrower.
-Operators still have to run `portmanager hosts get`, `portmanager operation get`, two direct agent reads, and `portmanager operations audit-index`, then manually hand those five outputs to the assembly helper.
+Operators still have to run `pmg hosts get`, `pmg operation get`, two direct agent reads, and `pmg operations audit-index`, then manually hand those five outputs to the assembly helper.
 That manual fetch step is repetitive, drift-prone, and still leaves room for mismatched source scope even though the repo already knows the canonical packet layout and validator truth.
 
 ## Comparison Against Prior Milestone 3 Slices

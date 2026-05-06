@@ -19,7 +19,7 @@ This guide starts only after `/second-target-policy-pack` opens bounded review a
 It does not widen supported-target claims by itself.
 
 ### Inputs
-- `portmanager operations second-target-policy-pack --json` shows `reviewAdjudication.state: review_open`.
+- `pmg operations second-target-policy-pack --json` shows `reviewAdjudication.state: review_open`.
 - The same pack shows `liveTransportFollowUp.state: capture_required`.
 - The current recorded address is still `172.17.0.2`.
 - `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` stays preserved and untouched.
@@ -29,12 +29,12 @@ It does not widen supported-target claims by itself.
 - One Debian 12 candidate host is reachable on a real Tailscale tailnet.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm the follow-up guide path, artifact root pattern, current recorded address, and required artifact ids.
+1. Read `pmg operations second-target-policy-pack` and confirm the follow-up guide path, artifact root pattern, current recorded address, and required artifact ids.
 2. Rehearse bounded bootstrap on that same candidate host and keep the linked controller operation id:
-   - `portmanager hosts probe <host-id> --wait`
-   - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
+   - `pmg hosts probe <host-id> --wait`
+   - `pmg hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 3. Run one bounded steady-state mutation on the same host so the live follow-up packet has fresh transport evidence:
-   - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
+   - `pmg bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
 4. Preferred read-only preflight: let one repo-native preview command auto-resolve the latest candidate host plus latest successful bootstrap pair, fetch controller host detail, bootstrap detail, and one host-scoped audit index, then report packet root, resolved ids, captured address, derived agent URL, audit operation ids, and `captureReady` before any packet files are written. Preview stays blocked if captured address is still unresolved or still equals preserved Docker bridge `172.17.0.2`, so operators do not mistake an invalid packet candidate for a ready live capture lane:
    - `pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>`
 5. Preferred packet-writing path: after preview reports `captureReady: true`, run the matching capture command to fetch host detail, bootstrap detail, steady-state `/health`, steady-state `/runtime-state`, and one host-scoped audit index, then write the canonical packet-local JSON files plus `live-transport-follow-up-summary.json` in one step:
@@ -42,11 +42,11 @@ It does not widen supported-target claims by itself.
 6. Add `--candidate-target-profile-id <target-profile-id>` when operator review needs a bounded candidate lane other than the default `debian-12-systemd-tailscale`. Add explicit `--host-id <host-id>` and `--bootstrap-operation-id <operation-id>` only when operator review needs a hand-selected override or mismatch debugging path. Add `--agent-base-url <url>` only when preview shows that the bootstrap result summary does not expose a usable live agent base URL. Add `--audit-limit <count>` when preview shows that the host-scoped audit window must widen so the bootstrap operation still appears in the captured audit index. Existing scaffold roots may be upgraded without `--force`, but existing non-scaffold packet roots stay protected unless `--force` is explicit.
 7. Fallback path: if direct capture cannot reach controller or agent HTTP surfaces, create one fresh scaffold root and feed the five bounded source files into the assembly helper manually:
    - `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
-   - `portmanager hosts get <host-id> --json`
-   - `portmanager operation get <bootstrap-operation-id> --json`
+   - `pmg hosts get <host-id> --json`
+   - `pmg operation get <bootstrap-operation-id> --json`
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/health`
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
-   - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --limit 5 --json`
    - `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
 8. Only pass `--captured-at <iso>` when operator review must override the newest valid source timestamp. Otherwise let the helper derive `candidateTargetProfileId`, `capturedAt`, and `capturedAddress`, and fail if host-detail versus bootstrap transport addresses drift.
 9. `artifactFiles` must still point at packet-local files for all five required artifact ids. Use this minimum layout unless a successor template explicitly replaces it:

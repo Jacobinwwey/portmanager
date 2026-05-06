@@ -32,18 +32,18 @@ It now points at the preserved rollback rehearsal bundle that `/second-target-po
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md`, `docs/operations/portmanager-debian-12-review-packet-template.md`, and `docs/operations/portmanager-backup-rollback-policy.md` stay the companion truth surfaces.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm rollback parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
+1. Read `pmg operations second-target-policy-pack` and confirm rollback parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
 2. List rollback points for the candidate host and choose one point tied to the same bounded review packet:
-   - `portmanager rollback-points --host-id <host-id> --json`
+   - `pmg rollback-points list --host-id <host-id> --json`
 3. Rehearse one bounded rollback:
-   - `portmanager rollback-points apply <rollback-point-id> --wait --json`
+   - `pmg rollback-points apply <rollback-point-id> --wait --json`
 4. Record the resulting controller operation detail:
-   - `portmanager operation get <rollback-operation-id> --json`
+   - `pmg operation get <rollback-operation-id> --json`
 5. Preserve the rollback-point id plus the terminal rollback result summary from the same packet:
    - keep the explicit `rollbackPointId`
    - keep the explicit terminal `resultSummary`
 6. Record one post-rollback diagnostics linkage from the same rehearsal:
-   - `portmanager diagnostics list --host-id <host-id> --rule-id <rule-id> --json`
+   - `pmg diagnostics list --host-id <host-id> --rule-id <rule-id> --json`
    - preserve one linked diagnostics artifact path or audit reference that proves post-rollback verification actually ran
 7. Copy every captured value into `docs/operations/portmanager-debian-12-review-packet-template.md`.
 

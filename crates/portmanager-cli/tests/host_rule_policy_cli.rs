@@ -288,12 +288,12 @@ fn terminal_operation(
     })
 }
 
-fn run_portmanager(args: &[&str], base_url: &str) -> std::process::Output {
-    Command::new(env!("CARGO_BIN_EXE_portmanager"))
+fn run_pmg(args: &[&str], base_url: &str) -> std::process::Output {
+    Command::new(env!("CARGO_BIN_EXE_pmg"))
         .args(args)
         .env("PORTMANAGER_CONTROLLER_BASE_URL", base_url)
         .output()
-        .expect("run portmanager")
+        .expect("run pmg")
 }
 
 #[test]
@@ -323,7 +323,7 @@ fn hosts_list_json_reads_controller_host_inventory() {
         }],
     }]);
 
-    let output = run_portmanager(&["hosts", "list", "--json"], &server.base_url());
+    let output = run_pmg(&["hosts", "list", "--json"], &server.base_url());
 
     assert!(output.status.success());
     let parsed: Value = serde_json::from_slice(&output.stdout).expect("json stdout");
@@ -401,7 +401,7 @@ fn hosts_get_text_surfaces_detail_context() {
         }],
     }]);
 
-    let output = run_portmanager(&["hosts", "get", "host_alpha"], &server.base_url());
+    let output = run_pmg(&["hosts", "get", "host_alpha"], &server.base_url());
 
     assert!(output.status.success());
     let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
@@ -427,7 +427,7 @@ fn hosts_get_json_reports_not_found_structurally() {
         }],
     }]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["hosts", "get", "host_missing", "--json"],
         &server.base_url(),
     );
@@ -465,7 +465,7 @@ fn hosts_create_wait_json_submits_target_profile_contract_body_and_returns_termi
         },
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "hosts",
             "create",
@@ -539,7 +539,7 @@ fn hosts_probe_wait_json_submits_mode_and_returns_terminal_operation() {
         },
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "hosts",
             "probe",
@@ -591,7 +591,7 @@ fn hosts_bootstrap_wait_json_submits_bootstrap_contract_body() {
         },
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "hosts",
             "bootstrap",
@@ -651,7 +651,7 @@ fn bridge_rules_list_json_reads_controller_rule_inventory() {
         }],
     }]);
 
-    let output = run_portmanager(&["bridge-rules", "list", "--json"], &server.base_url());
+    let output = run_pmg(&["bridge-rules", "list", "--json"], &server.base_url());
 
     assert!(output.status.success());
     let parsed: Value = serde_json::from_slice(&output.stdout).expect("json stdout");
@@ -680,7 +680,7 @@ fn bridge_rules_get_text_surfaces_target_and_lifecycle() {
         }],
     }]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["bridge-rules", "get", "rule_alpha_https"],
         &server.base_url(),
     );
@@ -721,7 +721,7 @@ fn bridge_rules_create_wait_json_submits_contract_body() {
         },
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "bridge-rules",
             "create",
@@ -792,7 +792,7 @@ fn bridge_rules_update_wait_json_surfaces_backup_and_rollback_evidence() {
         },
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "bridge-rules",
             "update",
@@ -855,7 +855,7 @@ fn bridge_rules_delete_wait_text_surfaces_terminal_state() {
         },
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "bridge-rules",
             "delete",
@@ -894,7 +894,7 @@ fn exposure_policies_get_json_reads_host_policy() {
         }],
     }]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["exposure-policies", "get", "host_alpha", "--json"],
         &server.base_url(),
     );
@@ -932,7 +932,7 @@ fn exposure_policies_set_wait_json_submits_policy_contract_body() {
         },
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "exposure-policies",
             "set",

@@ -33,18 +33,18 @@ It defines the minimum post-bootstrap artifact bundle that must exist before `/s
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md` and `docs/operations/portmanager-debian-12-review-packet-template.md` stay the companion truth surfaces.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm steady-state parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
+1. Read `pmg operations second-target-policy-pack` and confirm steady-state parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
 2. Run one normal controller-driven mutation after bootstrap:
-   - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
+   - `pmg bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
    - Use any equivalent exposure-policy or rule mutation only if it preserves the same bounded evidence model.
 3. Record the resulting controller operation detail:
-   - `portmanager operation get <post-mutation-operation-id> --json`
+   - `pmg operation get <post-mutation-operation-id> --json`
 4. Capture steady-state health:
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/health`
 5. Capture steady-state runtime state:
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
 6. Record one linked controller audit or replay reference:
-   - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --limit 5 --json`
 7. Copy every captured value into `docs/operations/portmanager-debian-12-review-packet-template.md`.
 
 ### Required artifacts

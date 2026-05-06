@@ -32,16 +32,16 @@ status: active
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md`、`docs/operations/portmanager-debian-12-review-packet-template.md` 与 `docs/operations/portmanager-backup-rollback-policy.md` 继续作为配套真相面。
 
 ### 采集流程
-1. 先读取 `portmanager operations second-target-policy-pack`，确认 diagnostics parity 已经由保留 packet 支撑，但更广支持声明仍然在 bounded review 完成前保持锁定。
+1. 先读取 `pmg operations second-target-policy-pack`，确认 diagnostics parity 已经由保留 packet 支撑，但更广支持声明仍然在 bounded review 完成前保持锁定。
 2. 为候选主机和规则触发一次有边界的 controller-side diagnostics：
    - `curl -fsS -X POST http://<controller-host>:<controller-port>/snapshots/diagnostics -H 'content-type: application/json' -d '{"hostId":"<host-id>","ruleId":"<rule-id>","port":<listen-port>,"scheme":"http","captureSnapshot":true}'`
    - 只有在保持同一套 controller artifact 与 event 模型时，才可以改用等价的有边界 controller-driven diagnostics 触发方式。
 3. 记录对应 controller operation 详情：
-   - `portmanager operation get <diagnostics-operation-id> --json`
+   - `pmg operation get <diagnostics-operation-id> --json`
 4. 采集同一轮 diagnostics 的 artifact bundle：
-   - `portmanager diagnostics list --host-id <host-id> --rule-id <rule-id> --json`
+   - `pmg diagnostics list --host-id <host-id> --rule-id <rule-id> --json`
 5. 记录一条对应的 controller audit 或 replay 引用：
-   - `portmanager operations audit-index --host-id <host-id> --rule-id <rule-id> --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --rule-id <rule-id> --limit 5 --json`
 6. 为同一份 packet 记录一条简短的 operator drift 备注：
    - 如果验证保持健康，就保留显式 no-drift 结论
    - 如果 drift 仍存在，就保留显式 degraded 或 rollback-required 备注

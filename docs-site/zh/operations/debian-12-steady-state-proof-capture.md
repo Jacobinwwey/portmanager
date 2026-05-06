@@ -33,18 +33,18 @@ status: active
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md` 与 `docs/operations/portmanager-debian-12-review-packet-template.md` 继续作为配套真相面。
 
 ### 采集流程
-1. 先读取 `portmanager operations second-target-policy-pack`，确认 steady-state parity 已经由保留 packet 支撑，但更广支持声明仍然在 bounded review 完成前保持锁定。
+1. 先读取 `pmg operations second-target-policy-pack`，确认 steady-state parity 已经由保留 packet 支撑，但更广支持声明仍然在 bounded review 完成前保持锁定。
 2. 在 bootstrap 之后执行一次正常 controller-driven mutation：
-   - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
+   - `pmg bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
    - 只有在保持同一套有边界证据模型时，才可以改用等价 exposure-policy 或 rule mutation。
 3. 记录对应 controller operation 详情：
-   - `portmanager operation get <post-mutation-operation-id> --json`
+   - `pmg operation get <post-mutation-operation-id> --json`
 4. 采集 steady-state health：
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/health`
 5. 采集 steady-state runtime state：
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
 6. 记录一条对应的 controller audit 或 replay 引用：
-   - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --limit 5 --json`
 7. 把采集结果逐项回填进 `docs/operations/portmanager-debian-12-review-packet-template.md`。
 
 ### 必需产物

@@ -11,7 +11,7 @@ use serde_json::{json, Map, Value};
 use thiserror::Error;
 
 #[derive(Parser)]
-#[command(name = "portmanager")]
+#[command(name = "pmg")]
 #[command(about = "PortManager CLI")]
 struct Cli {
     #[command(subcommand)]

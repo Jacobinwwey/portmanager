@@ -51,7 +51,7 @@ jobs:
         run: pnpm acceptance:verify
 
   confidence:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 45

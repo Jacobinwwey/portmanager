@@ -24,17 +24,17 @@ It still does not widen supported-target claims beyond the bounded review packet
 - `docs/operations/portmanager-debian-12-acceptance-recipe.md` and `docs/operations/portmanager-debian-12-review-packet-template.md` stay the companion truth surfaces.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm the preserved bootstrap slice is still linked inside the complete bounded packet while broader support claims remain locked pending bounded review.
+1. Read `pmg operations second-target-policy-pack` and confirm the preserved bootstrap slice is still linked inside the complete bounded packet while broader support claims remain locked pending bounded review.
 2. Create or confirm one candidate host with `--target-profile-id debian-12-systemd-tailscale`.
 3. Run one bounded bootstrap rehearsal through the normal controller path:
-   - `portmanager hosts probe <host-id> --wait`
-   - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
+   - `pmg hosts probe <host-id> --wait`
+   - `pmg hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 4. Read the resulting operation detail:
-   - `portmanager operation get <bootstrap-operation-id> --json`
+   - `pmg operation get <bootstrap-operation-id> --json`
 5. Record one linked audit or replay reference:
-   - `portmanager operations audit-index --host-id <host-id> --type bootstrap_host --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --type bootstrap_host --limit 5 --json`
 6. Record one host-detail snapshot proving the target profile stayed locked:
-   - `portmanager hosts get <host-id> --json`
+   - `pmg hosts get <host-id> --json`
 7. Copy every captured value into `docs/operations/portmanager-debian-12-review-packet-template.md`.
 
 ### Preserved execution bundle

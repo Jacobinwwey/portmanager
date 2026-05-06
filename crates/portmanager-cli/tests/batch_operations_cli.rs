@@ -302,12 +302,12 @@ fn batch_operation_detail(state: &str) -> Value {
     })
 }
 
-fn run_portmanager(args: &[&str], base_url: &str) -> std::process::Output {
-    Command::new(env!("CARGO_BIN_EXE_portmanager"))
+fn run_pmg(args: &[&str], base_url: &str) -> std::process::Output {
+    Command::new(env!("CARGO_BIN_EXE_pmg"))
         .args(args)
         .env("PORTMANAGER_CONTROLLER_BASE_URL", base_url)
         .output()
-        .expect("run portmanager")
+        .expect("run pmg")
 }
 
 #[test]
@@ -337,7 +337,7 @@ fn operations_batch_apply_policy_wait_posts_batch_request_and_returns_parent_det
         },
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "operations",
             "batch-apply-policy",
@@ -415,7 +415,7 @@ fn operations_list_supports_parent_operation_id_filter() {
         }],
     }]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "operations",
             "list",

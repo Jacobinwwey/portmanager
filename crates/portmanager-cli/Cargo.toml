@@ -1,9 +1,14 @@
 [package]
 name = "portmanager-cli"
+default-run = "pmg"
 edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
 version.workspace = true
+
+[[bin]]
+name = "pmg"
+path = "src/main.rs"
 
 [[bin]]
 name = "portmanager"

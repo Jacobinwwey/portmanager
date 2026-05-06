@@ -11,7 +11,7 @@ This guide starts only after `/second-target-policy-pack` opens bounded review a
 It does not widen supported-target claims by itself.
 
 ### Inputs
-- `portmanager operations second-target-policy-pack --json` shows `reviewAdjudication.state: review_open`.
+- `pmg operations second-target-policy-pack --json` shows `reviewAdjudication.state: review_open`.
 - The same pack shows `liveTransportFollowUp.state: capture_required`.
 - The current recorded address is still `172.17.0.2`.
 - `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` stays preserved and untouched.
@@ -21,12 +21,12 @@ It does not widen supported-target claims by itself.
 - One Debian 12 candidate host is reachable on a real Tailscale tailnet.
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm the follow-up guide path, artifact root pattern, current recorded address, and required artifact ids.
+1. Read `pmg operations second-target-policy-pack` and confirm the follow-up guide path, artifact root pattern, current recorded address, and required artifact ids.
 2. Rehearse bounded bootstrap on that same candidate host and keep the linked controller operation id:
-   - `portmanager hosts probe <host-id> --wait`
-   - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
+   - `pmg hosts probe <host-id> --wait`
+   - `pmg hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 3. Run one bounded steady-state mutation on the same host so the live follow-up packet has fresh transport evidence:
-   - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
+   - `pmg bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
 4. Preferred read-only preflight: let one repo-native preview command auto-resolve the latest candidate host plus latest successful bootstrap pair, fetch controller host detail, bootstrap detail, and one host-scoped audit index, then report packet root, resolved ids, captured address, derived agent URL, audit operation ids, and `captureReady` before any packet files are written. Preview stays blocked if captured address is still unresolved or still equals preserved Docker bridge `172.17.0.2`, so operators do not mistake an invalid packet candidate for a ready live capture lane:
    - `pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>`
 5. Preferred packet-writing path: after preview reports `captureReady: true`, run the matching capture command to fetch host detail, bootstrap detail, steady-state `/health`, steady-state `/runtime-state`, and one host-scoped audit index, then write the canonical packet-local JSON files plus `live-transport-follow-up-summary.json` in one step:
@@ -34,11 +34,11 @@ It does not widen supported-target claims by itself.
 6. Add `--candidate-target-profile-id <target-profile-id>` when operator review needs a bounded candidate lane other than the default `debian-12-systemd-tailscale`. Add explicit `--host-id <host-id>` and `--bootstrap-operation-id <operation-id>` only when operator review needs a hand-selected override or mismatch debugging path. Add `--agent-base-url <url>` only when preview shows that the bootstrap result summary does not expose a usable live agent base URL. Add `--audit-limit <count>` when preview shows that the host-scoped audit window must widen so the bootstrap operation still appears in the captured audit index. Existing scaffold roots may be upgraded without `--force`, but existing non-scaffold packet roots stay protected unless `--force` is explicit.
 7. Fallback path: if direct capture cannot reach controller or agent HTTP surfaces, create one fresh scaffold root and feed the five bounded source files into the assembly helper manually:
    - `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
-   - `portmanager hosts get <host-id> --json`
-   - `portmanager operation get <bootstrap-operation-id> --json`
+   - `pmg hosts get <host-id> --json`
+   - `pmg operation get <bootstrap-operation-id> --json`
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/health`
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
-   - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --limit 5 --json`
    - `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
 8. Only pass `--captured-at <iso>` when operator review must override the newest valid source timestamp. Otherwise let the helper derive `candidateTargetProfileId`, `capturedAt`, and `capturedAddress`, and fail if host-detail versus bootstrap transport addresses drift.
 9. `artifactFiles` must still point at packet-local files for all five required artifact ids. Use this minimum layout unless a successor template explicitly replaces it:
@@ -81,7 +81,7 @@ Do not overwrite the preserved Docker-bridge packet; keep it as historical evide
 它本身不会扩大支持声明。
 
 ### 输入条件
-- `portmanager operations second-target-policy-pack --json` 已经显示 `reviewAdjudication.state: review_open`。
+- `pmg operations second-target-policy-pack --json` 已经显示 `reviewAdjudication.state: review_open`。
 - 同一份 pack 已经显示 `liveTransportFollowUp.state: capture_required`。
 - 当前记录地址仍然是 `172.17.0.2`。
 - `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/` 继续作为已保留历史 packet，不被改写。
@@ -91,12 +91,12 @@ Do not overwrite the preserved Docker-bridge packet; keep it as historical evide
 - 已有一台 Debian 12 候选主机真实接入同一条 Tailscale tailnet。
 
 ### 采集流程
-1. 先读取 `portmanager operations second-target-policy-pack`，确认 follow-up guide path、artifact root pattern、当前记录地址与 required artifact id。
+1. 先读取 `pmg operations second-target-policy-pack`，确认 follow-up guide path、artifact root pattern、当前记录地址与 required artifact id。
 2. 在同一台候选主机上重放一次有边界 bootstrap，并保留对应 controller operation id：
-   - `portmanager hosts probe <host-id> --wait`
-   - `portmanager hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
+   - `pmg hosts probe <host-id> --wait`
+   - `pmg hosts bootstrap <host-id> --ssh-user <user> --desired-agent-port <port> --wait`
 3. 在同一台主机上执行一次有边界 steady-state mutation，让 live follow-up packet 拥有新的 transport 证据：
-   - `portmanager bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
+   - `pmg bridge-rules create --host-id <host-id> --protocol tcp --listen-port <listen-port> --target-host <target-host> --target-port <target-port> --wait`
 4. 首选只读预检：先用一条 repo-native preview helper 自动解析最新候选主机与最新成功 bootstrap 配对，再抓取 controller host detail、bootstrap detail 与一份 host-scoped audit index，并在不写 packet 文件前提下返回 packet root、resolved id、captured address、derived agent URL、audit operation id 与 `captureReady`。只要 captured address 仍未解析出来，或仍然等于保留的 Docker bridge `172.17.0.2`，preview 就会继续保持 blocked，避免把无效 packet 候选误判成 ready：
    - `pnpm milestone:preview:live-packet -- --packet-date <date> --controller-base-url <url>`
 5. 首选写入路径：只有在 preview 已经报告 `captureReady: true` 之后，才执行匹配的 capture helper，再抓取 host detail、bootstrap detail、steady-state `/health`、steady-state `/runtime-state` 与一份 host-scoped audit index，并一次写入规范 packet 本地 JSON 文件与 `live-transport-follow-up-summary.json`：
@@ -104,11 +104,11 @@ Do not overwrite the preserved Docker-bridge packet; keep it as historical evide
 6. 只有在 operator review 需要切换有边界候选 lane 时，才额外传 `--candidate-target-profile-id <target-profile-id>`；只有在需要 hand-picked override 或 mismatch 调试时，才额外传 `--host-id <host-id>` 与 `--bootstrap-operation-id <operation-id>`。只有在 preview 已经显示 bootstrap result summary 无法给出可用 live agent base URL 时，才额外传 `--agent-base-url <url>`。只有在 preview 已经显示 host-scoped audit window 太窄、还抓不到 bootstrap operation 时，才额外放大 `--audit-limit <count>`。已经存在但仍是 scaffold-only 的 packet 根目录可以直接升级；而已经存在的非 scaffold packet 根目录仍然必须显式传 `--force` 才允许覆盖。
 7. 回退路径：如果 capture helper 暂时无法直接访问 controller 或 agent HTTP surface，就先创建 scaffold 根目录，再手工收集五份源产物交给 assembly helper：
    - `pnpm milestone:scaffold:live-packet -- --packet-date <date>`
-   - `portmanager hosts get <host-id> --json`
-   - `portmanager operation get <bootstrap-operation-id> --json`
+   - `pmg hosts get <host-id> --json`
+   - `pmg operation get <bootstrap-operation-id> --json`
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/health`
    - `curl -fsSL http://<tailscale-ip>:<agent-port>/runtime-state`
-   - `portmanager operations audit-index --host-id <host-id> --limit 5 --json`
+   - `pmg operations audit-index --host-id <host-id> --limit 5 --json`
    - `pnpm milestone:assemble:live-packet -- --packet-date <date> --candidate-host-detail <path> --bootstrap-operation <path> --steady-state-health <path> --steady-state-runtime-state <path> --controller-audit-index <path>`
 8. 只有在 operator review 明确需要覆盖最新源时间戳时才额外传 `--captured-at <iso>`；否则让 helper 自动从真实产物推导 `candidateTargetProfileId`、`capturedAt` 与 `capturedAddress`，并在 host-detail 与 bootstrap 传输地址漂移时直接失败。
 9. `artifactFiles` 仍然必须给五个必需产物 id 都指向同一 packet 根目录下的文件。除非后续模板明确替换，否则最小布局固定为：

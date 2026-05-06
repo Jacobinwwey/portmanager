@@ -177,19 +177,19 @@ fn operation_detail_with_evidence() -> Value {
     })
 }
 
-fn run_portmanager(args: &[&str], base_url: &str) -> std::process::Output {
-    run_portmanager_with_env(args, &[("PORTMANAGER_CONTROLLER_BASE_URL", base_url)])
+fn run_pmg(args: &[&str], base_url: &str) -> std::process::Output {
+    run_pmg_with_env(args, &[("PORTMANAGER_CONTROLLER_BASE_URL", base_url)])
 }
 
-fn run_portmanager_with_env(
+fn run_pmg_with_env(
     args: &[&str],
     env_pairs: &[(&str, &str)],
 ) -> std::process::Output {
-    Command::new(env!("CARGO_BIN_EXE_portmanager"))
+    Command::new(env!("CARGO_BIN_EXE_pmg"))
         .args(args)
         .envs(env_pairs.iter().copied())
         .output()
-        .expect("run portmanager")
+        .expect("run pmg")
 }
 
 #[test]
@@ -202,7 +202,7 @@ fn operation_get_json_returns_operation_detail_only() {
         }],
     )]);
 
-    let output = run_portmanager(&["operation", "get", "op_123", "--json"], &server.base_url());
+    let output = run_pmg(&["operation", "get", "op_123", "--json"], &server.base_url());
 
     assert!(output.status.success());
     assert!(output.stderr.is_empty());
@@ -233,7 +233,7 @@ fn operation_get_wait_polls_until_terminal_state() {
         ],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "operation",
             "get",
@@ -267,7 +267,7 @@ fn operation_get_wait_reports_timeout_explicitly() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "operation",
             "get",
@@ -304,7 +304,7 @@ fn operation_get_text_surfaces_summary_recovery_and_event_replay_path() {
         }],
     )]);
 
-    let output = run_portmanager(&["operation", "get", "op_123"], &server.base_url());
+    let output = run_pmg(&["operation", "get", "op_123"], &server.base_url());
 
     assert!(output.status.success());
     assert!(output.stderr.is_empty());
@@ -326,7 +326,7 @@ fn degraded_operation_stays_distinct_from_transport_failure() {
         }],
     )]);
 
-    let degraded_output = run_portmanager(
+    let degraded_output = run_pmg(
         &[
             "operation",
             "get",
@@ -351,7 +351,7 @@ fn degraded_operation_stays_distinct_from_transport_failure() {
     )]);
 
     let transport_output =
-        run_portmanager(&["operation", "get", "op_123", "--json"], &transport_server.base_url());
+        run_pmg(&["operation", "get", "op_123", "--json"], &transport_server.base_url());
 
     assert!(!transport_output.status.success());
     assert!(transport_output.stderr.is_empty());
@@ -399,7 +399,7 @@ fn events_list_json_reads_shared_event_stream_history() {
         }],
     )]);
 
-    let output = run_portmanager(&["events", "list", "--json", "--limit", "2"], &server.base_url());
+    let output = run_pmg(&["events", "list", "--json", "--limit", "2"], &server.base_url());
 
     assert!(output.status.success());
     assert!(output.stderr.is_empty());
@@ -447,7 +447,7 @@ fn events_list_json_filters_by_operation_id() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "events",
             "list",
@@ -504,7 +504,7 @@ fn events_list_text_surfaces_selected_operation_timeline() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["events", "list", "--operation-id", "op_backup_required_001"],
         &server.base_url(),
     );
@@ -542,7 +542,7 @@ fn health_checks_list_json_reads_degraded_bridge_verify_checks() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "health-checks",
             "list",
@@ -592,7 +592,7 @@ fn backups_list_json_filters_by_host() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["backups", "list", "--json", "--host-id", "host_alpha"],
         &server.base_url(),
     );
@@ -642,7 +642,7 @@ fn backups_list_text_surfaces_backup_policy_and_remote_status() {
         }],
     )]);
 
-    let output = run_portmanager(&["backups", "list", "--host-id", "host_alpha"], &server.base_url());
+    let output = run_pmg(&["backups", "list", "--host-id", "host_alpha"], &server.base_url());
 
     assert!(output.status.success());
     assert!(output.stderr.is_empty());
@@ -693,7 +693,7 @@ fn diagnostics_list_json_filters_by_host_and_rule() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "diagnostics",
             "list",
@@ -736,7 +736,7 @@ fn rollback_points_list_json_filters_by_host_and_state() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "rollback-points",
             "list",
@@ -804,7 +804,7 @@ fn rollback_points_apply_json_waits_for_terminal_operation() {
         ),
     ]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "rollback-points",
             "apply",
@@ -855,7 +855,7 @@ fn operations_list_json_filters_by_host_state_and_type() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "operations",
             "list",
@@ -905,7 +905,7 @@ fn operations_list_text_surfaces_result_summary_and_recovery_links() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "operations",
             "list",
@@ -977,7 +977,7 @@ fn operations_persistence_readiness_json_reads_shared_controller_surface() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["operations", "persistence-readiness", "--json"],
         &server.base_url(),
     );
@@ -1043,7 +1043,7 @@ fn operations_persistence_readiness_json_supports_consumer_boundary_env_and_pref
     )]);
 
     let consumer_base_url = format!("{}/api/controller", server.base_url());
-    let output = run_portmanager_with_env(
+    let output = run_pmg_with_env(
         &["operations", "persistence-readiness", "--json"],
         &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
     );
@@ -1124,7 +1124,7 @@ fn operations_persistence_decision_pack_text_surfaces_review_state_and_triggers(
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["operations", "persistence-decision-pack"],
         &server.base_url(),
     );
@@ -1198,7 +1198,7 @@ fn operations_persistence_decision_pack_json_supports_consumer_boundary_env_and_
     )]);
 
     let consumer_base_url = format!("{}/api/controller", server.base_url());
-    let output = run_portmanager_with_env(
+    let output = run_pmg_with_env(
         &["operations", "persistence-decision-pack", "--json"],
         &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
     );
@@ -1243,7 +1243,7 @@ fn operations_consumer_boundary_decision_pack_text_surfaces_split_criteria() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["operations", "consumer-boundary-decision-pack"],
         &server.base_url(),
     );
@@ -1285,7 +1285,7 @@ fn operations_consumer_boundary_decision_pack_json_supports_consumer_boundary_en
     )]);
 
     let consumer_base_url = format!("{}/api/controller", server.base_url());
-    let output = run_portmanager_with_env(
+    let output = run_pmg_with_env(
         &["operations", "consumer-boundary-decision-pack", "--json"],
         &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
     );
@@ -1330,7 +1330,7 @@ fn operations_deployment_boundary_decision_pack_text_surfaces_standalone_review_
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["operations", "deployment-boundary-decision-pack"],
         &server.base_url(),
     );
@@ -1372,7 +1372,7 @@ fn operations_deployment_boundary_decision_pack_json_supports_consumer_boundary_
     )]);
 
     let consumer_base_url = format!("{}/api/controller", server.base_url());
-    let output = run_portmanager_with_env(
+    let output = run_pmg_with_env(
         &["operations", "deployment-boundary-decision-pack", "--json"],
         &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
     );
@@ -1597,7 +1597,7 @@ fn operations_second_target_policy_pack_text_surfaces_expansion_criteria() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["operations", "second-target-policy-pack"],
         &server.base_url(),
     );
@@ -1793,7 +1793,7 @@ fn operations_second_target_policy_pack_text_surfaces_blocking_review_delta() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["operations", "second-target-policy-pack"],
         &server.base_url(),
     );
@@ -1950,7 +1950,7 @@ fn operations_second_target_policy_pack_text_surfaces_completed_live_transport_c
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &["operations", "second-target-policy-pack"],
         &server.base_url(),
     );
@@ -2142,7 +2142,7 @@ fn operations_second_target_policy_pack_json_supports_consumer_boundary_env_and_
     )]);
 
     let consumer_base_url = format!("{}/api/controller", server.base_url());
-    let output = run_portmanager_with_env(
+    let output = run_pmg_with_env(
         &["operations", "second-target-policy-pack", "--json"],
         &[("PORTMANAGER_CONSUMER_BASE_URL", consumer_base_url.as_str())],
     );
@@ -2201,7 +2201,7 @@ fn operations_audit_index_text_surfaces_linked_evidence() {
         }],
     )]);
 
-    let output = run_portmanager(
+    let output = run_pmg(
         &[
             "operations",
             "audit-index",

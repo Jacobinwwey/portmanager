@@ -132,6 +132,7 @@ If it drifts into architecture theater, it loses against its own operator value.
 #### Absorb from PortsWhisper-Rust
 - CLI density:
   - PortManager CLI commands should stay short, composable, and evidence-oriented.
+  - standardize the primary executable prefix as `pmg` so operator commands stay compact and visually distinct from product/repo naming.
 - release hygiene:
   - keep acceptance and packaging discipline visible.
 - scope clarity:
@@ -161,6 +162,7 @@ If it drifts into architecture theater, it loses against its own operator value.
 
 #### Workstream 1: CLI density from PortsWhisper-Rust
 - keep verbs short and deterministic
+- keep the primary command prefix short and stable: `pmg`
 - keep `--json` output first-class and stable
 - prefer direct task language over internal control-plane jargon
 - improve “one command to next action” paths:
@@ -248,6 +250,7 @@ Implementation implication:
 #### Priority 3: isolate review/evidence from runtime critical path
 - review artifacts remain first-class outputs
 - but review-specific complexity should stop leaking into ordinary operator flows unless it prevents a real failure mode
+- ordinary implementation slices should not require new review/evidence surfaces unless they change public wording, touch a high-risk mutation path, or close a demonstrated failure mode
 
 #### Priority 4: harden remote-network semantics
 - replace unrealistic controller-agent timeout assumptions with configurable, evidence-based defaults
@@ -277,6 +280,7 @@ Implementation implication:
 
 ### Best-practice rules going forward
 - operator paths beat meta-surfaces
+- `pmg` stays the primary CLI entrypoint; the product name remains `PortManager`
 - fewer nouns, more executable outcomes
 - evidence supports runtime truth; it does not replace it
 - remote-control semantics must tolerate real-world latency

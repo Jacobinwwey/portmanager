@@ -10,7 +10,7 @@ The first implemented CLI read path is now available in-repo.
 ## CLI expectations
 
 ```bash
-portmanager operation get op_123 --json --wait
+pmg operation get op_123 --json --wait
 ```
 
 - `--json` returns structured output only

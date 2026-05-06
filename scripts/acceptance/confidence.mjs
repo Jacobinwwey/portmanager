@@ -437,7 +437,7 @@ export function renderHistorySummary(snapshot) {
   lines.push('## Promotion Readiness')
   lines.push(`- Status: ${readiness.status}`)
   lines.push(
-    `- Qualified scope: ${readiness.qualifiedEvents.join(', ')} on ${readiness.requiredRef}`
+    `- Qualified history scope: ${readiness.qualifiedEvents.join(', ')} on ${readiness.requiredRef}`
   )
   lines.push(
     `- Qualified runs: ${readiness.qualifiedRuns}/${readiness.minimumQualifiedRuns}`

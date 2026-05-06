@@ -22,6 +22,8 @@ PortManager V1 是一个通过 Tailscale 暴露远端 localhost 服务的控制�
 - Web、CLI 与未来 agent 驱动自动化都必须作为同一契约面的平级一等入口。
 - 即使高级 agent 工作流尚未实现，产品从第一天开始也必须保持 agent-friendly。
 - PortManager 必须持续保持为远端暴露控制平面，而不是漂移成通用本地端口工具或工作站启动器。
+- `pmg` 是主 CLI 命令前缀；`portmanager` 可以在迁移期保留为兼容别名，但新的 operator 与 agent-facing 表面应统一标准化到 `pmg`。
+- review/evidence 机制的职责是保护公开文案真相与高风险变更，不应继续成为普通实现推进的默认阻塞器。
 
 ### 非目标澄清
 - PortManager 不是通过提供比 `PortsWhisper-Rust` 更强的本地端口检查来竞争。
@@ -93,9 +95,9 @@ PortManager V1 是一个通过 Tailscale 暴露远端 localhost 服务的控制�
 - `2026-04-18` 也继续补齐了一层 acceptance 加固：同一条 development-progress docs 校验现在还会容忍“被忽略的本地 `.portmanager` 历史比已提交 docs-site progress artifact 更新”的场景，因此本地 acceptance 在未明确重跑 docs 生成前仍保持稳定。
 - controller 侧的规则生命周期会在 diagnostics 之后才进入 `active`，而原始 agent runtime 在验证完成前仍保持 `applied_unverified`。这条分层语义现在已经是刻意保留的实现，不再是缺失项。
 - `2026-04-17` 的下一段 Milestone 2 切片也已经落地：agent `/health` + `/runtime-state`、controller host summary/detail、CLI host 输出与 Web host detail 现在都会发布 `agentVersion` 以及 `live` / `stale` / `unreachable` 的 heartbeat 语义。
-- `2026-04-17` 的下一段 Milestone 2 编排切片也已经落地：`pnpm milestone:verify:confidence` 现在已经把既有 `pnpm acceptance:verify` gate 与 remote-backup replay proof 收敛成一条规范 routine，`.github/workflows/mainline-acceptance.yml` 也会在 `push main`、`workflow_dispatch` 与每日 schedule 历史路径上运行这条更重的 routine。
+- `2026-04-17` 的下一段 Milestone 2 编排切片也已经落地：`pnpm milestone:verify:confidence` 现在已经把既有 `pnpm acceptance:verify` gate 与 remote-backup replay proof 收敛成一条规范 routine，`.github/workflows/mainline-acceptance.yml` 现在会把这条更重的 routine 保留给显式 `workflow_dispatch` 与每日 schedule 历史路径，而普通 `push main` 继续走较轻的 acceptance 路径。
 - `2026-04-17` 的下一段 Milestone 2 confidence-history 切片也已经落地：规范 routine 现在会写出 `.portmanager/reports/milestone-confidence-report.json`、追加 `.portmanager/reports/milestone-confidence-history.json`、渲染 `.portmanager/reports/milestone-confidence-summary.md`，并附带 `eventName`、`ref`、`sha`、`runId`、`runAttempt`、`workflow` 等 CI traceability 字段；CI 也会先恢复并保存这组 bundle，再上传同一份 bundle，让开发者不必只靠原始日志核对持续转绿证据。
-- `2026-04-17` 的下一段 Milestone 2 confidence-readiness 切片也已经落地：持久 history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，标记每次 run 是否真正属于 readiness 推进资格范围，并用 `7` 次 qualified run 加 `3` 次连续 qualified pass 作为统一阈值；同一份 summary 也会直接出现在 GitHub Actions job summary 里供开发者查看。
+- `2026-04-17` 的下一段 Milestone 2 confidence-readiness 切片也已经落地：持久 history 现在会区分 `local-only`、`building-history`、`promotion-ready` 三种 readiness 状态，标记每次 run 是否真正属于 readiness 推进资格范围，并用 qualified history scope 下的 `7` 次 qualified run 加 `3` 次连续 qualified pass 作为统一阈值；同一份 summary 也会直接出现在 GitHub Actions job summary 里供开发者查看。
 - `2026-04-17` 的下一段 Milestone 2 confidence-history sync 切片也已经落地：`pnpm milestone:sync:confidence-history` 现在会通过已认证 `gh` 把 GitHub Actions 已完成 `mainline-acceptance` bundle artifact 导回本地 `.portmanager/reports/`，按稳定 history entry id 去重，并让开发者在本地复核与 CI 相同的 readiness 结论。
 - `2026-04-17` 的下一段 Milestone 2 confidence-review-signal 切片也已经落地：持久 snapshot 现在会额外记录 `latestQualifiedRun`，并把 qualified mainline run、本地 visibility-only run、非 qualified 远端 run 分开统计；summary 也会把这些信号单独渲染出来，让本地 rerun 不再掩盖真实主线证据。
 - `2026-04-17` 的下一段 Milestone 2 confidence-progress-page 切片也已经落地：docs-site 现在会生成 milestone confidence progress 数据，公开发布 `/en/roadmap/development-progress` 与 `/zh/roadmap/development-progress`，并在 roadmap 首页直接预览同一份 latest-qualified 快照。

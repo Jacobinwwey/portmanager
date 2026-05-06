@@ -13,7 +13,7 @@ The full product implementation is not shipped yet, but the first CLI read path 
 ## Target command shape
 
 ```bash
-portmanager operation get op_123 --json --wait
+pmg operation get op_123 --json --wait
 ```
 
 ## Required behavior

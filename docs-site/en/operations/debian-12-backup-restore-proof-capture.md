@@ -33,19 +33,19 @@ It now records the bounded backup bundle that `/second-target-policy-pack` treat
 - restore-readiness reference: `rp_op_backup_1776807481139_825`, preserved in `docs/operations/artifacts/debian-12-bootstrap-packet-2026-04-21/backup-rollback-points.json`
 
 ### Capture flow
-1. Read `portmanager operations second-target-policy-pack` and confirm backup-and-restore parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
+1. Read `pmg operations second-target-policy-pack` and confirm backup-and-restore parity is already backed by the preserved packet while broader support claims still stay locked pending bounded review.
 2. Trigger one bounded controller backup operation on the candidate host:
    - `POST /backups/run` with `mode: "required"`
    - Use any equivalent bounded path only if it preserves the same manifest, remote-backup, and rollback-point evidence model.
 3. Record the resulting controller operation detail:
-   - `portmanager operation get <backup-operation-id> --json`
+   - `pmg operation get <backup-operation-id> --json`
 4. Capture the linked backup summary from the same operation:
-   - `portmanager backups list --operation-id <backup-operation-id> --json`
+   - `pmg backups list --operation-id <backup-operation-id> --json`
 5. Record the remote-backup result from the same bundle:
    - preserve the explicit configured result if GitHub backup is enabled
    - preserve the explicit `not_configured` state and operator action if remote backup is still absent
 6. Record one restore-readiness reference from the same bundle:
-   - `portmanager rollback-points list --host-id <host-id> --state ready --json`
+   - `pmg rollback-points list --host-id <host-id> --state ready --json`
 7. Copy every captured value into `docs/operations/portmanager-debian-12-review-packet-template.md`.
 
 ### Required artifacts

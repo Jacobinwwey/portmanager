@@ -13,7 +13,7 @@ title: Agent Quickstart
 ## 目标命令形态
 
 ```bash
-portmanager operation get op_123 --json --wait
+pmg operation get op_123 --json --wait
 ```
 
 ## 必须满足的行为
