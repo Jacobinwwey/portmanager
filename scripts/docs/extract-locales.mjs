@@ -304,6 +304,18 @@ function confidenceProgressSource(history, wordingReview, currentReviewPack) {
     consecutivePasses: history.consecutivePasses,
     readiness: history.readiness,
     visibility: history.visibility,
+    activeConfidenceCollection: {
+      workflow: 'mainline-acceptance.yml',
+      lightMainlineGate: {
+        events: ['pull_request', 'push'],
+        branch: 'main',
+        command: 'pnpm acceptance:verify'
+      },
+      heavyConfidenceLane: {
+        events: ['workflow_dispatch', 'schedule'],
+        command: 'pnpm milestone:verify:confidence'
+      }
+    },
     latestRun: reduceConfidenceRun(history.latestRun),
     latestQualifiedRun: reduceConfidenceRun(history.latestQualifiedRun),
     recentRuns: [...(history.entries ?? [])].toReversed().slice(0, 6).map(reduceConfidenceRun),

@@ -130,6 +130,18 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:confidence/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:review:promotion-ready/)
   assert.match(milestoneConfidenceComponent, /pnpm milestone:fetch:review-pack/)
+  assert.match(milestoneConfidenceComponent, /Active confidence collection lane:/)
+  assert.match(milestoneConfidenceComponent, /Ordinary mainline gate:/)
+  assert.match(milestoneConfidenceComponent, /const ordinaryMainlineGateLabel = computed/)
+  assert.match(milestoneConfidenceComponent, /const activeConfidenceLaneLabel = computed/)
+  assert.match(
+    milestoneConfidenceComponent,
+    /progress\.activeConfidenceCollection\.lightMainlineGate\.command/
+  )
+  assert.match(
+    milestoneConfidenceComponent,
+    /progress\.activeConfidenceCollection\.heavyConfidenceLane\.command/
+  )
   assert.match(
     milestoneConfidenceComponent,
     /pnpm milestone:rehearse:debian12-incus -- --name portmanager-debian12-review/
@@ -425,6 +437,30 @@ test('roadmap publishes a development-progress page backed by live milestone con
   assert.equal(
     milestoneConfidenceProgress.publication.refreshCommand,
     'pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence'
+  )
+  assert.equal(
+    milestoneConfidenceProgress.activeConfidenceCollection.workflow,
+    'mainline-acceptance.yml'
+  )
+  assert.deepEqual(
+    milestoneConfidenceProgress.activeConfidenceCollection.lightMainlineGate.events,
+    ['pull_request', 'push']
+  )
+  assert.equal(
+    milestoneConfidenceProgress.activeConfidenceCollection.lightMainlineGate.branch,
+    'main'
+  )
+  assert.equal(
+    milestoneConfidenceProgress.activeConfidenceCollection.lightMainlineGate.command,
+    'pnpm acceptance:verify'
+  )
+  assert.deepEqual(
+    milestoneConfidenceProgress.activeConfidenceCollection.heavyConfidenceLane.events,
+    ['workflow_dispatch', 'schedule']
+  )
+  assert.equal(
+    milestoneConfidenceProgress.activeConfidenceCollection.heavyConfidenceLane.command,
+    'pnpm milestone:verify:confidence'
   )
   assert.equal(typeof milestoneConfidenceProgress.wordingReview.publicClaimClass, 'string')
   assert.equal(typeof milestoneConfidenceProgress.wordingReview.wordingReviewAllowed, 'boolean')

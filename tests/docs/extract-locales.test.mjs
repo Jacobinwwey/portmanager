@@ -198,6 +198,13 @@ test('explicit confidence refresh regenerates the committed artifact from local 
     refreshedArtifact,
     /"refreshCommand": "pnpm --dir docs-site --ignore-workspace run docs:generate:refresh-confidence"/
   )
+  assert.match(refreshedArtifact, /"activeConfidenceCollection"/)
+  assert.match(refreshedArtifact, /"workflow": "mainline-acceptance\.yml"/)
+  assert.match(refreshedArtifact, /"events": \[\s*"pull_request",\s*"push"\s*\]/)
+  assert.match(refreshedArtifact, /"branch": "main"/)
+  assert.match(refreshedArtifact, /"command": "pnpm acceptance:verify"/)
+  assert.match(refreshedArtifact, /"events": \[\s*"workflow_dispatch",\s*"schedule"\s*\]/)
+  assert.match(refreshedArtifact, /"command": "pnpm milestone:verify:confidence"/)
   assert.match(refreshedArtifact, /"publicClaimClass": "promotion-ready-reviewed"/)
   assert.match(refreshedArtifact, /"wordingReviewAllowed": true/)
   assert.match(refreshedArtifact, /"requiredNextAction": "Review milestone wording against helper outputs\."/)

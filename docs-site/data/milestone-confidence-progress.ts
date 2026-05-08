@@ -30,6 +30,24 @@ export const milestoneConfidenceProgress = {
     "localVisibilityOnlyRuns": 6,
     "nonQualifiedRemoteRuns": 0
   },
+  "activeConfidenceCollection": {
+    "workflow": "mainline-acceptance.yml",
+    "lightMainlineGate": {
+      "events": [
+        "pull_request",
+        "push"
+      ],
+      "branch": "main",
+      "command": "pnpm acceptance:verify"
+    },
+    "heavyConfidenceLane": {
+      "events": [
+        "workflow_dispatch",
+        "schedule"
+      ],
+      "command": "pnpm milestone:verify:confidence"
+    }
+  },
   "latestRun": {
     "id": "2026-04-21T06:39:23.985Z-24707884501-1",
     "outcome": "passed",

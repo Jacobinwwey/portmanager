@@ -58,6 +58,8 @@
           <li>{{ copy.failingRuns }} {{ progress.failedRuns }}</li>
           <li>{{ copy.consecutivePassingRuns }} {{ progress.consecutivePasses }}</li>
           <li>{{ copy.qualifiedScope }} <code>{{ qualifiedScopeLabel }}</code></li>
+          <li>{{ copy.ordinaryMainlineGate }} <code>{{ ordinaryMainlineGateLabel }}</code></li>
+          <li>{{ copy.activeConfidenceLane }} <code>{{ activeConfidenceLaneLabel }}</code></li>
         </ul>
       </section>
     </div>
@@ -343,6 +345,8 @@ const copy = computed(() => props.locale === 'zh'
       failingRuns: 'Failing runs：',
       consecutivePassingRuns: '连续通过：',
       qualifiedScope: 'Qualified history scope：',
+      ordinaryMainlineGate: '普通主线 gate：',
+      activeConfidenceLane: '当前 active confidence 采集 lane：',
       outcome: 'Outcome：',
       qualifiedForReadiness: 'Qualified for readiness：',
       qualified: 'Qualified',
@@ -450,6 +454,8 @@ const copy = computed(() => props.locale === 'zh'
       failingRuns: 'Failing runs:',
       consecutivePassingRuns: 'Consecutive passing runs:',
       qualifiedScope: 'Qualified history scope:',
+      ordinaryMainlineGate: 'Ordinary mainline gate:',
+      activeConfidenceLane: 'Active confidence collection lane:',
       outcome: 'Outcome:',
       qualifiedForReadiness: 'Qualified for readiness:',
       qualified: 'Qualified',
@@ -498,6 +504,19 @@ const consecutivePassesLabel = computed(
 const qualifiedScopeLabel = computed(
   () => `${progress.readiness.qualifiedEvents.join(', ')} on ${progress.readiness.requiredRef}`
 )
+
+const ordinaryMainlineGateLabel = computed(() => {
+  const events = progress.activeConfidenceCollection.lightMainlineGate.events.join(', ')
+  const branch = progress.activeConfidenceCollection.lightMainlineGate.branch
+  const command = progress.activeConfidenceCollection.lightMainlineGate.command
+  return `${events} ${branch} -> ${command}`
+})
+
+const activeConfidenceLaneLabel = computed(() => {
+  const events = progress.activeConfidenceCollection.heavyConfidenceLane.events.join(', ')
+  const command = progress.activeConfidenceCollection.heavyConfidenceLane.command
+  return `${events} -> ${command}`
+})
 
 const wordingReviewTone = computed(() => {
   if (!progress.wordingReview) return 'planned'

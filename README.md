@@ -184,10 +184,12 @@ The current branch now also includes Milestone 1 foundation code for workspace s
 - build the published docs site: `corepack pnpm --dir docs-site --ignore-workspace run docs:build`
 
 ### Milestone verification
-- run the full mainline acceptance gate locally: `corepack pnpm acceptance:verify`
-- primary CLI command prefix: `pmg`
+- primary CLI command prefix for daily work: `pmg`
 - compatibility note: `portmanager` remains available as a transition alias; new docs and examples should prefer `pmg`
-- run the canonical milestone confidence routine locally: `pnpm milestone:verify:confidence`
+- default local and `push main` verification path: `corepack pnpm acceptance:verify`
+- ordinary mainline CI gate: `pull_request`, `push main` -> `pnpm acceptance:verify`
+- heavy confidence collection lane is not the daily default: `workflow_dispatch`, `schedule` -> `pnpm milestone:verify:confidence`
+- run the canonical milestone confidence routine locally only when you are deliberately collecting or reviewing confidence history: `pnpm milestone:verify:confidence`
 - sync completed GitHub Actions confidence history into local review: `pnpm milestone:sync:confidence-history -- --limit 20`
 - run the repo-native promotion review helper: `pnpm milestone:review:promotion-ready -- --limit 20`
 - inspect latest local confidence report: `.portmanager/reports/milestone-confidence-report.json`
